@@ -26,9 +26,9 @@ gulp.task('war', function () {
     gulp.src(["dist/**/*"])
         .pipe(war({
             welcome: 'index.html',
-            displayName: 'ICSM WAR',
+            displayName: 'FSDF Elvis WAR',
         }))
-        .pipe(zip('icsm.war'))
+        .pipe(zip('fsdf-elvis.war'))
         .pipe(gulp.dest("."));
 });
 

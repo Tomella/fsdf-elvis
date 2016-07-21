@@ -1,4 +1,4 @@
-## explorer-icsm
+## FSDF ELVIS
 
 Elevation clip, zip and ship ICSM.
 
@@ -11,10 +11,14 @@ There are some things to do to get started. If you want to automate it more go a
 
 Always leave gulp running as it builds the concatenated JS and CSS on the fly.
 
-In the future, when metadata searching is turned back on you will need find some way to proxy to the NaviGAtor Solr instance when working locally. Typically run an Apache web server and have these entries equivalent to these to make it work.
+### How it builds
+Everything builds into the dist directory. It builds to have a small foot print so that it can
+easily be overlayed with other applications with little likelyhood of name clashes with:
+* The HTML at the base (this is where it is most likely to clash)
+* All other content under the icsm directory.
 
-``` HTTP Proxy entries
-ProxyPass /csw-indexer/  http://www-test.ga.gov.au/csw-indexer/ retry=10
-ProxyPassReverse /csw-indexer/ http://www-test.ga.gov.au/csw-indexer/
-```
+### Optional war build
+You can optionally package it up as a war, from the command line:
+> gulp war
 
+This builds the deployable artefact into the base of the project, "fsdf-elvis.war"
