@@ -1,0 +1,1727 @@
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function(angular) {
+
+'use strict';
+
+angular.module("common.bbox", ['geo.draw'])
+
+.directive("commonBboxShowAll", ['$rootScope', '$timeout', function($rootScope, $timeout) {
+	return {
+		link : function(scope, element) {
+			element.on("click", function() {
+				$timeout(function() {
+					$rootScope.$broadcast("commonbboxshowall");
+				});
+			});
+		}
+	};
+}])
+
+.directive("commonBboxHideAll", ['$rootScope', function($rootScope) {
+	return {
+		link : function(scope, element) {
+			element.on("click", function() {
+				$rootScope.$broadcast("commonbboxhideall");
+			});
+		}
+	};
+}])
+
+.directive("commonBboxShowVisible", ['$rootScope', 'mapService', function($rootScope, mapService) {
+	return {
+		link : function(scope, element) {
+			element.on("click", function() {
+				mapService.getMap().then(function(map) {
+					$rootScope.$broadcast("commonbboxshowvisible", map.getBounds());
+				});
+			});
+		}
+	};
+}])
+
+.directive("commonBbox", ['$rootScope', 'bboxService', function($rootScope, bboxService) {
+	return {
+		templateUrl : "common/bbox/bbox.html",
+		scope : {
+			data : "="
+		},
+		link : function(scope, element) {
+
+			$rootScope.$on("commonbboxshowall", function() {
+				scope.data.hasBbox = true;
+			});
+
+			$rootScope.$on("commonbboxhideall", function() {
+				scope.data.hasBbox = false;
+			});
+
+			$rootScope.$on("commonbboxshowvisible", function(event, bounds) {
+				var myBounds = scope.data.bounds,
+					draw = bounds.getWest() < myBounds.xMin &&
+						bounds.getEast() > myBounds.xMax &&
+						bounds.getNorth() > myBounds.yMax &&
+						bounds.getSouth() < myBounds.yMin;
+
+				scope.data.hasBbox = draw;
+			});
+
+			scope.$watch("data.hasBbox", function(newValue) {
+				if(newValue) {
+					bboxService.draw(scope.data).then(function(bbox) {
+						scope.bbox = bbox;
+					});
+				} else{
+					scope.bbox = bboxService.remove(scope.bbox);
+				}
+			});
+
+			scope.toggle = function() {
+				var draw = scope.data.hasBbox = !scope.data.hasBbox;
+			};
+
+			scope.$on("$destroy", function() {
+				if(scope.data.hasBbox) {
+					scope.bbox = bboxService.remove(scope.bbox);
+				}
+			});
+		}
+	};
+}])
+
+
+.factory("bboxService", ['mapService', function(mapService) {
+	var normalLayerColor = "#ff7800",
+		hilightLayerColor = 'darkblue';
+
+	return {
+		draw : function(data) {
+			var parts = data.bbox.split(" "),
+				bounds = [[+parts[1], +parts[0]], [+parts[3], +parts[2]]];
+
+			return mapService.getMap().then(function(map) {
+				// create an orange rectangle
+				var layer = L.rectangle(bounds, {fill: false, color: normalLayerColor, weight: 2, opacity: 0.8});
+				layer.addTo(map);
+				map.fitBounds(bounds);
+				return layer;
+			});
+		},
+
+		remove : function(bbox) {
+			if(bbox){
+				bbox._map.removeLayer(bbox);
+			}
+			return null;
+		}
+	};
+
+}]);
+
+
+})(angular);
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function(angular) {
+
+'use strict';
+
+angular.module("common.clip", ['geo.draw'])
+
+.directive("wizardClip", ['$timeout', 'clipService', 'flashService', function($timeout, clipService, flashService) {
+	return {
+		templateUrl : "common/clip/clip.html",
+		scope : {
+			clip : "=",
+			bounds : "=",
+			trigger : "=",
+			drawn : "&"
+		},
+		link : function(scope, element) {
+			if(typeof scope.showBounds === "undefined") {
+				scope.showBounds = false;
+			}
+			scope.$watch("bounds", function(bounds) {
+				if(bounds && scope.trigger) {
+					$timeout(function() {
+						scope.initiateDraw();
+					});
+				} else if(!bounds) {
+					clipService.cancelDraw();
+				}
+			});
+
+			scope.initiateDraw = function() {
+				clipService.initiateDraw().then(drawComplete);
+
+				function drawComplete(data) {
+					var c = scope.clip;
+					var response;
+
+					c.xMax = +data.clip.xMax;
+					c.xMin = +data.clip.xMin;
+					c.yMax = +data.clip.yMax;
+					c.yMin = +data.clip.yMin;
+					if(scope.drawn) {
+						response = scope.drawn();
+						if(response && response.code && response.code == "oversize") {
+							scope.initiateDraw();
+						}
+					}
+				}
+			};
+		}
+	};
+}])
+
+
+.factory("clipService", ['$q', '$rootScope', 'drawService', function($q, $rootScope, drawService) {
+	return {
+		initiateDraw : function() {
+			return drawService.drawRectangle().then(drawComplete);
+		},
+
+		cancelDraw : function() {
+			drawService.cancelDrawRectangle();
+		}
+	};
+
+	function drawComplete(data) {
+		return {clip:{
+			xMax: data.bounds.getEast().toFixed(5),
+			xMin: data.bounds.getWest().toFixed(5),
+			yMax: data.bounds.getNorth().toFixed(5),
+			yMin: data.bounds.getSouth().toFixed(5)
+		}};
+	}
+}]);
+
+
+})(angular);
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function(angular, $) {
+'use strict';
+
+angular.module("common.download", ['common.geoprocess'])
+
+.directive("wizardPopup", ["downloadService", function(downloadService) {
+	return {
+		restrict : "AE",
+		templateUrl : "common/download/popup.html",
+		link : function(scope) {
+			downloadService.data().then(function(data) {
+				scope.data = data;
+
+				scope.$watch("data.item", function(newValue, oldValue) {
+					if(newValue) {
+						scope.stage = "bbox";
+					}
+
+					if(newValue || oldValue) {
+						downloadService.setState(newValue);
+					}
+				});
+			});
+		}
+	};
+}])
+
+.directive("wizardDownload", ["downloadService", function(downloadService) {
+	return {
+		restrict : "AE",
+		controller : "DownloadCtrl",
+		templateUrl : "common/download/popup.html",
+		link : function() {
+			console.log("What the download...")
+		}
+	};
+}])
+
+.directive("commonDownload", ['downloadService', function(downloadService) {
+	return {
+		templateUrl : "common/download/download.html",
+		controller : "DownloadCtrl",
+		link : function(scope, element) {
+			downloadService.data().then(function(data) {
+				scope.data = data;
+			});
+
+			scope.$watch("data.item", function(item, old) {
+				if(item || old) {
+					downloadService.setState(item);
+				}
+			});
+		}
+	};
+}])
+
+.directive("downloadAdd", ['$rootScope', 'downloadService', 'flashService', function($rootScope, downloadService, flashService) {
+	return {
+		template : "<button type='button' class='undecorated' ng-click='toggle()'><span class='fa-stack'  tooltip-placement='right' tooltip='Extract data.'>" +
+					"<i class='fa fa-lg fa-download' ng-class='{active:item.download}'></i>" +
+				"</span></button>",
+		restrict: "AE",
+		scope: {
+			item : "=",
+			group: "="
+		},
+		link : function(scope, element) {
+			scope.toggle = function() {
+				if(scope.item.download) {
+					downloadService.clear(scope.item);
+				} else {
+					flashService.add("Select an area of interest that intersects the highlighted areas.");
+					downloadService.add(scope.item);
+					if(scope.group && scope.group.sysId) {
+						$rootScope.$broadcast('hide.wms', scope.group.sysId);
+					}
+				}
+			};
+		}
+	};
+}])
+
+.directive("downloadEmail", ['downloadService', function(downloadService) {
+	return {
+		template : '<div class="input-group">' +
+  			'<span class="input-group-addon" id="nedf-email">Email</span>' +
+			'<input required="required" type="email" ng-change="download.changeEmail(email)" ng-model="email" class="form-control" placeholder="Email address to send download link" aria-describedby="nedf-email">' +
+			'</div>',
+		restrict: "AE",
+		link : function(scope, element) {
+			downloadService.getEmail().then(function(email) {
+				scope.email = email;
+			});
+		}
+	};
+}])
+
+
+.directive("downloadFilename", ['flashService', 'downloadService', function(flashService, downloadService) {
+	return {
+		template : '<div class="input-group">' +
+  			'<span class="input-group-addon" id="nedf-filename">Filename</span>' +
+			'<input type="text"' +
+			' ng-maxlength="30" ng-trim="true" ng-keypress="restrict($event)"' +
+  			' ng-model="data.filename" class="form-control" placeholder="Optional filename" aria-describedby="nedf-filename">' +
+  			'<span class="input-group-addon" id="basic-addon2">.zip</span>' +
+			'</div>' +
+			'<div>Only up to 9 characters made up of alphanumeric or "_" allowed for file name</div>',
+		restrict: "AE",
+		scope: {
+			data: "="
+		},
+		link : function(scope, element) {
+			var flasher;
+			scope.restrict = function(event) {
+				var key = event.keyCode;
+				var char = String.fromCharCode(key).toUpperCase();
+				if(key > 31 && !char.match(/[\_A-Z0-9]/ig)) {
+					flashService.remove(flasher);
+					flasher = flashService.add('Only alphanumeric characters or "_" allowed in filename.', 5000);
+					event.preventDefault();
+				} else if(key > 31 && event.currentTarget.value &&  event.currentTarget.value.length >= 9){
+					flashService.remove(flasher);
+					flasher = flashService.add('Filename is restricted to 9 characters.', 5000);
+					event.preventDefault();
+				}
+
+			};
+		}
+	};
+}])
+
+.controller("DownloadCtrl", DownloadCtrl)
+.factory("downloadService", DownloadService);
+
+DownloadCtrl.$inject = ["downloadService"];
+function DownloadCtrl(downloadService) {
+	downloadService.data().then(function(data) {
+		this.data = data;
+	}.bind(this));
+
+	this.remove = function() {
+		downloadService.clear();
+	};
+
+	this.changeEmail = function(email) {
+		downloadService.setEmail(email);
+	};
+}
+
+DownloadService.$inject = ['$http', '$q', '$rootScope', 'mapService', 'persistService'];
+function DownloadService($http, $q, $rootScope, mapService, persistService) {
+	var key = "download_email",
+		downloadLayerGroup = "Download Layers",
+
+	mapState = {
+		zoom : null,
+		center : null,
+		layer : null
+	},
+
+	data = {
+		email : null,
+		item : null
+	},
+
+	service = {
+		getLayerGroup : function() {
+			return mapService.getGroup(downloadLayerGroup);
+		},
+
+		setState : function(data) {
+			if(data) {
+				prepare();
+			} else {
+				restore(map);
+			}
+
+			function prepare() {
+				var bounds = [
+					    [data.bounds.yMin, data.bounds.xMin],
+					    [data.bounds.yMax, data.bounds.xMax]
+					];
+
+				if(mapState.layer) {
+					mapService.getGroup(downloadLayerGroup).removeLayer(mapState.layer);
+				}
+				if(!data.queryLayer) {
+					mapState.layer = L.rectangle(bounds, {color:"black", fill:false});
+					mapService.getGroup(downloadLayerGroup).addLayer(mapState.layer);
+				}
+			}
+
+			function restore(map) {
+				mapService.clearGroup(downloadLayerGroup);
+				mapState.layer = null;
+			}
+		},
+
+		add : function(item) {
+			this.clear();
+			data.item = item;
+			data.item.download = true;
+			if(!item.processsing) {
+				item.processing = {
+					clip : {
+						xMax : null,
+						xMin : null,
+						yMax : null,
+						yMin : null
+					}
+				};
+			}
+		},
+
+		clear : function() {
+			if(data.item) {
+				data.item.download = false;
+				data.item = null;
+			}
+
+
+		},
+
+		setEmail : function(email) {
+			persistService.setItem(key, email);
+		},
+
+		getEmail : function() {
+			return persistService.getItem(key).then(function(value) {
+				data.email = value;
+				return value;
+			});
+		},
+
+		data : function() {
+			return $q.when(data);
+		}
+	};
+
+	return service;
+}
+
+})(angular, $);
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function(angular, L) {
+'use strict';
+
+angular.module("common.geoprocess", [])
+
+.directive("wizardGeoprocess", ['$http', '$q', '$timeout', 'geoprocessService', 'flashService', 'messageService',
+                                function($http, $q, $timeout, geoprocessService, flashService, messageService) {
+	return {
+		restrict :"AE",
+		templateUrl : "common/geoprocess/geoprocess.html",
+		scope : {
+			data : "="
+		},
+		link : function(scope) {
+			var clipMessage, clipTimeout, referenceLayer;
+
+			geoprocessService.outFormats().then(function(data) {
+				scope.outFormats = data;
+			});
+
+			scope.$watch("data", function(newData, oldData) {
+				if(oldData) {
+					geoprocessService.removeClip();
+					removeReferenceLayer();
+				}
+				if(newData && newData != oldData) {
+					scope.stage = "bbox";
+					drawReferenceLayer();
+				}
+			});
+
+			scope.$watchGroup(["data.processing.clip.xMax", "data.processing.clip.xMin", "data.processing.clip.yMax", "data.processing.clip.yMin"],
+					function(newValues, oldValues, scope) {
+				var result, url;
+
+				if(clipTimeout) {
+					$timeout.cancel(clipTimeout);
+					clipTimeout = null;
+				}
+				if(scope.data && scope.data.processing && scope.data.processing.clip && scope.data.processing.clip.xMax != null) {
+					var url = scope.config.extentCheckTemplates[scope.data.sysId];
+					clipMessage = flashService.add("Validating selected area...", 3000);
+
+					// Make really sure that all our stop points set this appropriately. We don't want the button locked out for ever.
+					scope.checkingOrFailed = !!url; // We only apply this to records that have a URL to check intersection against.
+					clipTimeout = $timeout(function() {
+						checkSize().then(function(result) {
+							try {
+								if(result && result.code == "success") {
+									if(url) {
+										// Order matches the $watch signature so be careful
+										var urlWithParms = url
+											.replace("{maxx}", newValues[0])
+											.replace("{minx}", newValues[1])
+											.replace("{maxy}", newValues[2])
+											.replace("{miny}", newValues[3]);
+										flashService.remove(clipMessage);
+										clipMessage = flashService.add("Checking there is data in your selected area...");
+										$http.get(urlWithParms).then(function(response) {
+											if(response.data && response.data.length > 0) {
+												flashService.remove(clipMessage);
+												if(response.data[0].Intersect === false) {
+													messageService.error("There is no data covering the drawn area currently in this resolution dataset.", 6000);
+													scope.stage = "bbox";
+													drawReferenceLayer();
+													// This is the only place that checkingOrFailed stays true;
+												} else {
+													if(response.data[0].Intersect === true) {
+														clipMessage = flashService.add("There is intersecting data. Click \"Next\" if you are ready to proceed.", 5000);
+													} else {
+														clipMessage = flashService.add("Click \"Next\" if you are ready to proceed.", 4000);
+													}
+													scope.checkingOrFailed = false;
+													geoprocessService.handleShowClip(scope.data.processing.clip);
+												}
+											}
+											console.log(response);
+										}, function(err) { // If it falls over we don't want to crash.
+											scope.checkingOrFailed = false;
+											geoprocessService.handleShowClip(scope.data.processing.clip);
+											console.log("Service unavailable to check intersection");
+										});
+									} else {
+										geoprocessService.handleShowClip(scope.data.processing.clip);
+										scope.checkingOrFailed = false;
+									}
+								}
+							} catch(e) {
+								// Very paranoid about setting it to block.
+								scope.checkingOrFailed = false;
+							}
+						});
+					}, 2000);
+				}
+
+				function checkSize() {
+					var deferred = $q.defer();
+
+					result = scope.drawn();
+					if(result && result.code) {
+						switch(result.code) {
+							case "oversize":
+								$timeout(function() {
+									flashService.remove(clipMessage);
+									messageService.error("The selected area is too large to process. Please restrict to approximately " +
+											Math.sqrt(scope.data.restrictSize) + " degrees square.");
+									scope.stage = "bbox";
+									drawReferenceLayer();
+									deferred.resolve(result)
+								});
+								break;
+
+							case "undersize":
+								$timeout(function() {
+									flashService.remove(clipMessage);
+									messageService.error("X Min and Y Min should be smaller than X Max and Y Max, respectively. Please update the drawn area.");
+									scope.stage = "bbox";
+									drawReferenceLayer();
+									deferred.resolve(result)
+								});
+								break;
+							default:
+								return $q.when(result);
+						}
+					}
+					return deferred.promise;
+				}
+			});
+
+			scope.drawn = function() {
+				geoprocessService.removeClip();
+				forceNumbers(scope.data.processing.clip);
+				//flashService.remove(clipMessage);
+				if(constrainBounds(scope.data.processing.clip, scope.data.bounds)) {
+					clipMessage = flashService.add("Redrawn to fit within data extent", 5000);
+				}
+
+				if(overSizeLimit(scope.data.processing.clip)) {
+					return {code: "oversize"};
+				}
+
+				if(underSizeLimit(scope.data.processing.clip)) {
+					return {code: "undersize"};
+				}
+
+				if(scope.data.processing.clip.xMax == null) {
+					return {code: "incomplete"};
+				}
+
+				//if(this.data.queryLayer) {
+				//	geoprocessService.queryLayer(scope.data.queryLayer, scope.data.processing.clip).then(function(response) {
+				//	});
+				//} else
+				if(validClip(scope.data.processing.clip)) {
+					return {code: "success"};
+				}
+				return {code: "invalid"};
+			}
+
+			scope.startExtract = function() {
+				if(scope.allDataSet()) {
+					messageService.info("Your request has been sent for processing. You will be notified by email on completion of the job.");
+					flashService.add("You can select another area for processing.", 10000);
+					geoprocessService.initiateJob(scope.data, scope.email);
+					scope.data.download = false;
+				}
+			};
+
+			scope.allDataSet = function() {
+				var proc = scope.data && scope.data.processing?scope.data.processing:null;
+				// For it to be OK we need.
+				return proc && scope.email &&
+					validClip(proc.clip) &&
+					proc.outCoordSys && proc.outFormat;
+			};
+
+			scope.validSansEmail = function() {
+				var proc = scope.data && scope.data.processing?scope.data.processing:null;
+				// For it to be OK we need.
+				return proc &&
+					validClip(proc.clip) &&
+					proc.outCoordSys && proc.outFormat;
+			};
+
+			scope.validClip = function(data) {
+				return data && data.processing && validClip(data.processing.clip)
+			};
+
+			geoprocessService.getConfig().then(function(config) {
+				scope.config = config;
+			});
+
+			function drawReferenceLayer() {
+				removeReferenceLayer();
+				if(scope.data.referenceLayer) {
+					referenceLayer = geoprocessService.addLayer(scope.data.referenceLayer);
+				}
+			}
+
+			function removeReferenceLayer() {
+				if(referenceLayer) {
+					geoprocessService.removeLayer(referenceLayer);
+				}
+			}
+
+			function underSizeLimit(clip) {
+				var size = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
+				return size < 0.00000000001 || clip.xMax < clip.xMin;
+			}
+
+			function overSizeLimit(clip) {
+				// Shouldn't need abs but it doesn't hurt.
+				var size = Math.abs((clip.xMax - clip.xMin) * (clip.yMax - clip.yMin))
+
+				return scope.data.restrictSize && size > scope.data.restrictSize;
+			}
+
+			function constrainBounds(c, p) {
+				var flag = false,
+					ret = false;
+				// Have we read the parameters yet?
+
+				if(!p || empty(c.xMax) || empty(c.xMin) || empty(c.yMax) || empty(c.yMin)) {
+					return false;
+				}
+
+				ret = flag = +c.xMax < +p.xMin;
+				if(flag) {
+					c.xMax = +p.xMin;
+				}
+
+				flag = +c.xMax > +p.xMax;
+				ret = ret || flag;
+
+				if(flag) {
+					c.xMax = +p.xMax;
+				}
+
+				flag = +c.xMin < +p.xMin;
+				ret = ret || flag;
+				if(flag) {
+					c.xMin = +p.xMin;
+				}
+
+				flag = +c.xMin > +c.xMax;
+				ret = ret || flag;
+				if(flag) {
+					c.xMin = c.xMax;
+				}
+
+				// Now for the Y's
+				flag = +c.yMax < +p.yMin;
+				ret = ret || flag;
+				if(flag) {
+					c.yMax = +p.yMin;
+				}
+
+				flag = +c.yMax > +p.yMax;
+				ret = ret || flag;
+				if(flag) {
+					c.yMax = +p.yMax;
+				}
+
+				flag = +c.yMin < +p.yMin;
+				ret = ret || flag;
+				if(flag) {
+					c.yMin = +p.yMin;
+				}
+
+				flag = +c.yMin > +c.yMax;
+				ret = ret || flag;
+				if(flag) {
+					c.yMin = +c.yMax;
+				}
+
+				return ret;
+
+				function empty(val) {
+					return angular.isUndefined(val) ||
+						val === "" ||
+						val === null;
+				}
+			}
+
+			function forceNumbers(clip) {
+				clip.xMax = clip.xMax == null?null:+clip.xMax;
+				clip.xMin = clip.xMin == null?null:+clip.xMin;
+				clip.yMax = clip.yMax == null?null:+clip.yMax;
+				clip.yMin = clip.yMin == null?null:+clip.yMin;
+			}
+
+			// The input validator takes care of order and min/max constraints. We just check valid existance.
+			function validClip(clip) {
+				return clip &&
+					angular.isNumber(clip.xMax) &&
+					angular.isNumber(clip.xMin) &&
+					angular.isNumber(clip.yMax) &&
+					angular.isNumber(clip.yMin) &&
+					!overSizeLimit(clip) &&
+					!underSizeLimit(clip);
+			}
+		}
+	};
+}])
+
+.factory("geoprocessService", GeoprocessService)
+
+.filter("sysIntersect", function() {
+	return function(collection, extent) {
+		// The extent may have missing numbers so we don't restrict at that point.
+		if(!extent ||
+				!angular.isNumber(extent.xMin) ||
+				!angular.isNumber(extent.xMax) ||
+				!angular.isNumber(extent.yMin) ||
+				!angular.isNumber(extent.yMax)) {
+			return collection;
+		}
+
+		return collection.filter(function(item) {
+
+			// We know these have valid numbers if it exists
+			if(!item.extent) {
+				return true;
+			}
+			// We have a restriction
+			return item.extent.xMin <= extent.xMin &&
+				item.extent.xMax >= extent.xMax &&
+				item.extent.yMin <= extent.yMin &&
+				item.extent.yMax >= extent.yMax;
+		});
+	};
+});
+
+GeoprocessService.$invoke = ['$http', '$q', '$timeout', 'configService', 'downloadService', 'ga', 'mapService', 'downloadService'];
+function GeoprocessService($http, $q, $timeout, configService, downloadService, mapService, persistService) {
+	var DEFAULT_DATASET = "dems1sv1_0", // TODO: We have to get this from the metadata somehow.
+		geoprocessingTemplates,
+		GEOPROCESS_LOGGING_URL = "service/log/geoprocess",
+		clipLayer = null,
+		map;
+
+	configService.getConfig("initiateServiceTemplates").then(function(template) {
+		geoprocessingTemplates = template;
+	});
+
+
+	mapService.getMap().then(function(lMap) {
+		map = lMap;
+	});
+
+	function getUrl(data) {
+		var custom, key, template;
+
+		if(geoprocessingTemplates.custom) {
+			custom = geoprocessingTemplates.custom[data.primaryId];
+			if(custom) {
+				key = custom.key;
+				template = custom.templates[data[key]];
+				if(template) {
+					return template;
+				}
+			}
+		}
+		return geoprocessingTemplates["default"];
+	}
+
+	return {
+		queryLayer: function(query, clip) {
+			var deferred = $q.defer();
+
+			var layer = L.esri.featureLayer({
+			    url: query.url
+			});
+
+			var bounds = L.latLngBounds(
+				[clip.yMin, clip.xMin],	// top left
+				[clip.yMax, clip.xMax]  // bottom right
+			);
+
+			layer.query().intersects(bounds).ids(function(error, ids) {
+				if(error) {
+					deferred.reject(error);
+				} else {
+					deferred.resolve(ids);
+				}
+			})
+			return deferred.promise;
+		},
+
+		outFormats: function() {
+			return configService.getConfig("processing").then(function(data) {
+				return data.outFormat;
+			})
+		},
+
+		handleShowClip : function(clip) {
+			this.removeClip();
+
+			clipLayer = L.rectangle([
+			    [clip.yMin, clip.xMin],
+			    [clip.yMax, clip.xMax]
+			], {
+				weight:2,
+				opacity:0.9,
+				fill:false,
+				color: "#000000",
+				width:3,
+				clickable: false
+			});
+
+			clipLayer.addTo(map);
+		},
+
+		removeClip : function() {
+			if(clipLayer) {
+				map.removeLayer(clipLayer);
+				clipLayer = null;
+			}
+		},
+
+		addLayer: function(data) {
+			return L.tileLayer.wms(data.parameters[0], data.parameters[1]).addTo(map);
+		},
+
+		removeLayer: function(layer) {
+			map.removeLayer(layer);
+		},
+
+		initiateJob : function(data, email) {
+			var dataset = DEFAULT_DATASET,  // TODO Replace with real dataset file name from metadata.
+				win, workingString = getUrl(data),
+				processing = data.processing,
+				log = {
+					bbox : {
+						yMin : processing.clip.yMin,
+						yMax : processing.clip.yMax,
+						xMin : processing.clip.xMin,
+						xMax : processing.clip.xMax,
+					},
+					geocatId : data.primaryId,
+					crs : processing.outCoordSys.code,
+					format : processing.outFormat.code
+				};
+
+			angular.forEach({
+					basename : dataset,
+					id : data.primaryId,
+					yMin : processing.clip.yMin,
+					yMax : processing.clip.yMax,
+					xMin : processing.clip.xMin,
+					xMax : processing.clip.xMax,
+					outFormat : processing.outFormat.code,
+					outCoordSys : processing.outCoordSys.code,
+					filename : processing.filename?processing.filename:"",
+					state : data.state?data.state:"",
+					email : email
+				}, function(item, key) {
+					workingString = workingString.replace("${" + key + "}", item);
+				});
+
+			$("#launcher")[0].src = workingString;
+
+			downloadService.setEmail(email);
+			$http.post(GEOPROCESS_LOGGING_URL, log);
+
+			ga('send', 'event', 'nedf', 'click', 'FME data export: ' + JSON.stringify(log));
+		},
+
+		getConfig : function() {
+			return configService.getConfig("processing");
+		}
+	};
+}
+
+
+})(angular, L);
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+(function(angular) {
+'use strict';
+
+angular.module("common.extent", ["explorer.switch"])
+
+.directive("commonExtent", ['extentService', function(extentService) {
+	return {
+		restrict : "AE",
+		templateUrl : "common/extent/extent.html",
+		controller : ['$scope', function($scope) {
+			$scope.parameters = extentService.getParameters();
+		}],
+		link : function(scope, element, attrs) {
+
+		}
+	};
+}])
+
+.factory("extentService", ExtentService);
+
+ExtentService.$inject = ['mapService', 'searchService'];
+function ExtentService(mapService, searchService) {
+	var bbox = searchService.getSearchCriteria().bbox;
+
+	if(bbox.fromMap) {
+		enableMapListeners();
+	}
+
+	return {
+		getParameters : function() {
+			return bbox;
+		}
+	};
+
+	function enableMapListeners() {
+		mapService.getMap().then(function(map) {
+			map.on("moveend", execute);
+			map.on("zoomend", execute);
+			execute();
+		});
+	}
+
+	function disableMapListeners() {
+		return mapService.getMap().then(function(map) {
+			map.off("moveend", execute);
+			map.off("zoomend", execute);
+			return map;
+		});
+	}
+
+	function execute() {
+		mapService.getMap().then(function(map) {
+			var bounds = map.getBounds();
+			bbox.yMin = bounds.getSouth();
+			bbox.xMin = bounds.getWest();
+			bbox.yMax = bounds.getNorth();
+			bbox.xMax = bounds.getEast();
+			searchService.refresh();
+		});
+	}
+}
+
+})(angular);
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+(function(angular) {
+
+'use strict';
+
+angular.module('common.header', [])
+
+.controller('headerController', [ '$scope', '$q', '$timeout', function ($scope, $q, $timeout) {
+
+    var modifyConfigSource = function (headerConfig) {
+        return headerConfig;
+    };
+
+    $scope.$on('headerUpdated', function (event, args) {
+        $scope.headerConfig = modifyConfigSource(args);
+    });
+}])
+
+.directive('icsmHeader', [function() {
+	var defaults = {
+		heading:"ICSM",
+		headingtitle:"ICSM",
+		helpurl:"help.html",
+		helptitle:"Get help about ICSM",
+		helpalttext:"Get help about ICSM",
+		skiptocontenttitle:"Skip to content",
+		skiptocontent:"Skip to content",
+		quicklinksurl:"/search/api/quickLinks/json?lang=en-US"
+	};
+	return {
+		transclude:true,
+		restrict:'EA',
+		templateUrl:"common/header/header.html",
+		scope : {
+			breadcrumbs: "=",
+			heading: "=",
+			headingtitle:"=",
+			helpurl:"=",
+			helptitle:"=",
+			helpalttext:"=",
+			skiptocontenttitle:"=",
+			skiptocontent:"=",
+			quicklinksurl:"="
+		},
+		link:function(scope, element, attrs) {
+			var data = angular.copy(defaults);
+			angular.forEach(defaults, function(value, key) {
+				if(!(key in scope)) {
+					scope[key] = value;
+				}
+			});
+		}
+	};
+}])
+
+.factory('headerService', ['$http', function() {
+}]);
+
+
+})(angular);
+ (function(angular) {
+
+'use strict';
+
+angular.module('common.altthemes', [])
+
+	/**
+ 	 *
+ 	 * Override the original mars user.
+ 	 *
+  	 */
+	.directive('altThemes', ['altthemesService', function(themesService) {
+		return {
+			restrict: 'AE',
+			templateUrl: 'common/navigation/altthemes.html',
+			link: function(scope) {
+				themesService.getThemes().then(function(themes) {
+					scope.themes = themes;
+				});
+
+				themesService.getCurrentTheme().then(function(theme) {
+					scope.theme = theme;
+				});
+
+				scope.changeTheme = function(theme) {
+					scope.theme = theme;
+					themesService.setTheme(theme.key);
+				};
+			}
+		};
+   }])
+
+	.controller('altthemesCtrl', ['altthemesService', function(altthemesService) {
+		this.service = altthemesService;
+	}])
+
+	.filter('altthemesFilter', function() {
+   	return function(features, theme) {
+			var response = [];
+			// Give 'em all if they haven't set a theme.
+			if(!theme) {
+				return features;
+			}
+
+			if(features) {
+				features.forEach(function(feature) {
+					if(feature.themes) {
+         			if( feature.themes.some(function(name) {
+							return name == theme.key;
+						})) {
+							response.push(feature);
+						}
+      			}
+      		});
+			}
+			return response;
+   	};
+	})
+
+	.factory('altthemesService', ['$q', 'configService', 'persistService', function($q, configService, persistService) {
+		var THEME_PERSIST_KEY = 'icsm.current.theme';
+		var DEFAULT_THEME = "All";
+		var waiting = [];
+		var self = this;
+
+		this.themes = [];
+		this.theme = null;
+
+		persistService.getItem(THEME_PERSIST_KEY).then(function(value) {
+			if(!value) {
+				value = DEFAULT_THEME;
+			}
+			configService.getConfig('themes').then(function(themes) {
+				self.themes = themes;
+				self.theme = themes[value];
+				// Decorate the key
+				angular.forEach(themes, function(theme, key) {
+					theme.key = key;
+				});
+				waiting.forEach(function(wait) {
+						wait.resolve(self.theme);
+				});
+			});
+		});
+
+
+		this.getCurrentTheme = function(){
+			if(this.theme) {
+				return $q.when(self.theme);
+			} else {
+				var waiter = $q.defer();
+				waiting.push(waiter);
+				return waiter.promise;
+			}
+		};
+
+		this.getThemes = function() {
+			return configService.getConfig('themes');
+		};
+
+		this.setTheme = function(key) {
+			this.theme = this.themes[key];
+			persistService.setItem(THEME_PERSIST_KEY, key);
+		};
+
+		return this;
+	}]);
+
+})(angular);
+(function(angular) {
+'use strict';
+
+angular.module('common.navigation', [])
+/**
+ *
+ * Override the original mars user.
+ *
+ */
+.directive('commonNavigation', [function() {
+	return {
+		restrict: 'AE',
+		template: "<alt-themes></alt-themes>",
+		link: function(scope) {
+			scope.username = "Anonymous";
+		}
+	};
+}])
+
+.factory('navigationService', [function() {
+	return {};
+}]);
+
+})(angular);
+(function(angular) {
+
+angular.module('ui.bootstrap-slider', [])
+    .directive('slider', ['$parse', '$timeout', function ($parse, $timeout) {
+        return {
+            restrict: 'AE',
+            replace: true,
+            template: '<div><input class="slider-input" type="text" /></div>',
+            require: 'ngModel',
+            scope: {
+                max: "=",
+                min: "=",
+                step: "=",
+                value: "=",
+                ngModel: '=',
+                range: '=',
+                enabled : '=',
+                sliderid: '=',
+                formatter: '&',
+                onStartSlide: '&',
+                onStopSlide: '&',
+                onSlide: '&'
+            },
+            link: function ($scope, element, attrs, ngModelCtrl, $compile) {
+                var ngModelDeregisterFn, ngDisabledDeregisterFn;
+
+                initSlider();
+
+                function initSlider() {
+                    var options = {};
+
+                    function setOption(key, value, defaultValue) {
+                        options[key] = value || defaultValue;
+                    }
+
+                    function setFloatOption(key, value, defaultValue) {
+                        options[key] = value ? parseFloat(value) : defaultValue;
+                    }
+
+                    function setBooleanOption(key, value, defaultValue) {
+                        options[key] = value ? value + '' === 'true' : defaultValue;
+                    }
+
+                    function getArrayOrValue(value) {
+                        return (angular.isString(value) && value.indexOf("[") === 0) ? angular.fromJson(value) : value;
+                    }
+
+                    setOption('id', $scope.sliderid);
+                    setOption('orientation', attrs.orientation, 'horizontal');
+                    setOption('selection', attrs.selection, 'before');
+                    setOption('handle', attrs.handle, 'round');
+                    setOption('tooltip', attrs.uiTooltip, 'show');
+                    setOption('tooltipseparator', attrs.tooltipseparator, ':');
+
+                    setFloatOption('min', $scope.min, 0);
+                    setFloatOption('max', $scope.max, 10);
+                    setFloatOption('step', $scope.step, 1);
+                    var strNbr = options.step + '';
+                    var decimals = strNbr.substring(strNbr.lastIndexOf('.') + 1);
+                    setFloatOption('precision', attrs.precision, decimals);
+
+                    setBooleanOption('tooltip_split', attrs.tooltipsplit, false);
+                    setBooleanOption('enabled', attrs.enabled, true);
+                    setBooleanOption('naturalarrowkeys', attrs.naturalarrowkeys, false);
+                    setBooleanOption('reversed', attrs.reversed, false);
+
+                    setBooleanOption('range', $scope.range, false);
+                    if (options.range) {
+                        if (angular.isArray($scope.value)) {
+                            options.value = $scope.value;
+                        }
+                        else if (angular.isString($scope.value)) {
+                            options.value = getArrayOrValue($scope.value);
+                            if (!angular.isArray(options.value)) {
+                                var value = parseFloat($scope.value);
+                                if (isNaN(value)) value = 5;
+
+                                if (value < $scope.min) {
+                                    value = $scope.min;
+                                    options.value = [value, options.max];
+                                }
+                                else if (value > $scope.max) {
+                                    value = $scope.max;
+                                    options.value = [options.min, value];
+                                }
+                                else {
+                                    options.value = [options.min, options.max];
+                                }
+                            }
+                        }
+                        else {
+                            options.value = [options.min, options.max]; // This is needed, because of value defined at $.fn.slider.defaults - default value 5 prevents creating range slider
+                        }
+                        $scope.ngModel = options.value; // needed, otherwise turns value into [null, ##]
+                    }
+                    else {
+                        setFloatOption('value', $scope.value, 5);
+                    }
+
+                    if ($scope.formatter) options.formatter = $scope.$eval($scope.formatter);
+
+                    var slider = $(element).find(".slider-input").eq(0);
+
+                    // check if slider jQuery plugin exists
+                    if ($.fn.slider) {
+                        // adding methods to jQuery slider plugin prototype
+                        $.fn.slider.constructor.prototype.disable = function () {
+                            this.picker.off();
+                        };
+                        $.fn.slider.constructor.prototype.enable = function () {
+                            this.picker.on();
+                        };
+
+                        // destroy previous slider to reset all options
+                        slider.slider(options);
+                        slider.slider('destroy');
+                        slider.slider(options);
+
+                        // everything that needs slider element
+                        var updateEvent = getArrayOrValue(attrs.updateevent);
+                        if (angular.isString(updateEvent)) {
+                            // if only single event name in string
+                            updateEvent = [updateEvent];
+                        }
+                        else {
+                            // default to slide event
+                            updateEvent = ['slide'];
+                        }
+                        angular.forEach(updateEvent, function (sliderEvent) {
+                            slider.on(sliderEvent, function (ev) {
+                                ngModelCtrl.$setViewValue(ev.value);
+                                $timeout(function () {
+                                    $scope.$apply();
+                                });
+                            });
+                        });
+                        slider.on('change', function (ev) {
+                            ngModelCtrl.$setViewValue(ev.value.newValue);
+                            $timeout(function () {
+                                $scope.$apply();
+                            });
+                        });
+
+                        // Event listeners
+                        var sliderEvents = {
+                            slideStart: 'onStartSlide',
+                            slide: 'onSlide',
+                            slideStop: 'onStopSlide'
+                        };
+                        angular.forEach(sliderEvents, function (sliderEventAttr, sliderEvent) {
+                            slider.on(sliderEvent, function (ev) {
+
+                                if ($scope[sliderEventAttr]) {
+                                    var invoker = $parse(attrs[sliderEventAttr]);
+                                    invoker($scope.$parent, {$event: ev, value: ev.value});
+
+                                    $timeout(function () {
+                                        $scope.$apply();
+                                    });
+                                }
+                            });
+                        });
+
+                        // deregister ngDisabled watcher to prevent memory leaks
+                        if (angular.isFunction(ngDisabledDeregisterFn)) {
+                            ngDisabledDeregisterFn();
+                            ngDisabledDeregisterFn = null;
+                        }
+                        if (angular.isDefined(attrs.ngDisabled)) {
+                            ngDisabledDeregisterFn = $scope.$watch(attrs.ngDisabled, function (value) {
+                                if (value) {
+                                    slider.slider('disable');
+                                }
+                                else {
+                                    slider.slider('enable');
+                                }
+                            });
+                        }
+                        // deregister ngModel watcher to prevent memory leaks
+                        if (angular.isFunction(ngModelDeregisterFn)) ngModelDeregisterFn();
+                        ngModelDeregisterFn = $scope.$watch('ngModel', function (value) {
+                            slider.slider('setValue', value);
+                        });
+                    }
+
+                    window.slip = slider;
+
+                    $scope.$watch("enabled", function(value) {
+                         if (value) {
+                            slider.slider('disable');
+                         } else {
+                            slider.slider('enable');
+                         }
+                    });
+                }
+
+                var watchers = ['min', 'max', 'step', 'range'];
+                angular.forEach(watchers, function (prop) {
+                    $scope.$watch(prop, function () {
+                        initSlider();
+                    });
+                });
+            }
+        };
+    }]);
+})(angular);
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function(angular) {
+
+'use strict';
+
+angular.module("common.toolbar", [])
+
+.directive("icsmToolbar", [function() {
+	return {
+		controller: 'toolbarLinksCtrl'
+	};
+}])
+
+
+/**
+ * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
+ */
+.directive('icsmToolbarRow', [function() {
+	return {
+		scope:{
+			map:"="
+		},
+		restrict:'AE',
+		templateUrl:'common/toolbar/toolbar.html'
+	};
+}])
+
+.controller("toolbarLinksCtrl", ["$scope", "configService", function($scope, configService) {
+
+	var self = this;
+	configService.getConfig().then(function(config) {
+		self.links = config.toolbarLinks;
+	});
+
+	$scope.item = "";
+	$scope.toggleItem = function(item) {
+		$scope.item = ($scope.item == item) ? "" : item;
+	};
+
+}]);
+
+})(angular);
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function(angular) {
+'use strict';
+
+angular.module("common.panes", [])
+
+.directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function($rootScope, $timeout, mapService) {
+	return {
+		templateUrl : "common/panes/panes.html",
+		transclude : true,
+		scope : {
+			defaultItem : "@",
+			data : "="
+		},
+		controller : ['$scope', function($scope) {
+			var changeSize = false;
+
+			$scope.view = $scope.defaultItem;
+
+			$scope.setView = function(what) {
+				var oldView = $scope.view;
+
+				if($scope.view == what) {
+					if(what) {
+						changeSize = true;
+					}
+					$scope.view = "";
+				} else {
+					if(!what) {
+						changeSize = true;
+					}
+					$scope.view = what;
+				}
+
+				$rootScope.$broadcast("view.changed", $scope.view, oldView);
+
+				if(changeSize) {
+					mapService.getMap().then(function(map) {
+						map._onResize();
+					});
+				}
+			};
+			$timeout(function() {
+				$rootScope.$broadcast("view.changed", $scope.view, null);
+			},50);
+		}]
+	};
+}])
+
+.directive("icsmTabs", [function() {
+	return {
+		templateUrl : "common/panes/tabs.html",
+		require : "^icsmPanes"
+	};
+}])
+
+.controller("PaneCtrl", PaneCtrl)
+.factory("paneService", PaneService);
+
+PaneCtrl.$inject = ["paneService"];
+function PaneCtrl(paneService) {
+	paneService.data().then(function(data) {
+		this.data = data;
+	}.bind(this));
+}
+
+PaneService.$inject = [];
+function PaneService() {
+	var data = {
+	};
+
+	return {
+		add : function(item) {
+		},
+
+		remove : function(item) {
+		}
+	};
+}
+
+})(angular);
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function(angular) {
+
+'use strict';
+
+angular.module("common.wms", [])
+
+.directive("commonWms", ['$rootScope', '$timeout', 'flashService', 'wmsService', function($rootScope, $timeout, flashService, wmsService) {
+	return {
+		scope : {
+			data : "="
+		},
+		template: '<button type="button" class="undecorated" ng-show="data.services.hasWms()" ng-click="toggle(item)" title="Show/hide WMS layer." tooltip-placement="right" tooltip="View on map using WMS.">' +
+			'<i ng-class="{active:data.isWmsShowing}" class="fa fa-lg fa-globe"></i></button>',
+		link : function(scope) {
+			scope.$watch("data", function(newData, oldData) {
+				if(newData) {
+					wmsService.subscribe(newData);
+				} else if(oldData) {
+					// In a fixed tag this gets called.
+					wmsService.unsubscribe(oldData);
+				}
+			});
+
+			$rootScope.$on('hide.wms', function(event, id) {
+				if(scope.data && id == scope.data.sysId && scope.data.isWmsShowing) {
+					scope.toggle();
+				}
+			});
+
+			scope.toggle = function() {
+				if(scope.data.isWmsShowing) {
+					wmsService.hide(scope.data);
+				} else {
+					wmsService.show(scope.data);
+				}
+			};
+
+			// In an ng-repeat this gets called
+			scope.$on("$destroy", function() {
+				wmsService.unsubscribe(scope.data);
+			});
+		}
+	};
+}])
+
+.factory("wmsService", ['$http', '$log', '$q', '$timeout', 'selectService', 'mapService',
+                        function($http, $log, $q, $timeout, selectService, mapService) {
+	var x2js = new X2JS(),
+		subscribers = {};
+
+	return {
+		createLayer : function(service) {
+			return new WmsClient(service);
+		},
+
+		subscribe : function(data) {
+			var id = data.primaryId,
+				wms = data.services.getWms(),
+				subscription = subscribers[id];
+
+			if(!wms) {
+				return;
+			}
+
+
+			if(subscription) {
+				subscription.count += 1;
+			} else {
+				subscription = subscribers[id] = {
+					count : 1,
+					layer : this.createLayer(wms)
+				};
+			}
+
+			if(subscription.count == 1 && data.isWmsShowing) {
+				console.log("Reshow WMS layer");
+				this._showLayer(subscription.layer);
+			}
+
+			console.log("We have " + subscription.count + " subscribers");
+		},
+
+		unsubscribe : function(data) {
+			var id = data.primaryId,
+				subscription = subscribers[id];
+
+			if(subscription) {
+				subscription.count--;
+
+				if(!subscription.count) {
+					// We want to clean up here. We don't say we aren't showing, we
+					console.log("Removing layer, deferred");
+					if(data.isWmsShowing) {
+						this._hideLayer(subscription.layer);
+					}
+				}
+			}
+		},
+
+		_showLayer : function(layer) {
+			if(layer) {
+				layer.showWms();
+			}
+		},
+
+		_hideLayer : function(layer) {
+			if(layer) {
+				layer.clearWms();
+			}
+		},
+
+		show : function(data) {
+			data.isWmsShowing = true;
+			this._showLayer(subscribers[data.primaryId].layer);
+		},
+
+		hide : function(data) {
+			data.isWmsShowing = false;
+			this._hideLayer(subscribers[data.primaryId].layer);
+		}
+	};
+
+	function WmsClient(service) {
+		var METADATA_SERVER_URL = "service/metadata/wmsLayernames",
+			rawUrl;
+
+		if(service.url.indexOf("?") > -1) {
+			rawUrl = service.url.substr(0, service.url.indexOf("?"));
+			// console.log(rawUrl);
+		} else {
+			rawUrl = service.url;
+		}
+
+		this.service= service;
+		this.layerGroup = selectService.getLayerGroup();
+		this.wmsLayer = null;
+		this.capabilities = null;
+
+		this.toggleWms = function() {
+			if(this.wmsLayer) {
+				this.clearWms();
+			} else {
+				this.showWms();
+			}
+		};
+
+		this.showWms = function() {
+			var createLayer = function() {
+				this.wmsLayer = L.tileLayer.wms(rawUrl, {
+					layers:this.layerNames,
+					format : "image/png",
+					transparent:true
+				}).addTo(this.layerGroup);
+			};
+
+			if(this.wmsLayer) {
+				this.clearWms();
+			}
+
+			if(!this.layerNames) {
+				if(service.layerNames) {
+					this.layerNames = service.layerNames;
+				} else {
+					return $http.get(METADATA_SERVER_URL, {params: {url:rawUrl}, cache:true}).then(function(response) {
+						this.layerNames = response.data;
+						createLayer.apply(this);
+					}.bind(this));
+				}
+			}
+
+			return $q.when(createLayer.apply(this));
+		};
+
+		this.clearWms = function() {
+			if(this.wmsLayer) {
+				this.layerGroup.removeLayer(this.wmsLayer);
+				this.wmsLayer = null;
+			}
+			return null;
+		};
+	}
+}]);
+
+})(angular);
+angular.module("common.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("common/bbox/bbox.html","<button type=\"button\" class=\"undecorated\" ng-click=\"toggle()\" tooltip-placement=\"right\" tooltip=\"Show data extent on the map.\">\r\n	<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-eye orange\':data.hasBbox,\'fa-eye-slash\':!data.hasBbox}\"></i>\r\n</button>");
+$templateCache.put("common/clip/clip.html","<div class=\"well well-sm\">\r\n<div class=\"container-fluid\">\r\n	<div class=\"row\">\r\n		<div class=\"col-md-12\">\r\n			<button style=\"margin-top:0px;\" ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" class=\"btn btn-primary btn-xs\">Draw</button>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-3\"> </div>\r\n		<div class=\"col-md-8\">\r\n			<strong>Y Max:</strong> \r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMax|number : 4}} max)</span></span> \r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-6\">\r\n			<strong>X Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMin|number : 4}} min)</span></span> \r\n		</div>\r\n		<div class=\"col-md-6\">\r\n			<strong>X Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMax|number : 4}} max)</span></span> \r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-offset-3 col-md-8\">\r\n			<strong>Y Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMin|number : 4}} min)</span></span> \r\n		</div>\r\n	</div>\r\n</div>\r\n</div>");
+$templateCache.put("common/download/download.html","<exp-modal ng-controller=\"DownloadCtrl as dl\" icon-class=\"fa-download\" is-open=\"dl.data.item.download\" title=\"Download data\" on-close=\"dl.remove()\" is-modal=\"true\">\r\n	<div style=\"padding:5px;\">\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><nedf-wms data=\"dl.data.item\"></nedf-wms>{{dl.data.item.title}}</h4>\r\n				{{dl.data.item.abstract}}\r\n   			</div>\r\n		</div>\r\n		<nedf-geoprocess data=\"dl.data.item\"></nedf-geoprocess>\r\n    	<div nedf-wcs data=\"dl.data.item\" ng-show=\"dl.data.item.services.hasWcs()\"></div>\r\n	</div>\r\n</exp-modal>");
+$templateCache.put("common/download/popup.html","<exp-modal icon-class=\"fa-download\"  is-open=\"data.item.download\" title=\"Download wizard\" on-close=\"dl.remove()\">\r\n	<div class=\"container-fluid downloadInner\" >\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><nedf-wms data=\"dl.data.item\"></nedf-wms>\r\n					<a href=\"http://www.ga.gov.au/metadata-gateway/metadata/record/{{dl.data.item.sysId}}\" target=\"_blank\"><strong class=\"ng-binding\">{{dl.data.item.title}}</strong></a>\r\n				</h4>\r\n   			</div>\r\n		</div>\r\n		<wizard-geoprocess data=\"dl.data.item\"></wizard-geoprocess>\r\n	</div>\r\n</exp-modal>");
+$templateCache.put("common/geoprocess/geoprocess.html","<div class=\"container-fluid\" style=\"overflow-x:hidden\" ng-form>\r\n	<div ng-show=\"stage==\'bbox\'\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12\">\r\n				<wizard-clip trigger=\"stage == \'bbox\'\" drawn=\"drawn()\" clip=\"data.processing.clip\" bounds=\"data.bounds\"></wizard-clip>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n 			<div class=\"col-md-12\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!validClip(data) || checkingOrFailed\" ng-click=\"stage=\'formats\'\">Next</button>\r\n			</div>\r\n		</div>\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Select an area of interest.</strong> There are two ways to select your area of interest:\r\n			<ol>\r\n				<li>Draw an area on the map with the mouse by clicking a corner and while holding the left mouse button\r\n					down drag diagonally across the map to the opposite corner or</li>\r\n				<li>Type your co-ordinates into the areas above.</li>\r\n			</ol>\r\n			Once drawn the points can be modified by the overwriting the values above or drawing another area by clicking the draw button again.\r\n			Ensure you select from the highlighted areas as the data can be quite sparse for some data.<br/>\r\n			<p style=\"padding-top:5px\">\r\n			<strong>Warning:</strong> Some extracts can be huge. It is best if you start with a small area to experiment with first. An email will be sent\r\n			with the size of the extract. Download judiciously.\r\n			</p>\r\n			<p style=\"padding-top\"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n				You can zoom in and out using the mouse wheel or the \"+\" and \"-\" map control on the top left of the map. If you\r\n				don\'t like the position of your drawn area, hit the \"Draw\" button and draw a new bounding box.\r\n			</p>\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'formats\'\">\r\n		<div class=\"well\">\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-3\">\r\n				<label for=\"geoprocessOutputFormat\">\r\n					Output Format\r\n				</label>\r\n			</div>\r\n			<div class=\"col-md-9\">\r\n				<select id=\"geoprocessOutputFormat\" style=\"width:95%\" ng-model=\"data.processing.outFormat\" ng-options=\"opt.value for opt in config.outFormat\"></select>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\">\r\n			<div class=\"col-md-3\">\r\n				<label for=\"geoprocessOutCoordSys\">\r\n					Coordinate System\r\n				</label>\r\n			</div>\r\n			<div class=\"col-md-9\">\r\n				<select id=\"geoprocessOutCoordSys\" style=\"width:95%\" ng-model=\"data.processing.outCoordSys\" ng-options=\"opt.value for opt in config.outCoordSys | sysIntersect : data.processing.clip\"></select>\r\n			</div>\r\n		</div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" ng-click=\"stage=\'bbox\'\">Previous</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!validSansEmail(data)\" ng-click=\"stage=\'email\'\">Next</button>\r\n   			</div>\r\n		</div>\r\n\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Data representation.</strong> Select how you want your data presented.<br/>\r\n			Output format is the structure of the data and you should choose a format compatible with the tools that you will use to manipulate the data.\r\n			<ul>\r\n				<li ng-repeat=\"format in outFormats\"><strong>{{format.value}}</strong> - {{format.description}}</li>\r\n			</ul>\r\n			Select what <i>coordinate system</i> or projection you would like. If in doubt select WGS84.<br/>\r\n			Not all projections cover all of Australia. If the area you select is not covered by a particular projection then the option to download in that projection will not be available.\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'email\'\">\r\n		<div class=\"well\" exp-enter=\"stage=\'confirm\'\">\r\n			<div download-email></div>\r\n			<br/>\r\n			<div download-filename data=\"data.processing\"></div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" ng-click=\"stage=\'formats\'\">Previous</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!allDataSet(data)\" ng-click=\"stage=\'confirm\'\">Submit</button>\r\n   			</div>\r\n		</div>\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Email notification</strong> The extract of data can take some time. By providing an email address we will be able to notify you when the job is complete. The email will provide a link to the extracted\r\n			data which will be packaged up as a single file. To be able to proceed you need to have provided:\r\n			<ul>\r\n				<li>An area of interest to extract the data (referred to as a bounding box).</li>\r\n				<li>An output format.</li>\r\n				<li>A valid coordinate system or projection.</li>\r\n				<li>An email address to receive the details of the extraction.</li>\r\n				<li><strong>Note:</strong>Email addresses need to be and are stored in the system.</li>\r\n			</ul>\r\n			<strong style=\"font-size:120%\">Optional filename</strong> The extract of data can take some time. By providing an optional filename it will allow you\r\n			to associate extracted data to your purpose for downloading data. For example:\r\n			<ul>\r\n				<li>myHouse will have a file named myHouse.zip</li>\r\n				<li>Sorrento would result in a file named Sorrento.zip</li>\r\n			</ul>\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'confirm\'\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12 abstractContainer\">\r\n				{{data.abstract}}\r\n			</div>\r\n		</div>\r\n		<h3>You have chosen:</h3>\r\n		<table class=\"table table-striped\">\r\n			<tbody>\r\n				<tr>\r\n					<th>Area</th>\r\n					<td>\r\n						<span style=\"display:inline-block; width: 10em\">Lower left (lat/lng&deg;):</span> {{data.processing.clip.yMin | number : 6}}, {{data.processing.clip.xMin | number : 6}}<br/>\r\n						<span style=\"display:inline-block;width: 10em\">Upper right (lat/lng&deg;):</span> {{data.processing.clip.yMax | number : 6}}, {{data.processing.clip.xMax | number : 6}}\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Output format</th>\r\n					<td>{{data.processing.outFormat.value}}</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Coordinate system</th>\r\n					<td>{{data.processing.outCoordSys.value}}</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Email address</th>\r\n					<td>{{email}}</td>\r\n				</tr>\r\n				<tr ng-show=\"data.processing.filename\">\r\n					<th>Filename</th>\r\n					<td>{{data.processing.filename}}</td>\r\n				</tr>\r\n			</tbody>\r\n		</table>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" style=\"width:6em\" ng-click=\"stage=\'email\'\">Back</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-click=\"startExtract()\">Confirm</button>\r\n   			</div>\r\n		</div>\r\n	</div>\r\n</div>");
+$templateCache.put("common/extent/extent.html","<div class=\"row\" style=\"border-top: 1px solid gray; padding-top:5px\">\r\n	<div class=\"col-md-5\">\r\n		<div class=\"form-inline\">\r\n			<label>\r\n				<input id=\"extentEnable\" type=\"checkbox\" ng-model=\"parameters.fromMap\" ng-click=\"change()\"></input> \r\n				Restrict area to map\r\n			</label>\r\n		</div>\r\n	</div>\r\n	 \r\n	<div class=\"col-md-7\" ng-show=\"parameters.fromMap\">\r\n		<div class=\"container-fluid\">\r\n			<div class=\"row\">\r\n				<div class=\"col-md-offset-3 col-md-8\">\r\n					<strong>Y Max:</strong> \r\n					<span>{{parameters.yMax | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n			<div class=\"row\">\r\n				<div class=\"col-md-6\">\r\n					<strong>X Min:</strong>\r\n					<span>{{parameters.xMin | number : 4}}</span> \r\n				</div>\r\n				<div class=\"col-md-6\">\r\n					<strong>X Max:</strong>\r\n					<span>{{parameters.xMax | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n			<div class=\"row\">\r\n				<div class=\"col-md-offset-3 col-md-8\">\r\n					<strong>Y Min:</strong>\r\n					<span>{{parameters.yMin | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
+$templateCache.put("common/header/header.html","<div class=\"container-full\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-header\">\r\n\r\n        <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".ga-header-collapse\">\r\n            <span class=\"sr-only\">Toggle navigation</span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n        </button>\r\n\r\n        <a href=\"http://www.ga.gov.au\" class=\"hidden-xs\"><img style=\"height:69\"\r\n            src=\"icsm/resources/img/icsm-logo-sml.gif\" alt=\"ICSM - ANZLIC Committee on Surveying &amp; Mapping\" class=\"logo\"></img></a>\r\n        <a href=\"http://www.ga.gov.au\" class=\"visible-xs\"><img src=\"icsm/resources/img/icsm-logo-sml.gif\" alt=\"ICSM - ANZLIC Committee on Surveying &amp; Mapping\" class=\"logo-stacked\"></img></a>\r\n        <a href=\"/\" class=\"appTitle visible-xs\"><h1 style=\"font-size:120%\">{{heading}}</h1></a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right\">\r\n        	<li common-navigation ng-show=\"username\" role=\"menuitem\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n        <div class=\"breadcrumbsContainer hidden-xs\">\r\n            <ul class=\"breadcrumbs\">\r\n                <li class=\"first\"><a href=\"/\">Home</a></li>\r\n                <li ng-class=\"{last:$last}\" ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{crumb.url}}\" title=\"{{crumb.title}}\" >{{crumb.name}}</a></li>\r\n            </ul>\r\n        </div>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");
+$templateCache.put("common/navigation/altthemes.html","<span class=\"altthemes-container\">\r\n	<span ng-repeat=\"item in themes\">\r\n       <a title=\"{{item.label}}\" ng-href=\"{{item.url}}\" class=\"altthemesItemCompact\">\r\n         <span class=\"altthemes-icon\" ng-class=\"item.className\"></span>\r\n       </a>\r\n    </li>\r\n</span>");
+$templateCache.put("common/toolbar/toolbar.html","<div icsm-toolbar>\r\n	<div class=\"row toolBarGroup\">\r\n		<div class=\"btn-group searchBar\" ng-show=\"root.whichSearch != \'region\'\">\r\n			<div class=\"input-group\" geo-search>\r\n				<input type=\"text\" ng-autocomplete ng-model=\"values.from.description\" options=\'{country:\"au\"}\'\r\n							size=\"32\" title=\"Select a locality to pan the map to.\" class=\"form-control\" aria-label=\"...\">\r\n				<div class=\"input-group-btn\">\r\n    				<button ng-click=\"zoom(false)\" exp-ga=\"[\'send\', \'event\', \'icsm\', \'click\', \'zoom to location\']\"\r\n						class=\"btn btn-default\"\r\n						title=\"Pan and potentially zoom to location.\"><i class=\"fa fa-search\"></i></button>\r\n				</div>\r\n			</div>\r\n		</div>\r\n		\r\n		<div class=\"pull-right\">\r\n			<div class=\"btn-toolbar radCore\" role=\"toolbar\"  icsm-toolbar>\r\n				<div class=\"btn-group\">\r\n					<!-- < icsm-state-toggle></icsm-state-toggle> -->\r\n				</div>\r\n			</div>		\r\n		\r\n			<div class=\"btn-toolbar\" style=\"margin:right:10px;display:inline-block\">\r\n				<div class=\"btn-group\">\r\n					<span class=\"btn btn-default\" geo-baselayer-control max-zoom=\"16\" title=\"Satellite to Topography bias on base map.\"></span>\r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
+$templateCache.put("common/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" icsm-toolbar-row map=\"root.map\"></div>\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div icsm-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'download\'\" icsm-view></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'maps\'\" icsm-maps></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" icsm-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" icsm-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
+$templateCache.put("common/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n		<button class=\"undecorated\">Download</button>\r\n	</div>\r\n	<!-- \r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n	-->\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");}]);

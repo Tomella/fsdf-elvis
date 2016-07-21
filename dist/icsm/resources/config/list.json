@@ -1,0 +1,22 @@
+{
+   "ACT Government": {
+      "code": "act",
+      "image": "icsm/resources/img/logo-ACT.jpg",
+      "height": 42,
+      "showText": false
+   },
+
+   "Geoscience Australia": {
+      "code": "ga",
+      "image": "icsm/resources/img/Geoscience Australia.jpg",
+      "height": 42,
+      "showText": false
+   },
+
+   "LPI": {
+      "code": "lpi",
+      "image": "icsm/resources/img/NSW.jpg",
+      "height": 42,
+      "showText": false
+   }
+}

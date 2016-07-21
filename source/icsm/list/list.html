@@ -1,0 +1,112 @@
+<div ng-show="!list || !list.length">
+	<div class="alert alert-warning" role="alert"><strong>Select an area</strong> to find datasets within.</div>
+</div>
+
+<div ng-show="list.length">
+   <div class="row">
+      <div class="col-md-5" uib-tooltip="Number of intersecting or very near datasets to your area of interest.">
+	      <h4 style="display:inline-block">Found {{matched()| number}} datasets</h4>
+      </div>
+      <div class="col-md-7">
+         <div class="input-group input-group-sm">
+            <span class="input-group-addon" id="names1">Filter:</span>
+            <input type="text" ng-model="filter" class="form-control"
+                   ng-change="update()" placeholder="Filter names" aria-describedby="names1">
+            <span class="input-group-btn">
+               <button class="btn btn-primary" type="button" data-toggle="collapse" uib-tooltip="Filter by file content type"
+                     data-target="#collapseFilters" aria-expanded="false" aria-controls="collapseFilters">
+                  More...
+               </button>
+            </span>
+         </div>
+      </div>
+   </div>
+   <div class="collapse" id="collapseFilters">
+      <div class="well">
+         <div class="row">
+            <span class="listTypeLabel">File type</span>
+            <span ng-repeat="type in filetypes" class="listType">
+               <input type="checkbox" ng-model="type.selected" ng-change="update()"/>
+               <span uib-tooltip="{{type.description}}">{{type.label}} ({{type.count}})</span>
+            </span>
+         </div>
+      </div>
+   </div>
+
+   <div ng-repeat="available in filteredList" class="well">
+      <h5>
+         <button class="undecorated" ng-click="expansions[available.source] = !expansions[available.source]" uib-tooltip="Click to collapse/expand this group"
+                  aria-expanded="true" aria-controls="collapse{{mappings[available.source].code}}">
+            <img ng-src="{{mappings[available.source].image}}" style="height:{{mappings[available.source].height}}px"></img>
+         </button>
+         <strong>{{available.source}}</strong>
+         (Showing {{available.downloadables.length}} of {{fullCount(available.source)}})
+         <span class="listTopExpander">
+            <button class="undecorated" ng-click="expansions[available.source] = !expansions[available.source]">
+               [{{expansions[available.source]?"collapse":"expand"}}]
+            </button>
+         </span>
+      </h5>
+      <div uib-collapse="!expansions[available.source]">
+         <div class="listRow" ng-class-odd="'listEven'" ng-repeat="item in available.downloadables"
+               data-ng-mouseenter="show(item)" data-ng-mouseleave="hide(item)">
+            <h5 ng-show="item.index_poly_name">{{item.index_poly_name}}</h5>
+            <div ng-show="item.file_size_ell">
+               <div>
+                  <a href="{{item.ell_url}}">
+                     <i class="fa fa-download"></i>
+                     {{item.ell_name}}
+                  </a>
+                  <span style="float:right;width:8em">Size: {{item.file_size_ell | fileSize}}</span>
+               </div>
+            </div>
+            <div ng-show="item.file_size_las">
+               <div>
+                  <a href="{{item.las_url}}">
+                     <i class="fa fa-download"></i>
+                     {{item.las_name}}
+                  </a>
+                  <span style="float:right;width:8em">Size: {{item.file_size_las | fileSize}}</span>
+               </div>
+            </div>
+            <div ng-show="item.file_size_ort">
+               <div>
+                  <a href="{{item.ort_url}}">
+                     <i class="fa fa-download"></i>
+                     {{item.ort_name}}
+                  </a>
+                  <span style="float:right;width:8em">Size: {{item.file_size_ort | fileSize}}</span>
+               </div>
+            </div>
+            <div ng-show="item.file_size_asc">
+               <div>
+                  <a href="{{item.asc_url}}">
+                     <i class="fa fa-download"></i>
+                     {{item.asc_name}}
+                  </a>
+                  <span style="float:right;width:8em">Size: {{item.file_size_asc | fileSize}}</span>
+               </div>
+            </div>
+            <div ng-show="item.file_size_prj">
+               <div>
+                  <a href="{{item.prj_url}}">
+                     <i class="fa fa-download"></i>
+                     {{item.prj_name}}
+                  </a>
+                  <span style="float:right;width:8em">Size: {{item.file_size_prj | fileSize}}</span>
+               </div>
+            </div>
+            <div ng-show="item.file_size_dem">
+               <div>
+                  <a href="{{item.dem_url}}">
+                     <i class="fa fa-download"></i>
+                     {{item.dem_name}}
+                  </a>
+                  <span style="float:right;width:8em">Size: {{item.file_size_dem | fileSize}}</span>
+               </div>
+            </div>
+         </div>
+         <div style="text-align:right"><button class="undecorated" ng-click="expansions[available.source] = false">[collapse]</button></div>
+      </div>
+   </div>
+</div>

@@ -1,0 +1,39 @@
+{
+  "name": "Icsm",
+  "version": "0.0.1-SNAPSHOT",
+  "description": "ICSM",
+  "keywords": [
+    "Explorer",
+    "ICSM",
+    "elevation"
+  ],
+  "author": {
+    "name": "Geoscience Australia",
+    "url": "http://www.ga.gov.au/"
+  },
+  "homepage": "http://www.ga.gov.au/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GeoscienceAustralia/icsm"
+  },
+  "dependencies": {
+    "express": "^4.13.3",
+    "gulp-insert": "^0.5.0",
+    "wiredep": "^3.0.1"
+  },
+  "devDependencies": {
+    "add-stream": "^1.0.0",
+    "gulp": "^3.9.0",
+    "gulp-angular-templatecache": "^1.6.0",
+    "gulp-concat": "^2.5.2",
+    "gulp-concat-css": "^2.2.0",
+    "gulp-jshint": "^1.11.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-sass": "^2.0.1",
+    "gulp-uglify": "^1.2.0",
+    "gulp-war": "^0.1.4",
+    "gulp-zip": "^3.2.0"
+  },
+  "bundleDependencies": [],
+  "private": true
+}

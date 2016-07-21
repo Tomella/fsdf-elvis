@@ -1,0 +1,72 @@
+{
+	"default": {
+		"heading": "Explorer ICSM",
+		"headingtitle": "ICSM",
+		"breadcrumbs": [{"name": "ICSM", "title": "Reload Explorer ICSM", "url": "/"}],
+		"helptitle": "Get help about Explorer ICSM",
+		"helpalttext": "Get help about Explorer ICSM"
+	},
+	"administrativeBoundaries": {
+		"heading": "Explorer Administrative Boundaries",
+		"headingtitle": "Administrative Boundaries",
+		"breadcrumbs": [{"name": "ICSM", "title": "Reload Explorer ICSM", "url": "/"}],
+		"helptitle": "Get help about Explorer Administrative Boundaries",
+		"helpalttext": "Get help about Explorer Administrative Boundaries"
+	},
+	"positioning": {
+		"heading": "Explorer Positioning",
+		"headingtitle": "Positioning",
+		"breadcrumbs": [{"name": "ICSM", "title": "Reload Explorer ICSM", "url": "/"}],
+		"helptitle": "Get help about Explorer Positioning",
+		"helpalttext": "Get help about Explorer Positioning"
+	},
+	"placeNames": {
+		"heading": "Explorer Place Names",
+		"headingtitle": "Place Names",
+		"breadcrumbs": [{"name": "ICSM", "title": "Reload Explorer ICSM", "url": "/"}],
+		"helptitle": "Get help about Explorer Place Names",
+		"helpalttext": "Get help about Explorer Place Names"
+	},
+	"landParcelAndProperty": {
+		"heading": "Explorer Land Parcel and Property",
+		"headingtitle": "Land Parcel and Property",
+		"breadcrumbs": [{"name": "ICSM", "title": "Reload Explorer ICSM", "url": "/"}],
+		"helptitle": "Get help about Explorer Land Parcel and Property",
+		"helpalttext": "Get help about Explorer Land Parcel and Property"
+	},
+	"imagery": {
+		"heading": "Explorer Imagery",
+		"headingtitle": "Imagery",
+		"breadcrumbs": [{"name": "ICSM", "title": "Reload Explorer ICSM", "url": "/"}],
+		"helptitle": "Get help about Explorer Imagery",
+		"helpalttext": "Get help about Explorer Imagery"
+	},
+	"transport": {
+		"heading": "Explorer Transport",
+		"headingtitle": "Transport",
+		"breadcrumbs": [{"name": "ICSM", "title": "Reload Explorer ICSM", "url": "/"}],
+		"helptitle": "Get help about Explorer Transport",
+		"helpalttext": "Get help about Explorer Transport"
+	},
+	"surfaceWater": {
+		"heading": "Explorer Water",
+		"headingtitle": "Water",
+		"breadcrumbs": [{"name": "ICSM", "title": "Reload Explorer ICSM", "url": "/"}],
+		"helptitle": "Get help about Explorer Water",
+		"helpalttext": "Get help about Explorer Water"
+	},
+	"elevationAndDepth": {
+		"heading": "Explorer Elevation and Depth",
+		"headingtitle": "Elevation and Depth",
+		"breadcrumbs": [{"name": "ICSM", "title": "Reload Explorer ICSM", "url": "/"}],
+		"helptitle": "Get help about Explorer Elevation and Depth",
+		"helpalttext": "Get help about Explorer Elevation and Depth"
+	},
+	"landCover": {
+		"heading": "Explorer Land Cover",
+		"headingtitle": "Land Cover",
+		"breadcrumbs": [{"name": "ICSM", "title": "Reload Explorer ICSM", "url": "/"}],
+		"helptitle": "Get help about Explorer Land Cover",
+		"helpalttext": "Get help about Explorer Land Cover"
+	}
+}

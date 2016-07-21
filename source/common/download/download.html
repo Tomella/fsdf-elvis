@@ -1,0 +1,12 @@
+<exp-modal ng-controller="DownloadCtrl as dl" icon-class="fa-download" is-open="dl.data.item.download" title="Download data" on-close="dl.remove()" is-modal="true">
+	<div style="padding:5px;">
+		<div class="row">
+  			<div class="col-md-12">
+				<h4><nedf-wms data="dl.data.item"></nedf-wms>{{dl.data.item.title}}</h4>
+				{{dl.data.item.abstract}}
+   			</div>
+		</div>
+		<nedf-geoprocess data="dl.data.item"></nedf-geoprocess>
+    	<div nedf-wcs data="dl.data.item" ng-show="dl.data.item.services.hasWcs()"></div>
+	</div>
+</exp-modal>
