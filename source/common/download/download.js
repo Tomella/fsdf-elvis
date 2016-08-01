@@ -1,6 +1,3 @@
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
 
 (function(angular, $) {
 'use strict';
@@ -35,7 +32,7 @@ angular.module("common.download", ['common.geoprocess'])
 		controller : "DownloadCtrl",
 		templateUrl : "common/download/popup.html",
 		link : function() {
-			console.log("What the download...")
+			console.log("What the download...");
 		}
 	};
 }])

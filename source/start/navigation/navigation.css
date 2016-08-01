@@ -1,0 +1,62 @@
+.start-content-container {
+   position:fixed;
+   top:95px;
+   bottom:6px;
+   overflow-y: auto;
+   left:0;
+   right:0;
+}
+
+@media (min-width: 1200px) {
+   .start-content-container .panel {
+      margin-left: 150px;
+      margin-right: 150px;
+   }
+}
+.select-icon {
+	background: url("../../../resources/img/sprites.svg") no-repeat;
+   display: inline-block;
+   width: 78px;
+   height: 120px;
+   margin: 0 auto 0 auto;
+}
+
+.select-pin {
+    background-position: 0px;
+}
+
+.select-map {
+    background-position: -75px;
+}
+
+.select-crosshair {
+    background-position: -150px;
+}
+
+.select-sign {
+    background-position: -225px;
+}
+
+.select-parcel {
+    background-position: -300px;
+}
+
+.select-satellite {
+    background-position: -375px;
+}
+
+.select-ship {
+    background-position: -450px;
+}
+
+.select-water {
+	background-position: -525px;
+}
+
+.select-shore {
+	background-position: -600px;
+}
+
+.select-land {
+	background-position: -675px;
+}

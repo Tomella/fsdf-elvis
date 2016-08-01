@@ -1,6 +1,4 @@
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
+
 (function(angular) {
 
 'use strict';
@@ -57,6 +55,5 @@ angular.module('common.header', [])
 
 .factory('headerService', ['$http', function() {
 }]);
-
 
 })(angular);

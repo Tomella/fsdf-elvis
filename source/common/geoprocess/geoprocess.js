@@ -1,6 +1,3 @@
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
 
 (function(angular, L) {
 'use strict';
@@ -41,8 +38,8 @@ angular.module("common.geoprocess", [])
 					$timeout.cancel(clipTimeout);
 					clipTimeout = null;
 				}
-				if(scope.data && scope.data.processing && scope.data.processing.clip && scope.data.processing.clip.xMax != null) {
-					var url = scope.config.extentCheckTemplates[scope.data.sysId];
+				if(scope.data && scope.data.processing && scope.data.processing.clip && scope.data.processing.clip.xMax !== null) {
+					url = scope.config.extentCheckTemplates[scope.data.sysId];
 					clipMessage = flashService.add("Validating selected area...", 3000);
 
 					// Make really sure that all our stop points set this appropriately. We don't want the button locked out for ever.
@@ -110,7 +107,7 @@ angular.module("common.geoprocess", [])
 											Math.sqrt(scope.data.restrictSize) + " degrees square.");
 									scope.stage = "bbox";
 									drawReferenceLayer();
-									deferred.resolve(result)
+									deferred.resolve(result);
 								});
 								break;
 
@@ -120,7 +117,7 @@ angular.module("common.geoprocess", [])
 									messageService.error("X Min and Y Min should be smaller than X Max and Y Max, respectively. Please update the drawn area.");
 									scope.stage = "bbox";
 									drawReferenceLayer();
-									deferred.resolve(result)
+									deferred.resolve(result);
 								});
 								break;
 							default:
@@ -147,7 +144,7 @@ angular.module("common.geoprocess", [])
 					return {code: "undersize"};
 				}
 
-				if(scope.data.processing.clip.xMax == null) {
+				if(scope.data.processing.clip.xMax === null) {
 					return {code: "incomplete"};
 				}
 
@@ -159,7 +156,7 @@ angular.module("common.geoprocess", [])
 					return {code: "success"};
 				}
 				return {code: "invalid"};
-			}
+			};
 
 			scope.startExtract = function() {
 				if(scope.allDataSet()) {
@@ -187,7 +184,7 @@ angular.module("common.geoprocess", [])
 			};
 
 			scope.validClip = function(data) {
-				return data && data.processing && validClip(data.processing.clip)
+				return data && data.processing && validClip(data.processing.clip);
 			};
 
 			geoprocessService.getConfig().then(function(config) {
@@ -214,7 +211,7 @@ angular.module("common.geoprocess", [])
 
 			function overSizeLimit(clip) {
 				// Shouldn't need abs but it doesn't hurt.
-				var size = Math.abs((clip.xMax - clip.xMin) * (clip.yMax - clip.yMin))
+				var size = Math.abs((clip.xMax - clip.xMin) * (clip.yMax - clip.yMin));
 
 				return scope.data.restrictSize && size > scope.data.restrictSize;
 			}
@@ -287,10 +284,10 @@ angular.module("common.geoprocess", [])
 			}
 
 			function forceNumbers(clip) {
-				clip.xMax = clip.xMax == null?null:+clip.xMax;
-				clip.xMin = clip.xMin == null?null:+clip.xMin;
-				clip.yMax = clip.yMax == null?null:+clip.yMax;
-				clip.yMin = clip.yMin == null?null:+clip.yMin;
+				clip.xMax = clip.xMax === null?null:+clip.xMax;
+				clip.xMin = clip.xMin === null?null:+clip.xMin;
+				clip.yMax = clip.yMax === null?null:+clip.yMax;
+				clip.yMin = clip.yMin === null?null:+clip.yMin;
 			}
 
 			// The input validator takes care of order and min/max constraints. We just check valid existance.
@@ -387,14 +384,14 @@ function GeoprocessService($http, $q, $timeout, configService, downloadService, 
 				} else {
 					deferred.resolve(ids);
 				}
-			})
+			});
 			return deferred.promise;
 		},
 
 		outFormats: function() {
 			return configService.getConfig("processing").then(function(data) {
 				return data.outFormat;
-			})
+			});
 		},
 
 		handleShowClip : function(clip) {
@@ -475,6 +472,5 @@ function GeoprocessService($http, $q, $timeout, configService, downloadService, 
 		}
 	};
 }
-
 
 })(angular, L);

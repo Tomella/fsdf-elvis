@@ -23,6 +23,7 @@ You can optionally package it up as a war, from the command line:
 
 This builds the deployable artefact into the base of the project, "fsdf-elvis.war"
 
+
 ### Google API.
 At the moment the registered Google API key for the cloud VM is in the HTML files. If you want it to work on
 your machine you'll have to register your own API key otherwise Google will block the page from working correctly.

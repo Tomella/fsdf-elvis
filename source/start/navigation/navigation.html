@@ -1,0 +1,15 @@
+<div class="container-fluid start-content-container">
+   <div class="panel panel-default" ng-repeat="item in data.themes">
+      <div class="panel-body">
+         <div class="row">
+            <div class="col-md-2">
+               <button ng-attr-title="{{item.title}}" class="select-icon select-{{item.code}}"></button>
+            </div>
+            <div class="col-md-8">
+               <h3>{{item.label}}</h3>
+               {{item.description}}
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

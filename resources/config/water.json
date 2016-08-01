@@ -45,7 +45,7 @@
          },
          {
          	"description" : "placeholder for layers above the topography",
-         	"name" : "Explorer ICSM Map Layers",
+         	"name" : "ELVIS – Foundation Spatial Data Map Layers",
          	"type" : "LayerGroup",
          	"layers": []
          },
@@ -73,7 +73,7 @@
       }
    },
    "layersTab" : {
-   		"group" : "Explorer ICSM Map Layers",
+   		"group" : "ELVIS – Foundation Spatial Data Map Layers",
    		"title" : "Layers",
    		"layers" : [
    			{
@@ -342,7 +342,7 @@
          "label": "Water",
          "title": "",
          "className": "altthemes-water",
-         "url": "/surfaceWater.html"
+         "url": "/water.html"
       },
       {
          "label": "Elevation and Depth",

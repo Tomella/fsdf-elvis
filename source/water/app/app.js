@@ -2,7 +2,7 @@
 
 'use strict';
 
-angular.module("SurfaceWaterApp", [
+angular.module("WaterApp", [
 	 	'common.altthemes',
 	 	'common.bbox',
       'common.clip',
