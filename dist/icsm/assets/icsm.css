@@ -660,7 +660,7 @@ div.leaflet-control-scale-line {
 .select-icon {
   background: url("../resources/img/sprites.svg") no-repeat;
   display: inline-block;
-  width: 78px;
+  width: 75px;
   height: 120px;
   margin: 0 auto 0 auto;
 }

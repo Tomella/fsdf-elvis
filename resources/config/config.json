@@ -28,13 +28,30 @@
          },
          {
             "name":"Australian Topography",
-            "pseudoBaseLayer" : true,
+            "pseudoBaseLayer" : false,
             "type":["TileLayer"],
             "key":"topography",
             "parameters":[
                 "http://services.ga.gov.au/gis/rest/services/NationalMap_Colour_Topographic_Base_World_WM/MapServer/tile/{z}/{y}/{x}",
                 {
                    "layers" : "Image",
+                   "format" : "image/png",
+                   "transparent" : true,
+                   "opacity" : 0.7
+                }
+            ],
+            "addLayerControl":false,
+            "visible":true
+         },
+         {
+            "name":"dem",
+            "pseudoBaseLayer" : true,
+            "type":["TileLayer", "WMS"],
+            "key":"dem",
+            "parameters":[
+                "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/dev_space/GetPNG.fmw",
+                {
+                   "layers" : "NSW_QLD_5mIndex",
                    "format" : "image/png",
                    "transparent" : true,
                    "opacity" : 0.7
@@ -158,69 +175,5 @@
 	"processing": {
 		"intersectsUrl1": "icsm/resources/config/response.json",
       "intersectsUrl": "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/dev_space/LPI_ReturnDownloadables.fmw?ymin={miny}&ymax={maxy}&xmin={minx}&xmax={maxx}"
-	},
-   "themes":[
-      {
-         "label": "Administrative Boundaries",
-         "title": "",
-         "className": "altthemes-map",
-         "url": "comingSoon.html",
-         "urlPending": "/administrativeBoundaries.html"
-      },
-      {
-         "label": "Positioning",
-         "title": "",
-         "className": "altthemes-crosshair",
-         "url": "comingSoon.html",
-         "urlPending": "/positioning.html"
-      },
-      {
-         "label": "Place Names",
-         "title": "",
-         "className": "altthemes-sign",
-         "url": "comingSoon.html",
-         "urlPending": "/placeNames.html"
-      },
-      {
-         "label": "Land Parcel and Property",
-         "title": "",
-         "className": "altthemes-parcel",
-         "url": "comingSoon.html",
-         "urlPending": "/landParcelAndProperty.html"
-      },
-      {
-         "label": "Imagery",
-         "title": "",
-         "className": "altthemes-satellite",
-         "url": "comingSoon.html",
-         "urlPending": "/imagery.html"
-      },
-      {
-         "label": "Transport",
-         "title": "",
-         "className": "altthemes-ship",
-         "url": "comingSoon.html",
-         "urlPending": "/transport.html"
-      },
-      {
-         "label": "Water",
-         "title": "",
-         "className": "altthemes-water",
-         "url": "/water.html"
-      },
-      {
-         "label": "Elevation and Depth",
-         "title": "",
-         "className": "altthemes-shore",
-         "url": "comingSoon.html",
-		   "urlPending": "/elevationAndDepth.html"
-      },
-      {
-         "label": "Land Cover",
-         "title": "",
-         "className": "altthemes-land",
-         "url": "comingSoon.html",
-         "urlPending": "/landCover.html"
-      }
-   ]
+	}
 }

@@ -954,132 +954,6 @@ under the License.
 		};
 	}]).factory('headerService', ['$http', function () {}]);
 })(angular);
-'use strict';
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module('common.altthemes', [])
-
-	/**
- 	 *
- 	 * Override the original mars user.
- 	 *
-  	 */
-	.directive('altThemes', ['altthemesService', function (themesService) {
-		return {
-			restrict: 'AE',
-			templateUrl: 'common/navigation/altthemes.html',
-			link: function link(scope) {
-				themesService.getThemes().then(function (themes) {
-					scope.themes = themes;
-				});
-
-				themesService.getCurrentTheme().then(function (theme) {
-					scope.theme = theme;
-				});
-
-				scope.changeTheme = function (theme) {
-					scope.theme = theme;
-					themesService.setTheme(theme.key);
-				};
-			}
-		};
-	}]).controller('altthemesCtrl', ['altthemesService', function (altthemesService) {
-		this.service = altthemesService;
-	}]).filter('altthemesFilter', function () {
-		return function (features, theme) {
-			var response = [];
-			// Give 'em all if they haven't set a theme.
-			if (!theme) {
-				return features;
-			}
-
-			if (features) {
-				features.forEach(function (feature) {
-					if (feature.themes) {
-						if (feature.themes.some(function (name) {
-							return name == theme.key;
-						})) {
-							response.push(feature);
-						}
-					}
-				});
-			}
-			return response;
-		};
-	}).factory('altthemesService', ['$q', 'configService', 'persistService', function ($q, configService, persistService) {
-		var THEME_PERSIST_KEY = 'icsm.current.theme';
-		var DEFAULT_THEME = "All";
-		var waiting = [];
-		var self = this;
-
-		this.themes = [];
-		this.theme = null;
-
-		persistService.getItem(THEME_PERSIST_KEY).then(function (value) {
-			if (!value) {
-				value = DEFAULT_THEME;
-			}
-			configService.getConfig('themes').then(function (themes) {
-				self.themes = themes;
-				self.theme = themes[value];
-				// Decorate the key
-				angular.forEach(themes, function (theme, key) {
-					theme.key = key;
-				});
-				waiting.forEach(function (wait) {
-					wait.resolve(self.theme);
-				});
-			});
-		});
-
-		this.getCurrentTheme = function () {
-			if (this.theme) {
-				return $q.when(self.theme);
-			} else {
-				var waiter = $q.defer();
-				waiting.push(waiter);
-				return waiter.promise;
-			}
-		};
-
-		this.getThemes = function () {
-			return configService.getConfig('themes');
-		};
-
-		this.setTheme = function (key) {
-			this.theme = this.themes[key];
-			persistService.setItem(THEME_PERSIST_KEY, key);
-		};
-
-		return this;
-	}]);
-})(angular);
-'use strict';
-
-(function (angular) {
-	'use strict';
-
-	angular.module('common.navigation', [])
-	/**
-  *
-  * Override the original mars user.
-  *
-  */
-	.directive('commonNavigation', [function () {
-		return {
-			restrict: 'AE',
-			template: "<alt-themes></alt-themes>",
-			link: function link(scope) {
-				scope.username = "Anonymous";
-			}
-		};
-	}]).factory('navigationService', [function () {
-		return {};
-	}]);
-})(angular);
 "use strict";
 
 (function (angular) {
@@ -1351,6 +1225,137 @@ under the License.
         };
     }]);
 })(angular);
+'use strict';
+
+(function (angular) {
+
+	'use strict';
+
+	angular.module('common.altthemes', [])
+
+	/**
+ 	 *
+ 	 * Override the original mars user.
+ 	 *
+  	 */
+	.directive('altThemes', ['altthemesService', function (themesService) {
+		return {
+			restrict: 'AE',
+			templateUrl: 'common/navigation/altthemes.html',
+			link: function link(scope) {
+				themesService.getThemes().then(function (themes) {
+					scope.themes = themes;
+				});
+
+				themesService.getCurrentTheme().then(function (theme) {
+					scope.theme = theme;
+				});
+
+				scope.changeTheme = function (theme) {
+					scope.theme = theme;
+					themesService.setTheme(theme.key);
+				};
+			}
+		};
+	}]).controller('altthemesCtrl', ['altthemesService', function (altthemesService) {
+		this.service = altthemesService;
+	}]).filter('altthemesFilter', function () {
+		return function (features, theme) {
+			var response = [];
+			// Give 'em all if they haven't set a theme.
+			if (!theme) {
+				return features;
+			}
+
+			if (features) {
+				features.forEach(function (feature) {
+					if (feature.themes) {
+						if (feature.themes.some(function (name) {
+							return name == theme.key;
+						})) {
+							response.push(feature);
+						}
+					}
+				});
+			}
+			return response;
+		};
+	}).factory('altthemesService', ['$q', '$http', 'persistService', function ($q, $http, persistService) {
+		var THEME_PERSIST_KEY = 'icsm.current.theme';
+		var THEMES_LOCATION = 'icsm/resources/config/themes.json';
+		var DEFAULT_THEME = "All";
+		var waiting = [];
+		var self = this;
+
+		this.themes = [];
+		this.theme = null;
+
+		persistService.getItem(THEME_PERSIST_KEY).then(function (value) {
+			if (!value) {
+				value = DEFAULT_THEME;
+			}
+			$http.get(THEMES_LOCATION, { cache: true }).then(function (response) {
+				var themes = response.data.themes;
+
+				self.themes = themes;
+				self.theme = themes[value];
+				// Decorate the key
+				angular.forEach(themes, function (theme, key) {
+					theme.key = key;
+				});
+				waiting.forEach(function (wait) {
+					wait.resolve(self.theme);
+				});
+			});
+		});
+
+		this.getCurrentTheme = function () {
+			if (this.theme) {
+				return $q.when(self.theme);
+			} else {
+				var waiter = $q.defer();
+				waiting.push(waiter);
+				return waiter.promise;
+			}
+		};
+
+		this.getThemes = function () {
+			return $http.get(THEMES_LOCATION, { cache: true }).then(function (response) {
+				return response.data.themes;
+			});
+		};
+
+		this.setTheme = function (key) {
+			this.theme = this.themes[key];
+			persistService.setItem(THEME_PERSIST_KEY, key);
+		};
+
+		return this;
+	}]);
+})(angular);
+'use strict';
+
+(function (angular) {
+	'use strict';
+
+	angular.module('common.navigation', [])
+	/**
+  *
+  * Override the original mars user.
+  *
+  */
+	.directive('commonNavigation', [function () {
+		return {
+			restrict: 'AE',
+			template: "<alt-themes></alt-themes>",
+			link: function link(scope) {
+				scope.username = "Anonymous";
+			}
+		};
+	}]).factory('navigationService', [function () {
+		return {};
+	}]);
+})(angular);
 "use strict";
 
 (function (angular) {
@@ -1572,7 +1577,7 @@ $templateCache.put("common/download/popup.html","<exp-modal icon-class=\"fa-down
 $templateCache.put("common/extent/extent.html","<div class=\"row\" style=\"border-top: 1px solid gray; padding-top:5px\">\r\n	<div class=\"col-md-5\">\r\n		<div class=\"form-inline\">\r\n			<label>\r\n				<input id=\"extentEnable\" type=\"checkbox\" ng-model=\"parameters.fromMap\" ng-click=\"change()\"></input> \r\n				Restrict area to map\r\n			</label>\r\n		</div>\r\n	</div>\r\n	 \r\n	<div class=\"col-md-7\" ng-show=\"parameters.fromMap\">\r\n		<div class=\"container-fluid\">\r\n			<div class=\"row\">\r\n				<div class=\"col-md-offset-3 col-md-8\">\r\n					<strong>Y Max:</strong> \r\n					<span>{{parameters.yMax | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n			<div class=\"row\">\r\n				<div class=\"col-md-6\">\r\n					<strong>X Min:</strong>\r\n					<span>{{parameters.xMin | number : 4}}</span> \r\n				</div>\r\n				<div class=\"col-md-6\">\r\n					<strong>X Max:</strong>\r\n					<span>{{parameters.xMax | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n			<div class=\"row\">\r\n				<div class=\"col-md-offset-3 col-md-8\">\r\n					<strong>Y Min:</strong>\r\n					<span>{{parameters.yMin | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/geoprocess/geoprocess.html","<div class=\"container-fluid\" style=\"overflow-x:hidden\" ng-form>\r\n	<div ng-show=\"stage==\'bbox\'\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12\">\r\n				<wizard-clip trigger=\"stage == \'bbox\'\" drawn=\"drawn()\" clip=\"data.processing.clip\" bounds=\"data.bounds\"></wizard-clip>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n 			<div class=\"col-md-12\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!validClip(data) || checkingOrFailed\" ng-click=\"stage=\'formats\'\">Next</button>\r\n			</div>\r\n		</div>\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Select an area of interest.</strong> There are two ways to select your area of interest:\r\n			<ol>\r\n				<li>Draw an area on the map with the mouse by clicking a corner and while holding the left mouse button\r\n					down drag diagonally across the map to the opposite corner or</li>\r\n				<li>Type your co-ordinates into the areas above.</li>\r\n			</ol>\r\n			Once drawn the points can be modified by the overwriting the values above or drawing another area by clicking the draw button again.\r\n			Ensure you select from the highlighted areas as the data can be quite sparse for some data.<br/>\r\n			<p style=\"padding-top:5px\">\r\n			<strong>Warning:</strong> Some extracts can be huge. It is best if you start with a small area to experiment with first. An email will be sent\r\n			with the size of the extract. Download judiciously.\r\n			</p>\r\n			<p style=\"padding-top\"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n				You can zoom in and out using the mouse wheel or the \"+\" and \"-\" map control on the top left of the map. If you\r\n				don\'t like the position of your drawn area, hit the \"Draw\" button and draw a new bounding box.\r\n			</p>\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'formats\'\">\r\n		<div class=\"well\">\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-3\">\r\n				<label for=\"geoprocessOutputFormat\">\r\n					Output Format\r\n				</label>\r\n			</div>\r\n			<div class=\"col-md-9\">\r\n				<select id=\"geoprocessOutputFormat\" style=\"width:95%\" ng-model=\"data.processing.outFormat\" ng-options=\"opt.value for opt in config.outFormat\"></select>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\">\r\n			<div class=\"col-md-3\">\r\n				<label for=\"geoprocessOutCoordSys\">\r\n					Coordinate System\r\n				</label>\r\n			</div>\r\n			<div class=\"col-md-9\">\r\n				<select id=\"geoprocessOutCoordSys\" style=\"width:95%\" ng-model=\"data.processing.outCoordSys\" ng-options=\"opt.value for opt in config.outCoordSys | sysIntersect : data.processing.clip\"></select>\r\n			</div>\r\n		</div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" ng-click=\"stage=\'bbox\'\">Previous</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!validSansEmail(data)\" ng-click=\"stage=\'email\'\">Next</button>\r\n   			</div>\r\n		</div>\r\n\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Data representation.</strong> Select how you want your data presented.<br/>\r\n			Output format is the structure of the data and you should choose a format compatible with the tools that you will use to manipulate the data.\r\n			<ul>\r\n				<li ng-repeat=\"format in outFormats\"><strong>{{format.value}}</strong> - {{format.description}}</li>\r\n			</ul>\r\n			Select what <i>coordinate system</i> or projection you would like. If in doubt select WGS84.<br/>\r\n			Not all projections cover all of Australia. If the area you select is not covered by a particular projection then the option to download in that projection will not be available.\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'email\'\">\r\n		<div class=\"well\" exp-enter=\"stage=\'confirm\'\">\r\n			<div download-email></div>\r\n			<br/>\r\n			<div download-filename data=\"data.processing\"></div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" ng-click=\"stage=\'formats\'\">Previous</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!allDataSet(data)\" ng-click=\"stage=\'confirm\'\">Submit</button>\r\n   			</div>\r\n		</div>\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Email notification</strong> The extract of data can take some time. By providing an email address we will be able to notify you when the job is complete. The email will provide a link to the extracted\r\n			data which will be packaged up as a single file. To be able to proceed you need to have provided:\r\n			<ul>\r\n				<li>An area of interest to extract the data (referred to as a bounding box).</li>\r\n				<li>An output format.</li>\r\n				<li>A valid coordinate system or projection.</li>\r\n				<li>An email address to receive the details of the extraction.</li>\r\n				<li><strong>Note:</strong>Email addresses need to be and are stored in the system.</li>\r\n			</ul>\r\n			<strong style=\"font-size:120%\">Optional filename</strong> The extract of data can take some time. By providing an optional filename it will allow you\r\n			to associate extracted data to your purpose for downloading data. For example:\r\n			<ul>\r\n				<li>myHouse will have a file named myHouse.zip</li>\r\n				<li>Sorrento would result in a file named Sorrento.zip</li>\r\n			</ul>\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'confirm\'\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12 abstractContainer\">\r\n				{{data.abstract}}\r\n			</div>\r\n		</div>\r\n		<h3>You have chosen:</h3>\r\n		<table class=\"table table-striped\">\r\n			<tbody>\r\n				<tr>\r\n					<th>Area</th>\r\n					<td>\r\n						<span style=\"display:inline-block; width: 10em\">Lower left (lat/lng&deg;):</span> {{data.processing.clip.yMin | number : 6}}, {{data.processing.clip.xMin | number : 6}}<br/>\r\n						<span style=\"display:inline-block;width: 10em\">Upper right (lat/lng&deg;):</span> {{data.processing.clip.yMax | number : 6}}, {{data.processing.clip.xMax | number : 6}}\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Output format</th>\r\n					<td>{{data.processing.outFormat.value}}</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Coordinate system</th>\r\n					<td>{{data.processing.outCoordSys.value}}</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Email address</th>\r\n					<td>{{email}}</td>\r\n				</tr>\r\n				<tr ng-show=\"data.processing.filename\">\r\n					<th>Filename</th>\r\n					<td>{{data.processing.filename}}</td>\r\n				</tr>\r\n			</tbody>\r\n		</table>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" style=\"width:6em\" ng-click=\"stage=\'email\'\">Back</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-click=\"startExtract()\">Confirm</button>\r\n   			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-header\">\r\n\r\n        <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".ga-header-collapse\">\r\n            <span class=\"sr-only\">Toggle navigation</span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n        </button>\r\n\r\n        <a href=\"http://www.ga.gov.au\" class=\"hidden-xs header-logo\">\r\n            <img src=\"icsm/resources/img/fsdf-logo.png\" alt=\"ANZLIC the Spatial Information Council\" class=\"logo\"></img></a>\r\n        <a href=\"http://www.ga.gov.au\" class=\"visible-xs\"><img src=\"icsm/resources/img/icsm-logo-sml.gif\" alt=\"ICSM - ANZLIC Committee on Surveying &amp; Mapping\" class=\"logo-stacked\"></img></a>\r\n        <a href=\"/\" class=\"appTitle visible-xs\"><h1 style=\"font-size:120%\">{{heading}}</h1></a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right\">\r\n        	<li common-navigation ng-show=\"username\" role=\"menuitem\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n        <div class=\"breadcrumbsContainer hidden-xs\">\r\n            <ul class=\"breadcrumbs\">\r\n                <li class=\"first\"><a href=\"/\">Home</a></li>\r\n                <li ng-class=\"{last:$last}\" ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{crumb.url}}\" title=\"{{crumb.title}}\" >{{crumb.name}}</a></li>\r\n            </ul>\r\n        </div>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");
-$templateCache.put("common/navigation/altthemes.html","<span class=\"altthemes-container\">\r\n	<span ng-repeat=\"item in themes\">\r\n       <a title=\"{{item.label}}\" ng-href=\"{{item.url}}\" class=\"altthemesItemCompact\">\r\n         <span class=\"altthemes-icon\" ng-class=\"item.className\"></span>\r\n       </a>\r\n    </li>\r\n</span>");
 $templateCache.put("common/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" icsm-toolbar-row map=\"root.map\"></div>\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div icsm-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'download\'\" icsm-view></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'maps\'\" icsm-maps></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" icsm-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" icsm-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n		<button class=\"undecorated\">Download</button>\r\n	</div>\r\n	<!-- \r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n	-->\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");
+$templateCache.put("common/navigation/altthemes.html","<span class=\"altthemes-container\">\r\n	<span ng-repeat=\"item in themes\">\r\n       <a title=\"{{item.label}}\" ng-href=\"{{item.url}}\" class=\"altthemesItemCompact\">\r\n         <span class=\"altthemes-icon\" ng-class=\"item.className\"></span>\r\n       </a>\r\n    </li>\r\n</span>");
 $templateCache.put("common/toolbar/toolbar.html","<div icsm-toolbar>\r\n	<div class=\"row toolBarGroup\">\r\n		<div class=\"btn-group searchBar\" ng-show=\"root.whichSearch != \'region\'\">\r\n			<div class=\"input-group\" geo-search>\r\n				<input type=\"text\" ng-autocomplete ng-model=\"values.from.description\" options=\'{country:\"au\"}\'\r\n							size=\"32\" title=\"Select a locality to pan the map to.\" class=\"form-control\" aria-label=\"...\">\r\n				<div class=\"input-group-btn\">\r\n    				<button ng-click=\"zoom(false)\" exp-ga=\"[\'send\', \'event\', \'icsm\', \'click\', \'zoom to location\']\"\r\n						class=\"btn btn-default\"\r\n						title=\"Pan and potentially zoom to location.\"><i class=\"fa fa-search\"></i></button>\r\n				</div>\r\n			</div>\r\n		</div>\r\n		\r\n		<div class=\"pull-right\">\r\n			<div class=\"btn-toolbar radCore\" role=\"toolbar\"  icsm-toolbar>\r\n				<div class=\"btn-group\">\r\n					<!-- < icsm-state-toggle></icsm-state-toggle> -->\r\n				</div>\r\n			</div>		\r\n		\r\n			<div class=\"btn-toolbar\" style=\"margin:right:10px;display:inline-block\">\r\n				<div class=\"btn-group\">\r\n					<span class=\"btn btn-default\" geo-baselayer-control max-zoom=\"16\" title=\"Satellite to Topography bias on base map.\"></span>\r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");}]);
