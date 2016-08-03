@@ -390,6 +390,44 @@ under the License.
 
 	'use strict';
 
+	angular.module("icsm.glossary", []).directive("icsmGlossary", [function () {
+		return {
+			templateUrl: "icsm/glossary/glossary.html"
+		};
+	}]).controller("GlossaryCtrl", GlossaryCtrl).factory("glossaryService", GlossaryService);
+
+	GlossaryCtrl.$inject = ['$log', 'glossaryService'];
+	function GlossaryCtrl($log, glossaryService) {
+		var self = this;
+		$log.info("GlossaryCtrl");
+		glossaryService.getTerms().then(function (terms) {
+			self.terms = terms;
+		});
+	}
+
+	GlossaryService.$inject = ['$http'];
+	function GlossaryService($http) {
+		var TERMS_SERVICE = "icsm/resources/config/glossary.json";
+
+		return {
+			getTerms: function getTerms() {
+				return $http.get(TERMS_SERVICE, { cache: true }).then(function (response) {
+					return response.data;
+				});
+			}
+		};
+	}
+})(angular);
+"use strict";
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function (angular) {
+
+	'use strict';
+
 	angular.module("icsm.help", []).directive("icsmHelp", [function () {
 		return {
 			templateUrl: "icsm/help/help.html"
@@ -425,44 +463,6 @@ under the License.
 		return {
 			getFaqs: function getFaqs() {
 				return $http.get(FAQS_SERVICE, { cache: true }).then(function (response) {
-					return response.data;
-				});
-			}
-		};
-	}
-})(angular);
-"use strict";
-
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module("icsm.glossary", []).directive("icsmGlossary", [function () {
-		return {
-			templateUrl: "icsm/glossary/glossary.html"
-		};
-	}]).controller("GlossaryCtrl", GlossaryCtrl).factory("glossaryService", GlossaryService);
-
-	GlossaryCtrl.$inject = ['$log', 'glossaryService'];
-	function GlossaryCtrl($log, glossaryService) {
-		var self = this;
-		$log.info("GlossaryCtrl");
-		glossaryService.getTerms().then(function (terms) {
-			self.terms = terms;
-		});
-	}
-
-	GlossaryService.$inject = ['$http'];
-	function GlossaryService($http) {
-		var TERMS_SERVICE = "icsm/resources/config/glossary.json";
-
-		return {
-			getTerms: function getTerms() {
-				return $http.get(TERMS_SERVICE, { cache: true }).then(function (response) {
 					return response.data;
 				});
 			}
@@ -990,6 +990,29 @@ under the License.
  */
 
 (function (angular) {
+	'use strict';
+
+	angular.module("icsm.plot", []).directive("icsmPlot", ['$log', function ($log) {
+		return {
+			restrict: "AE",
+			scope: {
+				line: "="
+			},
+			link: function link(scope, element, attrs, ctrl) {
+				scope.$watch("line", function (newValue, oldValue) {
+					$log.info(newValue);
+				});
+			}
+		};
+	}]);
+})(angular);
+"use strict";
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function (angular) {
 
 	'use strict';
 
@@ -1498,29 +1521,6 @@ under the License.
 		};
 	}
 })(angular);
-"use strict";
-
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
-(function (angular) {
-	'use strict';
-
-	angular.module("icsm.plot", []).directive("icsmPlot", ['$log', function ($log) {
-		return {
-			restrict: "AE",
-			scope: {
-				line: "="
-			},
-			link: function link(scope, element, attrs, ctrl) {
-				scope.$watch("line", function (newValue, oldValue) {
-					$log.info(newValue);
-				});
-			}
-		};
-	}]);
-})(angular);
 'use strict';
 
 /*!
@@ -1941,9 +1941,9 @@ under the License.
 angular.module("icsm.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("icsm/app/app.html","<div>\r\n	<!-- BEGIN: Sticky Header -->\r\n	<div explorer-header style=\"z-index:1\"\r\n			class=\"navbar navbar-default navbar-fixed-top\"\r\n			heading=\"\'ELVIS - Foundation Spatial Data\'\"\r\n			headingtitle=\"\'ICSM\'\"\r\n			breadcrumbs=\"[{name:\'ICSM\', title: \'Reload ELVIS - Foundation Spatial Data\', url: \'.\'}]\"\r\n			helptitle=\"\'Get help about ELVIS - Foundation Spatial Data\'\"\r\n			helpalttext=\"\'Get help about ELVIS - Foundation Spatial Data\'\">\r\n	</div>\r\n	<!-- END: Sticky Header -->\r\n\r\n\r\n	<!-- Messages go here. They are fixed to the tab bar. -->\r\n	<div explorer-messages class=\"marsMessages noPrint\"></div>\r\n\r\n	<icsm-panes data=\"root.data\" default-item=\"download\"></icsm-panes>\r\n</div>");
 $templateCache.put("icsm/clip/clip.html","<div class=\"well well-sm\">\r\n	<div class=\"container-fluid\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-10\">\r\n				<button style=\"margin-top:0px;\" ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\"  tooltip-placement=\"right\"\r\n               uib-tooltip=\"Enable drawing of a bounding box. On enabling, click on the map and drag diagonally\" class=\"btn btn-primary btn-xs\">Draw</button>\r\n			</div>\r\n			<div class=\"col-md-2\">\r\n				<button style=\"float:right\" ng-click=\"showInfo = !showInfo\"  tooltip-placement=\"left\"\r\n               uib-tooltip=\"Information.\" class=\"btn btn-primary btn-xs\"><i class=\"fa fa-info\"></i></button>\r\n				<exp-info title=\"Selecting an area\" show-close=\"true\" style=\"width:450px;position:fixed;top:230px;right:40px\" is-open=\"showInfo\"><icsm-info-bbox></div></exp-info>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\">\r\n			<div class=\"col-md-3\"> </div>\r\n			<div class=\"col-md-8\">\r\n				<div style=\"font-weight:bold;width:3.5em;display:inline-block\">Y Max:</div>\r\n				<span>\r\n               <input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMax\" ng-change=\"check()\"></input>\r\n               <span ng-show=\"showBounds && bounds\">({{bounds.yMax|number : 4}} max)</span>\r\n            </span>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\">\r\n			<div class=\"col-md-6\">\r\n				<div style=\"font-weight:bold;width:3.5em;display:inline-block\">X Min:</div>\r\n				<span>\r\n               <input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMin\" ng-change=\"check()\"></input>\r\n               <span ng-show=\"showBounds && bounds\">({{bounds.xMin|number : 4}} min)</span>\r\n            </span>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<div style=\"font-weight:bold;width:3.5em;display:inline-block\">X Max:</div>\r\n				<span>\r\n               <input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMax\" ng-change=\"check()\"></input>\r\n               <span ng-show=\"showBounds && bounds\">({{bounds.xMax|number : 4}} max)</span>\r\n            </span>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\">\r\n			<div class=\"col-md-offset-3 col-md-8\">\r\n				<div style=\"font-weight:bold;width:3.5em;display:inline-block\">Y Min:</div>\r\n				<span>\r\n               <input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMin\" ng-change=\"check()\"></input>\r\n               <span ng-show=\"showBounds && bounds\">({{bounds.yMin|number : 4}} min)</span>\r\n            </span>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/clip/infobbox.html","<div class=\"\">\r\n	<strong style=\"font-size:120%\">Select an area of interest.</strong> There are two ways to select your area of interest:\r\n	<ol>\r\n		<li>By hitting the \"Draw\" button an area on the map can be selected with the mouse by clicking a\r\n         corner and while holding the left mouse button\r\n			down drag diagonally across the map to the opposite corner or</li>\r\n		<li>Type your co-ordinates into the areas above.</li>\r\n	</ol>\r\n	Once drawn the points can be modified by the overwriting the values above or drawing another area by\r\n   clicking the \"Draw\" button again. <br/>\r\n	<strong>Notes:</strong>\r\n   <ul>\r\n      <li>The data does not cover all of Australia.</li>\r\n      <li>Restrict a search area to below four square degrees. eg 2x2 or 1x4</li>\r\n   </ul>\r\n	<p style=\"padding-top:5px\"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n		You can zoom in and out using the mouse wheel or the \"+\" and \"-\" map control on the top left of the map. If you\r\n		don\'t like the position of your drawn area, hit the \"Draw\" button and draw a new bounding box.\r\n	</p>\r\n</div>");
+$templateCache.put("icsm/glossary/glossary.html","<div ng-controller=\"GlossaryCtrl as glossary\">\r\n	<div style=\"position:relative;padding:5px;padding-left:10px;\" >\r\n		<div class=\"panel panel-default\" style=\"padding:5px;\" >\r\n			<div class=\"panel-heading\">\r\n				<h3 class=\"panel-title\">Glossary</h3>\r\n			</div>\r\n			<div class=\"panel-body\">\r\n				\r\n				\r\n	<table class=\"table table-striped\">\r\n		<thead>\r\n			<tr>\r\n				<th>Term</th>\r\n				<th>Definition</th>\r\n			</tr>\r\n		</thead>\r\n		<tbody>\r\n			<tr ng-repeat=\"term in glossary.terms\">\r\n				<td>{{term.term}}</td>\r\n				<td>{{term.definition}}</td>\r\n			</tr>\r\n		</tbody>\r\n	</table>\r\n</div>\r\n</div>\r\n</div>");
 $templateCache.put("icsm/help/faqs.html","<div class=\"container\" style=\"width:100%;border: 1px solid lightgray\">\r\n	<p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n		<strong>FAQS</strong>\r\n	</p>	\r\n\r\n	<h5 ng-repeat=\"faq in faqs\"><button type=\"button\" class=\"undecorated\" ng-click=\"focus(faq.key)\">{{faq.question}}</button></h5>\r\n	<hr/>\r\n	<div class=\"row\" ng-repeat=\"faq in faqs\">\r\n		<div class=\"col-md-12\">\r\n			<h5 tabindex=\"0\" id=\"faqs_{{faq.key}}\">{{faq.question}}</h5>\r\n			<span ng-bind-html=\"faq.answer\"></span>\r\n			<hr/>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/help/help.html","<div ng-controller=\"HelpCtrl as help\">\r\n	<div style=\"position:relative;padding:5px;padding-left:10px;\" >\r\n		<div class=\"panel panel-default\" style=\"padding:5px;\" >\r\n			<div class=\"panel-heading\">\r\n				<h3 class=\"panel-title\">Help</h3>\r\n			</div>\r\n			<div class=\"panel-body\">\r\n				The steps to get data!\r\n				<ol>\r\n					<li>Select dataset of interest <i class=\"fa fa-download\"></i> from Select tab</li>\r\n					<li>Define area</li>\r\n					<li>Select output format</li>\r\n					<li>Select coordinate system</li>\r\n					<li>Enter email address</li>\r\n					<li>Submit entries</li>\r\n				</ol>\r\n				An email will be sent to you on completion of the data extract with a link to your data.\r\n				<icsm-faqs faqs=\"help.faqs\" ></icsm-faqs>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
-$templateCache.put("icsm/glossary/glossary.html","<div ng-controller=\"GlossaryCtrl as glossary\">\r\n	<div style=\"position:relative;padding:5px;padding-left:10px;\" >\r\n		<div class=\"panel panel-default\" style=\"padding:5px;\" >\r\n			<div class=\"panel-heading\">\r\n				<h3 class=\"panel-title\">Glossary</h3>\r\n			</div>\r\n			<div class=\"panel-body\">\r\n				\r\n				\r\n	<table class=\"table table-striped\">\r\n		<thead>\r\n			<tr>\r\n				<th>Term</th>\r\n				<th>Definition</th>\r\n			</tr>\r\n		</thead>\r\n		<tbody>\r\n			<tr ng-repeat=\"term in glossary.terms\">\r\n				<td>{{term.term}}</td>\r\n				<td>{{term.definition}}</td>\r\n			</tr>\r\n		</tbody>\r\n	</table>\r\n</div>\r\n</div>\r\n</div>");
 $templateCache.put("icsm/list/list.html","<div ng-show=\"!list || !list.length\">\r\n	<div class=\"alert alert-warning\" role=\"alert\"><strong>Select an area</strong> to find datasets within.</div>\r\n</div>\r\n\r\n<div ng-show=\"list.length\">\r\n   <div class=\"row\">\r\n      <div class=\"col-md-5\" uib-tooltip=\"Number of intersecting or very near datasets to your area of interest.\">\r\n	      <h4 style=\"display:inline-block\">Found {{matched()| number}} datasets</h4>\r\n      </div>\r\n      <div class=\"col-md-7\">\r\n         <div class=\"input-group input-group-sm\">\r\n            <span class=\"input-group-addon\" id=\"names1\">Filter:</span>\r\n            <input type=\"text\" ng-model=\"filter\" class=\"form-control\"\r\n                   ng-change=\"update()\" placeholder=\"Filter names\" aria-describedby=\"names1\">\r\n            <span class=\"input-group-btn\">\r\n               <button class=\"btn btn-primary\" type=\"button\" data-toggle=\"collapse\" uib-tooltip=\"Filter by file content type\"\r\n                     data-target=\"#collapseFilters\" aria-expanded=\"false\" aria-controls=\"collapseFilters\">\r\n                  More...\r\n               </button>\r\n            </span>\r\n         </div>\r\n      </div>\r\n   </div>\r\n   <div class=\"collapse\" id=\"collapseFilters\">\r\n      <div class=\"well\">\r\n         <div class=\"row\">\r\n            <span class=\"listTypeLabel\">File type</span>\r\n            <span ng-repeat=\"type in filetypes\" class=\"listType\">\r\n               <input type=\"checkbox\" ng-model=\"type.selected\" ng-change=\"update()\"/>\r\n               <span uib-tooltip=\"{{type.description}}\">{{type.label}} ({{type.count}})</span>\r\n            </span>\r\n         </div>\r\n      </div>\r\n   </div>\r\n\r\n   <div ng-repeat=\"available in filteredList\" class=\"well\">\r\n      <h5>\r\n         <button class=\"undecorated\" ng-click=\"expansions[available.source] = !expansions[available.source]\" uib-tooltip=\"Click to collapse/expand this group\"\r\n                  aria-expanded=\"true\" aria-controls=\"collapse{{mappings[available.source].code}}\">\r\n            <img ng-src=\"{{mappings[available.source].image}}\" style=\"height:{{mappings[available.source].height}}px\"></img>\r\n         </button>\r\n         <strong>{{available.source}}</strong>\r\n         (Showing {{available.downloadables.length}} of {{fullCount(available.source)}})\r\n         <span class=\"listTopExpander\">\r\n            <button class=\"undecorated\" ng-click=\"expansions[available.source] = !expansions[available.source]\">\r\n               [{{expansions[available.source]?\"collapse\":\"expand\"}}]\r\n            </button>\r\n         </span>\r\n      </h5>\r\n      <div uib-collapse=\"!expansions[available.source]\">\r\n         <div class=\"listRow\" ng-class-odd=\"\'listEven\'\" ng-repeat=\"item in available.downloadables\"\r\n               data-ng-mouseenter=\"show(item)\" data-ng-mouseleave=\"hide(item)\">\r\n            <h5 ng-show=\"item.index_poly_name\">{{item.index_poly_name}}</h5>\r\n            <div ng-show=\"item.file_size_ell\">\r\n               <div>\r\n                  <a href=\"{{item.ell_url}}\">\r\n                     <i class=\"fa fa-download\"></i>\r\n                     {{item.ell_name}}\r\n                  </a>\r\n                  <span style=\"float:right;width:8em\">Size: {{item.file_size_ell | fileSize}}</span>\r\n               </div>\r\n            </div>\r\n            <div ng-show=\"item.file_size_las\">\r\n               <div>\r\n                  <a href=\"{{item.las_url}}\">\r\n                     <i class=\"fa fa-download\"></i>\r\n                     {{item.las_name}}\r\n                  </a>\r\n                  <span style=\"float:right;width:8em\">Size: {{item.file_size_las | fileSize}}</span>\r\n               </div>\r\n            </div>\r\n            <div ng-show=\"item.file_size_ort\">\r\n               <div>\r\n                  <a href=\"{{item.ort_url}}\">\r\n                     <i class=\"fa fa-download\"></i>\r\n                     {{item.ort_name}}\r\n                  </a>\r\n                  <span style=\"float:right;width:8em\">Size: {{item.file_size_ort | fileSize}}</span>\r\n               </div>\r\n            </div>\r\n            <div ng-show=\"item.file_size_asc\">\r\n               <div>\r\n                  <a href=\"{{item.asc_url}}\">\r\n                     <i class=\"fa fa-download\"></i>\r\n                     {{item.asc_name}}\r\n                  </a>\r\n                  <span style=\"float:right;width:8em\">Size: {{item.file_size_asc | fileSize}}</span>\r\n               </div>\r\n            </div>\r\n            <div ng-show=\"item.file_size_prj\">\r\n               <div>\r\n                  <a href=\"{{item.prj_url}}\">\r\n                     <i class=\"fa fa-download\"></i>\r\n                     {{item.prj_name}}\r\n                  </a>\r\n                  <span style=\"float:right;width:8em\">Size: {{item.file_size_prj | fileSize}}</span>\r\n               </div>\r\n            </div>\r\n            <div ng-show=\"item.file_size_dem\">\r\n               <div>\r\n                  <a href=\"{{item.dem_url}}\">\r\n                     <i class=\"fa fa-download\"></i>\r\n                     {{item.dem_name}}\r\n                  </a>\r\n                  <span style=\"float:right;width:8em\">Size: {{item.file_size_dem | fileSize}}</span>\r\n               </div>\r\n            </div>\r\n         </div>\r\n         <div style=\"text-align:right\"><button class=\"undecorated\" ng-click=\"expansions[available.source] = false\">[collapse]</button></div>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" icsm-toolbar-row map=\"root.map\"></div>\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div icsm-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'download\'\" icsm-view></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'maps\'\" icsm-maps></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" icsm-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" icsm-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n		<button class=\"undecorated\">Download</button>\r\n	</div>\r\n	<!-- \r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n	-->\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");

@@ -7,14 +7,14 @@ angular.module('start.navigation', [])
  * Override the original mars user.
  *
  */
-.directive('startNavigation', [function() {
+.directive('startNavigation', ['altthemesService', function(altthemesService) {
 	return {
-      scope: {
-         data: "="
-      },
 		restrict: 'AE',
 		templateUrl: 'start/navigation/navigation.html',
 		link: function(scope) {
+         altthemesService.getThemes().then(themes => {
+            scope.themes = themes;
+         });
 			scope.username = "Anonymous";
 		}
 	};

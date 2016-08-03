@@ -5,6 +5,7 @@
 angular.module("WaterApp", [
 	 	'common.altthemes',
 	 	'common.bbox',
+      'common.cc4',
       'common.clip',
       'common.download',
 	 	'common.extent',

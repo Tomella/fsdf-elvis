@@ -23,7 +23,7 @@ under the License.
 
 	'use strict';
 
-	angular.module("WaterApp", ['common.altthemes', 'common.bbox', 'common.clip', 'common.download', 'common.extent', 'common.header', 'common.navigation', 'common.templates', 'common.toolbar', 'common.wms', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.persist', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'explorer.map.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer', 'geo.baselayer.control', 'geo.draw',
+	angular.module("WaterApp", ['common.altthemes', 'common.bbox', 'common.cc4', 'common.clip', 'common.download', 'common.extent', 'common.header', 'common.navigation', 'common.templates', 'common.toolbar', 'common.wms', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.persist', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'explorer.map.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer', 'geo.baselayer.control', 'geo.draw',
 	// 'geo.elevation',
 	//'icsm.elevation',
 	//'geo.extent',
