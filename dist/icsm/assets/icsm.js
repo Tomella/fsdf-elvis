@@ -471,6 +471,195 @@ under the License.
 })(angular);
 'use strict';
 
+(function (mapevents) {
+   'use strict';
+
+   angular.module("icsm.mapevents", ['geo.map']).directive('icsmMapevents', ['icsmMapeventsService', function (icsmMapeventsService) {
+      return {
+         restrict: 'AE',
+         link: function link(scope) {
+            icsmMapeventsService.tickle();
+         }
+      };
+   }]).factory('icsmMapeventsService', ['$rootScope', '$timeout', 'configService', 'mapService', function ($rootScope, $timeout, configService, mapService) {
+      var marker, poly, bounds;
+      var config = configService.getConfig("mapConfig");
+      $rootScope.$on('icsm.bounds.draw', function showBbox(event, bbox) {
+         // 149.090045383719,-35.4,149.4,-35.3
+         if (!bbox) {
+            makeBounds(null);
+            return;
+         }
+
+         var xmax = bbox[2],
+             xmin = bbox[0],
+             ymax = bbox[3],
+             ymin = bbox[1];
+
+         // It's a bbox.
+         makeBounds({
+            type: "Feature",
+            geometry: {
+               type: "Polygon",
+               coordinates: [[[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax], [xmin, ymin]]]
+            },
+            properties: {}
+         }, false);
+      });
+
+      $rootScope.$on('icsm.bbox.draw', function showBbox(event, bbox) {
+         // 149.090045383719,-35.4,149.4,-35.3
+         if (!bbox) {
+            makePoly(null);
+            return;
+         }
+
+         var xmax = bbox[2],
+             xmin = bbox[0],
+             ymax = bbox[3],
+             ymin = bbox[1];
+
+         // It's a bbox.
+         makePoly({
+            type: "Feature",
+            geometry: {
+               type: "Polygon",
+               coordinates: [[[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax], [xmin, ymin]]]
+            },
+            properties: {}
+         }, false);
+      });
+      $rootScope.$on('icsm.poly.draw', function showBbox(event, geojson) {
+         // It's a GeoJSON Polygon geometry and it has a single ring.
+         makePoly(geojson, true);
+      });
+
+      if (config.listenForMarkerEvent) {
+         $rootScope.$on(config.listenForMarkerEvent, function showBbox(event, geojson) {
+            // It's a GeoJSON Polygon geometry and it has a single ring.
+            makeMarker(geojson);
+         });
+      }
+
+      function makeMarker(data) {
+         mapService.getMap().then(function (map) {
+            if (marker) {
+               map.removeLayer(marker);
+            }
+            if (!data) {
+               return;
+            }
+
+            var point;
+            if (typeof data.properties.SAMPLE_LONGITUDE != "undefined") {
+               point = {
+                  type: "Point",
+                  coordinates: [data.properties.SAMPLE_LONGITUDE, data.properties.SAMPLE_LATITUDE]
+               };
+            } else {
+               point = data.geometry;
+            }
+
+            marker = L.geoJson({
+               type: "Feature",
+               geometry: point,
+               id: data.id
+            }).addTo(map);
+
+            if (data.properties.html) {
+               marker.bindPopup(data.properties.html).openPopup();
+            }
+         });
+      }
+
+      function makePoly(data, zoomTo) {
+         console.log("pre getting map to make poly");
+         mapService.getMap().then(function (map) {
+            console.log("getting map to make poly");
+            if (poly) {
+               map.removeLayer(poly);
+            }
+
+            if (data) {
+               poly = L.geoJson(data, {
+                  style: function style(feature) {
+                     return {
+                        opacity: 1,
+                        clickable: false,
+                        fillOpacity: 0,
+                        color: "red"
+                     };
+                  }
+               }).addTo(map);
+
+               if (zoomTo) {
+                  $timeout(function () {
+                     var bounds = poly.getBounds();
+                     map.fitBounds(bounds, {
+                        animate: true,
+                        padding: L.point(100, 100)
+                     });
+                  }, 50);
+               }
+            }
+         });
+      }
+
+      function makeBounds(data, zoomTo) {
+         console.log("pre getting map to make bounds");
+         mapService.getMap().then(function (map) {
+            console.log("getting map to make poly");
+            if (bounds) {
+               map.removeLayer(bounds);
+            }
+
+            if (data) {
+               bounds = L.geoJson(data, {
+                  style: function style(feature) {
+                     return {
+                        opacity: 1,
+                        clickable: false,
+                        fillOpacity: 0,
+                        color: "black"
+                     };
+                  }
+               }).addTo(map);
+
+               if (zoomTo) {
+                  $timeout(function () {
+                     var boundingBox = bounds.getBounds();
+                     map.fitBounds(boundingBox, {
+                        animate: true,
+                        padding: L.point(100, 100)
+                     });
+                  }, 50);
+               }
+            }
+         });
+      }
+
+      function clip(num, min, max) {
+         return Math.min(Math.max(num, min), max);
+      }
+
+      return {
+         tickle: function tickle() {
+            mapService.getMap().then(function (map) {
+               map.on('click', function (event) {
+                  var zoom = map.getZoom();
+                  var latlng = event.latlng;
+                  $rootScope.$broadcast("zoom.to", {
+                     zoom: zoom,
+                     latlng: latlng
+                  });
+               });
+            });
+         }
+      };
+   }]);
+})();
+'use strict';
+
 /*!
  * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
  */
@@ -719,195 +908,6 @@ under the License.
       };
    });
 })(angular);
-'use strict';
-
-(function (mapevents) {
-   'use strict';
-
-   angular.module("icsm.mapevents", ['geo.map']).directive('icsmMapevents', ['icsmMapeventsService', function (icsmMapeventsService) {
-      return {
-         restrict: 'AE',
-         link: function link(scope) {
-            icsmMapeventsService.tickle();
-         }
-      };
-   }]).factory('icsmMapeventsService', ['$rootScope', '$timeout', 'configService', 'mapService', function ($rootScope, $timeout, configService, mapService) {
-      var marker, poly, bounds;
-      var config = configService.getConfig("mapConfig");
-      $rootScope.$on('icsm.bounds.draw', function showBbox(event, bbox) {
-         // 149.090045383719,-35.4,149.4,-35.3
-         if (!bbox) {
-            makeBounds(null);
-            return;
-         }
-
-         var xmax = bbox[2],
-             xmin = bbox[0],
-             ymax = bbox[3],
-             ymin = bbox[1];
-
-         // It's a bbox.
-         makeBounds({
-            type: "Feature",
-            geometry: {
-               type: "Polygon",
-               coordinates: [[[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax], [xmin, ymin]]]
-            },
-            properties: {}
-         }, false);
-      });
-
-      $rootScope.$on('icsm.bbox.draw', function showBbox(event, bbox) {
-         // 149.090045383719,-35.4,149.4,-35.3
-         if (!bbox) {
-            makePoly(null);
-            return;
-         }
-
-         var xmax = bbox[2],
-             xmin = bbox[0],
-             ymax = bbox[3],
-             ymin = bbox[1];
-
-         // It's a bbox.
-         makePoly({
-            type: "Feature",
-            geometry: {
-               type: "Polygon",
-               coordinates: [[[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax], [xmin, ymin]]]
-            },
-            properties: {}
-         }, false);
-      });
-      $rootScope.$on('icsm.poly.draw', function showBbox(event, geojson) {
-         // It's a GeoJSON Polygon geometry and it has a single ring.
-         makePoly(geojson, true);
-      });
-
-      if (config.listenForMarkerEvent) {
-         $rootScope.$on(config.listenForMarkerEvent, function showBbox(event, geojson) {
-            // It's a GeoJSON Polygon geometry and it has a single ring.
-            makeMarker(geojson);
-         });
-      }
-
-      function makeMarker(data) {
-         mapService.getMap().then(function (map) {
-            if (marker) {
-               map.removeLayer(marker);
-            }
-            if (!data) {
-               return;
-            }
-
-            var point;
-            if (typeof data.properties.SAMPLE_LONGITUDE != "undefined") {
-               point = {
-                  type: "Point",
-                  coordinates: [data.properties.SAMPLE_LONGITUDE, data.properties.SAMPLE_LATITUDE]
-               };
-            } else {
-               point = data.geometry;
-            }
-
-            marker = L.geoJson({
-               type: "Feature",
-               geometry: point,
-               id: data.id
-            }).addTo(map);
-
-            if (data.properties.html) {
-               marker.bindPopup(data.properties.html).openPopup();
-            }
-         });
-      }
-
-      function makePoly(data, zoomTo) {
-         console.log("pre getting map to make poly");
-         mapService.getMap().then(function (map) {
-            console.log("getting map to make poly");
-            if (poly) {
-               map.removeLayer(poly);
-            }
-
-            if (data) {
-               poly = L.geoJson(data, {
-                  style: function style(feature) {
-                     return {
-                        opacity: 1,
-                        clickable: false,
-                        fillOpacity: 0,
-                        color: "red"
-                     };
-                  }
-               }).addTo(map);
-
-               if (zoomTo) {
-                  $timeout(function () {
-                     var bounds = poly.getBounds();
-                     map.fitBounds(bounds, {
-                        animate: true,
-                        padding: L.point(100, 100)
-                     });
-                  }, 50);
-               }
-            }
-         });
-      }
-
-      function makeBounds(data, zoomTo) {
-         console.log("pre getting map to make bounds");
-         mapService.getMap().then(function (map) {
-            console.log("getting map to make poly");
-            if (bounds) {
-               map.removeLayer(bounds);
-            }
-
-            if (data) {
-               bounds = L.geoJson(data, {
-                  style: function style(feature) {
-                     return {
-                        opacity: 1,
-                        clickable: false,
-                        fillOpacity: 0,
-                        color: "black"
-                     };
-                  }
-               }).addTo(map);
-
-               if (zoomTo) {
-                  $timeout(function () {
-                     var boundingBox = bounds.getBounds();
-                     map.fitBounds(boundingBox, {
-                        animate: true,
-                        padding: L.point(100, 100)
-                     });
-                  }, 50);
-               }
-            }
-         });
-      }
-
-      function clip(num, min, max) {
-         return Math.min(Math.max(num, min), max);
-      }
-
-      return {
-         tickle: function tickle() {
-            mapService.getMap().then(function (map) {
-               map.on('click', function (event) {
-                  var zoom = map.getZoom();
-                  var latlng = event.latlng;
-                  $rootScope.$broadcast("zoom.to", {
-                     zoom: zoom,
-                     latlng: latlng
-                  });
-               });
-            });
-         }
-      };
-   }]);
-})();
 "use strict";
 
 /*!
@@ -1938,7 +1938,7 @@ under the License.
 		return service;
 	}
 })(angular, $);
-angular.module("icsm.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("icsm/app/app.html","<div>\r\n	<!-- BEGIN: Sticky Header -->\r\n	<div explorer-header style=\"z-index:1\"\r\n			class=\"navbar navbar-default navbar-fixed-top\"\r\n			heading=\"\'ELVIS – Foundation Spatial Data\'\"\r\n			headingtitle=\"\'ICSM\'\"\r\n			breadcrumbs=\"[{name:\'ICSM\', title: \'Reload ELVIS – Foundation Spatial Data\', url: \'.\'}]\"\r\n			helptitle=\"\'Get help about ELVIS – Foundation Spatial Data\'\"\r\n			helpalttext=\"\'Get help about ELVIS – Foundation Spatial Data\'\">\r\n	</div>\r\n	<!-- END: Sticky Header -->\r\n\r\n\r\n	<!-- Messages go here. They are fixed to the tab bar. -->\r\n	<div explorer-messages class=\"marsMessages noPrint\"></div>\r\n\r\n	<icsm-panes data=\"root.data\" default-item=\"download\"></icsm-panes>\r\n</div>");
+angular.module("icsm.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("icsm/app/app.html","<div>\r\n	<!-- BEGIN: Sticky Header -->\r\n	<div explorer-header style=\"z-index:1\"\r\n			class=\"navbar navbar-default navbar-fixed-top\"\r\n			heading=\"\'ELVIS - Foundation Spatial Data\'\"\r\n			headingtitle=\"\'ICSM\'\"\r\n			breadcrumbs=\"[{name:\'ICSM\', title: \'Reload ELVIS - Foundation Spatial Data\', url: \'.\'}]\"\r\n			helptitle=\"\'Get help about ELVIS - Foundation Spatial Data\'\"\r\n			helpalttext=\"\'Get help about ELVIS - Foundation Spatial Data\'\">\r\n	</div>\r\n	<!-- END: Sticky Header -->\r\n\r\n\r\n	<!-- Messages go here. They are fixed to the tab bar. -->\r\n	<div explorer-messages class=\"marsMessages noPrint\"></div>\r\n\r\n	<icsm-panes data=\"root.data\" default-item=\"download\"></icsm-panes>\r\n</div>");
 $templateCache.put("icsm/clip/clip.html","<div class=\"well well-sm\">\r\n	<div class=\"container-fluid\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-10\">\r\n				<button style=\"margin-top:0px;\" ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\"  tooltip-placement=\"right\"\r\n               uib-tooltip=\"Enable drawing of a bounding box. On enabling, click on the map and drag diagonally\" class=\"btn btn-primary btn-xs\">Draw</button>\r\n			</div>\r\n			<div class=\"col-md-2\">\r\n				<button style=\"float:right\" ng-click=\"showInfo = !showInfo\"  tooltip-placement=\"left\"\r\n               uib-tooltip=\"Information.\" class=\"btn btn-primary btn-xs\"><i class=\"fa fa-info\"></i></button>\r\n				<exp-info title=\"Selecting an area\" show-close=\"true\" style=\"width:450px;position:fixed;top:230px;right:40px\" is-open=\"showInfo\"><icsm-info-bbox></div></exp-info>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\">\r\n			<div class=\"col-md-3\"> </div>\r\n			<div class=\"col-md-8\">\r\n				<div style=\"font-weight:bold;width:3.5em;display:inline-block\">Y Max:</div>\r\n				<span>\r\n               <input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMax\" ng-change=\"check()\"></input>\r\n               <span ng-show=\"showBounds && bounds\">({{bounds.yMax|number : 4}} max)</span>\r\n            </span>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\">\r\n			<div class=\"col-md-6\">\r\n				<div style=\"font-weight:bold;width:3.5em;display:inline-block\">X Min:</div>\r\n				<span>\r\n               <input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMin\" ng-change=\"check()\"></input>\r\n               <span ng-show=\"showBounds && bounds\">({{bounds.xMin|number : 4}} min)</span>\r\n            </span>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<div style=\"font-weight:bold;width:3.5em;display:inline-block\">X Max:</div>\r\n				<span>\r\n               <input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMax\" ng-change=\"check()\"></input>\r\n               <span ng-show=\"showBounds && bounds\">({{bounds.xMax|number : 4}} max)</span>\r\n            </span>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\">\r\n			<div class=\"col-md-offset-3 col-md-8\">\r\n				<div style=\"font-weight:bold;width:3.5em;display:inline-block\">Y Min:</div>\r\n				<span>\r\n               <input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMin\" ng-change=\"check()\"></input>\r\n               <span ng-show=\"showBounds && bounds\">({{bounds.yMin|number : 4}} min)</span>\r\n            </span>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/clip/infobbox.html","<div class=\"\">\r\n	<strong style=\"font-size:120%\">Select an area of interest.</strong> There are two ways to select your area of interest:\r\n	<ol>\r\n		<li>By hitting the \"Draw\" button an area on the map can be selected with the mouse by clicking a\r\n         corner and while holding the left mouse button\r\n			down drag diagonally across the map to the opposite corner or</li>\r\n		<li>Type your co-ordinates into the areas above.</li>\r\n	</ol>\r\n	Once drawn the points can be modified by the overwriting the values above or drawing another area by\r\n   clicking the \"Draw\" button again. <br/>\r\n	<strong>Notes:</strong>\r\n   <ul>\r\n      <li>The data does not cover all of Australia.</li>\r\n      <li>Restrict a search area to below four square degrees. eg 2x2 or 1x4</li>\r\n   </ul>\r\n	<p style=\"padding-top:5px\"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n		You can zoom in and out using the mouse wheel or the \"+\" and \"-\" map control on the top left of the map. If you\r\n		don\'t like the position of your drawn area, hit the \"Draw\" button and draw a new bounding box.\r\n	</p>\r\n</div>");
 $templateCache.put("icsm/glossary/glossary.html","<div ng-controller=\"GlossaryCtrl as glossary\">\r\n	<div style=\"position:relative;padding:5px;padding-left:10px;\" >\r\n		<div class=\"panel panel-default\" style=\"padding:5px;\" >\r\n			<div class=\"panel-heading\">\r\n				<h3 class=\"panel-title\">Glossary</h3>\r\n			</div>\r\n			<div class=\"panel-body\">\r\n				\r\n				\r\n	<table class=\"table table-striped\">\r\n		<thead>\r\n			<tr>\r\n				<th>Term</th>\r\n				<th>Definition</th>\r\n			</tr>\r\n		</thead>\r\n		<tbody>\r\n			<tr ng-repeat=\"term in glossary.terms\">\r\n				<td>{{term.term}}</td>\r\n				<td>{{term.definition}}</td>\r\n			</tr>\r\n		</tbody>\r\n	</table>\r\n</div>\r\n</div>\r\n</div>");
@@ -1950,7 +1950,7 @@ $templateCache.put("icsm/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"pa
 $templateCache.put("icsm/select/doc.html","<div ng-class-odd=\"\'odd\'\" ng-class-even=\"\'even\'\" ng-mouseleave=\"select.lolight(doc)\" ng-mouseenter=\"select.hilight(doc)\">\r\n	<span ng-class=\"{ellipsis:!expanded}\" tooltip-enable=\"!expanded\" style=\"width:100%;display:inline-block;\" \r\n			tooltip-class=\"selectAbstractTooltip\" tooltip=\"{{doc.abstract | truncate : 250}}\" tooltip-placement=\"bottom\">\r\n		<button type=\"button\" class=\"undecorated\" ng-click=\"expanded = !expanded\" title=\"Click to see more about this dataset\">\r\n			<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-caret-down\':expanded,\'fa-caret-right\':(!expanded)}\"></i>\r\n		</button>\r\n		<download-add item=\"doc\" group=\"group\"></download-add>\r\n		<icsm-wms data=\"doc\"></icsm-wms>\r\n		<icsm-bbox data=\"doc\" ng-if=\"doc.showExtent\"></icsm-bbox>\r\n		<a href=\"http://www.ga.gov.au/metadata-gateway/metadata/record/{{doc.sysId}}\" target=\"_blank\" ><strong>{{doc.title}}</strong></a>\r\n	</span>\r\n	<span ng-class=\"{ellipsis:!expanded}\" style=\"width:100%;display:inline-block;padding-right:15px;\">\r\n		{{doc.abstract}}\r\n	</span>\r\n	<div ng-show=\"expanded\" style=\"padding-bottom: 5px;\">\r\n		<h5>Keywords</h5>\r\n		<div>\r\n			<span class=\"badge\" ng-repeat=\"keyword in doc.keywords track by $index\">{{keyword}}</span>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/select/group.html","<div class=\"panel panel-default\" style=\"margin-bottom:-5px;\" >\r\n	<div class=\"panel-heading\"><icsm-wms data=\"group\"></icsm-wms> <strong>{{group.title}}</strong></div>\r\n	<div class=\"panel-body\">\r\n   		<div ng-repeat=\"doc in group.docs\">\r\n   			<select-doc doc=\"doc\" group=\"group\"></select-doc>\r\n		</div>\r\n	</div>\r\n</div>\r\n");
 $templateCache.put("icsm/select/select.html","<div>\r\n	<div style=\"position:relative;padding:5px;padding-left:10px;\" ng-controller=\"SelectCtrl as select\" class=\"scrollPanel\">\r\n		<div class=\"panel panel-default\" style=\"margin-bottom:-5px\">\r\n  			<div class=\"panel-heading\">\r\n  				<h3 class=\"panel-title\">Available datasets</h3>\r\n  			</div>\r\n  			<div class=\"panel-body\">\r\n				<div ng-repeat=\"doc in select.data.response.docs\" style=\"padding-bottom:7px\">\r\n					<select-doc ng-if=\"doc.type == \'dataset\'\" doc=\"doc\"></select-doc>\r\n					<select-group ng-if=\"doc.type == \'group\'\" group=\"doc\"></select-group>\r\n				</div>\r\n  			</div>\r\n		</div>\r\n	</div>\r\n</div>");
-$templateCache.put("icsm/splash/splash.html","<div class=\"modal-header\">\r\n   <h3 class=\"modal-title splash\">ELVIS – Foundation Spatial Data</h3>\r\n</div>\r\n<div class=\"modal-body\" id=\"accept\" ng-form exp-enter=\"accept()\" icsm-splash-modal style=\"width: 100%; margin-left: auto; margin-right: auto;\">\r\n	<div>\r\n		<p>\r\n			Here you can download datasets sourced from jurisdictions.\r\n		</p>\r\n		<p>\r\n			<a href=\"http://www.ga.gov.au/topographic-mapping/digital-elevation-data.html\" target=\"_blank\">Find out more on our Elevation page.</a>\r\n		</p>\r\n		<p>\r\n			Data can be downloaded at <strong>no charge</strong> and there is no limit to how many (please check the file size before you download your files).\r\n		</p>\r\n		<p>\r\n			<a href=\"http://opentopo.sdsc.edu/gridsphere/gridsphere?cid=contributeframeportlet&gs_action=listTools\" target=\"_blank\">Click here for Free GIS Tools.</a>\r\n		</p>\r\n      <h5>How to use</h5>\r\n      <p>\r\n         <ul>\r\n            <li>Click on the map, holding the button down,</li>\r\n            <li>Drag to a diagonal corner (not too big, there is a limit of roughly 2x2 degrees)</li>\r\n            <li>On release we will check for data within or very near yur area of interest</li>\r\n            <li>If the list is large you can filter:\r\n               <ul>\r\n                  <li>Partial text match by typing in the filter field and/or</li>\r\n                  <li>By clicking the more button, you can restrict the display to certain file types</li>\r\n               </ul>\r\n            </li>\r\n            <li>Click on any file you would like to download. To reiterate, these files can be huge so take note of the file size before downloading</li>\r\n         </ul>\r\n      </p>\r\n      <h5>Hints</h5>\r\n      <p>\r\n         <ul>\r\n            <li>You can manually type the coordinates into the boxes. After 5 seconds of no changes the area described is checked, just like drawing the box with the mouse.</li>\r\n            <li>Hovering over many items will give you further information about the purpose of the item</li>\r\n            <li>Drawing a polyline allows you to measure distance along the polyline.</li>\r\n            <li>While the tool to draw your area of interest is enabled it is easiest to pan the map using the arrow keys.</li>\r\n            <li>There are many areas where there is no data though the coverage is improving all the time.</li\r\n         </ul>\r\n      </p>\r\n	</div>\r\n   <div style=\"padding:30px; padding-top:0; padding-bottom:40px; width:100%\">\r\n		<div class=\"pull-right\">\r\n		  	<button type=\"button\" class=\"btn btn-primary ng-pristine ng-valid ng-touched\" ng-model=\"seenSplash\" ng-focus=\"\" ng-click=\"accept()\">Continue</button>\r\n		</div>\r\n	</div>\r\n	<div ng-show=\"messages.length > 0\" class=\"container\" style=\"width:100%; max-height:250px; overflow-y:auto\">\r\n		<div class=\"row\" ng-class-even=\"\'grayline\'\" style=\"font-weight:bold\">\r\n			<div class=\"col-sm-12\" ><h3>News</h3></div>\r\n		</div>\r\n\r\n		<div class=\"row\"ng-class-even=\"\'grayline\'\" style=\"max-height:400px;overflow:auto\" ng-repeat=\"message in messages | sortNotes\">\r\n			<div class=\"col-sm-12\">\r\n				<h4>{{message.title}} <span class=\"pull-right\" style=\"font-size:70%\">Created: {{message.creationDate | date : \"dd/MM/yyyy\"}}</span></h4>\r\n				<div ng-bind-html=\"message.description\"></div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
+$templateCache.put("icsm/splash/splash.html","<div class=\"modal-header\">\r\n   <h3 class=\"modal-title splash\">ELVIS - Foundation Spatial Data</h3>\r\n</div>\r\n<div class=\"modal-body\" id=\"accept\" ng-form exp-enter=\"accept()\" icsm-splash-modal style=\"width: 100%; margin-left: auto; margin-right: auto;\">\r\n	<div>\r\n		<p>\r\n			Here you can download datasets sourced from jurisdictions.\r\n		</p>\r\n		<p>\r\n			<a href=\"http://www.ga.gov.au/topographic-mapping/digital-elevation-data.html\" target=\"_blank\">Find out more on our Elevation page.</a>\r\n		</p>\r\n		<p>\r\n			Data can be downloaded at <strong>no charge</strong> and there is no limit to how many (please check the file size before you download your files).\r\n		</p>\r\n		<p>\r\n			<a href=\"http://opentopo.sdsc.edu/gridsphere/gridsphere?cid=contributeframeportlet&gs_action=listTools\" target=\"_blank\">Click here for Free GIS Tools.</a>\r\n		</p>\r\n      <h5>How to use</h5>\r\n      <p>\r\n         <ul>\r\n            <li>Click on the map, holding the button down,</li>\r\n            <li>Drag to a diagonal corner (not too big, there is a limit of roughly 2x2 degrees)</li>\r\n            <li>On release we will check for data within or very near yur area of interest</li>\r\n            <li>If the list is large you can filter:\r\n               <ul>\r\n                  <li>Partial text match by typing in the filter field and/or</li>\r\n                  <li>By clicking the more button, you can restrict the display to certain file types</li>\r\n               </ul>\r\n            </li>\r\n            <li>Click on any file you would like to download. To reiterate, these files can be huge so take note of the file size before downloading</li>\r\n         </ul>\r\n      </p>\r\n      <h5>Hints</h5>\r\n      <p>\r\n         <ul>\r\n            <li>You can manually type the coordinates into the boxes. After 5 seconds of no changes the area described is checked, just like drawing the box with the mouse.</li>\r\n            <li>Hovering over many items will give you further information about the purpose of the item</li>\r\n            <li>Drawing a polyline allows you to measure distance along the polyline.</li>\r\n            <li>While the tool to draw your area of interest is enabled it is easiest to pan the map using the arrow keys.</li>\r\n            <li>There are many areas where there is no data though the coverage is improving all the time.</li\r\n         </ul>\r\n      </p>\r\n	</div>\r\n   <div style=\"padding:30px; padding-top:0; padding-bottom:40px; width:100%\">\r\n		<div class=\"pull-right\">\r\n		  	<button type=\"button\" class=\"btn btn-primary ng-pristine ng-valid ng-touched\" ng-model=\"seenSplash\" ng-focus=\"\" ng-click=\"accept()\">Continue</button>\r\n		</div>\r\n	</div>\r\n	<div ng-show=\"messages.length > 0\" class=\"container\" style=\"width:100%; max-height:250px; overflow-y:auto\">\r\n		<div class=\"row\" ng-class-even=\"\'grayline\'\" style=\"font-weight:bold\">\r\n			<div class=\"col-sm-12\" ><h3>News</h3></div>\r\n		</div>\r\n\r\n		<div class=\"row\"ng-class-even=\"\'grayline\'\" style=\"max-height:400px;overflow:auto\" ng-repeat=\"message in messages | sortNotes\">\r\n			<div class=\"col-sm-12\">\r\n				<h4>{{message.title}} <span class=\"pull-right\" style=\"font-size:70%\">Created: {{message.creationDate | date : \"dd/MM/yyyy\"}}</span></h4>\r\n				<div ng-bind-html=\"message.description\"></div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/themes/themes.html","<div class=\"dropdown themesdropdown\">\r\n  <button class=\"btn btn-default dropdown-toggle themescurrent\" type=\"button\" id=\"dropdownMenu1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"true\">\r\n    Theme\r\n    <span class=\"caret\"></span>\r\n  </button>\r\n  <ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenu1\">\r\n    <li ng-repeat=\"item in themes\">\r\n       <a href=\"#\" title=\"{{item.title}}\" ng-href=\"{{item.url}}\" class=\"themesItemCompact\">\r\n         <span class=\"icsm-icon\" ng-class=\"item.className\"></span>\r\n         <strong style=\"vertical-align:top;font-size:110%\">{{item.label}}</strong>\r\n       </a>\r\n    </li>\r\n  </ul>\r\n</div>");
 $templateCache.put("icsm/toolbar/toolbar.html","<div icsm-toolbar>\r\n	<div class=\"row toolBarGroup\">\r\n		<div class=\"btn-group searchBar\" ng-show=\"root.whichSearch != \'region\'\">\r\n			<div class=\"input-group\" geo-search>\r\n				<input type=\"text\" ng-autocomplete ng-model=\"values.from.description\" options=\'{country:\"au\"}\'\r\n							size=\"32\" title=\"Select a locality to pan the map to.\" class=\"form-control\" aria-label=\"...\">\r\n				<div class=\"input-group-btn\">\r\n    				<button ng-click=\"zoom(false)\" exp-ga=\"[\'send\', \'event\', \'icsm\', \'click\', \'zoom to location\']\"\r\n						class=\"btn btn-default\"\r\n						title=\"Pan and potentially zoom to location.\"><i class=\"fa fa-search\"></i></button>\r\n				</div>\r\n			</div>\r\n		</div>\r\n		\r\n		<div class=\"pull-right\">\r\n			<div class=\"btn-toolbar radCore\" role=\"toolbar\"  icsm-toolbar>\r\n				<div class=\"btn-group\">\r\n					<!-- < icsm-state-toggle></icsm-state-toggle> -->\r\n				</div>\r\n			</div>		\r\n		\r\n			<div class=\"btn-toolbar\" style=\"margin:right:10px;display:inline-block\">\r\n				<div class=\"btn-group\">\r\n					<span class=\"btn btn-default\" geo-baselayer-control max-zoom=\"16\" title=\"Satellite to Topography bias on base map.\"></span>\r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/view/view.html","<div class=\"container-fluid downloadInner\" >\r\n	<div class=\"row\">\r\n		<div class=\"col-md-12\">\r\n			<h4><icsm-wms data=\"data.item\" ng-title=\"data.item.abstract\"></icsm-wms>{{data.item.title}}</h4>\r\n  			</div>\r\n	</div>\r\n	<icsm-clip data=\"data.item\"></icsm-clip>\r\n	<icsm-list></icsm-list>\r\n</div>");}]);

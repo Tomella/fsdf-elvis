@@ -69,7 +69,7 @@
    },
    "initiateServiceTemplate" : "https://demo-ga.fmecloud.com/fmejobsubmitter/ElvIS_PROD/DEMClipZipShip_Master_S3Source.fmw?geocat_number=${id}&input_coord_sys=LL-WGS84&ymin=${yMin}&ymax=${yMax}&xmin=${xMin}&xmax=${xMax}&output_format=${outFormat}&out_coord_sys=${outCoordSys}&email_address=${email}&opt_showresult=false&opt_servicemode=async",
    "layersTab" : {
-   		"group" : "ELVIS – Foundation Spatial Data Map Layers",
+   		"group" : "ELVIS - Foundation Spatial Data Map Layers",
    		"title" : "Layers",
    		"layers" : [
    			{
