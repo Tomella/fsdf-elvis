@@ -7,6 +7,7 @@ angular.module("IcsmApp", [
 	 	'common.cc4',
 	 	'common.header',
       'common.navigation',
+	 	'common.panes',
       'common.templates',
 	 	'common.toolbar',
 
@@ -51,7 +52,6 @@ angular.module("IcsmApp", [
 	 	'icsm.help',
 	 	'icsm.list',
       'icsm.mapevents',
-	 	'icsm.panes',
 	 	'icsm.select',
 	 	'icsm.splash',
 	 	'icsm.state',

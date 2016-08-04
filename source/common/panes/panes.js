@@ -8,6 +8,7 @@ angular.module("common.panes", [])
 	return {
 		templateUrl : "common/panes/panes.html",
 		transclude : true,
+      replace: true,
 		scope : {
 			defaultItem : "@",
 			data : "="
