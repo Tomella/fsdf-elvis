@@ -1,33 +1,33 @@
 {
    "las": {
-      "label": "LAS",
+      "label": "Point cloud",
       "description": "Binary 3-dimensional point cloud data",
       "countField": "las_name",
-      "fields": ["file_size_las", "las_url", "las_name"]
+      "fields": ["file_size_las", "las_url", "las_name", "bbox"]
    },
    "asc": {
       "label": "ASCII",
       "description": "Generic ASCII file interchange system",
       "countField": "asc_name",
-      "fields": ["file_size_asc", "asc_url", "asc_name", "file_size_prj", "prj_url", "prj_name"]
+      "fields": ["file_size_asc", "asc_url", "asc_name", "file_size_prj", "prj_url", "prj_name", "bbox"]
    },
    "ell": {
       "label": "ELL",
       "description": "LAS with points located by Elevation, Latitude and Longitude.",
       "countField": "ell_name",
-      "fields": ["file_size_ell", "ell_url", "ell_name"]
+      "fields": ["file_size_ell", "ell_url", "ell_name", "bbox"]
    },
    "ort": {
       "label": "Orthogonal",
       "description": "Orthogonal lidar",
       "countField": "ort_name",
       "style": "padding-left:0; padding-right:0",
-      "fields": ["file_size_ort", "ort_url", "ort_name"]
+      "fields": ["file_size_ort", "ort_url", "ort_name", "bbox"]
    },
    "dem": {
       "label": "DEM",
       "description": "GeoTiff digital elevation model",
       "countField": "dem_name",
-      "fields": ["file_size_dem", "dem_url", "dem_name"]
+      "fields": ["file_size_dem", "dem_url", "dem_name", "bbox"]
    }
 }

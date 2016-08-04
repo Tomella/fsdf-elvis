@@ -52,6 +52,7 @@ angular.module("icsm.list", [])
             if(data.available_data) {
 				   data.available_data.forEach(function(item) {
                   if(item && item.downloadables && item.downloadables.length) {
+                     decorateGroups(item);
                      scope.list.push(item);
                   }
                });
@@ -70,6 +71,35 @@ angular.module("icsm.list", [])
             $rootScope.$broadcast('icsm.bbox.draw', null);
 				console.log("hide");
 			};
+
+         function decorateGroups(item) {
+            var filetypeKeys = {};
+            item.group = {};
+
+            angular.forEach(scope.filetypes, function(type, key) {
+               var group = decorateType(item.downloadables, type);
+               if(group.length) {
+                  item.group[key] = group
+               }
+               filetypeKeys[type.countField] = type;
+            });
+
+            console.log(item);
+
+            function decorateType(data, type) {
+               var response = [];
+               (data||[]).forEach(item => {
+                  if(item[type.countField]) {
+                     let obj = {};
+                     type.fields.forEach(field => {
+                        obj[field] = item[field];
+                     });
+                     response.push(obj);
+                  }
+               });
+               return response;
+            }
+         }
 
          function decorateCounts(list, types) {
             // reset
@@ -111,7 +141,7 @@ angular.module("icsm.list", [])
 
             if(selected) {
                workingList = list.map(function(item) {
-                  var downloadables = [];
+                  var holder, downloadables = [];
                   item.downloadables.forEach(function(download) {
                      var some = false;
                      var builder = {};
@@ -127,10 +157,13 @@ angular.module("icsm.list", [])
                         downloadables.push(builder);
                      }
                   });
-                  return {
+
+                  holder = {
                      source: item.source,
                      downloadables: downloadables
                   };
+                  decorateGroups(holder);
+                  return holder;
                }).filter(function(item) {
                   return item.downloadables.length > 0;
                });
@@ -166,10 +199,12 @@ angular.module("icsm.list", [])
                      }
                   });
                   if(downloadables.length) {
-                     response.push({
+                     let holder = {
                         downloadables: downloadables,
                         source: item.source
-                     });
+                     };
+                     decorateGroups(holder);
+                     response.push(holder);
                   }
                }
             });
@@ -187,6 +222,7 @@ angular.module("icsm.list", [])
 		}
 	};
 }])
+
 
 .factory('listService', ['$http', function($http) {
    var service = {};

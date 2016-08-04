@@ -1,3 +1,4 @@
+
 .wizardPopup {
   position: fixed;
   top: 20px;
@@ -66,6 +67,68 @@
 
 .common-header {
   background-color: white;
+}
+.altthemes-icon {
+  background: url("../resources/img/alt-sprites.svg") no-repeat;
+  display: inline-block;
+  width: 25px;
+  height: 40px;
+  margin: 0 auto 0 auto;
+}
+
+.altthemes-pin {
+  background-position: 0px;
+}
+
+.altthemes-map {
+  background-position: -25px;
+}
+
+.altthemes-crosshair {
+  background-position: -50px;
+}
+
+.altthemes-sign {
+  background-position: -75px;
+}
+
+.altthemes-parcel {
+  background-position: -100px;
+}
+
+.altthemes-satellite {
+  background-position: -125px;
+}
+
+.altthemes-ship {
+  background-position: -150px;
+}
+
+.altthemes-water {
+  background-position: -175px;
+}
+
+.altthemes-shore {
+  background-position: -200px;
+}
+
+.altthemes-land {
+  background-position: -225px;
+}
+
+.altthemesItemCompact {
+  margin-top: 0px !important;
+}
+
+.altthemesdropdown {
+  margin-top: -8px;
+  padding-right: 20px;
+  z-index: 100000;
+}
+
+.altthemesdropdown .altthemescurrent {
+  color: #fff;
+  background-color: #777;
 }
 .icsmTabs {
   position: absolute;
@@ -152,68 +215,6 @@
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-}
-.altthemes-icon {
-  background: url("../resources/img/alt-sprites.svg") no-repeat;
-  display: inline-block;
-  width: 25px;
-  height: 40px;
-  margin: 0 auto 0 auto;
-}
-
-.altthemes-pin {
-  background-position: 0px;
-}
-
-.altthemes-map {
-  background-position: -25px;
-}
-
-.altthemes-crosshair {
-  background-position: -50px;
-}
-
-.altthemes-sign {
-  background-position: -75px;
-}
-
-.altthemes-parcel {
-  background-position: -100px;
-}
-
-.altthemes-satellite {
-  background-position: -125px;
-}
-
-.altthemes-ship {
-  background-position: -150px;
-}
-
-.altthemes-water {
-  background-position: -175px;
-}
-
-.altthemes-shore {
-  background-position: -200px;
-}
-
-.altthemes-land {
-  background-position: -225px;
-}
-
-.altthemesItemCompact {
-  margin-top: 0px !important;
-}
-
-.altthemesdropdown {
-  margin-top: -8px;
-  padding-right: 20px;
-  z-index: 100000;
-}
-
-.altthemesdropdown .altthemescurrent {
-  color: #fff;
-  background-color: #777;
 }
 .radCore {
   margin-right: 3px;
@@ -508,6 +509,12 @@ input.ng-valid.ng-touched {
   display: inline-block;
 }
 
+.listItem {
+  padding-left: 8px;
+  padding-bottom: 6px;
+  font-size: 110%;
+}
+
 .listTopExpander {
   float: right;
   padding-top: 30px;
@@ -636,24 +643,9 @@ div.leaflet-control-scale-line {
     display: none;
   }
 }
-.downloadInner {
+.downloadPane {
   padding-left: 5px !important;
   padding-right: 5px !important;
-}
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
 }
 .start-content-container {
   position: fixed;
@@ -717,4 +709,19 @@ i.fa.active {
 
 .select-land {
   background-position: -675px;
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
 }

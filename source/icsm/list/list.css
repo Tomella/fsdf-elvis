@@ -31,6 +31,12 @@
    display: inline-block;
 }
 
+.listItem {
+   padding-left:8px;
+   padding-bottom:6px;
+   font-size: 110%;
+}
+
 .listTopExpander {
    float: right;
    padding-top:30px;
