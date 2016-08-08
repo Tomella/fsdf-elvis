@@ -6,7 +6,7 @@
   			</div>
   			<div class="panel-body">
 				<div ng-repeat="doc in select.data.response.docs" style="padding-bottom:7px">
-					<select-doc ng-if="doc.type == 'dataset'" doc="doc"></select-doc>
+					<div select-doc ng-if="doc.type == 'dataset'" doc="doc"></div>
 					<select-group ng-if="doc.type == 'group'" group="doc"></select-group>
 				</div>
   			</div>

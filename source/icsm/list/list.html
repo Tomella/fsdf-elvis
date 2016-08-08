@@ -19,7 +19,7 @@
       <div class="col-md-12">
          <div class="panel panel-default">
             <div class="panel-body">
-               <span class="listTypeLabel">Filter by type</span>
+               <span class="listTypeLabel">Filter by type:</span>
                <span ng-repeat="type in filetypes" class="listType">
                   <input type="checkbox" ng-model="type.selected" ng-change="update()"/>
                   <span uib-tooltip="{{type.description}}">{{type.label}} ({{type.count}})</span>

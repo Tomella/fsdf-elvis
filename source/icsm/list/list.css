@@ -20,14 +20,11 @@
 }
 
 .listTypeLabel {
-   padding-right:8px;
-   padding-left:8px;
    font-weight: bold;
 }
 
 .listType {
-   padding-left:9px;
-   padding-right:9px;
+   padding-left:7px;
    display: inline-block;
 }
 

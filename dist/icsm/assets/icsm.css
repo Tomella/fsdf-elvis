@@ -498,14 +498,11 @@ input.ng-valid.ng-touched {
 }
 
 .listTypeLabel {
-  padding-right: 8px;
-  padding-left: 8px;
   font-weight: bold;
 }
 
 .listType {
-  padding-left: 9px;
-  padding-right: 9px;
+  padding-left: 7px;
   display: inline-block;
 }
 
@@ -534,6 +531,52 @@ input.ng-valid.ng-touched {
 
 i.fa.active {
   color: red;
+}
+.radCore {
+  margin-right: 3px;
+  display: inline-block;
+}
+
+.searchBar {
+  width: 27em;
+  opacity: 0.9;
+}
+
+@media only screen and (max-width:1100px) {
+  .searchBar {
+    width: 23em;
+  }
+}
+
+@media only screen and (max-width:1025px) {
+  .searchBar {
+    width: 20em;
+  }
+}
+
+@media only screen and (max-width:645px) {
+  .searchBar {
+    display: none;
+  }
+}
+
+@media only screen and (max-width:965px) {
+  .radCore,
+  .hideWhenSmall,
+  .steps-indicator,
+  .secondToolbarInfo {
+    display: none;
+  }
+}
+
+div.leaflet-control-scale-line {
+  text-align: center;
+}
+
+@media only screen and (max-width:965px) {
+  div.leaflet-control-scale-line {
+    display: none;
+  }
 }
 .icsm-icon {
   background: url("icsm/img/global-sprites.svg") no-repeat;
@@ -596,52 +639,6 @@ i.fa.active {
 .themesdropdown .themescurrent {
   color: #fff;
   background-color: #777;
-}
-.radCore {
-  margin-right: 3px;
-  display: inline-block;
-}
-
-.searchBar {
-  width: 27em;
-  opacity: 0.9;
-}
-
-@media only screen and (max-width:1100px) {
-  .searchBar {
-    width: 23em;
-  }
-}
-
-@media only screen and (max-width:1025px) {
-  .searchBar {
-    width: 20em;
-  }
-}
-
-@media only screen and (max-width:645px) {
-  .searchBar {
-    display: none;
-  }
-}
-
-@media only screen and (max-width:965px) {
-  .radCore,
-  .hideWhenSmall,
-  .steps-indicator,
-  .secondToolbarInfo {
-    display: none;
-  }
-}
-
-div.leaflet-control-scale-line {
-  text-align: center;
-}
-
-@media only screen and (max-width:965px) {
-  div.leaflet-control-scale-line {
-    display: none;
-  }
 }
 .downloadPane {
   padding-left: 5px !important;
