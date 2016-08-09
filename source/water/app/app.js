@@ -4,6 +4,7 @@
 
 angular.module("WaterApp", [
 	 	'common.altthemes',
+	 	'common.baselayer.control',
 	 	'common.bbox',
       'common.cc4',
       'common.clip',
@@ -41,7 +42,6 @@ angular.module("WaterApp", [
 	 	'ngSanitize',
 	 	'page.footer',
 
-	 	'geo.baselayer.control',
 	 	'geo.draw',
 	 	// 'geo.elevation',
 	 	//'icsm.elevation',

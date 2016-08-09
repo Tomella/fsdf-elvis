@@ -11,7 +11,7 @@ angular.module("common.cc4", [])
       link: function(scope) {
          scope.template = 'common/cc4/cc4template.html';
       }
-   }
+   };
 }]);
 
 })(angular);

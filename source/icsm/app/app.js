@@ -4,6 +4,7 @@
 
 angular.module("IcsmApp", [
 	 	'common.altthemes',
+      'common.baselayer.control',
 	 	'common.cc4',
 	 	'common.header',
       'common.navigation',
@@ -36,7 +37,7 @@ angular.module("IcsmApp", [
 	 	'ngSanitize',
 	 	'page.footer',
 
-	 	'geo.baselayer.control',
+	 	//'geo.baselayer.control',
 	 	'geo.draw',
 	 	// 'geo.elevation',
 	 	//'icsm.elevation',

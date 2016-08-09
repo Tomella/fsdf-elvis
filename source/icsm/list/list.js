@@ -79,7 +79,7 @@ angular.module("icsm.list", [])
             angular.forEach(scope.filetypes, function(type, key) {
                var group = decorateType(item.downloadables, type);
                if(group.length) {
-                  item.group[key] = group
+                  item.group[key] = group;
                }
                filetypeKeys[type.countField] = type;
             });
