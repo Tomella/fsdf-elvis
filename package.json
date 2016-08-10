@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "express": "^4.13.3",
+    "request": "^2.74.0",
     "wiredep": "^3.0.1"
   },
   "devDependencies": {
