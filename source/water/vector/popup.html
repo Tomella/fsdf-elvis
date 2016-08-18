@@ -1,0 +1,12 @@
+<exp-modal icon-class="fa-download"  is-open="data.item.download" title="Download wizard" on-close="vdl.remove()">
+	<div class="container-fluid downloadInner" >
+		<div class="row">
+  			<div class="col-md-12">
+				<h4><nedf-wms data="vdl.data.item"></nedf-wms>
+					<a href="http://www.ga.gov.au/metadata-gateway/metadata/record/{{vdl.data.item.sysId}}" target="_blank"><strong class="ng-binding">{{vdl.data.item.title}}</strong></a>
+				</h4>
+   			</div>
+		</div>
+		<vector-geoprocess data="vdl.data.item"></vector-geoprocess>
+	</div>
+</exp-modal>

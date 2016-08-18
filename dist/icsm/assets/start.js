@@ -23,14 +23,13 @@ under the License.
 
 	'use strict';
 
-	angular.module("StartApp", ['common.altthemes', 'common.header', 'common.navigation', 'common.templates', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.persist', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'start.navigation', 'start.templates', 'ui.bootstrap', 'ngRoute', 'ngSanitize', 'page.footer'])
+	angular.module("StartApp", ['common.altthemes', 'common.header', 'common.navigation', 'common.storage', 'common.templates', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'start.navigation', 'start.templates', 'ui.bootstrap', 'ngRoute', 'ngSanitize', 'page.footer'])
 
 	// Set up all the service providers here.
-	.config(['configServiceProvider', 'persistServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', function (configServiceProvider, persistServiceProvider, projectsServiceProvider, versionServiceProvider) {
+	.config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider) {
 		configServiceProvider.location("icsm/resources/config/start.json");
 		configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
 		versionServiceProvider.url("icsm/assets/package.json");
-		persistServiceProvider.handler("local");
 		projectsServiceProvider.setProject("icsm");
 	}]).factory("userService", [function () {
 		return {

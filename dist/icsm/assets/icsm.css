@@ -1,3 +1,4 @@
+
 .wizardPopup {
   position: fixed;
   top: 20px;
@@ -67,6 +68,45 @@
 .common-header {
   background-color: white;
 }
+.iso19115,
+.iso19115 ul,
+.iso19115 li {
+  position: relative;
+}
+
+.iso19115 ul {
+  list-style: none;
+  padding-left: 32px;
+}
+
+.iso19115 li::before,
+.iso19115 li::after {
+  content: "";
+  position: absolute;
+  left: -12px;
+}
+
+.iso19115 li::before {
+  border-top: 1px solid #000;
+  top: 9px;
+  width: 8px;
+  height: 0;
+}
+
+.iso19115 li::after {
+  border-left: 1px solid #000;
+  height: 100%;
+  width: 0px;
+  top: 2px;
+}
+
+.iso19115 ul > li:last-child::after {
+  height: 8px;
+}
+
+.iso19115-head {
+  font-weight: bold;
+}
 .altthemes-icon {
   background: url("../resources/img/alt-sprites.svg") no-repeat;
   display: inline-block;
@@ -128,6 +168,50 @@
 .altthemesdropdown .altthemescurrent {
   color: #fff;
   background-color: #777;
+}
+.mvt,
+.mvt ul,
+.mvt li {
+  position: relative;
+}
+
+.mvt ul {
+  list-style: none;
+  padding-left: 32px;
+}
+
+.mvt li::before,
+.mvt li::after {
+  content: "";
+  position: absolute;
+  left: -12px;
+}
+
+.mvt li::before {
+  border-top: 1px solid #000;
+  top: 9px;
+  width: 8px;
+  height: 0;
+}
+
+.mvt li::after {
+  border-left: 1px solid #000;
+  height: 100%;
+  width: 0px;
+  top: 2px;
+}
+
+.mvt ul > li:last-child::after {
+  height: 8px;
+}
+
+.metaview-head {
+  font-weight: bold;
+}
+
+.metaview-info {
+  padding-left: 3px;
+  padding-right: 3px;
 }
 .icsmTabs {
   position: absolute;
@@ -643,21 +727,6 @@ div.leaflet-control-scale-line {
   padding-left: 5px !important;
   padding-right: 5px !important;
 }
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
 .start-content-container {
   position: fixed;
   top: 95px;
@@ -720,4 +789,33 @@ i.fa.active {
 
 .select-land {
   background-position: -675px;
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
+}
+.vector-tooltip {
+  min-width: 25em;
+}
+
+.vector-checkbox {
+  width: 18px;
+  height: 18px;
+  vertical-align: bottom;
+  margin-right: 7px !important;
+}
+
+.vector-add:disabled {
+  color: gray;
 }

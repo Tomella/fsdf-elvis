@@ -6,6 +6,7 @@ angular.module("ImageryApp", [
 	 	'common.altthemes',
 	 	'common.header',
       'common.navigation',
+		'common.storage',
       'common.templates',
 	 	'common.toolbar',
 
@@ -20,7 +21,6 @@ angular.module("ImageryApp", [
       'explorer.legend',
       'explorer.message',
 	 	'explorer.modal',
-	 	'explorer.persist',
 	 	'explorer.projects',
 	 	'explorer.tabs',
 	 	'explorer.version',
@@ -36,12 +36,11 @@ angular.module("ImageryApp", [
 ])
 
 // Set up all the service providers here.
-.config(['configServiceProvider', 'persistServiceProvider', 'projectsServiceProvider', 'versionServiceProvider',
-         function(configServiceProvider, persistServiceProvider, projectsServiceProvider, versionServiceProvider) {
+.config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider',
+         function(configServiceProvider, projectsServiceProvider, versionServiceProvider) {
 	configServiceProvider.location("icsm/resources/config/config.json");
    configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
 	versionServiceProvider.url("icsm/assets/package.json");
-	persistServiceProvider.handler("local");
 	projectsServiceProvider.setProject("icsm");
 }])
 

@@ -11,18 +11,18 @@ angular.module('icsm.themes', [])
  	 *
   	 */
 	.directive('icsmThemes', ['themesService', function(themesService) {
-		return { 
+		return {
 			restrict: 'AE',
 			templateUrl: 'icsm/themes/themes.html',
 			link: function(scope) {
 				themesService.getThemes().then(function(themes) {
 					scope.themes = themes;
 				});
-				
+
 				themesService.getCurrentTheme().then(function(theme) {
 					scope.theme = theme;
 				});
-				
+
 				scope.changeTheme = function(theme) {
 					scope.theme = theme;
 					themesService.setTheme(theme.key);
@@ -30,11 +30,11 @@ angular.module('icsm.themes', [])
 			}
 		};
    }])
-	
+
 	.controller('themesCtrl', ['themesService', function(themesService) {
-		this.service = themesService;	
+		this.service = themesService;
 	}])
-	
+
 	.filter('themesFilter', function() {
    	return function(features, theme) {
 			var response = [];
@@ -42,7 +42,7 @@ angular.module('icsm.themes', [])
 			if(!theme) {
 				return features;
 			}
-			
+
 			if(features) {
 				features.forEach(function(feature) {
 					if(feature.themes) {
@@ -57,25 +57,25 @@ angular.module('icsm.themes', [])
 			return response;
    	};
 	})
-	
-	.factory('themesService', ['$q', 'configService', 'persistService', function($q, configService, persistService) {
+
+	.factory('themesService', ['$q', 'configService', 'storageService', function($q, configService, storageService) {
 		var THEME_PERSIST_KEY = 'icsm.current.theme';
 		var DEFAULT_THEME = "All";
 		var waiting = [];
 		var self = this;
-		
-		this.themes = [];	
-		this.theme = null;	
-		
-		persistService.getItem(THEME_PERSIST_KEY).then(function(value) {
+
+		this.themes = [];
+		this.theme = null;
+
+		storageService.getItem(THEME_PERSIST_KEY).then(function(value) {
 			if(!value) {
 				value = DEFAULT_THEME;
-			} 
+			}
 			configService.getConfig('themes').then(function(themes) {
 				self.themes = themes;
 				self.theme = themes[value];
 				// Decorate the key
-				angular.forEach(themes, function(theme, key) { 
+				angular.forEach(themes, function(theme, key) {
 					theme.key = key;
 				});
 				waiting.forEach(function(wait) {
@@ -83,9 +83,9 @@ angular.module('icsm.themes', [])
 				});
 			});
 		});
-	
-		
-		this.getCurrentTheme = function(){ 
+
+
+		this.getCurrentTheme = function(){
 			if(this.theme) {
 				return $q.when(self.theme);
 			} else {
@@ -94,17 +94,17 @@ angular.module('icsm.themes', [])
 				return waiter.promise;
 			}
 		};
-		
+
 		this.getThemes = function() {
 			return configService.getConfig('themes');
 		};
-		
+
 		this.setTheme = function(key) {
 			this.theme = this.themes[key];
-			persistService.setItem(THEME_PERSIST_KEY, key);
+			storageService.setItem(THEME_PERSIST_KEY, key);
 		};
-		
+
 		return this;
 	}]);
-	
+
 })(angular);

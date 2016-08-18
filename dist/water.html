@@ -92,6 +92,7 @@ version of this application. The latest Firefox, Chrome plus Microsoft Internet 
 
 
 <div class="wizardPopup" wizard-popup ng-class="{'wizardPopup':data.item, wizardHide: !data.item}" ng-controller="DownloadCtrl as dl"></div>
+<div class="wizardPopup" vector-popup ng-class="{'wizardPopup':data.item, wizardHide: !data.item}" ng-controller="VectorDownloadCtrl as vdl"></div>
 <iframe id="launcher" style="height:0;display:none"></iframe>
 
 	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCXzhreLhP8a0z4TZNGOHUbH1Pacz3ghPE&v=3.24&language=en&libraries=places"></script>
@@ -119,7 +120,7 @@ version of this application. The latest Firefox, Chrome plus Microsoft Internet 
    <script src="icsm/bower_components/ga-explorer-map-components/dist/ga-explorer-map.js"></script>
 	<script src="icsm/bower_components/explorer-ui-components/dist/ga-explorer-ui.js"></script>
    <script src="icsm/bower_components/ang-accordion/js/ang-accordion.js"></script>
-   <script src="icsm/bower_components/abdmob/x2js/xml2json.min.js"></script>
+   <script src="icsm/bower_components/x2js/xml2json.min.js"></script>
 
 	<!-- These are the "ICSM" specific includes of modules -->
 	<script src="icsm/assets/common.js?v=VERSION_NO"></script>

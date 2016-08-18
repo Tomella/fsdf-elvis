@@ -23,18 +23,17 @@ under the License.
 
 	'use strict';
 
-	angular.module("WaterApp", ['common.altthemes', 'common.baselayer.control', 'common.bbox', 'common.cc4', 'common.clip', 'common.download', 'common.extent', 'common.header', 'common.navigation', 'common.templates', 'common.toolbar', 'common.wms', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.persist', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'explorer.map.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer', 'geo.draw',
+	angular.module("WaterApp", ['common.altthemes', 'common.baselayer.control', 'common.bbox', 'common.cc4', 'common.clip', 'common.download', 'common.extent', 'common.header', 'common.iso19115', 'common.metaview', 'common.navigation', 'common.recursionhelper', 'common.storage', 'common.templates', 'common.toolbar', 'common.wms', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'explorer.map.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer', 'geo.draw',
 	// 'geo.elevation',
 	//'icsm.elevation',
 	//'geo.extent',
-	'geo.geosearch', 'geo.map', 'geo.maphelper', 'geo.measure', 'water.panes', 'water.templates', 'water.select'])
+	'geo.geosearch', 'geo.map', 'geo.maphelper', 'geo.measure', 'water.panes', 'water.templates', 'water.select', 'water.vector', 'water.vector.download', 'water.vector.geoprocess'])
 
 	// Set up all the service providers here.
-	.config(['configServiceProvider', 'persistServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', function (configServiceProvider, persistServiceProvider, projectsServiceProvider, versionServiceProvider) {
+	.config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider) {
 		configServiceProvider.location("icsm/resources/config/water.json");
 		configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
 		versionServiceProvider.url("icsm/assets/package.json");
-		persistServiceProvider.handler("local");
 		projectsServiceProvider.setProject("icsm");
 	}]).config(['$routeProvider', function ($routeProvider) {
 		$routeProvider.when('/administrativeBoundaries', {
@@ -110,6 +109,81 @@ under the License.
 				data.modern = false;
 			}
 		});
+	}
+})(angular);
+"use strict";
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function (angular) {
+	'use strict';
+
+	angular.module("water.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
+		return {
+			templateUrl: "water/panes/panes.html",
+			transclude: true,
+			scope: {
+				defaultItem: "@",
+				data: "="
+			},
+			controller: ['$scope', function ($scope) {
+				var changeSize = false;
+
+				$scope.view = $scope.defaultItem;
+
+				$scope.setView = function (what) {
+					var oldView = $scope.view;
+
+					if ($scope.view == what) {
+						if (what) {
+							changeSize = true;
+						}
+						$scope.view = "";
+					} else {
+						if (!what) {
+							changeSize = true;
+						}
+						$scope.view = what;
+					}
+
+					$rootScope.$broadcast("view.changed", $scope.view, oldView);
+
+					if (changeSize) {
+						mapService.getMap().then(function (map) {
+							map._onResize();
+						});
+					}
+				};
+				$timeout(function () {
+					$rootScope.$broadcast("view.changed", $scope.view, null);
+				}, 50);
+			}]
+		};
+	}]).directive("icsmTabs", [function () {
+		return {
+			templateUrl: "water/panes/tabs.html",
+			require: "^icsmPanes"
+		};
+	}]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
+
+	PaneCtrl.$inject = ["paneService"];
+	function PaneCtrl(paneService) {
+		paneService.data().then(function (data) {
+			this.data = data;
+		}.bind(this));
+	}
+
+	PaneService.$inject = [];
+	function PaneService() {
+		var data = {};
+
+		return {
+			add: function add(item) {},
+
+			remove: function remove(item) {}
+		};
 	}
 })(angular);
 "use strict";
@@ -629,81 +703,671 @@ under the License.
 })(angular);
 "use strict";
 
+(function (angular, L) {
+	'use strict';
+
+	angular.module("water.vector.geoprocess", []).directive("vectorGeoprocess", ['$http', '$q', '$timeout', 'vectorGeoprocessService', 'flashService', 'messageService', 'vectorService', function ($http, $q, $timeout, vectorGeoprocessService, flashService, messageService, vectorService) {
+		return {
+			restrict: "AE",
+			templateUrl: "water/vector/geoprocess.html",
+			scope: {
+				data: "="
+			},
+			link: function link(scope) {
+				var clipMessage, clipTimeout, referenceLayer;
+
+				vectorService.outFormats().then(function (data) {
+					scope.outFormats = data;
+				});
+
+				scope.$watch("data", function (newData, oldData) {
+					if (oldData) {
+						vectorGeoprocessService.removeClip();
+						removeReferenceLayer();
+					}
+					if (newData && newData != oldData) {
+						scope.stage = "bbox";
+						drawReferenceLayer();
+					}
+				});
+
+				scope.$watchGroup(["data.processing.clip.xMax", "data.processing.clip.xMin", "data.processing.clip.yMax", "data.processing.clip.yMin"], function (newValues, oldValues, scope) {
+					var result, url;
+
+					if (clipTimeout) {
+						$timeout.cancel(clipTimeout);
+						clipTimeout = null;
+					}
+					if (scope.data && scope.data.processing && scope.data.processing.clip && scope.data.processing.clip.xMax !== null) {
+						clipMessage = flashService.add("Validating selected area...", 3000);
+
+						// Make really sure that all our stop points set this appropriately. We don't want the button locked out for ever.
+						scope.checkingOrFailed = !!url; // We only apply this to records that have a URL to check intersection against.
+						clipTimeout = $timeout(function () {
+							checkSize().then(function (result) {
+								try {
+									if (result && result.code == "success") {
+										vectorGeoprocessService.handleShowClip(scope.data.processing.clip);
+										scope.checkingOrFailed = false;
+									}
+								} catch (e) {
+									// Very paranoid about setting it to block.
+									scope.checkingOrFailed = false;
+								}
+							});
+						}, 2000);
+					}
+
+					function checkSize() {
+						var deferred = $q.defer();
+
+						result = scope.drawn();
+						if (result && result.code) {
+							switch (result.code) {
+								case "oversize":
+									$timeout(function () {
+										flashService.remove(clipMessage);
+										messageService.error("The selected area is too large to process. Please restrict to approximately " + Math.sqrt(scope.data.restrictSize) + " degrees square.");
+										scope.stage = "bbox";
+										drawReferenceLayer();
+										deferred.resolve(result);
+									});
+									break;
+
+								case "undersize":
+									$timeout(function () {
+										flashService.remove(clipMessage);
+										messageService.error("X Min and Y Min should be smaller than X Max and Y Max, respectively. Please update the drawn area.");
+										scope.stage = "bbox";
+										drawReferenceLayer();
+										deferred.resolve(result);
+									});
+									break;
+								default:
+									return $q.when(result);
+							}
+						}
+						return deferred.promise;
+					}
+				});
+
+				scope.drawn = function () {
+					vectorGeoprocessService.removeClip();
+					forceNumbers(scope.data.processing.clip);
+					//flashService.remove(clipMessage);
+					if (constrainBounds(scope.data.processing.clip, scope.data.bounds)) {
+						clipMessage = flashService.add("Redrawn to fit within data extent", 5000);
+					}
+
+					if (overSizeLimit(scope.data.processing.clip)) {
+						return { code: "oversize" };
+					}
+
+					if (underSizeLimit(scope.data.processing.clip)) {
+						return { code: "undersize" };
+					}
+
+					if (scope.data.processing.clip.xMax === null) {
+						return { code: "incomplete" };
+					}
+
+					//if(this.data.queryLayer) {
+					//	vectorGeoprocessService.queryLayer(scope.data.queryLayer, scope.data.processing.clip).then(function(response) {
+					//	});
+					//} else
+					if (validClip(scope.data.processing.clip)) {
+						return { code: "success" };
+					}
+					return { code: "invalid" };
+				};
+
+				scope.startExtract = function () {
+					if (scope.allDataSet()) {
+						messageService.info("Your request has been sent for processing. You will be notified by email on completion of the job.");
+						flashService.add("You can select another area for processing.", 10000);
+						vectorGeoprocessService.initiateJob(scope.data, scope.email);
+						scope.data.download = false;
+					}
+				};
+
+				scope.allDataSet = function () {
+					var proc = scope.data && scope.data.processing ? scope.data.processing : null;
+					// For it to be OK we need.
+					return proc && scope.email && validClip(proc.clip) && proc.outCoordSys && proc.outFormat;
+				};
+
+				scope.validSansEmail = function () {
+					var proc = scope.data && scope.data.processing ? scope.data.processing : null;
+					// For it to be OK we need.
+					return proc && validClip(proc.clip) && proc.outCoordSys && proc.outFormat;
+				};
+
+				scope.validClip = function (data) {
+					return data && data.processing && validClip(data.processing.clip);
+				};
+
+				vectorGeoprocessService.getConfig().then(function (config) {
+					scope.config = config;
+				});
+
+				function drawReferenceLayer() {
+					removeReferenceLayer();
+					if (scope.data.referenceLayer) {
+						referenceLayer = vectorGeoprocessService.addLayer(scope.data.referenceLayer);
+					}
+				}
+
+				function removeReferenceLayer() {
+					if (referenceLayer) {
+						vectorGeoprocessService.removeLayer(referenceLayer);
+					}
+				}
+
+				function underSizeLimit(clip) {
+					var size = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
+					return size < 0.00000000001 || clip.xMax < clip.xMin;
+				}
+
+				function overSizeLimit(clip) {
+					// Shouldn't need abs but it doesn't hurt.
+					var size = Math.abs((clip.xMax - clip.xMin) * (clip.yMax - clip.yMin));
+
+					return scope.data.restrictSize && size > scope.data.restrictSize;
+				}
+
+				function constrainBounds(c, p) {
+					var flag = false,
+					    ret = false;
+					// Have we read the parameters yet?
+
+					if (!p || empty(c.xMax) || empty(c.xMin) || empty(c.yMax) || empty(c.yMin)) {
+						return false;
+					}
+
+					ret = flag = +c.xMax < +p.xMin;
+					if (flag) {
+						c.xMax = +p.xMin;
+					}
+
+					flag = +c.xMax > +p.xMax;
+					ret = ret || flag;
+
+					if (flag) {
+						c.xMax = +p.xMax;
+					}
+
+					flag = +c.xMin < +p.xMin;
+					ret = ret || flag;
+					if (flag) {
+						c.xMin = +p.xMin;
+					}
+
+					flag = +c.xMin > +c.xMax;
+					ret = ret || flag;
+					if (flag) {
+						c.xMin = c.xMax;
+					}
+
+					// Now for the Y's
+					flag = +c.yMax < +p.yMin;
+					ret = ret || flag;
+					if (flag) {
+						c.yMax = +p.yMin;
+					}
+
+					flag = +c.yMax > +p.yMax;
+					ret = ret || flag;
+					if (flag) {
+						c.yMax = +p.yMax;
+					}
+
+					flag = +c.yMin < +p.yMin;
+					ret = ret || flag;
+					if (flag) {
+						c.yMin = +p.yMin;
+					}
+
+					flag = +c.yMin > +c.yMax;
+					ret = ret || flag;
+					if (flag) {
+						c.yMin = +c.yMax;
+					}
+
+					return ret;
+
+					function empty(val) {
+						return angular.isUndefined(val) || val === "" || val === null;
+					}
+				}
+
+				function forceNumbers(clip) {
+					clip.xMax = clip.xMax === null ? null : +clip.xMax;
+					clip.xMin = clip.xMin === null ? null : +clip.xMin;
+					clip.yMax = clip.yMax === null ? null : +clip.yMax;
+					clip.yMin = clip.yMin === null ? null : +clip.yMin;
+				}
+
+				// The input validator takes care of order and min/max constraints. We just check valid existance.
+				function validClip(clip) {
+					return clip && angular.isNumber(clip.xMax) && angular.isNumber(clip.xMin) && angular.isNumber(clip.yMax) && angular.isNumber(clip.yMin) && !overSizeLimit(clip) && !underSizeLimit(clip);
+				}
+			}
+		};
+	}]).factory("vectorGeoprocessService", VectorGeoprocessService).filter("sysIntersect", function () {
+		return function (collection, extent) {
+			// The extent may have missing numbers so we don't restrict at that point.
+			if (!extent || !angular.isNumber(extent.xMin) || !angular.isNumber(extent.xMax) || !angular.isNumber(extent.yMin) || !angular.isNumber(extent.yMax)) {
+				return collection;
+			}
+
+			return collection.filter(function (item) {
+
+				// We know these have valid numbers if it exists
+				if (!item.extent) {
+					return true;
+				}
+				// We have a restriction
+				return item.extent.xMin <= extent.xMin && item.extent.xMax >= extent.xMax && item.extent.yMin <= extent.yMin && item.extent.yMax >= extent.yMax;
+			});
+		};
+	});
+
+	VectorGeoprocessService.$invoke = ['$http', '$q', '$timeout', 'configService', 'downloadService', 'ga', 'mapService', 'storageService', 'vectorService'];
+	function VectorGeoprocessService($http, $q, $timeout, configService, downloadService, ga, mapService, storageService, vectorService) {
+		var DEFAULT_DATASET = "dems1sv1_0",
+		    // TODO: We have to get this from the metadata somehow.
+		geoprocessingTemplates,
+		    clipLayer = null,
+		    map;
+
+		vectorService.config().then(function (data) {
+			geoprocessingTemplates = data.serviceUrlTemplate;
+		});
+
+		mapService.getMap().then(function (lMap) {
+			map = lMap;
+		});
+
+		function getUrl(data) {
+			return geoprocessingTemplates;
+		}
+
+		return {
+			queryLayer: function queryLayer(query, clip) {
+				var deferred = $q.defer();
+
+				var layer = L.esri.featureLayer({
+					url: query.url
+				});
+
+				var bounds = L.latLngBounds([clip.yMin, clip.xMin], // top left
+				[clip.yMax, clip.xMax] // bottom right
+				);
+
+				layer.query().intersects(bounds).ids(function (error, ids) {
+					if (error) {
+						deferred.reject(error);
+					} else {
+						deferred.resolve(ids);
+					}
+				});
+				return deferred.promise;
+			},
+
+			outFormats: function outFormats() {
+				return vectorService.outFormats();
+			},
+
+			handleShowClip: function handleShowClip(clip) {
+				this.removeClip();
+
+				clipLayer = L.rectangle([[clip.yMin, clip.xMin], [clip.yMax, clip.xMax]], {
+					weight: 2,
+					opacity: 0.9,
+					fill: false,
+					color: "#000000",
+					width: 3,
+					clickable: false
+				});
+
+				clipLayer.addTo(map);
+			},
+
+			removeClip: function removeClip() {
+				if (clipLayer) {
+					map.removeLayer(clipLayer);
+					clipLayer = null;
+				}
+			},
+
+			addLayer: function addLayer(data) {
+				return L.tileLayer.wms(data.parameters[0], data.parameters[1]).addTo(map);
+			},
+
+			removeLayer: function removeLayer(layer) {
+				map.removeLayer(layer);
+			},
+
+			initiateJob: function initiateJob(data, email) {
+				var dataset = DEFAULT_DATASET,
+				    // TODO Replace with real dataset file name from metadata.
+				win,
+				    workingString = getUrl(data),
+				    processing = data.processing,
+				    log = {
+					bbox: {
+						yMin: processing.clip.yMin,
+						yMax: processing.clip.yMax,
+						xMin: processing.clip.xMin,
+						xMax: processing.clip.xMax
+					},
+					geocatId: data.primaryId,
+					crs: processing.outCoordSys.code,
+					format: processing.outFormat.code
+				},
+				    geocatNumbers = [],
+				    featuresSelected = [];
+
+				data.docs.forEach(function (doc) {
+					if (doc.selected) {
+						geocatNumbers.push(doc.primaryId);
+						featuresSelected.push(doc.code);
+					}
+				});
+
+				angular.forEach({
+					geocat_number: geocatNumbers.join(" "),
+					features_selected: featuresSelected.join(" "),
+					ymin: processing.clip.yMin,
+					ymax: processing.clip.yMax,
+					xmin: processing.clip.xMin,
+					xmax: processing.clip.xMax,
+					file_name: processing.filename ? processing.filename : "",
+					file_format_vector: processing.outFormat.code,
+					file_format_raster: "",
+					coord_sys: processing.outCoordSys.code,
+					email_address: email
+				}, function (item, key) {
+					workingString = workingString.replace("{" + key + "}", item);
+				});
+
+				//console.log(workingString);
+
+				$("#launcher")[0].src = workingString;
+
+				downloadService.setEmail(email);
+
+				ga('send', 'event', 'nedf', 'click', 'FME data export: ' + JSON.stringify(log));
+			},
+
+			getConfig: function getConfig() {
+				return vectorService.config();
+			}
+		};
+	}
+})(angular, L);
+'use strict';
+
 /*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ * Copyright 2016 Geoscience Australia (http://www.ga.gov.au/copyright.html)
  */
 
 (function (angular) {
+
+   'use strict';
+
+   angular.module("water.vector", []).directive('vectorSelect', [function () {
+      return {
+         templateUrl: "water/vector/vector.html",
+         controllerAs: "vect",
+         controller: "VectorCtrl"
+      };
+   }]).controller('VectorCtrl', ['selectService', 'vectorService', function (selectService, vectorService) {
+      var _this = this;
+
+      vectorService.config().then(function (data) {
+         _this.config = data;
+         _this.group = data.group;
+      });
+
+      this.hilight = function (doc) {
+         if (doc.layer) {
+            selectService.hilight(doc.layer);
+         }
+      };
+
+      this.lolight = function (doc) {
+         if (doc.layer) {
+            selectService.lolight(doc.layer);
+         }
+      };
+   }]).factory('vectorService', ['$http', '$q', function ($http, $q) {
+      var waiters,
+          config,
+          service = {};
+
+      service.config = function () {
+         if (config) {
+            return $q.when(config);
+         }
+         var waiter = $q.defer();
+
+         if (!waiters) {
+            waiters = [waiter];
+            $http.get('icsm/resources/config/water_vector.json', { cache: true }).then(function (response) {
+               config = response.data;
+               waiters.forEach(function (waiter) {
+                  waiter.resolve(config);
+               });
+            });
+         } else {
+            waiters.push(waiter);
+         }
+         return waiter.promise;
+      };
+
+      service.outFormats = function () {
+         return service.config().then(function (data) {
+            return data.refData.vectorFileFormat;
+         });
+      };
+
+      return service;
+   }]);
+})(angular);
+'use strict';
+
+(function (angular, $) {
 	'use strict';
 
-	angular.module("water.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
+	angular.module("water.vector.download", ['common.geoprocess']).directive("vectorPopup", ["vectorDownloadService", function (vectorDownloadService) {
 		return {
-			templateUrl: "water/panes/panes.html",
-			transclude: true,
-			scope: {
-				defaultItem: "@",
-				data: "="
-			},
-			controller: ['$scope', function ($scope) {
-				var changeSize = false;
+			restrict: "AE",
+			templateUrl: "water/vector/popup.html",
+			link: function link(scope) {
+				vectorDownloadService.data().then(function (data) {
+					scope.data = data;
 
-				$scope.view = $scope.defaultItem;
-
-				$scope.setView = function (what) {
-					var oldView = $scope.view;
-
-					if ($scope.view == what) {
-						if (what) {
-							changeSize = true;
+					scope.$watch("data.item", function (newValue, oldValue) {
+						if (newValue) {
+							scope.stage = "bbox";
 						}
-						$scope.view = "";
-					} else {
-						if (!what) {
-							changeSize = true;
+
+						if (newValue || oldValue) {
+							vectorDownloadService.setState(newValue);
 						}
-						$scope.view = what;
+					});
+				});
+			}
+		};
+	}]).directive("vectorDownload", ["vectorDdownloadService", function (vectorDownloadService) {
+		return {
+			restrict: "AE",
+			controller: "VectorDownloadCtrl",
+			templateUrl: "water/vector/popup.html",
+			link: function link() {
+				console.log("What the download...");
+			}
+		};
+	}]).directive("commonVectorDownload", ['vectorDownloadService', function (vectorDownloadService) {
+		return {
+			templateUrl: "water/vector/download.html",
+			controller: "VectorDownloadCtrl",
+			link: function link(scope, element) {
+				vectorDownloadService.data().then(function (data) {
+					scope.data = data;
+				});
+
+				scope.$watch("data.item", function (item, old) {
+					if (item || old) {
+						vectorDownloadService.setState(item);
 					}
-
-					$rootScope.$broadcast("view.changed", $scope.view, oldView);
-
-					if (changeSize) {
-						mapService.getMap().then(function (map) {
-							map._onResize();
-						});
+				});
+			}
+		};
+	}]).directive("vectorAdd", ['$rootScope', 'vectorDownloadService', 'flashService', function ($rootScope, vectorDownloadService, flashService) {
+		return {
+			templateUrl: "water/vector/add.html",
+			restrict: "AE",
+			scope: {
+				group: "="
+			},
+			link: function link(scope, element) {
+				scope.toggle = function () {
+					if (scope.group.download) {
+						vectorDownloadService.clear(scope.group);
+					} else {
+						flashService.add("Select an area of interest that intersects the highlighted areas.");
+						vectorDownloadService.add(scope.group);
+						if (scope.group.sysId) {
+							$rootScope.$broadcast('hide.wms', scope.group.sysId);
+						}
 					}
 				};
-				$timeout(function () {
-					$rootScope.$broadcast("view.changed", $scope.view, null);
-				}, 50);
-			}]
-		};
-	}]).directive("icsmTabs", [function () {
-		return {
-			templateUrl: "water/panes/tabs.html",
-			require: "^icsmPanes"
-		};
-	}]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
 
-	PaneCtrl.$inject = ["paneService"];
-	function PaneCtrl(paneService) {
-		paneService.data().then(function (data) {
-			this.data = data;
-		}.bind(this));
+				scope.someSelected = function () {
+					if (!scope.group || !scope.group.docs) {
+						return false;
+					}
+
+					var result = scope.group.docs.some(function (doc) {
+						return doc.selected;
+					});
+					return result;
+				};
+			}
+		};
+	}]).controller("VectorDownloadCtrl", VectorDownloadCtrl).factory("vectorDownloadService", VectorDownloadService);
+
+	VectorDownloadCtrl.$inject = ["vectorDownloadService"];
+	function VectorDownloadCtrl(vectorDownloadService) {
+		var _this = this;
+
+		vectorDownloadService.data().then(function (data) {
+			_this.data = data;
+		});
+
+		this.remove = function () {
+			vectorDownloadService.clear();
+		};
+
+		this.changeEmail = function (email) {
+			vectorDownloadService.setEmail(email);
+		};
 	}
 
-	PaneService.$inject = [];
-	function PaneService() {
-		var data = {};
+	VectorDownloadService.$inject = ['$http', '$q', '$rootScope', 'mapService', 'storageService'];
+	function VectorDownloadService($http, $q, $rootScope, mapService, storageService) {
+		var key = "download_email",
+		    downloadLayerGroup = "Download Layers",
+		    mapState = {
+			zoom: null,
+			center: null,
+			layer: null
+		},
+		    _data = {
+			email: null,
+			item: null
+		},
+		    service = {
+			getLayerGroup: function getLayerGroup() {
+				return mapService.getGroup(downloadLayerGroup);
+			},
 
-		return {
-			add: function add(item) {},
+			setState: function setState(data) {
+				if (data) {
+					prepare();
+				} else {
+					restore(map);
+				}
 
-			remove: function remove(item) {}
+				function prepare() {
+					var bounds = [[data.bounds.yMin, data.bounds.xMin], [data.bounds.yMax, data.bounds.xMax]];
+
+					if (mapState.layer) {
+						mapService.getGroup(downloadLayerGroup).removeLayer(mapState.layer);
+					}
+					if (!data.queryLayer) {
+						mapState.layer = L.rectangle(bounds, { color: "black", fill: false });
+						mapService.getGroup(downloadLayerGroup).addLayer(mapState.layer);
+					}
+				}
+
+				function restore(map) {
+					mapService.clearGroup(downloadLayerGroup);
+					mapState.layer = null;
+				}
+			},
+
+			add: function add(item) {
+				this.clear();
+				_data.item = item;
+				_data.item.download = true;
+				if (!item.processsing) {
+					item.processing = {
+						clip: {
+							xMax: null,
+							xMin: null,
+							yMax: null,
+							yMin: null
+						}
+					};
+				}
+			},
+
+			clear: function clear() {
+				if (_data.item) {
+					_data.item.download = false;
+					_data.item = null;
+				}
+			},
+
+			setEmail: function setEmail(email) {
+				storageService.setItem(key, email);
+			},
+
+			getEmail: function getEmail() {
+				return storageService.getItem(key).then(function (value) {
+					_data.email = value;
+					return value;
+				});
+			},
+
+			data: function data() {
+				return $q.when(_data);
+			}
 		};
+
+		return service;
 	}
-})(angular);
-angular.module("water.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("water/select/doc.html","<div ng-class-odd=\"\'odd\'\" ng-class-even=\"\'even\'\" ng-mouseleave=\"select.lolight(doc)\" ng-mouseenter=\"select.hilight(doc)\">\r\n	<span ng-class=\"{ellipsis:!expanded}\" tooltip-enable=\"!expanded\" style=\"width:100%;display:inline-block;\"\r\n			tooltip-class=\"selectAbstractTooltip\" tooltip=\"{{doc.abstract | truncate : 250}}\" tooltip-placement=\"bottom\">\r\n		<button type=\"button\" class=\"undecorated\" ng-click=\"expanded = !expanded\" title=\"Click to see more about this dataset\">\r\n			<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-caret-down\':expanded,\'fa-caret-right\':(!expanded)}\"></i>\r\n		</button>\r\n		<download-add item=\"doc\" group=\"group\"></download-add>\r\n		<common-wms data=\"doc\"></common-wms>\r\n		<common-bbox data=\"doc\" ng-if=\"doc.showExtent\"></common-bbox>\r\n		<common-cc4></common-cc4>\r\n		<a href=\"http://www.ga.gov.au/metadata-gateway/metadata/record/{{doc.sysId}}\" target=\"_blank\" ><strong>{{doc.title}}</strong></a>\r\n	</span>\r\n	<span ng-class=\"{ellipsis:!expanded}\" style=\"width:100%;display:inline-block;padding-right:15px;\">\r\n		{{doc.abstract}}\r\n	</span>\r\n	<div ng-show=\"expanded\" style=\"padding-bottom: 5px;\">\r\n		<h5>Keywords</h5>\r\n		<div>\r\n			<span class=\"badge\" ng-repeat=\"keyword in doc.keywords track by $index\">{{keyword}}</span>\r\n		</div>\r\n	</div>\r\n</div>");
+})(angular, $);
+angular.module("water.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("water/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" icsm-toolbar-row map=\"root.map\"></div>\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div icsm-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'datasets\'\" water-select></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" water-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" water-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
+$templateCache.put("water/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'datasets\'}\" ng-click=\"setView(\'datasets\')\">\r\n		<button class=\"undecorated\">Datasets</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");
+$templateCache.put("water/select/doc.html","<div ng-class-odd=\"\'odd\'\" ng-class-even=\"\'even\'\" ng-mouseleave=\"select.lolight(doc)\" ng-mouseenter=\"select.hilight(doc)\">\r\n	<span ng-class=\"{ellipsis:!expanded}\" tooltip-enable=\"!expanded\" style=\"width:100%;display:inline-block;\"\r\n			tooltip-class=\"selectAbstractTooltip\" tooltip=\"{{doc.abstract | truncate : 250}}\" tooltip-placement=\"bottom\">\r\n		<button type=\"button\" class=\"undecorated\" ng-click=\"expanded = !expanded\" title=\"Click to see more about this dataset\">\r\n			<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-caret-down\':expanded,\'fa-caret-right\':(!expanded)}\"></i>\r\n		</button>\r\n		<download-add item=\"doc\" group=\"group\"></download-add>\r\n		<common-wms data=\"doc\"></common-wms>\r\n		<common-bbox data=\"doc\" ng-if=\"doc.showExtent\"></common-bbox>\r\n		<common-cc4></common-cc4>\r\n		<common-metaview url=\"\'http://www.ga.gov.au/metadata-gateway/metadata/record/\' + doc.sysId + \'/xml\'\" container=\"select\" item=\"doc\"></common-metaview>\r\n		<a href=\"http://www.ga.gov.au/metadata-gateway/metadata/record/{{doc.sysId}}\" target=\"_blank\" ><strong>{{doc.title}}</strong></a>\r\n	</span>\r\n	<span ng-class=\"{ellipsis:!expanded}\" style=\"width:100%;display:inline-block;padding-right:15px;\">\r\n		{{doc.abstract}}\r\n	</span>\r\n	<div ng-show=\"expanded\" style=\"padding-bottom: 5px;\">\r\n		<h5>Keywords</h5>\r\n		<div>\r\n			<span class=\"badge\" ng-repeat=\"keyword in doc.keywords track by $index\">{{keyword}}</span>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("water/select/group.html","<div class=\"panel panel-default\" style=\"margin-bottom:-5px;\" >\r\n	<div class=\"panel-heading\"><nedf-wms data=\"group\"></nedf-wms> <strong>{{group.title}}</strong></div>\r\n	<div class=\"panel-body\">\r\n   		<div ng-repeat=\"doc in group.docs\">\r\n   			<div select-doc doc=\"doc\" group=\"group\"></div>\r\n		</div>\r\n	</div>\r\n</div>\r\n");
-$templateCache.put("water/select/select.html","<div>\r\n	<div style=\"position:relative;padding:5px;padding-left:10px;\" ng-controller=\"SelectCtrl as select\" class=\"scrollPanel\">\r\n		<div class=\"panel panel-default\" style=\"margin-bottom:-5px\">\r\n  			<div class=\"panel-heading\">\r\n  				<h3 class=\"panel-title\">Available datasets</h3>\r\n  			</div>\r\n  			<div class=\"panel-body\">\r\n				<div ng-repeat=\"doc in select.data.response.docs\" style=\"padding-bottom:7px\">\r\n					<div select-doc ng-if=\"doc.type == \'dataset\'\" doc=\"doc\"></div>\r\n					<select-group ng-if=\"doc.type == \'group\'\" group=\"doc\"></select-group>\r\n				</div>\r\n  			</div>\r\n		</div>\r\n	</div>\r\n</div>");
-$templateCache.put("water/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" icsm-toolbar-row map=\"root.map\"></div>\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div icsm-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'datasets\'\" water-select></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" water-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" water-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
-$templateCache.put("water/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'datasets\'}\" ng-click=\"setView(\'datasets\')\">\r\n		<button class=\"undecorated\">Datasets</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");}]);
+$templateCache.put("water/select/select.html","<div ng-controller=\"SelectCtrl as select\">\r\n	<div style=\"position:relative;padding:5px;padding-left:10px;\" class=\"scrollPanel\" ng-if=\"!select.selected\">\r\n		<div class=\"panel panel-default\" style=\"margin-bottom:-5px\">\r\n  			<div class=\"panel-heading\">\r\n  				<h3 class=\"panel-title\">Available datasets</h3>\r\n  			</div>\r\n  			<div class=\"panel-body\">\r\n				<div ng-repeat=\"doc in select.data.response.docs\" style=\"padding-bottom:7px\">\r\n					<div select-doc ng-if=\"doc.type == \'dataset\'\" doc=\"doc\"></div>\r\n					<select-group ng-if=\"doc.type == \'group\'\" group=\"doc\"></select-group>\r\n				</div>\r\n				<div vector-select></div>\r\n  			</div>\r\n		</div>\r\n	</div>\r\n	<div style=\"position:relative;padding:5px;padding-left:10px;\" class=\"scrollPanel\" ng-if=\"select.selected\" common-item-metaview container=\"select\"></div>\r\n</div>");
+$templateCache.put("water/vector/add.html","<button type=\'button\' ng-disabled=\'!someSelected()\' class=\'undecorated vector-add\' ng-click=\'toggle()\'>\r\n   <span class=\'fa-stack\' tooltip-placement=\'right\' uib-tooltip=\'Extract data from one or more vector types.\'>\r\n	   <i class=\'fa fa-lg fa-download\' ng-class=\'{active:item.download}\'></i>\r\n	</span>\r\n</button>");
+$templateCache.put("water/vector/download.html","");
+$templateCache.put("water/vector/geoprocess.html","<div class=\"container-fluid\" style=\"overflow-x:hidden\" ng-form>\r\n	<div ng-show=\"stage==\'bbox\'\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12\">\r\n				<wizard-clip trigger=\"stage == \'bbox\'\" drawn=\"drawn()\" clip=\"data.processing.clip\" bounds=\"data.bounds\"></wizard-clip>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n 			<div class=\"col-md-12\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!validClip(data) || checkingOrFailed\" ng-click=\"stage=\'formats\'\">Next</button>\r\n			</div>\r\n		</div>\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Select an area of interest.</strong> There are two ways to select your area of interest:\r\n			<ol>\r\n				<li>Draw an area on the map with the mouse by clicking a corner and while holding the left mouse button\r\n					down drag diagonally across the map to the opposite corner or</li>\r\n				<li>Type your co-ordinates into the areas above.</li>\r\n			</ol>\r\n			Once drawn the points can be modified by the overwriting the values above or drawing another area by clicking the draw button again.\r\n			Ensure you select from the highlighted areas as the data can be quite sparse for some data.<br/>\r\n			<p style=\"padding-top:5px\">\r\n			<strong>Warning:</strong> Some extracts can be huge. It is best if you start with a small area to experiment with first. An email will be sent\r\n			with the size of the extract. Download judiciously.\r\n			</p>\r\n			<p style=\"padding-top\"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n				You can zoom in and out using the mouse wheel or the \"+\" and \"-\" map control on the top left of the map. If you\r\n				don\'t like the position of your drawn area, hit the \"Draw\" button and draw a new bounding box.\r\n			</p>\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'formats\'\">\r\n		<div class=\"well\">\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-3\">\r\n				<label for=\"vectorGeoprocessOutputFormat\">\r\n					Output Format\r\n				</label>\r\n			</div>\r\n			<div class=\"col-md-9\">\r\n				<select id=\"vectorGeoprocessOutputFormat\" style=\"width:95%\" ng-model=\"data.processing.outFormat\" ng-options=\"opt.value for opt in config.refData.vectorFileFormat\"></select>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\">\r\n			<div class=\"col-md-3\">\r\n				<label for=\"geoprocessOutCoordSys\">\r\n					Coordinate System\r\n				</label>\r\n			</div>\r\n			<div class=\"col-md-9\">\r\n				<select id=\"vectorGeoprocessOutCoordSys\" style=\"width:95%\" ng-model=\"data.processing.outCoordSys\" ng-options=\"opt.value for opt in config.refData.outCoordSys | sysIntersect : data.processing.clip\"></select>\r\n			</div>\r\n		</div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" ng-click=\"stage=\'bbox\'\">Previous</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!validSansEmail(data)\" ng-click=\"stage=\'email\'\">Next</button>\r\n   			</div>\r\n		</div>\r\n\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Data representation.</strong> Select how you want your data presented.<br/>\r\n			Output format is the structure of the data and you should choose a format compatible with the tools that you will use to manipulate the data.\r\n			<ul>\r\n				<li ng-repeat=\"format in outFormats\"><strong>{{format.value}}</strong> - {{format.description}}</li>\r\n			</ul>\r\n			Select what <i>coordinate system</i> or projection you would like. If in doubt select WGS84.<br/>\r\n			Not all projections cover all of Australia. If the area you select is not covered by a particular projection then the option to download in that projection will not be available.\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'email\'\">\r\n		<div class=\"well\" exp-enter=\"stage=\'confirm\'\">\r\n			<div download-email></div>\r\n			<br/>\r\n			<div download-filename data=\"data.processing\"></div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" ng-click=\"stage=\'formats\'\">Previous</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!allDataSet(data)\" ng-click=\"stage=\'confirm\'\">Submit</button>\r\n   			</div>\r\n		</div>\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Email notification</strong> The extract of data can take some time. By providing an email address we will be able to notify you when the job is complete. The email will provide a link to the extracted\r\n			data which will be packaged up as a single file. To be able to proceed you need to have provided:\r\n			<ul>\r\n				<li>An area of interest to extract the data (referred to as a bounding box).</li>\r\n				<li>An output format.</li>\r\n				<li>A valid coordinate system or projection.</li>\r\n				<li>An email address to receive the details of the extraction.</li>\r\n				<li><strong>Note:</strong>Email addresses need to be and are stored in the system.</li>\r\n			</ul>\r\n			<strong style=\"font-size:120%\">Optional filename</strong> The extract of data can take some time. By providing an optional filename it will allow you\r\n			to associate extracted data to your purpose for downloading data. For example:\r\n			<ul>\r\n				<li>myHouse will have a file named myHouse.zip</li>\r\n				<li>Sorrento would result in a file named Sorrento.zip</li>\r\n			</ul>\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'confirm\'\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12 abstractContainer\">\r\n				{{data.abstract}}\r\n			</div>\r\n		</div>\r\n		<h3>You have chosen:</h3>\r\n		<table class=\"table table-striped\">\r\n			<tbody>\r\n				<tr>\r\n					<th>Area</th>\r\n					<td>\r\n						<span style=\"display:inline-block; width: 10em\">Lower left (lat/lng&deg;):</span> {{data.processing.clip.yMin | number : 6}}, {{data.processing.clip.xMin | number : 6}}<br/>\r\n						<span style=\"display:inline-block;width: 10em\">Upper right (lat/lng&deg;):</span> {{data.processing.clip.yMax | number : 6}}, {{data.processing.clip.xMax | number : 6}}\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Output format</th>\r\n					<td>{{data.processing.outFormat.value}}</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Coordinate system</th>\r\n					<td>{{data.processing.outCoordSys.value}}</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Email address</th>\r\n					<td>{{email}}</td>\r\n				</tr>\r\n				<tr ng-show=\"data.processing.filename\">\r\n					<th>Filename</th>\r\n					<td>{{data.processing.filename}}</td>\r\n				</tr>\r\n			</tbody>\r\n		</table>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" style=\"width:6em\" ng-click=\"stage=\'email\'\">Back</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-click=\"startExtract()\">Confirm</button>\r\n   			</div>\r\n		</div>\r\n	</div>\r\n</div>");
+$templateCache.put("water/vector/popup.html","<exp-modal icon-class=\"fa-download\"  is-open=\"data.item.download\" title=\"Download wizard\" on-close=\"vdl.remove()\">\r\n	<div class=\"container-fluid downloadInner\" >\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><nedf-wms data=\"vdl.data.item\"></nedf-wms>\r\n					<a href=\"http://www.ga.gov.au/metadata-gateway/metadata/record/{{vdl.data.item.sysId}}\" target=\"_blank\"><strong class=\"ng-binding\">{{vdl.data.item.title}}</strong></a>\r\n				</h4>\r\n   			</div>\r\n		</div>\r\n		<vector-geoprocess data=\"vdl.data.item\"></vector-geoprocess>\r\n	</div>\r\n</exp-modal>");
+$templateCache.put("water/vector/vector.html","<div class=\"panel panel-default\" style=\"margin-bottom:-5px;\">\r\n   <div class=\"panel-heading\">\r\n		<vector-add group=\"vect.group\"></vector-add>\r\n		<common-bbox data=\"vect.group\"></common-bbox>\r\n		<common-cc4></common-cc4>\r\n      <strong>{{vect.group.title}}</strong>\r\n   </div>\r\n   <div class=\"panel-body\">\r\n      <div ng-repeat=\"doc in vect.group.docs\">\r\n         <div ng-class-odd=\"\'odd\'\" ng-class-even=\"\'even\'\" style=\"padding-left:12px\" ng-mouseleave=\"vect.lolight(doc)\" ng-mouseenter=\"vect.hilight(doc)\" >\r\n            <span style=\"width:100%;display:inline-block;padding-bottom:8px\">\r\n               <input type=\"checkbox\" class=\"vector-checkbox\" ng-model=\"doc.selected\">\r\n		         <common-metaview url=\"\'http://www.ga.gov.au/metadata-gateway/metadata/record/\' + doc.sysId + \'/xml\'\" container=\"select\" item=\"doc\"></common-metaview>\r\n		         <a href=\"http://www.ga.gov.au/metadata-gateway/metadata/record/{{doc.sysId}}\" target=\"_blank\" tooltip-append-to-body=\"true\"\r\n                           uib-tooltip=\"{{doc.abstract}}\" tooltip-placement=\"auto bottom\" tooltip-class=\"vector-tooltip\">\r\n                  <strong>{{doc.title}}</strong>\r\n               </a>\r\n	         </span>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");}]);

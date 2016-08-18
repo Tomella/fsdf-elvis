@@ -15,7 +15,6 @@
       'explorer.legend',
       'explorer.message',
 	 	'explorer.modal',
-	 	'explorer.persist',
 	 	'explorer.projects',
 	 	'explorer.tabs',
 	 	'explorer.version',
@@ -64,11 +63,10 @@
 ])
 
 // Set up all the service providers here.
-.config(['configServiceProvider', 'persistServiceProvider', 'projectsServiceProvider', 'versionServiceProvider',
-         function(configServiceProvider, persistServiceProvider, projectsServiceProvider, versionServiceProvider) {
+.config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider',
+         function(configServiceProvider, projectsServiceProvider, versionServiceProvider) {
 	configServiceProvider.location("icsm/resources/config/config.json");
 	versionServiceProvider.url("assets/package.json");
-	persistServiceProvider.handler("local");
 	projectsServiceProvider.setProject("icsm");
 }])
 

@@ -71,6 +71,285 @@ under the License.
 })(angular);
 'use strict';
 
+(function (angular, $) {
+	'use strict';
+
+	angular.module("common.download", ['common.geoprocess']).directive("wizardPopup", ["downloadService", function (downloadService) {
+		return {
+			restrict: "AE",
+			templateUrl: "common/download/popup.html",
+			link: function link(scope) {
+				downloadService.data().then(function (data) {
+					scope.data = data;
+
+					scope.$watch("data.item", function (newValue, oldValue) {
+						if (newValue) {
+							scope.stage = "bbox";
+						}
+
+						if (newValue || oldValue) {
+							downloadService.setState(newValue);
+						}
+					});
+				});
+			}
+		};
+	}]).directive("wizardDownload", ["downloadService", function (downloadService) {
+		return {
+			restrict: "AE",
+			controller: "DownloadCtrl",
+			templateUrl: "common/download/popup.html",
+			link: function link() {
+				console.log("What the download...");
+			}
+		};
+	}]).directive("commonDownload", ['downloadService', function (downloadService) {
+		return {
+			templateUrl: "common/download/download.html",
+			controller: "DownloadCtrl",
+			link: function link(scope, element) {
+				downloadService.data().then(function (data) {
+					scope.data = data;
+				});
+
+				scope.$watch("data.item", function (item, old) {
+					if (item || old) {
+						downloadService.setState(item);
+					}
+				});
+			}
+		};
+	}]).directive("downloadAdd", ['$rootScope', 'downloadService', 'flashService', function ($rootScope, downloadService, flashService) {
+		return {
+			template: "<button type='button' class='undecorated' ng-click='toggle()'><span class='fa-stack'  tooltip-placement='right' tooltip='Extract data.'>" + "<i class='fa fa-lg fa-download' ng-class='{active:item.download}'></i>" + "</span></button>",
+			restrict: "AE",
+			scope: {
+				item: "=",
+				group: "="
+			},
+			link: function link(scope, element) {
+				scope.toggle = function () {
+					if (scope.group && scope.group.download) {
+						downloadService.clear(scope.item);
+					} else {
+						flashService.add("Select an area of interest that intersects the highlighted areas.");
+						downloadService.add(scope.item);
+						if (scope.group && scope.group.sysId) {
+							$rootScope.$broadcast('hide.wms', scope.group.sysId);
+						}
+					}
+				};
+			}
+		};
+	}]).directive("downloadEmail", ['downloadService', function (downloadService) {
+		return {
+			template: '<div class="input-group">' + '<span class="input-group-addon" id="nedf-email">Email</span>' + '<input required="required" type="email" ng-change="download.changeEmail(email)" ng-model="email" class="form-control" placeholder="Email address to send download link" aria-describedby="nedf-email">' + '</div>',
+			restrict: "AE",
+			link: function link(scope, element) {
+				downloadService.getEmail().then(function (email) {
+					scope.email = email;
+				});
+			}
+		};
+	}]).directive("downloadFilename", ['flashService', 'downloadService', function (flashService, downloadService) {
+		return {
+			template: '<div class="input-group">' + '<span class="input-group-addon" id="nedf-filename">Filename</span>' + '<input type="text"' + ' ng-maxlength="30" ng-trim="true" ng-keypress="restrict($event)"' + ' ng-model="data.filename" class="form-control" placeholder="Optional filename" aria-describedby="nedf-filename">' + '<span class="input-group-addon" id="basic-addon2">.zip</span>' + '</div>' + '<div>Only up to 9 characters made up of alphanumeric or "_" allowed for file name</div>',
+			restrict: "AE",
+			scope: {
+				data: "="
+			},
+			link: function link(scope, element) {
+				var flasher;
+				scope.restrict = function (event) {
+					var key = event.keyCode;
+					var char = String.fromCharCode(key).toUpperCase();
+					if (key > 31 && !char.match(/[\_A-Z0-9]/ig)) {
+						flashService.remove(flasher);
+						flasher = flashService.add('Only alphanumeric characters or "_" allowed in filename.', 5000);
+						event.preventDefault();
+					} else if (key > 31 && event.currentTarget.value && event.currentTarget.value.length >= 9) {
+						flashService.remove(flasher);
+						flasher = flashService.add('Filename is restricted to 9 characters.', 5000);
+						event.preventDefault();
+					}
+				};
+			}
+		};
+	}]).controller("DownloadCtrl", DownloadCtrl).factory("downloadService", DownloadService);
+
+	DownloadCtrl.$inject = ["downloadService"];
+	function DownloadCtrl(downloadService) {
+		downloadService.data().then(function (data) {
+			this.data = data;
+		}.bind(this));
+
+		this.remove = function () {
+			downloadService.clear();
+		};
+
+		this.changeEmail = function (email) {
+			downloadService.setEmail(email);
+		};
+	}
+
+	DownloadService.$inject = ['$http', '$q', '$rootScope', 'mapService', 'storageService'];
+	function DownloadService($http, $q, $rootScope, mapService, storageService) {
+		var key = "download_email",
+		    downloadLayerGroup = "Download Layers",
+		    mapState = {
+			zoom: null,
+			center: null,
+			layer: null
+		},
+		    _data = {
+			email: null,
+			item: null
+		},
+		    service = {
+			getLayerGroup: function getLayerGroup() {
+				return mapService.getGroup(downloadLayerGroup);
+			},
+
+			setState: function setState(data) {
+				if (data) {
+					prepare();
+				} else {
+					restore(map);
+				}
+
+				function prepare() {
+					var bounds = [[data.bounds.yMin, data.bounds.xMin], [data.bounds.yMax, data.bounds.xMax]];
+
+					if (mapState.layer) {
+						mapService.getGroup(downloadLayerGroup).removeLayer(mapState.layer);
+					}
+					if (!data.queryLayer) {
+						mapState.layer = L.rectangle(bounds, { color: "black", fill: false });
+						mapService.getGroup(downloadLayerGroup).addLayer(mapState.layer);
+					}
+				}
+
+				function restore(map) {
+					mapService.clearGroup(downloadLayerGroup);
+					mapState.layer = null;
+				}
+			},
+
+			add: function add(item) {
+				this.clear();
+				_data.item = item;
+				_data.item.download = true;
+				if (!item.processsing) {
+					item.processing = {
+						clip: {
+							xMax: null,
+							xMin: null,
+							yMax: null,
+							yMin: null
+						}
+					};
+				}
+			},
+
+			clear: function clear() {
+				if (_data.item) {
+					_data.item.download = false;
+					_data.item = null;
+				}
+			},
+
+			setEmail: function setEmail(email) {
+				storageService.setItem(key, email);
+			},
+
+			getEmail: function getEmail() {
+				return storageService.getItem(key).then(function (value) {
+					_data.email = value;
+					return value;
+				});
+			},
+
+			data: function data() {
+				return $q.when(_data);
+			}
+		};
+
+		return service;
+	}
+})(angular, $);
+'use strict';
+
+(function (angular) {
+
+	'use strict';
+
+	angular.module("common.clip", ['geo.draw']).directive("wizardClip", ['$timeout', 'clipService', 'flashService', function ($timeout, clipService, flashService) {
+		return {
+			templateUrl: "common/clip/clip.html",
+			scope: {
+				clip: "=",
+				bounds: "=",
+				trigger: "=",
+				drawn: "&"
+			},
+			link: function link(scope, element) {
+				if (typeof scope.showBounds === "undefined") {
+					scope.showBounds = false;
+				}
+				scope.$watch("bounds", function (bounds) {
+					if (bounds && scope.trigger) {
+						$timeout(function () {
+							scope.initiateDraw();
+						});
+					} else if (!bounds) {
+						clipService.cancelDraw();
+					}
+				});
+
+				scope.initiateDraw = function () {
+					clipService.initiateDraw().then(drawComplete);
+
+					function drawComplete(data) {
+						var c = scope.clip;
+						var response;
+
+						c.xMax = +data.clip.xMax;
+						c.xMin = +data.clip.xMin;
+						c.yMax = +data.clip.yMax;
+						c.yMin = +data.clip.yMin;
+						if (scope.drawn) {
+							response = scope.drawn();
+							if (response && response.code && response.code == "oversize") {
+								scope.initiateDraw();
+							}
+						}
+					}
+				};
+			}
+		};
+	}]).factory("clipService", ['$q', '$rootScope', 'drawService', function ($q, $rootScope, drawService) {
+		return {
+			initiateDraw: function initiateDraw() {
+				return drawService.drawRectangle().then(drawComplete);
+			},
+
+			cancelDraw: function cancelDraw() {
+				drawService.cancelDrawRectangle();
+			}
+		};
+
+		function drawComplete(data) {
+			return { clip: {
+					xMax: data.bounds.getEast().toFixed(5),
+					xMin: data.bounds.getWest().toFixed(5),
+					yMax: data.bounds.getNorth().toFixed(5),
+					yMin: data.bounds.getSouth().toFixed(5)
+				} };
+		}
+	}]);
+})(angular);
+'use strict';
+
 (function (angular) {
 
 	'use strict';
@@ -189,285 +468,6 @@ under the License.
       };
    }]);
 })(angular);
-'use strict';
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module("common.clip", ['geo.draw']).directive("wizardClip", ['$timeout', 'clipService', 'flashService', function ($timeout, clipService, flashService) {
-		return {
-			templateUrl: "common/clip/clip.html",
-			scope: {
-				clip: "=",
-				bounds: "=",
-				trigger: "=",
-				drawn: "&"
-			},
-			link: function link(scope, element) {
-				if (typeof scope.showBounds === "undefined") {
-					scope.showBounds = false;
-				}
-				scope.$watch("bounds", function (bounds) {
-					if (bounds && scope.trigger) {
-						$timeout(function () {
-							scope.initiateDraw();
-						});
-					} else if (!bounds) {
-						clipService.cancelDraw();
-					}
-				});
-
-				scope.initiateDraw = function () {
-					clipService.initiateDraw().then(drawComplete);
-
-					function drawComplete(data) {
-						var c = scope.clip;
-						var response;
-
-						c.xMax = +data.clip.xMax;
-						c.xMin = +data.clip.xMin;
-						c.yMax = +data.clip.yMax;
-						c.yMin = +data.clip.yMin;
-						if (scope.drawn) {
-							response = scope.drawn();
-							if (response && response.code && response.code == "oversize") {
-								scope.initiateDraw();
-							}
-						}
-					}
-				};
-			}
-		};
-	}]).factory("clipService", ['$q', '$rootScope', 'drawService', function ($q, $rootScope, drawService) {
-		return {
-			initiateDraw: function initiateDraw() {
-				return drawService.drawRectangle().then(drawComplete);
-			},
-
-			cancelDraw: function cancelDraw() {
-				drawService.cancelDrawRectangle();
-			}
-		};
-
-		function drawComplete(data) {
-			return { clip: {
-					xMax: data.bounds.getEast().toFixed(5),
-					xMin: data.bounds.getWest().toFixed(5),
-					yMax: data.bounds.getNorth().toFixed(5),
-					yMin: data.bounds.getSouth().toFixed(5)
-				} };
-		}
-	}]);
-})(angular);
-'use strict';
-
-(function (angular, $) {
-	'use strict';
-
-	angular.module("common.download", ['common.geoprocess']).directive("wizardPopup", ["downloadService", function (downloadService) {
-		return {
-			restrict: "AE",
-			templateUrl: "common/download/popup.html",
-			link: function link(scope) {
-				downloadService.data().then(function (data) {
-					scope.data = data;
-
-					scope.$watch("data.item", function (newValue, oldValue) {
-						if (newValue) {
-							scope.stage = "bbox";
-						}
-
-						if (newValue || oldValue) {
-							downloadService.setState(newValue);
-						}
-					});
-				});
-			}
-		};
-	}]).directive("wizardDownload", ["downloadService", function (downloadService) {
-		return {
-			restrict: "AE",
-			controller: "DownloadCtrl",
-			templateUrl: "common/download/popup.html",
-			link: function link() {
-				console.log("What the download...");
-			}
-		};
-	}]).directive("commonDownload", ['downloadService', function (downloadService) {
-		return {
-			templateUrl: "common/download/download.html",
-			controller: "DownloadCtrl",
-			link: function link(scope, element) {
-				downloadService.data().then(function (data) {
-					scope.data = data;
-				});
-
-				scope.$watch("data.item", function (item, old) {
-					if (item || old) {
-						downloadService.setState(item);
-					}
-				});
-			}
-		};
-	}]).directive("downloadAdd", ['$rootScope', 'downloadService', 'flashService', function ($rootScope, downloadService, flashService) {
-		return {
-			template: "<button type='button' class='undecorated' ng-click='toggle()'><span class='fa-stack'  tooltip-placement='right' tooltip='Extract data.'>" + "<i class='fa fa-lg fa-download' ng-class='{active:item.download}'></i>" + "</span></button>",
-			restrict: "AE",
-			scope: {
-				item: "=",
-				group: "="
-			},
-			link: function link(scope, element) {
-				scope.toggle = function () {
-					if (scope.item.download) {
-						downloadService.clear(scope.item);
-					} else {
-						flashService.add("Select an area of interest that intersects the highlighted areas.");
-						downloadService.add(scope.item);
-						if (scope.group && scope.group.sysId) {
-							$rootScope.$broadcast('hide.wms', scope.group.sysId);
-						}
-					}
-				};
-			}
-		};
-	}]).directive("downloadEmail", ['downloadService', function (downloadService) {
-		return {
-			template: '<div class="input-group">' + '<span class="input-group-addon" id="nedf-email">Email</span>' + '<input required="required" type="email" ng-change="download.changeEmail(email)" ng-model="email" class="form-control" placeholder="Email address to send download link" aria-describedby="nedf-email">' + '</div>',
-			restrict: "AE",
-			link: function link(scope, element) {
-				downloadService.getEmail().then(function (email) {
-					scope.email = email;
-				});
-			}
-		};
-	}]).directive("downloadFilename", ['flashService', 'downloadService', function (flashService, downloadService) {
-		return {
-			template: '<div class="input-group">' + '<span class="input-group-addon" id="nedf-filename">Filename</span>' + '<input type="text"' + ' ng-maxlength="30" ng-trim="true" ng-keypress="restrict($event)"' + ' ng-model="data.filename" class="form-control" placeholder="Optional filename" aria-describedby="nedf-filename">' + '<span class="input-group-addon" id="basic-addon2">.zip</span>' + '</div>' + '<div>Only up to 9 characters made up of alphanumeric or "_" allowed for file name</div>',
-			restrict: "AE",
-			scope: {
-				data: "="
-			},
-			link: function link(scope, element) {
-				var flasher;
-				scope.restrict = function (event) {
-					var key = event.keyCode;
-					var char = String.fromCharCode(key).toUpperCase();
-					if (key > 31 && !char.match(/[\_A-Z0-9]/ig)) {
-						flashService.remove(flasher);
-						flasher = flashService.add('Only alphanumeric characters or "_" allowed in filename.', 5000);
-						event.preventDefault();
-					} else if (key > 31 && event.currentTarget.value && event.currentTarget.value.length >= 9) {
-						flashService.remove(flasher);
-						flasher = flashService.add('Filename is restricted to 9 characters.', 5000);
-						event.preventDefault();
-					}
-				};
-			}
-		};
-	}]).controller("DownloadCtrl", DownloadCtrl).factory("downloadService", DownloadService);
-
-	DownloadCtrl.$inject = ["downloadService"];
-	function DownloadCtrl(downloadService) {
-		downloadService.data().then(function (data) {
-			this.data = data;
-		}.bind(this));
-
-		this.remove = function () {
-			downloadService.clear();
-		};
-
-		this.changeEmail = function (email) {
-			downloadService.setEmail(email);
-		};
-	}
-
-	DownloadService.$inject = ['$http', '$q', '$rootScope', 'mapService', 'persistService'];
-	function DownloadService($http, $q, $rootScope, mapService, persistService) {
-		var key = "download_email",
-		    downloadLayerGroup = "Download Layers",
-		    mapState = {
-			zoom: null,
-			center: null,
-			layer: null
-		},
-		    _data = {
-			email: null,
-			item: null
-		},
-		    service = {
-			getLayerGroup: function getLayerGroup() {
-				return mapService.getGroup(downloadLayerGroup);
-			},
-
-			setState: function setState(data) {
-				if (data) {
-					prepare();
-				} else {
-					restore(map);
-				}
-
-				function prepare() {
-					var bounds = [[data.bounds.yMin, data.bounds.xMin], [data.bounds.yMax, data.bounds.xMax]];
-
-					if (mapState.layer) {
-						mapService.getGroup(downloadLayerGroup).removeLayer(mapState.layer);
-					}
-					if (!data.queryLayer) {
-						mapState.layer = L.rectangle(bounds, { color: "black", fill: false });
-						mapService.getGroup(downloadLayerGroup).addLayer(mapState.layer);
-					}
-				}
-
-				function restore(map) {
-					mapService.clearGroup(downloadLayerGroup);
-					mapState.layer = null;
-				}
-			},
-
-			add: function add(item) {
-				this.clear();
-				_data.item = item;
-				_data.item.download = true;
-				if (!item.processsing) {
-					item.processing = {
-						clip: {
-							xMax: null,
-							xMin: null,
-							yMax: null,
-							yMin: null
-						}
-					};
-				}
-			},
-
-			clear: function clear() {
-				if (_data.item) {
-					_data.item.download = false;
-					_data.item = null;
-				}
-			},
-
-			setEmail: function setEmail(email) {
-				persistService.setItem(key, email);
-			},
-
-			getEmail: function getEmail() {
-				return persistService.getItem(key).then(function (value) {
-					_data.email = value;
-					return value;
-				});
-			},
-
-			data: function data() {
-				return $q.when(_data);
-			}
-		};
-
-		return service;
-	}
-})(angular, $);
 "use strict";
 
 (function (angular) {
@@ -830,12 +830,11 @@ under the License.
 		};
 	});
 
-	GeoprocessService.$invoke = ['$http', '$q', '$timeout', 'configService', 'downloadService', 'ga', 'mapService', 'downloadService'];
-	function GeoprocessService($http, $q, $timeout, configService, downloadService, mapService, persistService) {
+	GeoprocessService.$invoke = ['$http', '$q', '$timeout', 'configService', 'downloadService', 'ga', 'mapService', 'storageService'];
+	function GeoprocessService($http, $q, $timeout, configService, downloadService, mapService, storageService) {
 		var DEFAULT_DATASET = "dems1sv1_0",
 		    // TODO: We have to get this from the metadata somehow.
 		geoprocessingTemplates,
-		    GEOPROCESS_LOGGING_URL = "service/log/geoprocess",
 		    clipLayer = null,
 		    map;
 
@@ -958,7 +957,6 @@ under the License.
 				$("#launcher")[0].src = workingString;
 
 				downloadService.setEmail(email);
-				$http.post(GEOPROCESS_LOGGING_URL, log);
 
 				ga('send', 'event', 'nedf', 'click', 'FME data export: ' + JSON.stringify(log));
 			},
@@ -1024,6 +1022,323 @@ under the License.
 'use strict';
 
 (function (angular) {
+   'use strict';
+
+   angular.module('common.iso19115', ['common.recursionhelper']).directive('iso19115Metadata', [function () {
+      return {
+         templateUrl: 'common/iso19115/metadata.html',
+         scope: {
+            node: "="
+         }
+      };
+   }]).directive('iso19115Double', [function () {
+      return {
+         templateUrl: 'common/iso19115/double.html',
+         restrict: "AE",
+         scope: {
+            node: "=",
+            name: "@",
+            type: "@"
+         },
+         link: function link(scope) {
+            if (scope.node) {
+               scope.value = scope.node[scope.name][scope.type];
+            }
+         }
+
+      };
+   }]).directive('iso19115Node', [function () {
+      var converters = {
+         CharacterString: function CharacterString(node) {
+            if (node && node.CharacterString) {
+               return node.CharacterString.__text;
+            }
+            return null;
+         },
+         LanguageCode: function LanguageCode(node) {
+            if (node && node.LanguageCode) {
+               return node.LanguageCode._codeListValue;
+            }
+            return null;
+         },
+         MD_CharacterSetCode: function MD_CharacterSetCode(node) {
+            if (node && node.MD_CharacterSetCode) {
+               return node.LanguageCode._codeListValue;
+            }
+            return null;
+         },
+         _codeListValue: function _codeListValue(node) {
+            if (node) {
+               return node._codeListValue;
+            }
+            return null;
+         }
+      };
+
+      return {
+         template: '<ul><li><span class="iso19115-head" ng-show="display">{{display}}:</span> <span class="iso19115-value">{{value}}</span></li></ul>',
+         restrict: "AE",
+         replace: true,
+         scope: {
+            node: "=",
+            name: "@",
+            type: "@"
+         },
+         link: function link(scope) {
+            scope.display = nodeName(scope.name);
+            scope.value = converters[scope.type](scope.node);
+         }
+      };
+   }]).filter('iso19115NodeName', [function () {
+      return nodeName;
+   }]);
+
+   function nodeName(nodeName) {
+      if (nodeName.toUpperCase() == nodeName) {
+         return nodeName;
+      }
+      var parts = nodeName.split("_");
+      var name = parts[parts.length - 1];
+      return name.replace(/./, function (f) {
+         return f.toUpperCase();
+      }).replace(/([A-Z])/g, ' $1').trim();
+   }
+})(angular);
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+(function (angular) {
+   'use strict';
+
+   angular.module("common.metaview", []).directive('commonMetaview', ['metaviewService', function (metaviewService) {
+      return {
+         templateUrl: 'common/metaview/metaview.html',
+         restrict: "AE",
+         scope: {
+            url: "=",
+            container: "=",
+            item: "="
+         },
+         link: function link(scope) {
+            console.log("URL = " + scope.url);
+            scope.select = function () {
+               metaviewService.get(scope.url, { cache: true }).then(function (data) {
+                  scope.item.metadata = data;
+                  scope.container.selected = scope.item;
+               });
+            };
+         }
+      };
+   }]).directive('commonItemMetaview', [function () {
+      return {
+         templateUrl: 'common/metaview/item.html',
+         restrict: "AE",
+         scope: {
+            container: "="
+         },
+         link: function link(scope) {}
+      };
+   }]).directive('metaviewIso19115', [function () {
+      return {
+         templateUrl: 'common/metaview/iso19115.html',
+         restrict: "AE",
+         scope: {
+            data: "="
+         },
+         link: function link(scope) {}
+      };
+   }]).directive('metaviewIso19115Array', ['RecursionHelper', function (RecursionHelper) {
+      function link(scope) {
+         scope.isObject = function () {
+            return angular.isObject(scope.node);
+         };
+
+         scope.getKeys = function () {
+            if (scope.isObject()) {
+               return Object.keys(scope.node).filter(function (key) {
+                  return !(excludeNodes[key] || key.indexOf(":") > -1);
+               }).map(function (key) {
+                  if (key === '') {
+                     return '""';
+                  }
+                  return key;
+               });
+            }
+         };
+      }
+
+      return {
+         template: '<metaview-node ng-repeat="nextKey in getKeys() track by $index" node="node[nextKey]" key="nextKey"></metaview-node>',
+         restrict: "AE",
+         scope: {
+            data: "="
+         },
+         compile: function compile(element) {
+            // Use the compile function from the RecursionHelper,
+            // And return the linking function(s) which it returns
+            return RecursionHelper.compile(element, link);
+         }
+      };
+   }]).directive('metaviewIso19115Node', ['RecursionHelper', function (RecursionHelper) {
+      var excludeNodes = {
+         $$hashKey: true,
+         __prefix: true,
+         __text: true,
+         _codeList: true,
+         _codeListValue: true,
+         CharacterString: true,
+         DateTime: true,
+         LanguageCode: true,
+         MD_ScopeCode: true,
+         scopeCode: true
+      };
+      function link(scope) {
+         scope.isObject = function () {
+            return angular.isObject(scope.node);
+         };
+
+         scope.getKeys = function () {
+            if (scope.isObject()) {
+               return Object.keys(scope.node).filter(function (key) {
+                  return !(excludeNodes[key] || key.indexOf(":") > -1);
+               }).map(function (key) {
+                  if (key === '') {
+                     return '""';
+                  }
+                  return key;
+               });
+            }
+         };
+
+         scope.isArray = function () {
+            return angular.isArray(scope.node);
+         };
+      }
+
+      return {
+         templateUrl: 'common/metaview/iso19115node.html',
+         restrict: "E",
+         replace: true,
+         scope: {
+            node: "=",
+            key: "=",
+            array: "="
+         },
+         compile: function compile(element) {
+            // Use the compile function from the RecursionHelper,
+            // And return the linking function(s) which it returns
+            return RecursionHelper.compile(element, link);
+         }
+      };
+   }]).filter('metaviewText', [function () {
+      var keyChild = {
+         CharacterString: "__text",
+         DateTime: "__text",
+         LanguageCode: "_codeListValue",
+         linkage: ["URL", "__text"],
+         MD_ScopeCode: "_codeListValue",
+         _codeListValue: "#text"
+      },
+          keys = [];
+
+      angular.forEach(keyChild, function (value, key) {
+         this.push(key);
+      }, keys);
+
+      return function (node) {
+         var value = null;
+         if (node) {
+            keys.some(function (key) {
+               var child = node[key];
+               if (child) {
+                  var _ret = function () {
+                     var children = keyChild[key];
+                     if (!Array.isArray(children)) {
+                        children = [children];
+                     }
+
+                     var result = child;
+                     children.forEach(function (kid) {
+                        if (kid != "#text") {
+                           result = result[kid];
+                        }
+                     });
+
+                     value = result; //child[keyChild[key]];
+                     return {
+                        v: true
+                     };
+                  }();
+
+                  if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+               }
+               return false;
+            });
+         }
+         return value;
+      };
+   }]).filter('metaviewNodeName', [function () {
+      return function (nodeName) {
+         if (parseInt(nodeName) + "" == "" + nodeName) {
+            console.log("Its a num");
+            return "";
+         }
+         if (nodeName.toUpperCase() == nodeName) {
+            return nodeName;
+         }
+         var parts = nodeName.split("_");
+         var name = parts[parts.length - 1];
+         return name.replace(/./, function (f) {
+            return f.toUpperCase();
+         }).replace(/([A-Z])/g, ' $1').trim();
+      };
+   }]).filter('metaviewTransform', [function () {
+      return function (node, key) {
+         if (node.CharacterString) {
+            return node.CharacterString.__text;
+         }
+         return node;
+      };
+   }]).provider('metaviewService', function MetaviewServiceProvider() {
+      var proxy = "xml2js/";
+
+      this.proxy = function (newProxy) {
+         proxy = newProxy;
+      };
+
+      this.$get = ['$http', function ($http) {
+         return new MetaviewService(proxy, $http);
+      }];
+   });
+
+   var MetaviewService = function () {
+      function MetaviewService(proxy, $http) {
+         _classCallCheck(this, MetaviewService);
+
+         this.proxy = proxy;
+         this.http = $http;
+      }
+
+      _createClass(MetaviewService, [{
+         key: 'get',
+         value: function get(url) {
+            return this.http.get(this.proxy + url).then(function (response) {
+               return response.data;
+            });
+         }
+      }]);
+
+      return MetaviewService;
+   }();
+})(angular);
+'use strict';
+
+(function (angular) {
 
 	'use strict';
 
@@ -1076,7 +1391,7 @@ under the License.
 			}
 			return response;
 		};
-	}).factory('altthemesService', ['$q', '$http', 'persistService', function ($q, $http, persistService) {
+	}).factory('altthemesService', ['$q', '$http', 'storageService', function ($q, $http, storageService) {
 		var THEME_PERSIST_KEY = 'icsm.current.theme';
 		var THEMES_LOCATION = 'icsm/resources/config/themes.json';
 		var DEFAULT_THEME = "All";
@@ -1086,7 +1401,7 @@ under the License.
 		this.themes = [];
 		this.theme = null;
 
-		persistService.getItem(THEME_PERSIST_KEY).then(function (value) {
+		storageService.getItem(THEME_PERSIST_KEY).then(function (value) {
 			if (!value) {
 				value = DEFAULT_THEME;
 			}
@@ -1123,7 +1438,7 @@ under the License.
 
 		this.setTheme = function (key) {
 			this.theme = this.themes[key];
-			persistService.setItem(THEME_PERSIST_KEY, key);
+			storageService.setItem(THEME_PERSIST_KEY, key);
 		};
 
 		return this;
@@ -1424,6 +1739,107 @@ under the License.
         };
     }]);
 })(angular);
+'use strict';
+
+(function (angular) {
+  'use strict';
+
+  // from http://stackoverflow.com/a/18609594
+
+  angular.module('common.recursionhelper', []).factory('RecursionHelper', ['$compile', function ($compile) {
+    return {
+      /**
+       * Manually compiles the element, fixing the recursion loop.
+       * @param element
+       * @param [link] A post-link function, or an object with function(s)
+       * registered via pre and post properties.
+       * @returns An object containing the linking functions.
+       */
+      compile: function compile(element, link) {
+        // Normalize the link parameter
+        if (angular.isFunction(link)) {
+          link = { post: link };
+        }
+
+        // Break the recursion loop by removing the contents
+        var contents = element.contents().remove();
+        var compiledContents;
+        return {
+          pre: link && link.pre ? link.pre : null,
+          /**
+           * Compiles and re-adds the contents
+           */
+          post: function post(scope, element) {
+            // Compile the contents
+            if (!compiledContents) {
+              compiledContents = $compile(contents);
+            }
+            // Re-add the compiled contents to the element
+            compiledContents(scope, function (clone) {
+              element.append(clone);
+            });
+
+            // Call the post-linking function, if any
+            if (link && link.post) {
+              link.post.apply(null, arguments);
+            }
+          }
+        };
+      }
+    };
+  }]);
+})(angular);
+'use strict';
+
+(function (angular) {
+	'use strict';
+
+	angular.module("common.storage", ['explorer.projects']).factory("storageService", ['$log', '$q', 'projectsService', function ($log, $q, projectsService) {
+		return {
+			setGlobalItem: function setGlobalItem(key, value) {
+				this._setItem("_system", key, value);
+			},
+
+			setItem: function setItem(key, value) {
+				projectsService.getCurrentProject().then(function (project) {
+					this._setItem(project, key, value);
+				}.bind(this));
+			},
+
+			_setItem: function _setItem(project, key, value) {
+				$log.debug("Fetching state for key locally" + key);
+				localStorage.setItem("mars.anon." + project + "." + key, JSON.stringify(value));
+			},
+
+			getGlobalItem: function getGlobalItem(key) {
+				return this._getItem("_system", key);
+			},
+
+			getItem: function getItem(key) {
+				var deferred = $q.defer();
+				projectsService.getCurrentProject().then(function (project) {
+					this._getItem(project, key).then(function (response) {
+						deferred.resolve(response);
+					});
+				}.bind(this));
+				return deferred.promise;
+			},
+
+			_getItem: function _getItem(project, key) {
+				$log.debug("Fetching state locally for key " + key);
+				var item = localStorage.getItem("mars.anon." + project + "." + key);
+				if (item) {
+					try {
+						item = JSON.parse(item);
+					} catch (e) {
+						// Do nothing as it will be a string
+					}
+				}
+				return $q.when(item);
+			}
+		};
+	}]);
+})(angular);
 "use strict";
 
 (function (angular) {
@@ -1638,15 +2054,22 @@ under the License.
 		}
 	}]);
 })(angular);
-angular.module("common.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("common/bbox/bbox.html","<button type=\"button\" class=\"undecorated\" ng-click=\"toggle()\" tooltip-placement=\"right\" tooltip=\"Show data extent on the map.\">\r\n	<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-eye orange\':data.hasBbox,\'fa-eye-slash\':!data.hasBbox}\"></i>\r\n</button>");
+angular.module("common.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("common/download/download.html","<exp-modal ng-controller=\"DownloadCtrl as dl\" icon-class=\"fa-download\" is-open=\"dl.data.item.download\" title=\"Download data\" on-close=\"dl.remove()\" is-modal=\"true\">\r\n	<div style=\"padding:5px;\">\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><nedf-wms data=\"dl.data.item\"></nedf-wms>{{dl.data.item.title}}</h4>\r\n				{{dl.data.item.abstract}}\r\n   			</div>\r\n		</div>\r\n		<nedf-geoprocess data=\"dl.data.item\"></nedf-geoprocess>\r\n    	<div nedf-wcs data=\"dl.data.item\" ng-show=\"dl.data.item.services.hasWcs()\"></div>\r\n	</div>\r\n</exp-modal>");
+$templateCache.put("common/download/popup.html","<exp-modal icon-class=\"fa-download\"  is-open=\"data.item.download\" title=\"Download wizard\" on-close=\"dl.remove()\">\r\n	<div class=\"container-fluid downloadInner\" >\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><nedf-wms data=\"dl.data.item\"></nedf-wms>\r\n					<a href=\"http://www.ga.gov.au/metadata-gateway/metadata/record/{{dl.data.item.sysId}}\" target=\"_blank\"><strong class=\"ng-binding\">{{dl.data.item.title}}</strong></a>\r\n				</h4>\r\n   			</div>\r\n		</div>\r\n		<wizard-geoprocess data=\"dl.data.item\"></wizard-geoprocess>\r\n	</div>\r\n</exp-modal>");
+$templateCache.put("common/clip/clip.html","<div class=\"well well-sm\">\r\n<div class=\"container-fluid\">\r\n	<div class=\"row\">\r\n		<div class=\"col-md-12\">\r\n			<button style=\"margin-top:0px;\" ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" class=\"btn btn-primary btn-xs\">Draw</button>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-3\"> </div>\r\n		<div class=\"col-md-8\">\r\n			<strong>Y Max:</strong> \r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMax|number : 4}} max)</span></span> \r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-6\">\r\n			<strong>X Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMin|number : 4}} min)</span></span> \r\n		</div>\r\n		<div class=\"col-md-6\">\r\n			<strong>X Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMax|number : 4}} max)</span></span> \r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-offset-3 col-md-8\">\r\n			<strong>Y Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMin|number : 4}} min)</span></span> \r\n		</div>\r\n	</div>\r\n</div>\r\n</div>");
+$templateCache.put("common/bbox/bbox.html","<button type=\"button\" class=\"undecorated\" ng-click=\"toggle()\" tooltip-placement=\"right\" tooltip=\"Show data extent on the map.\">\r\n	<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-eye orange\':data.hasBbox,\'fa-eye-slash\':!data.hasBbox}\"></i>\r\n</button>");
 $templateCache.put("common/cc4/cc4.html","<button type=\"button\" class=\"undecorated\" title=\"View CCBy 4.0 licence details\"\r\n      popover-trigger=\"outsideClick\"\r\n      uib-popover-template=\"template\" popover-placement=\"bottom\" popover-append-to-body=\"true\">\r\n	<i ng-class=\"{active:data.isWmsShowing}\" class=\"fa fa-lg fa-gavel\"></i>\r\n</button>");
 $templateCache.put("common/cc4/cc4template.html","<div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-12\">\r\n         <a target=\"_blank\" href=\"https://creativecommons.org/licenses/by/4.0/\">Creative Commons Attribution 4.0 </a>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-2\">\r\n         <span class=\"fa-stack\" aria-hidden=\"true\">\r\n         <i class=\"fa fa-check-circle-o fa-stack-2x\" aria-hidden=\"true\"></i>\r\n      </span>\r\n      </div>\r\n      <div class=\"col-md-10\">\r\n         You may use this work for commercial purposes.\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-2\">\r\n         <span class=\"fa-stack\" aria-hidden=\"true\">\r\n         <i class=\"fa fa-circle-o fa-stack-2x\"></i>\r\n         <i class=\"fa fa-female fa-stack-1x\"></i>\r\n      </span>\r\n      </div>\r\n      <div class=\"col-md-10\">\r\n         You must attribute the creator in your own works.\r\n      </div>\r\n   </div>\r\n</div>");
-$templateCache.put("common/clip/clip.html","<div class=\"well well-sm\">\r\n<div class=\"container-fluid\">\r\n	<div class=\"row\">\r\n		<div class=\"col-md-12\">\r\n			<button style=\"margin-top:0px;\" ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" class=\"btn btn-primary btn-xs\">Draw</button>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-3\"> </div>\r\n		<div class=\"col-md-8\">\r\n			<strong>Y Max:</strong> \r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMax|number : 4}} max)</span></span> \r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-6\">\r\n			<strong>X Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMin|number : 4}} min)</span></span> \r\n		</div>\r\n		<div class=\"col-md-6\">\r\n			<strong>X Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMax|number : 4}} max)</span></span> \r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-offset-3 col-md-8\">\r\n			<strong>Y Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMin|number : 4}} min)</span></span> \r\n		</div>\r\n	</div>\r\n</div>\r\n</div>");
-$templateCache.put("common/download/download.html","<exp-modal ng-controller=\"DownloadCtrl as dl\" icon-class=\"fa-download\" is-open=\"dl.data.item.download\" title=\"Download data\" on-close=\"dl.remove()\" is-modal=\"true\">\r\n	<div style=\"padding:5px;\">\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><nedf-wms data=\"dl.data.item\"></nedf-wms>{{dl.data.item.title}}</h4>\r\n				{{dl.data.item.abstract}}\r\n   			</div>\r\n		</div>\r\n		<nedf-geoprocess data=\"dl.data.item\"></nedf-geoprocess>\r\n    	<div nedf-wcs data=\"dl.data.item\" ng-show=\"dl.data.item.services.hasWcs()\"></div>\r\n	</div>\r\n</exp-modal>");
-$templateCache.put("common/download/popup.html","<exp-modal icon-class=\"fa-download\"  is-open=\"data.item.download\" title=\"Download wizard\" on-close=\"dl.remove()\">\r\n	<div class=\"container-fluid downloadInner\" >\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><nedf-wms data=\"dl.data.item\"></nedf-wms>\r\n					<a href=\"http://www.ga.gov.au/metadata-gateway/metadata/record/{{dl.data.item.sysId}}\" target=\"_blank\"><strong class=\"ng-binding\">{{dl.data.item.title}}</strong></a>\r\n				</h4>\r\n   			</div>\r\n		</div>\r\n		<wizard-geoprocess data=\"dl.data.item\"></wizard-geoprocess>\r\n	</div>\r\n</exp-modal>");
 $templateCache.put("common/extent/extent.html","<div class=\"row\" style=\"border-top: 1px solid gray; padding-top:5px\">\r\n	<div class=\"col-md-5\">\r\n		<div class=\"form-inline\">\r\n			<label>\r\n				<input id=\"extentEnable\" type=\"checkbox\" ng-model=\"parameters.fromMap\" ng-click=\"change()\"></input> \r\n				Restrict area to map\r\n			</label>\r\n		</div>\r\n	</div>\r\n	 \r\n	<div class=\"col-md-7\" ng-show=\"parameters.fromMap\">\r\n		<div class=\"container-fluid\">\r\n			<div class=\"row\">\r\n				<div class=\"col-md-offset-3 col-md-8\">\r\n					<strong>Y Max:</strong> \r\n					<span>{{parameters.yMax | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n			<div class=\"row\">\r\n				<div class=\"col-md-6\">\r\n					<strong>X Min:</strong>\r\n					<span>{{parameters.xMin | number : 4}}</span> \r\n				</div>\r\n				<div class=\"col-md-6\">\r\n					<strong>X Max:</strong>\r\n					<span>{{parameters.xMax | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n			<div class=\"row\">\r\n				<div class=\"col-md-offset-3 col-md-8\">\r\n					<strong>Y Min:</strong>\r\n					<span>{{parameters.yMin | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/geoprocess/geoprocess.html","<div class=\"container-fluid\" style=\"overflow-x:hidden\" ng-form>\r\n	<div ng-show=\"stage==\'bbox\'\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12\">\r\n				<wizard-clip trigger=\"stage == \'bbox\'\" drawn=\"drawn()\" clip=\"data.processing.clip\" bounds=\"data.bounds\"></wizard-clip>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n 			<div class=\"col-md-12\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!validClip(data) || checkingOrFailed\" ng-click=\"stage=\'formats\'\">Next</button>\r\n			</div>\r\n		</div>\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Select an area of interest.</strong> There are two ways to select your area of interest:\r\n			<ol>\r\n				<li>Draw an area on the map with the mouse by clicking a corner and while holding the left mouse button\r\n					down drag diagonally across the map to the opposite corner or</li>\r\n				<li>Type your co-ordinates into the areas above.</li>\r\n			</ol>\r\n			Once drawn the points can be modified by the overwriting the values above or drawing another area by clicking the draw button again.\r\n			Ensure you select from the highlighted areas as the data can be quite sparse for some data.<br/>\r\n			<p style=\"padding-top:5px\">\r\n			<strong>Warning:</strong> Some extracts can be huge. It is best if you start with a small area to experiment with first. An email will be sent\r\n			with the size of the extract. Download judiciously.\r\n			</p>\r\n			<p style=\"padding-top\"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n				You can zoom in and out using the mouse wheel or the \"+\" and \"-\" map control on the top left of the map. If you\r\n				don\'t like the position of your drawn area, hit the \"Draw\" button and draw a new bounding box.\r\n			</p>\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'formats\'\">\r\n		<div class=\"well\">\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-3\">\r\n				<label for=\"geoprocessOutputFormat\">\r\n					Output Format\r\n				</label>\r\n			</div>\r\n			<div class=\"col-md-9\">\r\n				<select id=\"geoprocessOutputFormat\" style=\"width:95%\" ng-model=\"data.processing.outFormat\" ng-options=\"opt.value for opt in config.outFormat\"></select>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\">\r\n			<div class=\"col-md-3\">\r\n				<label for=\"geoprocessOutCoordSys\">\r\n					Coordinate System\r\n				</label>\r\n			</div>\r\n			<div class=\"col-md-9\">\r\n				<select id=\"geoprocessOutCoordSys\" style=\"width:95%\" ng-model=\"data.processing.outCoordSys\" ng-options=\"opt.value for opt in config.outCoordSys | sysIntersect : data.processing.clip\"></select>\r\n			</div>\r\n		</div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" ng-click=\"stage=\'bbox\'\">Previous</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!validSansEmail(data)\" ng-click=\"stage=\'email\'\">Next</button>\r\n   			</div>\r\n		</div>\r\n\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Data representation.</strong> Select how you want your data presented.<br/>\r\n			Output format is the structure of the data and you should choose a format compatible with the tools that you will use to manipulate the data.\r\n			<ul>\r\n				<li ng-repeat=\"format in outFormats\"><strong>{{format.value}}</strong> - {{format.description}}</li>\r\n			</ul>\r\n			Select what <i>coordinate system</i> or projection you would like. If in doubt select WGS84.<br/>\r\n			Not all projections cover all of Australia. If the area you select is not covered by a particular projection then the option to download in that projection will not be available.\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'email\'\">\r\n		<div class=\"well\" exp-enter=\"stage=\'confirm\'\">\r\n			<div download-email></div>\r\n			<br/>\r\n			<div download-filename data=\"data.processing\"></div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" ng-click=\"stage=\'formats\'\">Previous</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!allDataSet(data)\" ng-click=\"stage=\'confirm\'\">Submit</button>\r\n   			</div>\r\n		</div>\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Email notification</strong> The extract of data can take some time. By providing an email address we will be able to notify you when the job is complete. The email will provide a link to the extracted\r\n			data which will be packaged up as a single file. To be able to proceed you need to have provided:\r\n			<ul>\r\n				<li>An area of interest to extract the data (referred to as a bounding box).</li>\r\n				<li>An output format.</li>\r\n				<li>A valid coordinate system or projection.</li>\r\n				<li>An email address to receive the details of the extraction.</li>\r\n				<li><strong>Note:</strong>Email addresses need to be and are stored in the system.</li>\r\n			</ul>\r\n			<strong style=\"font-size:120%\">Optional filename</strong> The extract of data can take some time. By providing an optional filename it will allow you\r\n			to associate extracted data to your purpose for downloading data. For example:\r\n			<ul>\r\n				<li>myHouse will have a file named myHouse.zip</li>\r\n				<li>Sorrento would result in a file named Sorrento.zip</li>\r\n			</ul>\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'confirm\'\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12 abstractContainer\">\r\n				{{data.abstract}}\r\n			</div>\r\n		</div>\r\n		<h3>You have chosen:</h3>\r\n		<table class=\"table table-striped\">\r\n			<tbody>\r\n				<tr>\r\n					<th>Area</th>\r\n					<td>\r\n						<span style=\"display:inline-block; width: 10em\">Lower left (lat/lng&deg;):</span> {{data.processing.clip.yMin | number : 6}}, {{data.processing.clip.xMin | number : 6}}<br/>\r\n						<span style=\"display:inline-block;width: 10em\">Upper right (lat/lng&deg;):</span> {{data.processing.clip.yMax | number : 6}}, {{data.processing.clip.xMax | number : 6}}\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Output format</th>\r\n					<td>{{data.processing.outFormat.value}}</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Coordinate system</th>\r\n					<td>{{data.processing.outCoordSys.value}}</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Email address</th>\r\n					<td>{{email}}</td>\r\n				</tr>\r\n				<tr ng-show=\"data.processing.filename\">\r\n					<th>Filename</th>\r\n					<td>{{data.processing.filename}}</td>\r\n				</tr>\r\n			</tbody>\r\n		</table>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" style=\"width:6em\" ng-click=\"stage=\'email\'\">Back</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-click=\"startExtract()\">Confirm</button>\r\n   			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-header\">\r\n\r\n        <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".ga-header-collapse\">\r\n            <span class=\"sr-only\">Toggle navigation</span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n        </button>\r\n\r\n        <a href=\"http://www.ga.gov.au\" class=\"hidden-xs header-logo\">\r\n            <img src=\"icsm/resources/img/fsdf-logo.png\" alt=\"ANZLIC the Spatial Information Council\" class=\"logo\"></img></a>\r\n        <a href=\"http://www.ga.gov.au\" class=\"visible-xs\"><img src=\"icsm/resources/img/icsm-logo-sml.gif\" alt=\"ICSM - ANZLIC Committee on Surveying &amp; Mapping\" class=\"logo-stacked\"></img></a>\r\n        <a href=\"/\" class=\"appTitle visible-xs\"><h1 style=\"font-size:120%\">{{heading}}</h1></a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right\">\r\n        	<li common-navigation ng-show=\"username\" role=\"menuitem\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n        <div class=\"breadcrumbsContainer hidden-xs\">\r\n            <ul class=\"breadcrumbs\">\r\n                <li class=\"first\"><a href=\"/\">Home</a></li>\r\n                <li ng-class=\"{last:$last}\" ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{crumb.url}}\" title=\"{{crumb.title}}\" >{{crumb.name}}</a></li>\r\n            </ul>\r\n        </div>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");
+$templateCache.put("common/iso19115/double.html","\r\n<ul ng-show=\"node\">\r\n   <li>\r\n      <span class=\"iso19115-head\">{{name | iso19115NodeName}}</span>\r\n      <iso19115-node name=\"MD_ScopeCode\" node=\"node.hierarchyLevel.MD_ScopeCode\" type=\"_codeListValue\"></iso19115-node>\r\n   </li>\r\n</ul>\r\n");
+$templateCache.put("common/iso19115/metadata.html","<div class=\"iso19115\">\r\n   <ul>\r\n      <li>\r\n         <span class=\"iso19115-head\">Metadata</span>\r\n         <iso19115-node name=\"fileIdentifier\" node=\"node.fileIdentifier\" type=\"CharacterString\"></iso19115-node>\r\n         <iso19115-node name=\"language\" node=\"node.language\" type=\"LanguageCode\"></iso19115-node>\r\n         <ul ng-show=\"node.characterSet\">\r\n            <li>\r\n               <span class=\"iso19115-head\">Character Set</span>\r\n               <iso19115-node name=\"CharacterSetCode\" node=\"node.characterSet.MD_CharacterSetCode\" type=\"_codeListValue\"></iso19115-node>\r\n            </li>\r\n         </ul>\r\n\r\n         <ul ng-show=\"node.hierarchyLevel\">\r\n            <li>\r\n               <span class=\"iso19115-head\">Hierarchy Level</span>\r\n               <iso19115-node name=\"MD_ScopeCode\" node=\"node.hierarchyLevel.MD_ScopeCode\" type=\"_codeListValue\"></iso19115-node>\r\n            </li>\r\n         </ul>\r\n         <iso19115-double node=\"node.hierarchyLevel\" name=\"MD_ScopeCode\" type=\"_codeListValue\"></iso19115-double>\r\n      </li>\r\n   </ul>\r\n</div>");
+$templateCache.put("common/metaview/dublincore.html","Dublin core");
+$templateCache.put("common/metaview/iso19115.html","<iso19115-metadata node=\"data.metadata.GetRecordByIdResponse.MD_Metadata\" key=\"\'MD_Metadata\'\"></iso19115-metadata>\r\n");
+$templateCache.put("common/metaview/iso19115node.html","<ul>\r\n   <li>\r\n      <span class=\"metaview-head\">{{key | metaviewNodeName}}</span>\r\n      <span>{{node | metaviewText}}</span>\r\n      <ng-repeat ng-if=\"isArray()\" ng-repeat=\"next in node\" node=\"next]\">\r\n         <metaview-iso19115-array ng-repeat=\"nextKey in getKeys() track by $index\" node=\"node[nextKey]\" key=\"nextKey\"></metaview-iso19115-array>\r\n      </ng-repeat>\r\n      <metaview-iso19115-node ng-if=\"!isArray()\" ng-repeat=\"nextKey in getKeys() track by $index\" node=\"node[nextKey]\" key=\"nextKey\"></metaview-iso19115-node>\r\n   </li>\r\n</ul>");
+$templateCache.put("common/metaview/item.html","<div>\r\n	<button class=\"btn btn-sm btn-outline-primary\" ng-click=\"container.selected = null\"><i class=\"fa fa-angle-double-left\"></i> Back</button>\r\n      <span style=\"font-weight: bold;padding-left:10px; font-size:130%\">{{container.selected.title}}</span>\r\n      <metaview-iso19115 data=\"container.selected\"></metaview-iso19115>\r\n</div>");
+$templateCache.put("common/metaview/metaview.html","<button type=\"button\" class=\"undecorated\" title=\"View metadata\" ng-click=\"select()\">\r\n	<i class=\"fa fa-lg fa-info metaview-info\"></i>\r\n</button>");
 $templateCache.put("common/navigation/altthemes.html","<span class=\"altthemes-container\">\r\n	<span ng-repeat=\"item in themes\">\r\n       <a title=\"{{item.label}}\" ng-href=\"{{item.url}}\" class=\"altthemesItemCompact\">\r\n         <span class=\"altthemes-icon\" ng-class=\"item.className\"></span>\r\n       </a>\r\n    </li>\r\n</span>");
 $templateCache.put("common/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" icsm-toolbar-row map=\"root.map\"></div>\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div icsm-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'download\'\" icsm-view></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'maps\'\" icsm-maps></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" icsm-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" icsm-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n		<button class=\"undecorated\">Download</button>\r\n	</div>\r\n	<!-- \r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n	-->\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");

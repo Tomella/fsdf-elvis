@@ -11,7 +11,11 @@ angular.module("WaterApp", [
       'common.download',
 	 	'common.extent',
 	 	'common.header',
+	 	'common.iso19115',
+	 	'common.metaview',
       'common.navigation',
+		'common.recursionhelper',
+		'common.storage',
       'common.templates',
 	 	'common.toolbar',
 	 	'common.wms',
@@ -27,7 +31,6 @@ angular.module("WaterApp", [
       'explorer.legend',
       'explorer.message',
 	 	'explorer.modal',
-	 	'explorer.persist',
 	 	'explorer.projects',
 	 	'explorer.tabs',
 	 	'explorer.version',
@@ -53,16 +56,18 @@ angular.module("WaterApp", [
 
 	 	'water.panes',
 	 	'water.templates',
-      'water.select'
+      'water.select',
+		'water.vector',
+		'water.vector.download',
+		'water.vector.geoprocess'
 ])
 
 // Set up all the service providers here.
-.config(['configServiceProvider', 'persistServiceProvider', 'projectsServiceProvider', 'versionServiceProvider',
-         function(configServiceProvider, persistServiceProvider, projectsServiceProvider, versionServiceProvider) {
+.config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider',
+         function(configServiceProvider, projectsServiceProvider, versionServiceProvider) {
 	configServiceProvider.location("icsm/resources/config/water.json");
    configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
 	versionServiceProvider.url("icsm/assets/package.json");
-	persistServiceProvider.handler("local");
 	projectsServiceProvider.setProject("icsm");
 }])
 

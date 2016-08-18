@@ -57,7 +57,7 @@ angular.module('common.altthemes', [])
    	};
 	})
 
-	.factory('altthemesService', ['$q', '$http', 'persistService', function($q, $http, persistService) {
+	.factory('altthemesService', ['$q', '$http', 'storageService', function($q, $http, storageService) {
 		var THEME_PERSIST_KEY = 'icsm.current.theme';
       var THEMES_LOCATION = 'icsm/resources/config/themes.json';
 		var DEFAULT_THEME = "All";
@@ -67,7 +67,7 @@ angular.module('common.altthemes', [])
 		this.themes = [];
 		this.theme = null;
 
-		persistService.getItem(THEME_PERSIST_KEY).then(function(value) {
+		storageService.getItem(THEME_PERSIST_KEY).then(function(value) {
 			if(!value) {
 				value = DEFAULT_THEME;
 			}
@@ -105,7 +105,7 @@ angular.module('common.altthemes', [])
 
 		this.setTheme = function(key) {
 			this.theme = this.themes[key];
-			persistService.setItem(THEME_PERSIST_KEY, key);
+			storageService.setItem(THEME_PERSIST_KEY, key);
 		};
 
 		return this;

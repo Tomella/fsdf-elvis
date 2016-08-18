@@ -332,11 +332,10 @@ angular.module("common.geoprocess", [])
 	};
 });
 
-GeoprocessService.$invoke = ['$http', '$q', '$timeout', 'configService', 'downloadService', 'ga', 'mapService', 'downloadService'];
-function GeoprocessService($http, $q, $timeout, configService, downloadService, mapService, persistService) {
+GeoprocessService.$invoke = ['$http', '$q', '$timeout', 'configService', 'downloadService', 'ga', 'mapService', 'storageService'];
+function GeoprocessService($http, $q, $timeout, configService, downloadService, mapService, storageService) {
 	var DEFAULT_DATASET = "dems1sv1_0", // TODO: We have to get this from the metadata somehow.
 		geoprocessingTemplates,
-		GEOPROCESS_LOGGING_URL = "service/log/geoprocess",
 		clipLayer = null,
 		map;
 
@@ -462,7 +461,6 @@ function GeoprocessService($http, $q, $timeout, configService, downloadService, 
 			$("#launcher")[0].src = workingString;
 
 			downloadService.setEmail(email);
-			$http.post(GEOPROCESS_LOGGING_URL, log);
 
 			ga('send', 'event', 'nedf', 'click', 'FME data export: ' + JSON.stringify(log));
 		},

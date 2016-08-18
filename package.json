@@ -11,6 +11,7 @@
     "name": "Geoscience Australia",
     "url": "http://www.ga.gov.au/"
   },
+  "license": "Apache-2.0",
   "homepage": "http://www.ga.gov.au/",
   "repository": {
     "type": "git",
@@ -18,8 +19,11 @@
   },
   "dependencies": {
     "express": "^4.13.3",
+    "express-http-proxy": "^0.9.1",
     "request": "^2.74.0",
-    "wiredep": "^3.0.1"
+    "wiredep": "^3.0.1",
+    "x2js": "^2.0.1",
+    "yargs": "^4.8.1"
   },
   "devDependencies": {
     "gulp-insert": "^0.5.0",

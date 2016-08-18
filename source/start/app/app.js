@@ -6,6 +6,7 @@ angular.module("StartApp", [
 	 	'common.altthemes',
 	 	'common.header',
       'common.navigation',
+		'common.storage',
       'common.templates',
 
       'explorer.config',
@@ -19,7 +20,6 @@ angular.module("StartApp", [
       'explorer.legend',
       'explorer.message',
 	 	'explorer.modal',
-	 	'explorer.persist',
 	 	'explorer.projects',
 	 	'explorer.tabs',
 	 	'explorer.version',
@@ -36,12 +36,11 @@ angular.module("StartApp", [
 ])
 
 // Set up all the service providers here.
-.config(['configServiceProvider', 'persistServiceProvider', 'projectsServiceProvider', 'versionServiceProvider',
-         function(configServiceProvider, persistServiceProvider, projectsServiceProvider, versionServiceProvider) {
+.config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider',
+         function(configServiceProvider, projectsServiceProvider, versionServiceProvider) {
 	configServiceProvider.location("icsm/resources/config/start.json");
    configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
 	versionServiceProvider.url("icsm/assets/package.json");
-	persistServiceProvider.handler("local");
 	projectsServiceProvider.setProject("icsm");
 }])
 

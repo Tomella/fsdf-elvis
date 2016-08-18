@@ -67,7 +67,7 @@ angular.module("common.download", ['common.geoprocess'])
 		},
 		link : function(scope, element) {
 			scope.toggle = function() {
-				if(scope.item.download) {
+				if(scope.group && scope.group.download) {
 					downloadService.clear(scope.item);
 				} else {
 					flashService.add("Select an area of interest that intersects the highlighted areas.");
@@ -149,8 +149,8 @@ function DownloadCtrl(downloadService) {
 	};
 }
 
-DownloadService.$inject = ['$http', '$q', '$rootScope', 'mapService', 'persistService'];
-function DownloadService($http, $q, $rootScope, mapService, persistService) {
+DownloadService.$inject = ['$http', '$q', '$rootScope', 'mapService', 'storageService'];
+function DownloadService($http, $q, $rootScope, mapService, storageService) {
 	var key = "download_email",
 		downloadLayerGroup = "Download Layers",
 
@@ -224,11 +224,11 @@ function DownloadService($http, $q, $rootScope, mapService, persistService) {
 		},
 
 		setEmail : function(email) {
-			persistService.setItem(key, email);
+			storageService.setItem(key, email);
 		},
 
 		getEmail : function() {
-			return persistService.getItem(key).then(function(value) {
+			return storageService.getItem(key).then(function(value) {
 				data.email = value;
 				return value;
 			});
