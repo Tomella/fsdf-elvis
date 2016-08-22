@@ -141,9 +141,9 @@ app.get('/xml2js/*', function (req, res, next) {
     }, function (error, response, body) {
         var code = 500;
         var x2js, text, headers, decoder = new StringDecoder('utf8');
-if(error) {
-    console.log("Err", error);
-}
+        if(error) {
+            console.log("Err", error);
+        }
         if (body) {
             code = response.statusCode;
             headers = filterHeaders(req, response.headers);
