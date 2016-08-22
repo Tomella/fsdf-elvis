@@ -1,10 +1,18 @@
 {
    "group": {
+      "primaryId": "vect01",
       "title": "Surface Hydrology",
       "showExtent": true,
       "bbox":"112.8 -44.0 154.1 -8.9",
+      "tileCache": "http://services.ga.gov.au/gis/rest/services/Surface_Hydrology_WM/MapServer/tile/{z}/{y}/{x}",
+      "tileCacheOptions": {
+         "bounds": [
+            [-44, 112.8],
+            [-9, 153]
+         ]
+      },
       "spatial": {
-         "westLongitude": 112.8,
+         "westLongitude": 112.85,
          "eastLongitude": 154.1,
          "northLatitude": -8.9,
          "southLatitude": -44.0,
