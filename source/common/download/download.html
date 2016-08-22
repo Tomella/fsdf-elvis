@@ -2,11 +2,10 @@
 	<div style="padding:5px;">
 		<div class="row">
   			<div class="col-md-12">
-				<h4><nedf-wms data="dl.data.item"></nedf-wms>{{dl.data.item.title}}</h4>
+				<h4><common-wms data="dl.data.item"></common-wms><common-tile data="dl.data.item"></common-tile>{{dl.data.item.title}}</h4>
 				{{dl.data.item.abstract}}
    			</div>
 		</div>
 		<nedf-geoprocess data="dl.data.item"></nedf-geoprocess>
-    	<div nedf-wcs data="dl.data.item" ng-show="dl.data.item.services.hasWcs()"></div>
 	</div>
 </exp-modal>
