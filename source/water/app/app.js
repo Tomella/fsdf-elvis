@@ -17,6 +17,7 @@ angular.module("WaterApp", [
 		'common.recursionhelper',
 		'common.storage',
       'common.templates',
+      'common.tile',
 	 	'common.toolbar',
 	 	'common.wms',
 

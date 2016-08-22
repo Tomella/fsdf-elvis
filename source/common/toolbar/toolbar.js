@@ -16,12 +16,18 @@ angular.module("common.toolbar", [])
  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
  */
 .directive('icsmToolbarRow', [function() {
+	var DEFAULT_TITLE  = "Satellite to Topography bias on base map.";
+
 	return {
 		scope:{
-			map:"="
+			map:"=",
+			title: "="
 		},
 		restrict:'AE',
-		templateUrl:'common/toolbar/toolbar.html'
+		templateUrl:'common/toolbar/toolbar.html',
+		link: function(scope) {
+			scope.title = scope.title? scope.title: DEFAULT_TITLE;
+		}
 	};
 }])
 

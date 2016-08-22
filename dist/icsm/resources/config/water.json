@@ -27,27 +27,21 @@
             "visible":true
          },
          {
-            "name":"Australian Topography",
+            "name":"Water observations from space",
             "pseudoBaseLayer" : true,
-            "type":["TileLayer"],
-            "key":"topography",
+            "type":["TileLayer", "WMS"],
+            "key":"wofs",
             "parameters":[
-                "http://services.ga.gov.au/gis/rest/services/NationalMap_Colour_Topographic_Base_World_WM/MapServer/tile/{z}/{y}/{x}",
+                "http://geoserver.nci.org.au/geoserver/NFRIP-WOfS/wms",
                 {
-                   "layers" : "Image",
+                   "layers" : "WaterSummaryFiltered",
                    "format" : "image/png",
                    "transparent" : true,
-                   "opacity" : 0.7
+                   "opacity" : 1
                 }
             ],
             "addLayerControl":false,
             "visible":true
-         },
-         {
-         	"description" : "placeholder for layers above the topography",
-         	"name" : "ELVIS - Foundation Spatial Data Map Layers",
-         	"type" : "LayerGroup",
-         	"layers": []
          },
          {
          	"description" : "placeholder for layers above the map layers",

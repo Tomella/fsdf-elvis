@@ -471,270 +471,6 @@ under the License.
 		};
 	}
 })(angular);
-"use strict";
-
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
-(function (angular) {
-	'use strict';
-
-	angular.module("icsm.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
-		return {
-			templateUrl: "icsm/panes/panes.html",
-			transclude: true,
-			scope: {
-				defaultItem: "@",
-				data: "="
-			},
-			controller: ['$scope', function ($scope) {
-				var changeSize = false;
-
-				$scope.view = $scope.defaultItem;
-
-				$scope.setView = function (what) {
-					var oldView = $scope.view;
-
-					if ($scope.view == what) {
-						if (what) {
-							changeSize = true;
-						}
-						$scope.view = "";
-					} else {
-						if (!what) {
-							changeSize = true;
-						}
-						$scope.view = what;
-					}
-
-					$rootScope.$broadcast("view.changed", $scope.view, oldView);
-
-					if (changeSize) {
-						mapService.getMap().then(function (map) {
-							map._onResize();
-						});
-					}
-				};
-				$timeout(function () {
-					$rootScope.$broadcast("view.changed", $scope.view, null);
-				}, 50);
-			}]
-		};
-	}]).directive("icsmTabs", [function () {
-		return {
-			templateUrl: "icsm/panes/tabs.html",
-			require: "^icsmPanes"
-		};
-	}]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
-
-	PaneCtrl.$inject = ["paneService"];
-	function PaneCtrl(paneService) {
-		paneService.data().then(function (data) {
-			this.data = data;
-		}.bind(this));
-	}
-
-	PaneService.$inject = [];
-	function PaneService() {
-		var data = {};
-
-		return {
-			add: function add(item) {},
-
-			remove: function remove(item) {}
-		};
-	}
-})(angular);
-'use strict';
-
-(function (mapevents) {
-   'use strict';
-
-   angular.module("icsm.mapevents", ['geo.map']).directive('icsmMapevents', ['icsmMapeventsService', function (icsmMapeventsService) {
-      return {
-         restrict: 'AE',
-         link: function link(scope) {
-            icsmMapeventsService.tickle();
-         }
-      };
-   }]).factory('icsmMapeventsService', ['$rootScope', '$timeout', 'configService', 'mapService', function ($rootScope, $timeout, configService, mapService) {
-      var marker, poly, bounds;
-      var config = configService.getConfig("mapConfig");
-      $rootScope.$on('icsm.bounds.draw', function showBbox(event, bbox) {
-         // 149.090045383719,-35.4,149.4,-35.3
-         if (!bbox) {
-            makeBounds(null);
-            return;
-         }
-
-         var xmax = bbox[2],
-             xmin = bbox[0],
-             ymax = bbox[3],
-             ymin = bbox[1];
-
-         // It's a bbox.
-         makeBounds({
-            type: "Feature",
-            geometry: {
-               type: "Polygon",
-               coordinates: [[[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax], [xmin, ymin]]]
-            },
-            properties: {}
-         }, false);
-      });
-
-      $rootScope.$on('icsm.bbox.draw', function showBbox(event, bbox) {
-         // 149.090045383719,-35.4,149.4,-35.3
-         if (!bbox) {
-            makePoly(null);
-            return;
-         }
-
-         var xmax = bbox[2],
-             xmin = bbox[0],
-             ymax = bbox[3],
-             ymin = bbox[1];
-
-         // It's a bbox.
-         makePoly({
-            type: "Feature",
-            geometry: {
-               type: "Polygon",
-               coordinates: [[[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax], [xmin, ymin]]]
-            },
-            properties: {}
-         }, false);
-      });
-      $rootScope.$on('icsm.poly.draw', function showBbox(event, geojson) {
-         // It's a GeoJSON Polygon geometry and it has a single ring.
-         makePoly(geojson, true);
-      });
-
-      if (config.listenForMarkerEvent) {
-         $rootScope.$on(config.listenForMarkerEvent, function showBbox(event, geojson) {
-            // It's a GeoJSON Polygon geometry and it has a single ring.
-            makeMarker(geojson);
-         });
-      }
-
-      function makeMarker(data) {
-         mapService.getMap().then(function (map) {
-            if (marker) {
-               map.removeLayer(marker);
-            }
-            if (!data) {
-               return;
-            }
-
-            var point;
-            if (typeof data.properties.SAMPLE_LONGITUDE != "undefined") {
-               point = {
-                  type: "Point",
-                  coordinates: [data.properties.SAMPLE_LONGITUDE, data.properties.SAMPLE_LATITUDE]
-               };
-            } else {
-               point = data.geometry;
-            }
-
-            marker = L.geoJson({
-               type: "Feature",
-               geometry: point,
-               id: data.id
-            }).addTo(map);
-
-            if (data.properties.html) {
-               marker.bindPopup(data.properties.html).openPopup();
-            }
-         });
-      }
-
-      function makePoly(data, zoomTo) {
-         console.log("pre getting map to make poly");
-         mapService.getMap().then(function (map) {
-            console.log("getting map to make poly");
-            if (poly) {
-               map.removeLayer(poly);
-            }
-
-            if (data) {
-               poly = L.geoJson(data, {
-                  style: function style(feature) {
-                     return {
-                        opacity: 1,
-                        clickable: false,
-                        fillOpacity: 0,
-                        color: "red"
-                     };
-                  }
-               }).addTo(map);
-
-               if (zoomTo) {
-                  $timeout(function () {
-                     var bounds = poly.getBounds();
-                     map.fitBounds(bounds, {
-                        animate: true,
-                        padding: L.point(100, 100)
-                     });
-                  }, 50);
-               }
-            }
-         });
-      }
-
-      function makeBounds(data, zoomTo) {
-         console.log("pre getting map to make bounds");
-         mapService.getMap().then(function (map) {
-            console.log("getting map to make poly");
-            if (bounds) {
-               map.removeLayer(bounds);
-            }
-
-            if (data) {
-               bounds = L.geoJson(data, {
-                  style: function style(feature) {
-                     return {
-                        opacity: 1,
-                        clickable: false,
-                        fillOpacity: 0,
-                        color: "black"
-                     };
-                  }
-               }).addTo(map);
-
-               if (zoomTo) {
-                  $timeout(function () {
-                     var boundingBox = bounds.getBounds();
-                     map.fitBounds(boundingBox, {
-                        animate: true,
-                        padding: L.point(100, 100)
-                     });
-                  }, 50);
-               }
-            }
-         });
-      }
-
-      function clip(num, min, max) {
-         return Math.min(Math.max(num, min), max);
-      }
-
-      return {
-         tickle: function tickle() {
-            mapService.getMap().then(function (map) {
-               map.on('click', function (event) {
-                  var zoom = map.getZoom();
-                  var latlng = event.latlng;
-                  $rootScope.$broadcast("zoom.to", {
-                     zoom: zoom,
-                     latlng: latlng
-                  });
-               });
-            });
-         }
-      };
-   }]);
-})();
 'use strict';
 
 /*!
@@ -1022,6 +758,270 @@ under the License.
          return (size / ter).toFixed(1) + " TB";
       };
    });
+})(angular);
+'use strict';
+
+(function (mapevents) {
+   'use strict';
+
+   angular.module("icsm.mapevents", ['geo.map']).directive('icsmMapevents', ['icsmMapeventsService', function (icsmMapeventsService) {
+      return {
+         restrict: 'AE',
+         link: function link(scope) {
+            icsmMapeventsService.tickle();
+         }
+      };
+   }]).factory('icsmMapeventsService', ['$rootScope', '$timeout', 'configService', 'mapService', function ($rootScope, $timeout, configService, mapService) {
+      var marker, poly, bounds;
+      var config = configService.getConfig("mapConfig");
+      $rootScope.$on('icsm.bounds.draw', function showBbox(event, bbox) {
+         // 149.090045383719,-35.4,149.4,-35.3
+         if (!bbox) {
+            makeBounds(null);
+            return;
+         }
+
+         var xmax = bbox[2],
+             xmin = bbox[0],
+             ymax = bbox[3],
+             ymin = bbox[1];
+
+         // It's a bbox.
+         makeBounds({
+            type: "Feature",
+            geometry: {
+               type: "Polygon",
+               coordinates: [[[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax], [xmin, ymin]]]
+            },
+            properties: {}
+         }, false);
+      });
+
+      $rootScope.$on('icsm.bbox.draw', function showBbox(event, bbox) {
+         // 149.090045383719,-35.4,149.4,-35.3
+         if (!bbox) {
+            makePoly(null);
+            return;
+         }
+
+         var xmax = bbox[2],
+             xmin = bbox[0],
+             ymax = bbox[3],
+             ymin = bbox[1];
+
+         // It's a bbox.
+         makePoly({
+            type: "Feature",
+            geometry: {
+               type: "Polygon",
+               coordinates: [[[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax], [xmin, ymin]]]
+            },
+            properties: {}
+         }, false);
+      });
+      $rootScope.$on('icsm.poly.draw', function showBbox(event, geojson) {
+         // It's a GeoJSON Polygon geometry and it has a single ring.
+         makePoly(geojson, true);
+      });
+
+      if (config.listenForMarkerEvent) {
+         $rootScope.$on(config.listenForMarkerEvent, function showBbox(event, geojson) {
+            // It's a GeoJSON Polygon geometry and it has a single ring.
+            makeMarker(geojson);
+         });
+      }
+
+      function makeMarker(data) {
+         mapService.getMap().then(function (map) {
+            if (marker) {
+               map.removeLayer(marker);
+            }
+            if (!data) {
+               return;
+            }
+
+            var point;
+            if (typeof data.properties.SAMPLE_LONGITUDE != "undefined") {
+               point = {
+                  type: "Point",
+                  coordinates: [data.properties.SAMPLE_LONGITUDE, data.properties.SAMPLE_LATITUDE]
+               };
+            } else {
+               point = data.geometry;
+            }
+
+            marker = L.geoJson({
+               type: "Feature",
+               geometry: point,
+               id: data.id
+            }).addTo(map);
+
+            if (data.properties.html) {
+               marker.bindPopup(data.properties.html).openPopup();
+            }
+         });
+      }
+
+      function makePoly(data, zoomTo) {
+         console.log("pre getting map to make poly");
+         mapService.getMap().then(function (map) {
+            console.log("getting map to make poly");
+            if (poly) {
+               map.removeLayer(poly);
+            }
+
+            if (data) {
+               poly = L.geoJson(data, {
+                  style: function style(feature) {
+                     return {
+                        opacity: 1,
+                        clickable: false,
+                        fillOpacity: 0,
+                        color: "red"
+                     };
+                  }
+               }).addTo(map);
+
+               if (zoomTo) {
+                  $timeout(function () {
+                     var bounds = poly.getBounds();
+                     map.fitBounds(bounds, {
+                        animate: true,
+                        padding: L.point(100, 100)
+                     });
+                  }, 50);
+               }
+            }
+         });
+      }
+
+      function makeBounds(data, zoomTo) {
+         console.log("pre getting map to make bounds");
+         mapService.getMap().then(function (map) {
+            console.log("getting map to make poly");
+            if (bounds) {
+               map.removeLayer(bounds);
+            }
+
+            if (data) {
+               bounds = L.geoJson(data, {
+                  style: function style(feature) {
+                     return {
+                        opacity: 1,
+                        clickable: false,
+                        fillOpacity: 0,
+                        color: "black"
+                     };
+                  }
+               }).addTo(map);
+
+               if (zoomTo) {
+                  $timeout(function () {
+                     var boundingBox = bounds.getBounds();
+                     map.fitBounds(boundingBox, {
+                        animate: true,
+                        padding: L.point(100, 100)
+                     });
+                  }, 50);
+               }
+            }
+         });
+      }
+
+      function clip(num, min, max) {
+         return Math.min(Math.max(num, min), max);
+      }
+
+      return {
+         tickle: function tickle() {
+            mapService.getMap().then(function (map) {
+               map.on('click', function (event) {
+                  var zoom = map.getZoom();
+                  var latlng = event.latlng;
+                  $rootScope.$broadcast("zoom.to", {
+                     zoom: zoom,
+                     latlng: latlng
+                  });
+               });
+            });
+         }
+      };
+   }]);
+})();
+"use strict";
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function (angular) {
+	'use strict';
+
+	angular.module("icsm.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
+		return {
+			templateUrl: "icsm/panes/panes.html",
+			transclude: true,
+			scope: {
+				defaultItem: "@",
+				data: "="
+			},
+			controller: ['$scope', function ($scope) {
+				var changeSize = false;
+
+				$scope.view = $scope.defaultItem;
+
+				$scope.setView = function (what) {
+					var oldView = $scope.view;
+
+					if ($scope.view == what) {
+						if (what) {
+							changeSize = true;
+						}
+						$scope.view = "";
+					} else {
+						if (!what) {
+							changeSize = true;
+						}
+						$scope.view = what;
+					}
+
+					$rootScope.$broadcast("view.changed", $scope.view, oldView);
+
+					if (changeSize) {
+						mapService.getMap().then(function (map) {
+							map._onResize();
+						});
+					}
+				};
+				$timeout(function () {
+					$rootScope.$broadcast("view.changed", $scope.view, null);
+				}, 50);
+			}]
+		};
+	}]).directive("icsmTabs", [function () {
+		return {
+			templateUrl: "icsm/panes/tabs.html",
+			require: "^icsmPanes"
+		};
+	}]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
+
+	PaneCtrl.$inject = ["paneService"];
+	function PaneCtrl(paneService) {
+		paneService.data().then(function (data) {
+			this.data = data;
+		}.bind(this));
+	}
+
+	PaneService.$inject = [];
+	function PaneService() {
+		var data = {};
+
+		return {
+			add: function add(item) {},
+
+			remove: function remove(item) {}
+		};
+	}
 })(angular);
 "use strict";
 
@@ -1566,32 +1566,6 @@ under the License.
 /*!
  * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
  */
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module('icsm.state', []).directive("icsmStateToggle", ['downloadService', function (downloadService) {
-		return {
-			restrict: 'AE',
-			template: '<button ng-click="toggle(false)" ng-disabled="state.show" class="btn btn-default" title="Start downlaod selection."><i class="fa fa-lg fa-object-group"></i></button>',
-			link: function link(scope) {
-				downloadService.data().then(function (data) {
-					scope.state = data;
-				});
-
-				scope.toggle = function () {
-					scope.state.show = !scope.state.show;
-				};
-			}
-		};
-	}]);
-})(angular);
-'use strict';
-
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
 (function (angular) {
 
 	'use strict';
@@ -1706,6 +1680,32 @@ under the License.
 				}
 			});
 			return response;
+		};
+	}]);
+})(angular);
+'use strict';
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function (angular) {
+
+	'use strict';
+
+	angular.module('icsm.state', []).directive("icsmStateToggle", ['downloadService', function (downloadService) {
+		return {
+			restrict: 'AE',
+			template: '<button ng-click="toggle(false)" ng-disabled="state.show" class="btn btn-default" title="Start downlaod selection."><i class="fa fa-lg fa-object-group"></i></button>',
+			link: function link(scope) {
+				downloadService.data().then(function (data) {
+					scope.state = data;
+				});
+
+				scope.toggle = function () {
+					scope.state.show = !scope.state.show;
+				};
+			}
 		};
 	}]);
 })(angular);
@@ -1984,9 +1984,9 @@ $templateCache.put("icsm/clip/infobbox.html","<div class=\"\">\r\n	<strong style
 $templateCache.put("icsm/glossary/glossary.html","<div ng-controller=\"GlossaryCtrl as glossary\">\r\n	<div style=\"position:relative;padding:5px;padding-left:10px;\" >\r\n		<div class=\"panel panel-default\" style=\"padding:5px;\" >\r\n			<div class=\"panel-heading\">\r\n				<h3 class=\"panel-title\">Glossary</h3>\r\n			</div>\r\n			<div class=\"panel-body\">\r\n				\r\n				\r\n	<table class=\"table table-striped\">\r\n		<thead>\r\n			<tr>\r\n				<th>Term</th>\r\n				<th>Definition</th>\r\n			</tr>\r\n		</thead>\r\n		<tbody>\r\n			<tr ng-repeat=\"term in glossary.terms\">\r\n				<td>{{term.term}}</td>\r\n				<td>{{term.definition}}</td>\r\n			</tr>\r\n		</tbody>\r\n	</table>\r\n</div>\r\n</div>\r\n</div>");
 $templateCache.put("icsm/help/faqs.html","<div class=\"container\" style=\"width:100%;border: 1px solid lightgray\">\r\n	<p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n		<strong>FAQS</strong>\r\n	</p>	\r\n\r\n	<h5 ng-repeat=\"faq in faqs\"><button type=\"button\" class=\"undecorated\" ng-click=\"focus(faq.key)\">{{faq.question}}</button></h5>\r\n	<hr/>\r\n	<div class=\"row\" ng-repeat=\"faq in faqs\">\r\n		<div class=\"col-md-12\">\r\n			<h5 tabindex=\"0\" id=\"faqs_{{faq.key}}\">{{faq.question}}</h5>\r\n			<span ng-bind-html=\"faq.answer\"></span>\r\n			<hr/>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/help/help.html","<div ng-controller=\"HelpCtrl as help\">\r\n	<div style=\"position:relative;padding:5px;padding-left:10px;\" >\r\n		<div class=\"panel panel-default\" style=\"padding:5px;\" >\r\n			<div class=\"panel-heading\">\r\n				<h3 class=\"panel-title\">Help</h3>\r\n			</div>\r\n			<div class=\"panel-body\">\r\n				The steps to get data!\r\n				<ol>\r\n					<li>Select dataset of interest <i class=\"fa fa-download\"></i> from Select tab</li>\r\n					<li>Define area</li>\r\n					<li>Select output format</li>\r\n					<li>Select coordinate system</li>\r\n					<li>Enter email address</li>\r\n					<li>Submit entries</li>\r\n				</ol>\r\n				An email will be sent to you on completion of the data extract with a link to your data.\r\n				<icsm-faqs faqs=\"help.faqs\" ></icsm-faqs>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
+$templateCache.put("icsm/list/list.html","<div ng-show=\"!list || !list.length\">\r\n	<div class=\"alert alert-warning\" role=\"alert\"><strong>Select an area</strong> to find datasets within.</div>\r\n</div>\r\n\r\n<div ng-show=\"list.length\">\r\n   <div class=\"row\">\r\n      <div class=\"col-md-5\" uib-tooltip=\"Number of intersecting or very near datasets to your area of interest.\">\r\n	      <h4 style=\"display:inline-block\">Found {{matched()| number}} datasets</h4>\r\n      </div>\r\n      <div class=\"col-md-7\">\r\n         <div class=\"input-group input-group-sm\">\r\n            <span class=\"input-group-addon\" id=\"names1\">Filter:</span>\r\n            <input type=\"text\" ng-model=\"filter\" class=\"form-control\"\r\n                   ng-change=\"update()\" placeholder=\"Filter names\" aria-describedby=\"names1\">\r\n         </div>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-12\">\r\n         <div class=\"panel panel-default\">\r\n            <div class=\"panel-body\">\r\n               <span class=\"listTypeLabel\">Filter by type:</span>\r\n               <span ng-repeat=\"type in filetypes\" class=\"listType\">\r\n                  <input type=\"checkbox\" ng-model=\"type.selected\" ng-change=\"update()\"/>\r\n                  <span uib-tooltip=\"{{type.description}}\">{{type.label}} ({{type.count}})</span>\r\n               </span>\r\n            </div>\r\n         </div>\r\n      </div>\r\n   </div>\r\n\r\n   <div ng-repeat=\"available in filteredList\" class=\"well\">\r\n      <h5>\r\n         <button class=\"undecorated\" ng-click=\"expansions[available.source] = !expansions[available.source]\" uib-tooltip=\"Click to collapse/expand this group\"\r\n                  aria-expanded=\"true\" aria-controls=\"collapse{{mappings[available.source].code}}\">\r\n            <img ng-src=\"{{mappings[available.source].image}}\" ng-attr-style=\"height:{{mappings[available.source].height}}px\"></img>\r\n         </button>\r\n         <strong>{{available.source}}</strong>\r\n         (Showing {{available.downloadables.length}} of {{fullCount(available.source)}})\r\n         <span class=\"listTopExpander\">\r\n            <button class=\"undecorated\" ng-click=\"expansions[available.source] = !expansions[available.source]\">\r\n               [{{expansions[available.source]?\"collapse\":\"expand\"}}]\r\n            </button>\r\n         </span>\r\n      </h5>\r\n      <div uib-collapse=\"!expansions[available.source]\">\r\n         <div class=\"listRow\" ng-class-odd=\"\'listEven\'\" ng-repeat=\"(key, items) in available.group\">\r\n            <div ng-if=\"key == \'ell\'\">\r\n               <h5>hhhhhhhhhhhh\r\n                  <span uib-tooltip=\"{{filetypes[key].description}}\">{{filetypes[key].label}}</span>\r\n                  <input type=\"checkbox\" />\r\n               </h5>\r\n               <div ng-repeat=\"item in items\"\r\n                     data-ng-mouseenter=\"show(item)\" data-ng-mouseleave=\"hide(item)\">\r\n                  <a href=\"{{item.ell_url}}\">\r\n                     <i class=\"fa fa-lg fa-download\"></i>\r\n                  </a>\r\n                  <common-cc4></common-cc4>\r\n                  <spam class=\"listItem\">{{item.ell_name}}</spam>\r\n                  <span style=\"float:right;width:8em\">Size: {{item.file_size_ell | fileSize}}</span>\r\n               </div>\r\n            </div>\r\n            <div ng-if=\"key == \'las\'\">\r\n               <h5>\r\n                  <span uib-tooltip=\"{{filetypes[key].description}}\">{{filetypes[key].label}}</span>\r\n                  <input type=\"checkbox\" />\r\n               </h5>\r\n               <div ng-repeat=\"item in items\"\r\n                     data-ng-mouseenter=\"show(item)\" data-ng-mouseleave=\"hide(item)\">\r\n                  <a href=\"{{item.las_url}}\">\r\n                     <i class=\"fa fa-lg fa-download\"></i>\r\n                  </a>\r\n                  <common-cc4></common-cc4>\r\n                  <spam class=\"listItem\">{{item.las_name}}</spam>\r\n                  <span style=\"float:right;width:8em\">Size: {{item.file_size_las | fileSize}}</span>\r\n               </div>\r\n            </div>\r\n            <div ng-if=\"key == \'ort\'\">\r\n               <h5>\r\n                  <span uib-tooltip=\"{{filetypes[key].description}}\">{{filetypes[key].label}}</span>\r\n                  <input type=\"checkbox\" />\r\n               </h5>\r\n               <div ng-repeat=\"item in items\"\r\n                     data-ng-mouseenter=\"show(item)\" data-ng-mouseleave=\"hide(item)\">\r\n                  <a href=\"{{item.ort_url}}\">\r\n                     <i class=\"fa fa-lg fa-download\"></i>\r\n                  </a>\r\n                  <common-cc4></common-cc4>\r\n                  <spam class=\"listItem\">{{item.ort_name}}</spam>\r\n                  <span style=\"float:right;width:8em\">Size: {{item.file_size_ort | fileSize}}</span>\r\n               </div>\r\n            </div>\r\n            <div ng-if=\"key == \'asc\'\">\r\n               <h5>\r\n                  <span uib-tooltip=\"{{filetypes[key].description}}\">{{filetypes[key].label}}</span>\r\n                  <input type=\"checkbox\" />\r\n               </h5>\r\n               <div ng-repeat=\"item in items\"\r\n                     data-ng-mouseenter=\"show(item)\" data-ng-mouseleave=\"hide(item)\">\r\n                  <div>\r\n                     <a href=\"{{item.asc_url}}\">\r\n                        <i class=\"fa fa-lg fa-download\"></i>\r\n                     </a>\r\n                     <common-cc4></common-cc4>\r\n                     <spam class=\"listItem\">{{item.asc_name}}</spam>\r\n                     <span style=\"float:right;width:8em\">Size: {{item.file_size_asc | fileSize}}</span>\r\n                  </div>\r\n                  <div>\r\n                     <a href=\"{{item.prj_url}}\">\r\n                        <i class=\"fa fa-lg fa-download\"></i>\r\n                     </a>\r\n                     <common-cc4></common-cc4>\r\n                     <spam class=\"listItem\">{{item.prj_name}}</spam>\r\n                     <span style=\"float:right;width:8em\">Size: {{item.file_size_prj | fileSize}}</span>\r\n                  </div>\r\n               </div>\r\n            </div>\r\n            <div ng-if=\"key == \'dem\'\">\r\n               <h5>\r\n                  <span uib-tooltip=\"{{filetypes[key].description}}\">{{filetypes[key].label}}</span>\r\n                  <input type=\"checkbox\" />\r\n               </h5>\r\n               <div ng-repeat=\"item in items\"\r\n                     data-ng-mouseenter=\"show(item)\" data-ng-mouseleave=\"hide(item)\">\r\n                  <a href=\"{{item.dem_url}}\">\r\n                     <i class=\"fa fa-lg fa-download\"></i>\r\n                  </a>\r\n                  <common-cc4></common-cc4>\r\n                  <spam class=\"listItem\">{{item.dem_name}}</spam>\r\n                  <span style=\"float:right;width:8em\">Size: {{item.file_size_dem | fileSize}}</span>\r\n               </div>\r\n            </div>\r\n         </div>\r\n         <div style=\"text-align:right\"><button class=\"undecorated\" ng-click=\"expansions[available.source] = false\">[collapse]</button></div>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" icsm-toolbar-row map=\"root.map\"></div>\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div icsm-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'download\'\" icsm-view></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'maps\'\" icsm-maps></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" icsm-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" icsm-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n		<button class=\"undecorated\">Download</button>\r\n	</div>\r\n	<!-- \r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n	-->\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");
-$templateCache.put("icsm/list/list.html","<div ng-show=\"!list || !list.length\">\r\n	<div class=\"alert alert-warning\" role=\"alert\"><strong>Select an area</strong> to find datasets within.</div>\r\n</div>\r\n\r\n<div ng-show=\"list.length\">\r\n   <div class=\"row\">\r\n      <div class=\"col-md-5\" uib-tooltip=\"Number of intersecting or very near datasets to your area of interest.\">\r\n	      <h4 style=\"display:inline-block\">Found {{matched()| number}} datasets</h4>\r\n      </div>\r\n      <div class=\"col-md-7\">\r\n         <div class=\"input-group input-group-sm\">\r\n            <span class=\"input-group-addon\" id=\"names1\">Filter:</span>\r\n            <input type=\"text\" ng-model=\"filter\" class=\"form-control\"\r\n                   ng-change=\"update()\" placeholder=\"Filter names\" aria-describedby=\"names1\">\r\n         </div>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-12\">\r\n         <div class=\"panel panel-default\">\r\n            <div class=\"panel-body\">\r\n               <span class=\"listTypeLabel\">Filter by type:</span>\r\n               <span ng-repeat=\"type in filetypes\" class=\"listType\">\r\n                  <input type=\"checkbox\" ng-model=\"type.selected\" ng-change=\"update()\"/>\r\n                  <span uib-tooltip=\"{{type.description}}\">{{type.label}} ({{type.count}})</span>\r\n               </span>\r\n            </div>\r\n         </div>\r\n      </div>\r\n   </div>\r\n\r\n   <div ng-repeat=\"available in filteredList\" class=\"well\">\r\n      <h5>\r\n         <button class=\"undecorated\" ng-click=\"expansions[available.source] = !expansions[available.source]\" uib-tooltip=\"Click to collapse/expand this group\"\r\n                  aria-expanded=\"true\" aria-controls=\"collapse{{mappings[available.source].code}}\">\r\n            <img ng-src=\"{{mappings[available.source].image}}\" ng-attr-style=\"height:{{mappings[available.source].height}}px\"></img>\r\n         </button>\r\n         <strong>{{available.source}}</strong>\r\n         (Showing {{available.downloadables.length}} of {{fullCount(available.source)}})\r\n         <span class=\"listTopExpander\">\r\n            <button class=\"undecorated\" ng-click=\"expansions[available.source] = !expansions[available.source]\">\r\n               [{{expansions[available.source]?\"collapse\":\"expand\"}}]\r\n            </button>\r\n         </span>\r\n      </h5>\r\n      <div uib-collapse=\"!expansions[available.source]\">\r\n         <div class=\"listRow\" ng-class-odd=\"\'listEven\'\" ng-repeat=\"(key, items) in available.group\">\r\n            <div ng-if=\"key == \'ell\'\">\r\n               <h5>hhhhhhhhhhhh\r\n                  <span uib-tooltip=\"{{filetypes[key].description}}\">{{filetypes[key].label}}</span>\r\n                  <input type=\"checkbox\" />\r\n               </h5>\r\n               <div ng-repeat=\"item in items\"\r\n                     data-ng-mouseenter=\"show(item)\" data-ng-mouseleave=\"hide(item)\">\r\n                  <a href=\"{{item.ell_url}}\">\r\n                     <i class=\"fa fa-lg fa-download\"></i>\r\n                  </a>\r\n                  <common-cc4></common-cc4>\r\n                  <spam class=\"listItem\">{{item.ell_name}}</spam>\r\n                  <span style=\"float:right;width:8em\">Size: {{item.file_size_ell | fileSize}}</span>\r\n               </div>\r\n            </div>\r\n            <div ng-if=\"key == \'las\'\">\r\n               <h5>\r\n                  <span uib-tooltip=\"{{filetypes[key].description}}\">{{filetypes[key].label}}</span>\r\n                  <input type=\"checkbox\" />\r\n               </h5>\r\n               <div ng-repeat=\"item in items\"\r\n                     data-ng-mouseenter=\"show(item)\" data-ng-mouseleave=\"hide(item)\">\r\n                  <a href=\"{{item.las_url}}\">\r\n                     <i class=\"fa fa-lg fa-download\"></i>\r\n                  </a>\r\n                  <common-cc4></common-cc4>\r\n                  <spam class=\"listItem\">{{item.las_name}}</spam>\r\n                  <span style=\"float:right;width:8em\">Size: {{item.file_size_las | fileSize}}</span>\r\n               </div>\r\n            </div>\r\n            <div ng-if=\"key == \'ort\'\">\r\n               <h5>\r\n                  <span uib-tooltip=\"{{filetypes[key].description}}\">{{filetypes[key].label}}</span>\r\n                  <input type=\"checkbox\" />\r\n               </h5>\r\n               <div ng-repeat=\"item in items\"\r\n                     data-ng-mouseenter=\"show(item)\" data-ng-mouseleave=\"hide(item)\">\r\n                  <a href=\"{{item.ort_url}}\">\r\n                     <i class=\"fa fa-lg fa-download\"></i>\r\n                  </a>\r\n                  <common-cc4></common-cc4>\r\n                  <spam class=\"listItem\">{{item.ort_name}}</spam>\r\n                  <span style=\"float:right;width:8em\">Size: {{item.file_size_ort | fileSize}}</span>\r\n               </div>\r\n            </div>\r\n            <div ng-if=\"key == \'asc\'\">\r\n               <h5>\r\n                  <span uib-tooltip=\"{{filetypes[key].description}}\">{{filetypes[key].label}}</span>\r\n                  <input type=\"checkbox\" />\r\n               </h5>\r\n               <div ng-repeat=\"item in items\"\r\n                     data-ng-mouseenter=\"show(item)\" data-ng-mouseleave=\"hide(item)\">\r\n                  <div>\r\n                     <a href=\"{{item.asc_url}}\">\r\n                        <i class=\"fa fa-lg fa-download\"></i>\r\n                     </a>\r\n                     <common-cc4></common-cc4>\r\n                     <spam class=\"listItem\">{{item.asc_name}}</spam>\r\n                     <span style=\"float:right;width:8em\">Size: {{item.file_size_asc | fileSize}}</span>\r\n                  </div>\r\n                  <div>\r\n                     <a href=\"{{item.prj_url}}\">\r\n                        <i class=\"fa fa-lg fa-download\"></i>\r\n                     </a>\r\n                     <common-cc4></common-cc4>\r\n                     <spam class=\"listItem\">{{item.prj_name}}</spam>\r\n                     <span style=\"float:right;width:8em\">Size: {{item.file_size_prj | fileSize}}</span>\r\n                  </div>\r\n               </div>\r\n            </div>\r\n            <div ng-if=\"key == \'dem\'\">\r\n               <h5>\r\n                  <span uib-tooltip=\"{{filetypes[key].description}}\">{{filetypes[key].label}}</span>\r\n                  <input type=\"checkbox\" />\r\n               </h5>\r\n               <div ng-repeat=\"item in items\"\r\n                     data-ng-mouseenter=\"show(item)\" data-ng-mouseleave=\"hide(item)\">\r\n                  <a href=\"{{item.dem_url}}\">\r\n                     <i class=\"fa fa-lg fa-download\"></i>\r\n                  </a>\r\n                  <common-cc4></common-cc4>\r\n                  <spam class=\"listItem\">{{item.dem_name}}</spam>\r\n                  <span style=\"float:right;width:8em\">Size: {{item.file_size_dem | fileSize}}</span>\r\n               </div>\r\n            </div>\r\n         </div>\r\n         <div style=\"text-align:right\"><button class=\"undecorated\" ng-click=\"expansions[available.source] = false\">[collapse]</button></div>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/select/doc.html","<div ng-class-odd=\"\'odd\'\" ng-class-even=\"\'even\'\" ng-mouseleave=\"select.lolight(doc)\" ng-mouseenter=\"select.hilight(doc)\">\r\n	<span ng-class=\"{ellipsis:!expanded}\" tooltip-enable=\"!expanded\" style=\"width:100%;display:inline-block;\" \r\n			tooltip-class=\"selectAbstractTooltip\" tooltip=\"{{doc.abstract | truncate : 250}}\" tooltip-placement=\"bottom\">\r\n		<button type=\"button\" class=\"undecorated\" ng-click=\"expanded = !expanded\" title=\"Click to see more about this dataset\">\r\n			<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-caret-down\':expanded,\'fa-caret-right\':(!expanded)}\"></i>\r\n		</button>\r\n		<download-add item=\"doc\" group=\"group\"></download-add>\r\n		<icsm-wms data=\"doc\"></icsm-wms>\r\n		<icsm-bbox data=\"doc\" ng-if=\"doc.showExtent\"></icsm-bbox>\r\n		<a href=\"http://www.ga.gov.au/metadata-gateway/metadata/record/{{doc.sysId}}\" target=\"_blank\" ><strong>{{doc.title}}</strong></a>\r\n	</span>\r\n	<span ng-class=\"{ellipsis:!expanded}\" style=\"width:100%;display:inline-block;padding-right:15px;\">\r\n		{{doc.abstract}}\r\n	</span>\r\n	<div ng-show=\"expanded\" style=\"padding-bottom: 5px;\">\r\n		<h5>Keywords</h5>\r\n		<div>\r\n			<span class=\"badge\" ng-repeat=\"keyword in doc.keywords track by $index\">{{keyword}}</span>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/select/group.html","<div class=\"panel panel-default\" style=\"margin-bottom:-5px;\" >\r\n	<div class=\"panel-heading\"><icsm-wms data=\"group\"></icsm-wms> <strong>{{group.title}}</strong></div>\r\n	<div class=\"panel-body\">\r\n   		<div ng-repeat=\"doc in group.docs\">\r\n   			<div select-doc doc=\"doc\" group=\"group\"></div>\r\n		</div>\r\n	</div>\r\n</div>\r\n");
 $templateCache.put("icsm/select/select.html","<div>\r\n	<div style=\"position:relative;padding:5px;padding-left:10px;\" ng-controller=\"SelectCtrl as select\" class=\"scrollPanel\">\r\n		<div class=\"panel panel-default\" style=\"margin-bottom:-5px\">\r\n  			<div class=\"panel-heading\">\r\n  				<h3 class=\"panel-title\">Available datasets</h3>\r\n  			</div>\r\n  			<div class=\"panel-body\">\r\n				<div ng-repeat=\"doc in select.data.response.docs\" style=\"padding-bottom:7px\">\r\n					<div select-doc ng-if=\"doc.type == \'dataset\'\" doc=\"doc\"></div>\r\n					<select-group ng-if=\"doc.type == \'group\'\" group=\"doc\"></select-group>\r\n				</div>\r\n  			</div>\r\n		</div>\r\n	</div>\r\n</div>");
