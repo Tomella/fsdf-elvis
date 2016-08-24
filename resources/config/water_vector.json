@@ -7,8 +7,8 @@
       "tileCache": "http://services.ga.gov.au/gis/rest/services/Surface_Hydrology_WM/MapServer/tile/{z}/{y}/{x}",
       "tileCacheOptions": {
          "bounds": [
-            [-44, 112.8],
-            [-9, 153]
+            [-43.75, 113.05],
+            [-9, 153.63]
          ]
       },
       "spatial": {
