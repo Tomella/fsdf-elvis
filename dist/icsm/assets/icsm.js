@@ -19,103 +19,6 @@ under the License.
 
 'use strict';
 
-(function (angular) {
-
-	'use strict';
-
-	angular.module("IcsmApp", ['common.altthemes', 'common.baselayer.control', 'common.cc4', 'common.header', 'common.navigation', 'common.panes', 'common.storage', 'common.templates', 'common.toolbar', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'explorer.map.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer',
-
-	//'geo.baselayer.control',
-	'geo.draw',
-	// 'geo.elevation',
-	//'icsm.elevation',
-	//'geo.extent',
-	'geo.geosearch', 'geo.map', 'geo.maphelper', 'geo.measure', 'icsm.bounds', 'icsm.clip', 'icsm.glossary', 'icsm.help', 'icsm.list', 'icsm.mapevents', 'icsm.select', 'icsm.splash', 'icsm.state', 'icsm.templates', 'icsm.view'])
-
-	// Set up all the service providers here.
-	.config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider) {
-		configServiceProvider.location("icsm/resources/config/config.json");
-		configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
-		versionServiceProvider.url("icsm/assets/package.json");
-		projectsServiceProvider.setProject("icsm");
-	}]).config(['$routeProvider', function ($routeProvider) {
-		$routeProvider.when('/administrativeBoundaries', {
-			templateUrl: "admin/app/app.html",
-			controller: "adminCtrl",
-			controllerAs: "admin"
-		}).when('/positioning', {
-			templateUrl: "positioning/app/app.html",
-			controller: "positioningCtrl",
-			controllerAs: "positioning"
-		}).when('/placeNames', {
-			templateUrl: "placenames/app/app.html",
-			controller: "placeNamesCtrl",
-			controllerAs: "placeNames"
-		}).when('/landParcelAndProperty', {
-			templateUrl: "landParcelAndProperty/app/app.html",
-			controller: "landParcelAndPropertyCtrl",
-			controllerAs: "landParcelAndProperty"
-		}).when('/imagery', {
-			templateUrl: "imagery/app/app.html",
-			controller: "imageryCtrl",
-			controllerAs: "imagery"
-		}).when('/transport', {
-			templateUrl: "transport/app/app.html",
-			controller: "transportCtrl",
-			controllerAs: "transport"
-		}).when('/water', {
-			templateUrl: "water/app/app.html",
-			controller: "waterCtrl",
-			controllerAs: "water"
-		}).when('/elevationAndDepth', {
-			templateUrl: "elevationAndDepth/app/app.html",
-			controller: "elevationAndDepthCtrl",
-			controllerAs: "elevationAndDepth"
-		}).when('/landCover', {
-			templateUrl: "landCover/app/app.html",
-			controller: "landCoverCtrl",
-			controllerAs: "landCover"
-		}).when('/icsm', {
-			templateUrl: "icsm/app/app.html",
-			controller: "icsmCtrl",
-			controllerAs: "icsm"
-		}).otherwise({
-			redirectTo: "/icsm"
-		});
-	}]).factory("userService", [function () {
-		return {
-			login: noop,
-			hasAcceptedTerms: noop,
-			setAcceptedTerms: noop,
-			getUsername: function getUsername() {
-				return "anon";
-			}
-		};
-		function noop() {
-			return true;
-		}
-	}]).controller("RootCtrl", RootCtrl);
-
-	RootCtrl.$invoke = ['$http', 'configService', 'mapService'];
-	function RootCtrl($http, configService, mapService) {
-		var self = this;
-		mapService.getMap().then(function (map) {
-			self.map = map;
-		});
-		configService.getConfig().then(function (data) {
-			self.data = data;
-			// If its got WebGL its got everything we need.
-			try {
-				var canvas = document.createElement('canvas');
-				data.modern = !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
-			} catch (e) {
-				data.modern = false;
-			}
-		});
-	}
-})(angular);
-'use strict';
-
 /*!
  * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
  */
@@ -280,6 +183,103 @@ under the License.
 			});
 		}
 	}]);
+})(angular);
+'use strict';
+
+(function (angular) {
+
+	'use strict';
+
+	angular.module("IcsmApp", ['common.altthemes', 'common.baselayer.control', 'common.cc4', 'common.header', 'common.navigation', 'common.panes', 'common.storage', 'common.templates', 'common.toolbar', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'explorer.map.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer',
+
+	//'geo.baselayer.control',
+	'geo.draw',
+	// 'geo.elevation',
+	//'icsm.elevation',
+	//'geo.extent',
+	'geo.geosearch', 'geo.map', 'geo.maphelper', 'geo.measure', 'icsm.bounds', 'icsm.clip', 'icsm.glossary', 'icsm.help', 'icsm.list', 'icsm.mapevents', 'icsm.select', 'icsm.splash', 'icsm.state', 'icsm.templates', 'icsm.view'])
+
+	// Set up all the service providers here.
+	.config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider) {
+		configServiceProvider.location("icsm/resources/config/config.json");
+		configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
+		versionServiceProvider.url("icsm/assets/package.json");
+		projectsServiceProvider.setProject("icsm");
+	}]).config(['$routeProvider', function ($routeProvider) {
+		$routeProvider.when('/administrativeBoundaries', {
+			templateUrl: "admin/app/app.html",
+			controller: "adminCtrl",
+			controllerAs: "admin"
+		}).when('/positioning', {
+			templateUrl: "positioning/app/app.html",
+			controller: "positioningCtrl",
+			controllerAs: "positioning"
+		}).when('/placeNames', {
+			templateUrl: "placenames/app/app.html",
+			controller: "placeNamesCtrl",
+			controllerAs: "placeNames"
+		}).when('/landParcelAndProperty', {
+			templateUrl: "landParcelAndProperty/app/app.html",
+			controller: "landParcelAndPropertyCtrl",
+			controllerAs: "landParcelAndProperty"
+		}).when('/imagery', {
+			templateUrl: "imagery/app/app.html",
+			controller: "imageryCtrl",
+			controllerAs: "imagery"
+		}).when('/transport', {
+			templateUrl: "transport/app/app.html",
+			controller: "transportCtrl",
+			controllerAs: "transport"
+		}).when('/water', {
+			templateUrl: "water/app/app.html",
+			controller: "waterCtrl",
+			controllerAs: "water"
+		}).when('/elevationAndDepth', {
+			templateUrl: "elevationAndDepth/app/app.html",
+			controller: "elevationAndDepthCtrl",
+			controllerAs: "elevationAndDepth"
+		}).when('/landCover', {
+			templateUrl: "landCover/app/app.html",
+			controller: "landCoverCtrl",
+			controllerAs: "landCover"
+		}).when('/icsm', {
+			templateUrl: "icsm/app/app.html",
+			controller: "icsmCtrl",
+			controllerAs: "icsm"
+		}).otherwise({
+			redirectTo: "/icsm"
+		});
+	}]).factory("userService", [function () {
+		return {
+			login: noop,
+			hasAcceptedTerms: noop,
+			setAcceptedTerms: noop,
+			getUsername: function getUsername() {
+				return "anon";
+			}
+		};
+		function noop() {
+			return true;
+		}
+	}]).controller("RootCtrl", RootCtrl);
+
+	RootCtrl.$invoke = ['$http', 'configService', 'mapService'];
+	function RootCtrl($http, configService, mapService) {
+		var self = this;
+		mapService.getMap().then(function (map) {
+			self.map = map;
+		});
+		configService.getConfig().then(function (data) {
+			self.data = data;
+			// If its got WebGL its got everything we need.
+			try {
+				var canvas = document.createElement('canvas');
+				data.modern = !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+			} catch (e) {
+				data.modern = false;
+			}
+		});
+	}
 })(angular);
 'use strict';
 
@@ -471,6 +471,195 @@ under the License.
 		};
 	}
 })(angular);
+'use strict';
+
+(function (mapevents) {
+   'use strict';
+
+   angular.module("icsm.mapevents", ['geo.map']).directive('icsmMapevents', ['icsmMapeventsService', function (icsmMapeventsService) {
+      return {
+         restrict: 'AE',
+         link: function link(scope) {
+            icsmMapeventsService.tickle();
+         }
+      };
+   }]).factory('icsmMapeventsService', ['$rootScope', '$timeout', 'configService', 'mapService', function ($rootScope, $timeout, configService, mapService) {
+      var marker, poly, bounds;
+      var config = configService.getConfig("mapConfig");
+      $rootScope.$on('icsm.bounds.draw', function showBbox(event, bbox) {
+         // 149.090045383719,-35.4,149.4,-35.3
+         if (!bbox) {
+            makeBounds(null);
+            return;
+         }
+
+         var xmax = bbox[2],
+             xmin = bbox[0],
+             ymax = bbox[3],
+             ymin = bbox[1];
+
+         // It's a bbox.
+         makeBounds({
+            type: "Feature",
+            geometry: {
+               type: "Polygon",
+               coordinates: [[[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax], [xmin, ymin]]]
+            },
+            properties: {}
+         }, false);
+      });
+
+      $rootScope.$on('icsm.bbox.draw', function showBbox(event, bbox) {
+         // 149.090045383719,-35.4,149.4,-35.3
+         if (!bbox) {
+            makePoly(null);
+            return;
+         }
+
+         var xmax = bbox[2],
+             xmin = bbox[0],
+             ymax = bbox[3],
+             ymin = bbox[1];
+
+         // It's a bbox.
+         makePoly({
+            type: "Feature",
+            geometry: {
+               type: "Polygon",
+               coordinates: [[[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax], [xmin, ymin]]]
+            },
+            properties: {}
+         }, false);
+      });
+      $rootScope.$on('icsm.poly.draw', function showBbox(event, geojson) {
+         // It's a GeoJSON Polygon geometry and it has a single ring.
+         makePoly(geojson, true);
+      });
+
+      if (config.listenForMarkerEvent) {
+         $rootScope.$on(config.listenForMarkerEvent, function showBbox(event, geojson) {
+            // It's a GeoJSON Polygon geometry and it has a single ring.
+            makeMarker(geojson);
+         });
+      }
+
+      function makeMarker(data) {
+         mapService.getMap().then(function (map) {
+            if (marker) {
+               map.removeLayer(marker);
+            }
+            if (!data) {
+               return;
+            }
+
+            var point;
+            if (typeof data.properties.SAMPLE_LONGITUDE != "undefined") {
+               point = {
+                  type: "Point",
+                  coordinates: [data.properties.SAMPLE_LONGITUDE, data.properties.SAMPLE_LATITUDE]
+               };
+            } else {
+               point = data.geometry;
+            }
+
+            marker = L.geoJson({
+               type: "Feature",
+               geometry: point,
+               id: data.id
+            }).addTo(map);
+
+            if (data.properties.html) {
+               marker.bindPopup(data.properties.html).openPopup();
+            }
+         });
+      }
+
+      function makePoly(data, zoomTo) {
+         console.log("pre getting map to make poly");
+         mapService.getMap().then(function (map) {
+            console.log("getting map to make poly");
+            if (poly) {
+               map.removeLayer(poly);
+            }
+
+            if (data) {
+               poly = L.geoJson(data, {
+                  style: function style(feature) {
+                     return {
+                        opacity: 1,
+                        clickable: false,
+                        fillOpacity: 0,
+                        color: "red"
+                     };
+                  }
+               }).addTo(map);
+
+               if (zoomTo) {
+                  $timeout(function () {
+                     var bounds = poly.getBounds();
+                     map.fitBounds(bounds, {
+                        animate: true,
+                        padding: L.point(100, 100)
+                     });
+                  }, 50);
+               }
+            }
+         });
+      }
+
+      function makeBounds(data, zoomTo) {
+         console.log("pre getting map to make bounds");
+         mapService.getMap().then(function (map) {
+            console.log("getting map to make poly");
+            if (bounds) {
+               map.removeLayer(bounds);
+            }
+
+            if (data) {
+               bounds = L.geoJson(data, {
+                  style: function style(feature) {
+                     return {
+                        opacity: 1,
+                        clickable: false,
+                        fillOpacity: 0,
+                        color: "black"
+                     };
+                  }
+               }).addTo(map);
+
+               if (zoomTo) {
+                  $timeout(function () {
+                     var boundingBox = bounds.getBounds();
+                     map.fitBounds(boundingBox, {
+                        animate: true,
+                        padding: L.point(100, 100)
+                     });
+                  }, 50);
+               }
+            }
+         });
+      }
+
+      function clip(num, min, max) {
+         return Math.min(Math.max(num, min), max);
+      }
+
+      return {
+         tickle: function tickle() {
+            mapService.getMap().then(function (map) {
+               map.on('click', function (event) {
+                  var zoom = map.getZoom();
+                  var latlng = event.latlng;
+                  $rootScope.$broadcast("zoom.to", {
+                     zoom: zoom,
+                     latlng: latlng
+                  });
+               });
+            });
+         }
+      };
+   }]);
+})();
 'use strict';
 
 /*!
@@ -759,195 +948,6 @@ under the License.
       };
    });
 })(angular);
-'use strict';
-
-(function (mapevents) {
-   'use strict';
-
-   angular.module("icsm.mapevents", ['geo.map']).directive('icsmMapevents', ['icsmMapeventsService', function (icsmMapeventsService) {
-      return {
-         restrict: 'AE',
-         link: function link(scope) {
-            icsmMapeventsService.tickle();
-         }
-      };
-   }]).factory('icsmMapeventsService', ['$rootScope', '$timeout', 'configService', 'mapService', function ($rootScope, $timeout, configService, mapService) {
-      var marker, poly, bounds;
-      var config = configService.getConfig("mapConfig");
-      $rootScope.$on('icsm.bounds.draw', function showBbox(event, bbox) {
-         // 149.090045383719,-35.4,149.4,-35.3
-         if (!bbox) {
-            makeBounds(null);
-            return;
-         }
-
-         var xmax = bbox[2],
-             xmin = bbox[0],
-             ymax = bbox[3],
-             ymin = bbox[1];
-
-         // It's a bbox.
-         makeBounds({
-            type: "Feature",
-            geometry: {
-               type: "Polygon",
-               coordinates: [[[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax], [xmin, ymin]]]
-            },
-            properties: {}
-         }, false);
-      });
-
-      $rootScope.$on('icsm.bbox.draw', function showBbox(event, bbox) {
-         // 149.090045383719,-35.4,149.4,-35.3
-         if (!bbox) {
-            makePoly(null);
-            return;
-         }
-
-         var xmax = bbox[2],
-             xmin = bbox[0],
-             ymax = bbox[3],
-             ymin = bbox[1];
-
-         // It's a bbox.
-         makePoly({
-            type: "Feature",
-            geometry: {
-               type: "Polygon",
-               coordinates: [[[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax], [xmin, ymin]]]
-            },
-            properties: {}
-         }, false);
-      });
-      $rootScope.$on('icsm.poly.draw', function showBbox(event, geojson) {
-         // It's a GeoJSON Polygon geometry and it has a single ring.
-         makePoly(geojson, true);
-      });
-
-      if (config.listenForMarkerEvent) {
-         $rootScope.$on(config.listenForMarkerEvent, function showBbox(event, geojson) {
-            // It's a GeoJSON Polygon geometry and it has a single ring.
-            makeMarker(geojson);
-         });
-      }
-
-      function makeMarker(data) {
-         mapService.getMap().then(function (map) {
-            if (marker) {
-               map.removeLayer(marker);
-            }
-            if (!data) {
-               return;
-            }
-
-            var point;
-            if (typeof data.properties.SAMPLE_LONGITUDE != "undefined") {
-               point = {
-                  type: "Point",
-                  coordinates: [data.properties.SAMPLE_LONGITUDE, data.properties.SAMPLE_LATITUDE]
-               };
-            } else {
-               point = data.geometry;
-            }
-
-            marker = L.geoJson({
-               type: "Feature",
-               geometry: point,
-               id: data.id
-            }).addTo(map);
-
-            if (data.properties.html) {
-               marker.bindPopup(data.properties.html).openPopup();
-            }
-         });
-      }
-
-      function makePoly(data, zoomTo) {
-         console.log("pre getting map to make poly");
-         mapService.getMap().then(function (map) {
-            console.log("getting map to make poly");
-            if (poly) {
-               map.removeLayer(poly);
-            }
-
-            if (data) {
-               poly = L.geoJson(data, {
-                  style: function style(feature) {
-                     return {
-                        opacity: 1,
-                        clickable: false,
-                        fillOpacity: 0,
-                        color: "red"
-                     };
-                  }
-               }).addTo(map);
-
-               if (zoomTo) {
-                  $timeout(function () {
-                     var bounds = poly.getBounds();
-                     map.fitBounds(bounds, {
-                        animate: true,
-                        padding: L.point(100, 100)
-                     });
-                  }, 50);
-               }
-            }
-         });
-      }
-
-      function makeBounds(data, zoomTo) {
-         console.log("pre getting map to make bounds");
-         mapService.getMap().then(function (map) {
-            console.log("getting map to make poly");
-            if (bounds) {
-               map.removeLayer(bounds);
-            }
-
-            if (data) {
-               bounds = L.geoJson(data, {
-                  style: function style(feature) {
-                     return {
-                        opacity: 1,
-                        clickable: false,
-                        fillOpacity: 0,
-                        color: "black"
-                     };
-                  }
-               }).addTo(map);
-
-               if (zoomTo) {
-                  $timeout(function () {
-                     var boundingBox = bounds.getBounds();
-                     map.fitBounds(boundingBox, {
-                        animate: true,
-                        padding: L.point(100, 100)
-                     });
-                  }, 50);
-               }
-            }
-         });
-      }
-
-      function clip(num, min, max) {
-         return Math.min(Math.max(num, min), max);
-      }
-
-      return {
-         tickle: function tickle() {
-            mapService.getMap().then(function (map) {
-               map.on('click', function (event) {
-                  var zoom = map.getZoom();
-                  var latlng = event.latlng;
-                  $rootScope.$broadcast("zoom.to", {
-                     zoom: zoom,
-                     latlng: latlng
-                  });
-               });
-            });
-         }
-      };
-   }]);
-})();
 "use strict";
 
 /*!
@@ -1566,6 +1566,32 @@ under the License.
 /*!
  * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
  */
+
+(function (angular) {
+
+	'use strict';
+
+	angular.module('icsm.state', []).directive("icsmStateToggle", ['downloadService', function (downloadService) {
+		return {
+			restrict: 'AE',
+			template: '<button ng-click="toggle(false)" ng-disabled="state.show" class="btn btn-default" title="Start downlaod selection."><i class="fa fa-lg fa-object-group"></i></button>',
+			link: function link(scope) {
+				downloadService.data().then(function (data) {
+					scope.state = data;
+				});
+
+				scope.toggle = function () {
+					scope.state.show = !scope.state.show;
+				};
+			}
+		};
+	}]);
+})(angular);
+'use strict';
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
 (function (angular) {
 
 	'use strict';
@@ -1680,32 +1706,6 @@ under the License.
 				}
 			});
 			return response;
-		};
-	}]);
-})(angular);
-'use strict';
-
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module('icsm.state', []).directive("icsmStateToggle", ['downloadService', function (downloadService) {
-		return {
-			restrict: 'AE',
-			template: '<button ng-click="toggle(false)" ng-disabled="state.show" class="btn btn-default" title="Start downlaod selection."><i class="fa fa-lg fa-object-group"></i></button>',
-			link: function link(scope) {
-				downloadService.data().then(function (data) {
-					scope.state = data;
-				});
-
-				scope.toggle = function () {
-					scope.state.show = !scope.state.show;
-				};
-			}
 		};
 	}]);
 })(angular);
