@@ -1,0 +1,15 @@
+#!/bin/bash
+# Should be home already but make sure
+cd ~
+#
+# If the staging directory isn't there make it.
+[ -d staging ] || mkdir staging
+cd staging
+#
+# Clean it up if it already exists
+rm -rf *
+wget http://web.geospeedster.com/dist.zip
+unzip dist.zip
+sudo cp -rf dist/* /var/www/html
+# Do a little clean up
+rm -rf *

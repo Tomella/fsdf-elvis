@@ -7,6 +7,7 @@ angular.module("IcsmApp", [
       'common.baselayer.control',
 	 	'common.cc4',
 	 	'common.header',
+	 	'common.legend',
       'common.navigation',
 	 	'common.panes',
       'common.storage',

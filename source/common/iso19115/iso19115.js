@@ -14,6 +14,18 @@
       }])
 
 
+      .directive('iso19115Contact', [function () {
+         return {
+            templateUrl: 'common/iso19115/contact.html',
+            restrict: "AE",
+            scope: {
+               node: "="
+            }
+
+         };
+      }])
+
+
       .directive('iso19115Double', [function () {
          return {
             templateUrl: 'common/iso19115/double.html',

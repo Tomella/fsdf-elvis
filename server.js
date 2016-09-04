@@ -4,7 +4,7 @@ var express = require("express");
 var request = require('request');
 request.gzip = false;
 
-var httpProxy = require('http-proxy');
+//var httpProxy = require('http-proxy');
 var app = express();
 var url = require('url');
 var X2JS = require('x2js');
@@ -154,7 +154,7 @@ app.get('/xml2js/*', function (req, res, next) {
             res.status(code).send(x2js.xml2js(body.toString()));
         } else {
             console.log("No body!")
-            res.status(code).send("What the!");
+            res.status(code).send('{"error":{"code": ' + code + '}}');
         }
     });
 });

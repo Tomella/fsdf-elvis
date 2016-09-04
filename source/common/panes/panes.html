@@ -6,6 +6,7 @@
 			    <geo-extent></geo-extent>
 			</div>
     		<div geo-draw data="data.map.drawOptions" line-event="elevation.plot.data" rectangle-event="bounds.drawn"></div>
+    		<div class="common-legend" common-legend map="data.map"></div>
     		<div icsm-tabs class="icsmTabs"  ng-class="{'icsmTabsClosed':!view, 'icsmTabsOpen':view}"></div>
 		</div>
 		<div class="icsmPanesColRight" ng-class="{'hidden':!view, 'col-md-5':view}" style="padding-left:0; padding-right:0">
