@@ -11,7 +11,7 @@ var X2JS = require('x2js');
 var StringDecoder = require('string_decoder').StringDecoder;
 var yargs = require('yargs').options({
     'port': {
-        'default': 9080,
+        'default': 3000,
         'description': 'Port to listen on.'
     },
     'public': {
@@ -31,8 +31,7 @@ var yargs = require('yargs').options({
     }
 });
 var argv = yargs.argv;
-
-var port = process.env.PORT || 80;
+var port = process.env.PORT || argv.port;
 var SERVICES_ROOT = "http://web.geospeedster.com/explorer-rocks";
 
 var dontProxyHeaderRegex = /^(?:Host|Proxy-Connection|Accept-Encoding|Connection|Keep-Alive|Transfer-Encoding|TE|Trailer|Proxy-Authorization|Proxy-Authenticate|Upgrade)$/i;
