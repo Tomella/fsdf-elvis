@@ -117,6 +117,8 @@ gulp.task('imageryScripts', function() {
 });
 
 //Concatenate & Minify JS
+gulp.task('squash', ['squashCommon','squashIcsm', 'squashWater', 'squashStart', 'squashImagery']);
+
 gulp.task('squashCommon', function() {
 	return gulp.src(directories.assets + '/common.js')
 		.pipe(uglify())
@@ -164,35 +166,6 @@ gulp.task('watch', function() {
     //gulp.watch('scss/*.scss', ['sass']);
 });
 
-// Inject dist, bower, and resource files
-gulp.task('inject', ['scripts', 'minifyCss'], function() {
-	// wire up all src files
-	var injectSrc = gulp.src([
-
-		// our dist files
-		directories.assets + '/icsm.css',
-		directories.assets + '/common.js'
-	], { read: false });
-
-	var injectOptions = {
-		ignorePath: '/dist',
-		relative: true
-	};
-
-	// inject bower deps
-	var options = {
-		bowerJson: require('./bower.json'),
-		directory: directories.outbower,
-		ignorePath:  /^(\.\.\/)*\.\./
-	};
-
-	return gulp.src('./dist/*.html')
-		.pipe(wiredep(options))
-		.pipe(inject(injectSrc, injectOptions))
-		.pipe(gulp.dest('./dist'));
-
-});
-
 gulp.task('concatCss', function () {
   return gulp.src(directories.source + '/**/*.css')
     .pipe(concatCss("icsm.css"))
@@ -203,6 +176,8 @@ gulp.task('package', function() {
    return gulp.src('package.json')
       .pipe(gulp.dest(directories.assets));
 });
+
+gulp.task('build', ['views', 'package', 'scripts', 'concatCss', 'resources'])
 
 // Default Task
 gulp.task('default', ['lint', 'scripts', 'concatCss', 'watch', 'package', 'resources', 'views']);
