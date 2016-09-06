@@ -18,8 +18,8 @@
   ],
   "license": "http://git.prod.lan/raw/explorer/explorer-icsm.git/master/LICENCE",
   "dependencies": {
-    "ga-explorer-map-components": "git@github.com:Tomella/explorer-map-components.git#0.0.6",
-    "explorer-ui-components": "git@github.com:GeoscienceAustralia/explorer-ui-components.git#0.0.6",
+    "ga-explorer-map-components": "https://github.com/Tomella/explorer-map-components.git#0.0.6",
+    "explorer-ui-components": "https://github.com:GeoscienceAustralia/explorer-ui-components.git#0.0.6",
     "angular": "~1.4.12",
     "components-font-awesome": "~4.5.0",
     "bg-splitter": "*",
