@@ -2,15 +2,21 @@
 	<div class="container-fluid">
 		<div class="row">
 			<div class="col-md-10">
-				<button style="margin-top:0px;" ng-click="initiateDraw()" ng-disable="client.drawing"  tooltip-placement="right"
-               uib-tooltip="Enable drawing of a bounding box. On enabling, click on the map and drag diagonally" class="btn btn-primary btn-xs">Draw</button>
+				<strong style="font-size:120%">Select area:</strong>
+				<button ng-click="initiateDraw()" ng-disable="client.drawing" tooltip-placement="right" uib-tooltip="Enable drawing of a bounding box. On enabling, click on the map and drag diagonally"
+					class="btn btn-primary btn-default">Draw...</button>
+				<button ng-click="typing = !typing"  tooltip-placement="right" uib-tooltip="Type coordinates of a bounding box. Restricted to maximum of 2x2 degrees."
+					class="btn btn-primary btn-default">Manual entry...</button>
 			</div>
 			<div class="col-md-2">
-				<button style="float:right" ng-click="showInfo = !showInfo"  tooltip-placement="left"
-               uib-tooltip="Information." class="btn btn-primary btn-xs"><i class="fa fa-info"></i></button>
-				<exp-info title="Selecting an area" show-close="true" style="width:450px;position:fixed;top:230px;right:40px" is-open="showInfo"><icsm-info-bbox></div></exp-info>
+				<button style="float:right" ng-click="showInfo = !showInfo" tooltip-placement="left" uib-tooltip="Information." class="btn btn-primary btn-default"><i class="fa fa-info"></i></button>
+				<exp-info title="Selecting an area" show-close="true" style="width:450px;position:fixed;top:230px;right:40px" is-open="showInfo">
+					<icsm-info-bbox>
 			</div>
+			</exp-info>
 		</div>
+	</div>
+	<div class="container-fluid" style="padding-top:7px" ng-show="typing">
 		<div class="row">
 			<div class="col-md-3"> </div>
 			<div class="col-md-8">
@@ -18,7 +24,7 @@
 				<span>
                <input type="text" style="width:6em" ng-model="clip.yMax" ng-change="check()"></input>
                <span ng-show="showBounds && bounds">({{bounds.yMax|number : 4}} max)</span>
-            </span>
+				</span>
 			</div>
 		</div>
 		<div class="row">
@@ -27,14 +33,14 @@
 				<span>
                <input type="text" style="width:6em" ng-model="clip.xMin" ng-change="check()"></input>
                <span ng-show="showBounds && bounds">({{bounds.xMin|number : 4}} min)</span>
-            </span>
+				</span>
 			</div>
 			<div class="col-md-6">
 				<div style="font-weight:bold;width:3.5em;display:inline-block">X Max:</div>
 				<span>
                <input type="text" style="width:6em" ng-model="clip.xMax" ng-change="check()"></input>
                <span ng-show="showBounds && bounds">({{bounds.xMax|number : 4}} max)</span>
-            </span>
+				</span>
 			</div>
 		</div>
 		<div class="row">
@@ -43,7 +49,7 @@
 				<span>
                <input type="text" style="width:6em" ng-model="clip.yMin" ng-change="check()"></input>
                <span ng-show="showBounds && bounds">({{bounds.yMin|number : 4}} min)</span>
-            </span>
+				</span>
 			</div>
 		</div>
 	</div>

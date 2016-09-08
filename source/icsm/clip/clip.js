@@ -15,8 +15,8 @@ angular.module("icsm.clip", ['geo.draw'])
 	};
 })
 
-.directive("icsmClip", ['$rootScope', '$timeout', 'clipService', 'flashService', 'mapService',
-      function($rootScope, $timeout, clipService, flashService, mapService) {
+.directive("icsmClip", ['$rootScope', '$timeout', 'clipService', 'messageService', 'mapService',
+      function($rootScope, $timeout, clipService, messageService, mapService) {
 	return {
 		templateUrl : "icsm/clip/clip.html",
 		scope : {
@@ -33,6 +33,8 @@ angular.module("icsm.clip", ['geo.draw'])
             yMax: null,
             yMin: null
          };
+			scope.typing = false;
+
 			if(typeof scope.showBounds === "undefined") {
 				scope.showBounds = false;
 			}
@@ -64,6 +66,7 @@ angular.module("icsm.clip", ['geo.draw'])
          });
 
 			scope.initiateDraw = function() {
+				messageService.info("Click on the map and drag to define your area of interest.");
 				clipService.initiateDraw().then(drawComplete);
 			};
 
