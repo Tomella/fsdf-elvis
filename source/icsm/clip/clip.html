@@ -15,6 +15,12 @@
 			</div>
 			</exp-info>
 		</div>
+
+		<div class="row" ng-hide="hding">
+			<div class="col-md-12">
+				Selected {{clip.xMin|number : 4}}&deg; west, {{clip.yMax|number : 4}}&deg; north, {{clip.yMax|number : 4}}&deg; east, {{clip.xMin|number : 4}}&deg; south
+			</div>
+		</div>
 	</div>
 	<div class="container-fluid" style="padding-top:7px" ng-show="typing">
 		<div class="row">

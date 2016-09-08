@@ -1,0 +1,137 @@
+<div ng-show="!list || !list.length">
+	<div class="alert alert-warning" role="alert"><strong>Select an area</strong> to find datasets within.</div>
+</div>
+
+<div ng-show="list.length">
+   <div class="row">
+      <div class="col-md-5" uib-tooltip="Number of intersecting or very near datasets to your area of interest.">
+	      <h4 style="display:inline-block">Found {{matched()| number}} datasets</h4>
+      </div>
+      <div class="col-md-7">
+         <div class="input-group input-group-sm">
+            <span class="input-group-addon" id="names1">Filter:</span>
+            <input type="text" ng-model="filter" class="form-control"
+                   ng-change="update()" placeholder="Filter names" aria-describedby="names1">
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-md-12">
+         <div class="panel panel-default">
+            <div class="panel-body">
+               <span class="listTypeLabel">Filter by type:</span>
+               <span ng-repeat="type in filetypes" class="listType">
+                  <input type="checkbox" ng-model="type.selected" ng-change="update()"/>
+                  <span uib-tooltip="{{type.description}}">{{type.label}} ({{type.count}})</span>
+               </span>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <div ng-repeat="available in filteredList" class="well">
+      <h5>
+         <button class="undecorated" ng-click="expansions[available.source] = !expansions[available.source]" uib-tooltip="Click to collapse/expand this group"
+                  aria-expanded="true" aria-controls="collapse{{mappings[available.source].code}}">
+            <img ng-src="{{mappings[available.source].image}}" ng-attr-style="height:{{mappings[available.source].height}}px"></img>
+         </button>
+         <strong>{{available.source}}</strong>
+         (Showing {{available.downloadables.length}} of {{fullCount(available.source)}})
+         <span class="listTopExpander">
+            <button class="undecorated" ng-click="expansions[available.source] = !expansions[available.source]">
+               [{{expansions[available.source]?"collapse":"expand"}}]
+            </button>
+         </span>
+      </h5>
+      <div uib-collapse="!expansions[available.source]">
+         <div class="listRow" ng-class-odd="'listEven'" ng-repeat="(key, items) in available.group">
+            <div ng-if="key == 'ell'">
+               <h5>hhhhhhhhhhhh
+                  <span uib-tooltip="{{filetypes[key].description}}">{{filetypes[key].label}}</span>
+                  <input type="checkbox" />
+               </h5>
+               <div ng-repeat="item in items"
+                     data-ng-mouseenter="show(item)" data-ng-mouseleave="hide(item)">
+                  <a href="{{item.ell_url}}">
+                     <i class="fa fa-lg fa-download"></i>
+                  </a>
+                  <common-cc4></common-cc4>
+                  <spam class="listItem">{{item.ell_name}}</spam>
+                  <span style="float:right;width:8em">Size: {{item.file_size_ell | fileSize}}</span>
+               </div>
+            </div>
+            <div ng-if="key == 'las'">
+               <h5>
+                  <span uib-tooltip="{{filetypes[key].description}}">{{filetypes[key].label}}</span>
+                  <input type="checkbox" />
+               </h5>
+               <div ng-repeat="item in items"
+                     data-ng-mouseenter="show(item)" data-ng-mouseleave="hide(item)">
+                  <a href="{{item.las_url}}">
+                     <i class="fa fa-lg fa-download"></i>
+                  </a>
+                  <common-cc4></common-cc4>
+                  <spam class="listItem">{{item.las_name}}</spam>
+                  <span style="float:right;width:8em">Size: {{item.file_size_las | fileSize}}</span>
+               </div>
+            </div>
+            <div ng-if="key == 'ort'">
+               <h5>
+                  <span uib-tooltip="{{filetypes[key].description}}">{{filetypes[key].label}}</span>
+                  <input type="checkbox" />
+               </h5>
+               <div ng-repeat="item in items"
+                     data-ng-mouseenter="show(item)" data-ng-mouseleave="hide(item)">
+                  <a href="{{item.ort_url}}">
+                     <i class="fa fa-lg fa-download"></i>
+                  </a>
+                  <common-cc4></common-cc4>
+                  <spam class="listItem">{{item.ort_name}}</spam>
+                  <span style="float:right;width:8em">Size: {{item.file_size_ort | fileSize}}</span>
+               </div>
+            </div>
+            <div ng-if="key == 'asc'">
+               <h5>
+                  <span uib-tooltip="{{filetypes[key].description}}">{{filetypes[key].label}}</span>
+                  <input type="checkbox" />
+               </h5>
+               <div ng-repeat="item in items"
+                     data-ng-mouseenter="show(item)" data-ng-mouseleave="hide(item)">
+                  <div>
+                     <a href="{{item.asc_url}}">
+                        <i class="fa fa-lg fa-download"></i>
+                     </a>
+                     <common-cc4></common-cc4>
+                     <spam class="listItem">{{item.asc_name}}</spam>
+                     <span style="float:right;width:8em">Size: {{item.file_size_asc | fileSize}}</span>
+                  </div>
+                  <div>
+                     <a href="{{item.prj_url}}">
+                        <i class="fa fa-lg fa-download"></i>
+                     </a>
+                     <common-cc4></common-cc4>
+                     <spam class="listItem">{{item.prj_name}}</spam>
+                     <span style="float:right;width:8em">Size: {{item.file_size_prj | fileSize}}</span>
+                  </div>
+               </div>
+            </div>
+            <div ng-if="key == 'dem'">
+               <h5>
+                  <span uib-tooltip="{{filetypes[key].description}}">{{filetypes[key].label}}</span>
+                  <input type="checkbox" />
+               </h5>
+               <div ng-repeat="item in items"
+                     data-ng-mouseenter="show(item)" data-ng-mouseleave="hide(item)">
+                  <a href="{{item.dem_url}}">
+                     <i class="fa fa-lg fa-download"></i>
+                  </a>
+                  <common-cc4></common-cc4>
+                  <spam class="listItem">{{item.dem_name}}</spam>
+                  <span style="float:right;width:8em">Size: {{item.file_size_dem | fileSize}}</span>
+               </div>
+            </div>
+         </div>
+         <div style="text-align:right"><button class="undecorated" ng-click="expansions[available.source] = false">[collapse]</button></div>
+      </div>
+   </div>
+</div>

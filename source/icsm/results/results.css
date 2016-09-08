@@ -1,0 +1,41 @@
+.resultsItemHeading {
+	font-weight: bold;
+}
+
+.resultsItemLas, .resultsItemPrj, .resultsItemAsc {
+	padding-left: 10px;
+}
+
+.resultsEven {
+	background-color: #eee;
+}
+
+.resultsRow {
+   border-bottom: 1px solid lightgray;
+}
+
+.resultsRow div {
+   padding-top: 1px;
+   padding-bottom: 1px;
+}
+
+.resultsTypeLabel {
+   font-weight: bold;
+}
+
+.resultsType {
+   padding-left:7px;
+   display: inline-block;
+}
+
+.resultsItem {
+   padding-left:8px;
+   padding-bottom:6px;
+   font-size: 110%;
+}
+
+.resultsTopExpander {
+   float: right;
+   padding-top:30px;
+   font-size: 80%;
+}

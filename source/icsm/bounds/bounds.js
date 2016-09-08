@@ -41,7 +41,7 @@ angular.module("icsm.bounds", [])
             send('Area drawn. Checking for data...');
             checkSize(clip).then(function(message) {
                console.log(message);
-               if(message.code == "success") {
+               if(message.code === "success") {
                   $rootScope.$broadcast('icsm.bounds.draw', [
                      clip.xMin,
                      clip.yMin,
