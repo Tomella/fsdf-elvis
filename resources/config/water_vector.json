@@ -4,12 +4,12 @@
       "title": "Surface Hydrology",
       "showExtent": true,
       "bbox":"112.8 -44.0 154.1 -8.9",
-      "tileCache": "http://services.ga.gov.au/gis/rest/services/Surface_Hydrology_WM/MapServer/tile/{z}/{y}/{x}",
+      "tileCache": "http://services.ga.gov.au/site_1/services/Surface_Hydrology_WM/MapServer/WMSServer",
       "tileCacheOptions": {
-         "bounds": [
-            [-43.75, 113.05],
-            [-9, 153.63]
-         ]
+         "type": "WMS",
+			"format": "image/png",
+			"transparent": true,
+         "layers": "Surface_HydroPoints_National,Surface_HydroPolys_National,Surface_HydroLines_National,Surface_HydroPoints_Regional,Surface_HydroPolys_Regional,Surface_HydroLines_Regional"
       },
       "spatial": {
          "westLongitude": 112.85,

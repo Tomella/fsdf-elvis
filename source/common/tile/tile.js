@@ -72,7 +72,7 @@
                      };
                   }
 
-                  if (subscription.count == 1 && data.isTilesShowing) {
+                  if (subscription.count === 1 && data.isTilesShowing) {
                      console.log("Reshow tile layer");
                      this._showLayer(subscription.layer);
                   }
@@ -135,7 +135,13 @@
 
                this.showTile = function () {
                   var createLayer = function () {
-                     this.tileLayer = L.tileLayer(service.tileCache, service.tileCacheOptions).addTo(selectService.getLayerGroup());
+                     if(service.tileCacheOptions && service.tileCacheOptions.type === "WMS") {
+                        this.tileLayer = L.tileLayer.wms(service.tileCache, service.tileCacheOptions);
+                     } else {
+                        // This is the default tile type
+                        this.tileLayer = L.tileLayer(service.tileCache, service.tileCacheOptions);
+                     }
+                     this.tileLayer.addTo(selectService.getLayerGroup());
                   };
 
                   if (this.tileLayer) {

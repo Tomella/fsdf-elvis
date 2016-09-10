@@ -47,7 +47,7 @@ angular.module("common.geoprocess", [])
 					clipTimeout = $timeout(function() {
 						checkSize().then(function(result) {
 							try {
-								if(result && result.code == "success") {
+								if(result && result.code === "success") {
 									if(url) {
 										// Order matches the $watch signature so be careful
 										var urlWithParms = url

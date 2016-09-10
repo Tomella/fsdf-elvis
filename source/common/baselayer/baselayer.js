@@ -20,7 +20,7 @@ angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.boot
 			maxZoom: "="
 		},
 		link : function(scope, element) {
-			if(typeof scope.maxZoom == "undefined") {
+			if(typeof scope.maxZoom === "undefined") {
 				scope.maxZoom = DEFAULTS.maxZoom;
 			}
 			scope.slider = {

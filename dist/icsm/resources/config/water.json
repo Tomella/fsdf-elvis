@@ -18,12 +18,23 @@
          "minZoom":13
       },
       "layers":[
+
          {
-            "name":"Google Hybrid",
-            "type":"Google",
-            "parameters":["HYBRID"],
+            "name":"Water observations from space",
+            "type":["TileLayer", "WMS"],
             "defaultLayer":true,
             "isBaselayer":true,
+            "key":"catchments",
+            "parameters":[
+                "http://services.ga.gov.au/site_1/services/Surface_Hydrology_WM/MapServer/WMSServer",
+                {
+                   "layers" : "Basins,Catchments",
+                   "format" : "image/png",
+                   "transparent" : true,
+                   "opacity" : 1
+                }
+            ],
+            "addLayerControl":false,
             "visible":true
          },
          {
