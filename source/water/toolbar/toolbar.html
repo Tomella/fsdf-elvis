@@ -1,0 +1,28 @@
+<div icsm-toolbar>
+	<div class="row toolBarGroup">
+		<search-searches name="toolbar">
+			<search-search label="Google search" default="true">
+				<div geo-search></div>
+			</search-search>
+			<search-search label="Basins search">
+				<common-basin-search class="cossapSearch"></common-basin-search>
+			</search-search>
+			<search-search label="Catchments search">
+				<common-catchment-search class="cossapSearch"></common-catchment-search>
+			</search-search>
+		</search-searches>
+		<div class="pull-right">
+			<div class="btn-toolbar radCore" role="toolbar"  water-toolbar>
+				<div class="btn-group">
+					<!-- < water-state-toggle></water-state-toggle> -->
+				</div>
+			</div>
+
+			<div class="btn-toolbar" style="margin:right:10px;display:inline-block">
+				<div class="btn-group">
+					<span class="btn btn-default" common-baselayer-control max-zoom="16" title="Satellite to Topography bias on base map."></span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

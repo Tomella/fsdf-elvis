@@ -1,4 +1,3 @@
-
 .wizardPopup {
   position: fixed;
   top: 20px;
@@ -665,6 +664,49 @@ input.ng-valid.ng-touched {
   padding-top: 30px;
   font-size: 80%;
 }
+.resultsItemHeading {
+  font-weight: bold;
+}
+
+.resultsItemLas,
+.resultsItemPrj,
+.resultsItemAsc {
+  padding-left: 10px;
+}
+
+.resultsEven {
+  background-color: #eee;
+}
+
+.resultsRow {
+  border-bottom: 1px solid lightgray;
+}
+
+.resultsRow div {
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+
+.resultsTypeLabel {
+  font-weight: bold;
+}
+
+.resultsType {
+  padding-left: 7px;
+  display: inline-block;
+}
+
+.resultsItem {
+  padding-left: 8px;
+  padding-bottom: 6px;
+  font-size: 110%;
+}
+
+.resultsTopExpander {
+  float: right;
+  padding-top: 30px;
+  font-size: 80%;
+}
 .selectContainer {
   width: 100%;
 }
@@ -792,6 +834,81 @@ div.leaflet-control-scale-line {
   padding-left: 5px !important;
   padding-right: 5px !important;
 }
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
+}
+.radCore {
+  margin-right: 3px;
+  display: inline-block;
+}
+
+.searchBar {
+  width: 27em;
+  opacity: 0.9;
+}
+
+@media only screen and (max-width:1100px) {
+  .searchBar {
+    width: 23em;
+  }
+}
+
+@media only screen and (max-width:1025px) {
+  .searchBar {
+    width: 20em;
+  }
+}
+
+@media only screen and (max-width:645px) {
+  .searchBar {
+    display: none;
+  }
+}
+
+@media only screen and (max-width:965px) {
+  .radCore,
+  .hideWhenSmall,
+  .steps-indicator,
+  .secondToolbarInfo {
+    display: none;
+  }
+}
+
+div.leaflet-control-scale-line {
+  text-align: center;
+}
+
+@media only screen and (max-width:965px) {
+  div.leaflet-control-scale-line {
+    display: none;
+  }
+}
+.vector-tooltip {
+  min-width: 25em;
+}
+
+.vector-checkbox {
+  width: 18px;
+  height: 18px;
+  vertical-align: bottom;
+  margin-right: 7px !important;
+}
+
+.vector-add:disabled {
+  color: gray;
+}
 .start-content-container {
   position: fixed;
   top: 95px;
@@ -854,33 +971,4 @@ div.leaflet-control-scale-line {
 
 .select-land {
   background-position: -675px;
-}
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
-.vector-tooltip {
-  min-width: 25em;
-}
-
-.vector-checkbox {
-  width: 18px;
-  height: 18px;
-  vertical-align: bottom;
-  margin-right: 7px !important;
-}
-
-.vector-add:disabled {
-  color: gray;
 }
