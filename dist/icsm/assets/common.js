@@ -178,21 +178,6 @@ under the License.
 
 (function (angular) {
 
-   'use strict';
-
-   angular.module("common.cc4", []).directive('commonCc4', [function () {
-      return {
-         templateUrl: 'common/cc4/cc4.html',
-         link: function link(scope) {
-            scope.template = 'common/cc4/cc4template.html';
-         }
-      };
-   }]);
-})(angular);
-'use strict';
-
-(function (angular) {
-
 	'use strict';
 
 	angular.module("common.clip", ['geo.draw']).directive("wizardClip", ['$timeout', 'clipService', 'flashService', function ($timeout, clipService, flashService) {
@@ -259,6 +244,21 @@ under the License.
 				} };
 		}
 	}]);
+})(angular);
+'use strict';
+
+(function (angular) {
+
+   'use strict';
+
+   angular.module("common.cc4", []).directive('commonCc4', [function () {
+      return {
+         templateUrl: 'common/cc4/cc4.html',
+         link: function link(scope) {
+            scope.template = 'common/cc4/cc4template.html';
+         }
+      };
+   }]);
 })(angular);
 'use strict';
 
@@ -2463,9 +2463,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 	}]);
 })(angular);
 angular.module("common.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("common/bbox/bbox.html","<button type=\"button\" class=\"undecorated\" ng-click=\"toggle()\" tooltip-placement=\"right\" tooltip=\"Show data extent on the map.\">\r\n	<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-eye orange\':data.hasBbox,\'fa-eye-slash\':!data.hasBbox}\"></i>\r\n</button>");
+$templateCache.put("common/clip/clip.html","<div class=\"well well-sm\">\r\n<div class=\"container-fluid\">\r\n	<div class=\"row\">\r\n		<div class=\"col-md-12\">\r\n			<button style=\"margin-top:0px;\" ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" class=\"btn btn-primary btn-xs\">Draw</button>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-3\"> </div>\r\n		<div class=\"col-md-8\">\r\n			<strong>Y Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-6\">\r\n			<strong>X Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMin|number : 4}} min)</span></span>\r\n		</div>\r\n		<div class=\"col-md-6\">\r\n			<strong>X Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-offset-3 col-md-8\">\r\n			<strong>Y Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMin|number : 4}} min)</span></span>\r\n		</div>\r\n	</div>\r\n</div>\r\n</div>");
 $templateCache.put("common/cc4/cc4.html","<button type=\"button\" class=\"undecorated\" title=\"View CCBy 4.0 licence details\"\r\n      popover-trigger=\"outsideClick\"\r\n      uib-popover-template=\"template\" popover-placement=\"bottom\" popover-append-to-body=\"true\">\r\n	<i ng-class=\"{active:data.isWmsShowing}\" class=\"fa fa-lg fa-gavel\"></i>\r\n</button>");
 $templateCache.put("common/cc4/cc4template.html","<div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-12\">\r\n         <a target=\"_blank\" href=\"https://creativecommons.org/licenses/by/4.0/\">Creative Commons Attribution 4.0 </a>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-2\">\r\n         <span class=\"fa-stack\" aria-hidden=\"true\">\r\n         <i class=\"fa fa-check-circle-o fa-stack-2x\" aria-hidden=\"true\"></i>\r\n      </span>\r\n      </div>\r\n      <div class=\"col-md-10\">\r\n         You may use this work for commercial purposes.\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-2\">\r\n         <span class=\"fa-stack\" aria-hidden=\"true\">\r\n         <i class=\"fa fa-circle-o fa-stack-2x\"></i>\r\n         <i class=\"fa fa-female fa-stack-1x\"></i>\r\n      </span>\r\n      </div>\r\n      <div class=\"col-md-10\">\r\n         You must attribute the creator in your own works.\r\n      </div>\r\n   </div>\r\n</div>");
-$templateCache.put("common/clip/clip.html","<div class=\"well well-sm\">\r\n<div class=\"container-fluid\">\r\n	<div class=\"row\">\r\n		<div class=\"col-md-12\">\r\n			<button style=\"margin-top:0px;\" ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" class=\"btn btn-primary btn-xs\">Draw</button>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-3\"> </div>\r\n		<div class=\"col-md-8\">\r\n			<strong>Y Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-6\">\r\n			<strong>X Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMin|number : 4}} min)</span></span>\r\n		</div>\r\n		<div class=\"col-md-6\">\r\n			<strong>X Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-offset-3 col-md-8\">\r\n			<strong>Y Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMin|number : 4}} min)</span></span>\r\n		</div>\r\n	</div>\r\n</div>\r\n</div>");
 $templateCache.put("common/download/download.html","<exp-modal ng-controller=\"DownloadCtrl as dl\" icon-class=\"fa-download\" is-open=\"dl.data.item.download\" title=\"Download data\" on-close=\"dl.remove()\" is-modal=\"true\">\r\n	<div style=\"padding:5px;\">\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><common-wms data=\"dl.data.item\"></common-wms><common-tile data=\"dl.data.item\"></common-tile>{{dl.data.item.title}}</h4>\r\n				{{dl.data.item.abstract}}\r\n   			</div>\r\n		</div>\r\n		<nedf-geoprocess data=\"dl.data.item\"></nedf-geoprocess>\r\n	</div>\r\n</exp-modal>");
 $templateCache.put("common/download/popup.html","<exp-modal icon-class=\"fa-download\"  is-open=\"data.item.download\" title=\"Download wizard\" on-close=\"dl.remove()\">\r\n	<div class=\"container-fluid downloadInner\" >\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><common-wms data=\"dl.data.item\"></common-wms>\r\n					<a href=\"http://www.ga.gov.au/metadata-gateway/metadata/record/{{dl.data.item.sysId}}\" target=\"_blank\"><strong class=\"ng-binding\">{{dl.data.item.title}}</strong></a>\r\n				</h4>\r\n   			</div>\r\n		</div>\r\n		<wizard-geoprocess data=\"dl.data.item\"></wizard-geoprocess>\r\n	</div>\r\n</exp-modal>");
 $templateCache.put("common/extent/extent.html","<div class=\"row\" style=\"border-top: 1px solid gray; padding-top:5px\">\r\n	<div class=\"col-md-5\">\r\n		<div class=\"form-inline\">\r\n			<label>\r\n				<input id=\"extentEnable\" type=\"checkbox\" ng-model=\"parameters.fromMap\" ng-click=\"change()\"></input> \r\n				Restrict area to map\r\n			</label>\r\n		</div>\r\n	</div>\r\n	 \r\n	<div class=\"col-md-7\" ng-show=\"parameters.fromMap\">\r\n		<div class=\"container-fluid\">\r\n			<div class=\"row\">\r\n				<div class=\"col-md-offset-3 col-md-8\">\r\n					<strong>Y Max:</strong> \r\n					<span>{{parameters.yMax | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n			<div class=\"row\">\r\n				<div class=\"col-md-6\">\r\n					<strong>X Min:</strong>\r\n					<span>{{parameters.xMin | number : 4}}</span> \r\n				</div>\r\n				<div class=\"col-md-6\">\r\n					<strong>X Max:</strong>\r\n					<span>{{parameters.xMax | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n			<div class=\"row\">\r\n				<div class=\"col-md-offset-3 col-md-8\">\r\n					<strong>Y Min:</strong>\r\n					<span>{{parameters.yMin | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");

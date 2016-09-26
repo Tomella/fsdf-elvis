@@ -53,11 +53,11 @@
 		'icsm.glossary',
 		'icsm.help',
 		// Alternate list
+		'elvis.header',
 		'elvis.results',
 		//'icsm.list',
       'icsm.mapevents',
 		'icsm.select',
-		'icsm.splash',
 		'icsm.state',
 		'icsm.templates',
 		'icsm.view'
