@@ -170,7 +170,7 @@ angular.module("icsm.bounds", [])
                   send("", "clear");
 						if(response.data.available_data) {
                      response.data.available_data.forEach(function(group) {
-                        if(group.downloadables.length) {
+                        if(group.downloadables) {
                            message = "There is intersecting data. Select downloads from the list.";
                         }
                      });

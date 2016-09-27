@@ -272,6 +272,10 @@ angular.module("icsm.list", [])
 		if(!size) {
 			return "-";
 		}
+        if(("" + size).indexOf(" ") > -1) {
+            return size;
+        }
+
 		size = parseFloat(size);
 
 		if(size < 1000) {
