@@ -48,9 +48,7 @@
                         });
                         modalInstance.result.then(function (run) {
                            if (run) {
-                              reviewService.startExtract().then(function () {
-                                 console.log("Ran the data");
-                              });
+                              reviewService.startExtract();
                            }
                            scope.data.reviewing = false;
                         }, function () {
@@ -102,25 +100,19 @@
                   miny: clip.yMin,
                   email: this.data.email
                };
+               this.setEmail(data.email);
+
                configService.getConfig("processing").then(function(config) {
-                  var url = transformTemplate(config.processingUrl, data);
-                  console.log('clip');
-                  console.log(url);
+                  $("#launcher")[0].src = transformTemplate(config.processingUrl, data);
                });
             },
 
             setEmail: function (email) {
                this.data.email = email;
                persistService.setItem(key, email);
-            },
-
-            getEmail: function () {
-               return persistService.getItem(key).then(value => {
-                  this.data.email = value;
-                  return value;
-               });
-            },
+            }
          };
+
          persistService.getItem(key).then(value => {
             service.data.email = value;
          });
