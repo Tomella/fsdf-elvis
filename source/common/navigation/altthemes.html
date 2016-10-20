@@ -1,5 +1,5 @@
 <span class="altthemes-container">
-	<span ng-repeat="item in themes">
+	<span ng-repeat="item in themes | altthemesEnabled">
        <a title="{{item.label}}" ng-href="{{item.url}}" class="altthemesItemCompact">
          <span class="altthemes-icon" ng-class="item.className"></span>
        </a>
