@@ -25,6 +25,7 @@
       'explorer.legend',
       'explorer.message',
 		'explorer.modal',
+		'explorer.persist',
 		'explorer.projects',
 		'explorer.tabs',
 		'explorer.version',
@@ -55,6 +56,7 @@
 		// Alternate list
 		'elvis.header',
 		'elvis.results',
+		'elvis.reviewing',
 		//'icsm.list',
       'icsm.mapevents',
 		'icsm.select',
@@ -64,12 +66,13 @@
 	])
 
 		// Set up all the service providers here.
-		.config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider',
-         function (configServiceProvider, projectsServiceProvider, versionServiceProvider) {
+		.config(['configServiceProvider', 'projectsServiceProvider', 'persistServiceProvider', 'versionServiceProvider',
+         function (configServiceProvider, projectsServiceProvider, persistServiceProvider, versionServiceProvider) {
 				configServiceProvider.location("icsm/resources/config/config.json");
 				configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
 				versionServiceProvider.url("icsm/assets/package.json");
 				projectsServiceProvider.setProject("icsm");
+				persistServiceProvider.handler("local");
 			}])
 
 		.config(['$routeProvider', function ($routeProvider) {
