@@ -62,9 +62,9 @@ angular.module("icsm.panes", [])
 
 PaneCtrl.$inject = ["paneService"];
 function PaneCtrl(paneService) {
-	paneService.data().then(function(data) {
+	paneService.data().then(data => {
 		this.data = data;
-	}.bind(this));
+	});
 }
 
 PaneService.$inject = [];
