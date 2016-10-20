@@ -38,7 +38,8 @@ var dontProxyHeaderRegex = /^(?:Host|Proxy-Connection|Accept-Encoding|Connection
 // There should only ever be a couple. We do a contains on the requested host.
 var validHosts = [
     "localhost",
-    ".ga.gov.au"
+    ".ga.gov.au",
+    ".motogp.com"
 ];
 var upstreamProxy = argv['upstream-proxy'];
 
