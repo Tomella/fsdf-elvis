@@ -55,66 +55,48 @@ gulp.task('views', function () {
 });
 
 //Concatenate & Minify JS
-gulp.task('scripts', ["commonScripts", "icsmScripts", "waterScripts", 'imageryScripts', 'startScripts']);
+gulp.task('scripts', ["commonScripts", "icsmScripts", "waterScripts", 'imageryScripts', 'startScripts', 'ltScripts']);
 
 //Concatenate & Minify JS
 gulp.task('commonScripts', function() {
-   return gulp.src(directories.source + '/common/**/*.js')
-      .pipe(babel({
-            presets: ['es2015']
-      }))
-	   .pipe(addStream.obj(prepareCommonTemplates()))
-      .pipe(concat('common.js'))
-      .pipe(header(fs.readFileSync(directories.source + '/licence.txt', 'utf8')))
-      .pipe(gulp.dest(directories.assets));
+   return prepareScripts('common');
 });
 
 gulp.task('icsmScripts', function() {
-   return gulp.src(directories.source + '/icsm/**/*.js')
-      .pipe(babel({
-            presets: ['es2015']
-      }))
-	   .pipe(addStream.obj(prepareIcsmTemplates()))
-      .pipe(concat('icsm.js'))
-      .pipe(header(fs.readFileSync(directories.source + '/licence.txt', 'utf8')))
-      .pipe(gulp.dest(directories.assets));
+   return prepareScripts('icsm');
 });
 
 //Concatenate & Minify JS
 gulp.task('waterScripts', function() {
-   return gulp.src(directories.source + '/water/**/*.js')
-      .pipe(babel({
-            presets: ['es2015']
-      }))
-	   .pipe(addStream.obj(prepareWaterTemplates()))
-      .pipe(concat('water.js'))
-      .pipe(header(fs.readFileSync(directories.source + '/licence.txt', 'utf8')))
-      .pipe(gulp.dest(directories.assets));
+   return prepareScripts('water');
 });
 
 //Concatenate & Minify JS
 gulp.task('startScripts', function() {
-   return gulp.src(directories.source + '/start/**/*.js')
-      .pipe(babel({
-            presets: ['es2015']
-      }))
-	   .pipe(addStream.obj(prepareStartTemplates()))
-      .pipe(concat('start.js'))
-      .pipe(header(fs.readFileSync(directories.source + '/licence.txt', 'utf8')))
-      .pipe(gulp.dest(directories.assets));
+   return prepareScripts('start');
 });
 
 //Concatenate & Minify JS
 gulp.task('imageryScripts', function() {
-   return gulp.src(directories.source + '/imagery/**/*.js')
+   return prepareScripts('imagery');
+});
+
+//Concatenate & Minify JS
+gulp.task('ltScripts', function() {
+   return prepareScripts('lt');
+});
+
+function prepareScripts(name) {
+   return gulp.src(directories.source + '/' + name + '/**/*.js')
       .pipe(babel({
             presets: ['es2015']
       }))
-	   .pipe(addStream.obj(prepareImageryTemplates()))
-      .pipe(concat('imagery.js'))
+	   .pipe(addStream.obj(prepareNamedTemplates(name)))
+      .pipe(concat(name + '.js'))
       .pipe(header(fs.readFileSync(directories.source + '/licence.txt', 'utf8')))
       .pipe(gulp.dest(directories.assets));
-});
+}
+
 
 //Concatenate & Minify JS
 gulp.task('squash', ['squashCommon','squashIcsm', 'squashWater', 'squashStart', 'squashImagery']);
@@ -126,25 +108,29 @@ gulp.task('squashCommon', function() {
 		.pipe(gulp.dest(directories.assets + "/min"));
 });
 gulp.task('squashIcsm', function() {
-	return gulp.src(directories.assets + '/icsm.js')
-		.pipe(uglify())
-		.pipe(gulp.dest(directories.assets + "/min"));
+	return squashJs('icsm');
 });
 gulp.task('squashWater', function() {
-	return gulp.src(directories.assets + '/water.js')
-		.pipe(uglify())
-		.pipe(gulp.dest(directories.assets + "/min"));
+	return squashJs('water');
 });
 gulp.task('squashStart', function() {
-	return gulp.src(directories.assets + '/start.js')
-		.pipe(uglify())
-		.pipe(gulp.dest(directories.assets + "/min"));
+	return squashJs('start');
 });
+
 gulp.task('squashImagery', function() {
-	return gulp.src(directories.assets + '/imagery.js')
+	return squashJs('imagery');
+});
+
+gulp.task('squashLt', function() {
+	return squashJs('lt');
+});
+
+function squashJs(name) {
+	return gulp.src(directories.assets + '/' + name + '.js')
 		.pipe(uglify())
 		.pipe(gulp.dest(directories.assets + "/min"));
-});
+}
+
 
 // Watch Files For Changes
 gulp.task('watch', function() {
@@ -155,12 +141,14 @@ gulp.task('watch', function() {
     gulp.watch(directories.source + '/water/**/*(*.js|*.html)', ['waterScripts']);
     gulp.watch(directories.source + '/start/**/*(*.js|*.html)', ['startScripts']);
     gulp.watch(directories.source + '/imagery/**/*(*.js|*.html)', ['imageryScripts']);
+    gulp.watch(directories.source + '/lt/**/*(*.js|*.html)', ['ltScripts']);
     gulp.watch(directories.source + '/**/*.css', ['concatCss']);
     gulp.watch(directories.assets + '/common.js', ['squashCommon']);
     gulp.watch(directories.assets + '/icsm.js', ['squashIcsm']);
     gulp.watch(directories.assets + '/water.js', ['squashWater']);
     gulp.watch(directories.assets + '/start.js', ['squashStart']);
     gulp.watch(directories.assets + '/imagery.js', ['squashImagery']);
+    gulp.watch(directories.assets + '/lt.js', ['squashLt']);
     gulp.watch(directories.views +  '/*', ['views']);
     gulp.watch(directories.resources + '/**/*', ['resources']);
     //gulp.watch('scss/*.scss', ['sass']);
@@ -205,4 +193,9 @@ function prepareStartTemplates() {
 function prepareImageryTemplates() {
    return gulp.src(directories.source + '/imagery/**/*.html')
       .pipe(templateCache({module:"imagery.templates", root:'imagery', standalone : true}));
+}
+
+function prepareNamedTemplates(name) {
+   return gulp.src(directories.source + '/' + name + '/**/*.html')
+      .pipe(templateCache({module: name + ".templates", root:name, standalone : true}));
 }
