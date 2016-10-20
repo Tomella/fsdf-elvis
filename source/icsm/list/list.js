@@ -47,7 +47,7 @@ angular.module("icsm.list", [])
             scope.typeCounts = decorateCounts(filteredText, scope.filetypes);
          };
 
-			$rootScope.$on('site.selection', function(event, data) {
+		$rootScope.$on('site.selection', function(event, data) {
             scope.list = [];
             if(data.available_data) {
 				   data.available_data.forEach(function(item) {
@@ -59,9 +59,9 @@ angular.module("icsm.list", [])
             }
             scope.expansions = listService.createExpansions();
             scope.update();
-			});
+		});
 
-			scope.show = function(data) {
+		scope.show = function(data) {
             var bbox = toNumberArray(data.bbox);
             $rootScope.$broadcast('icsm.bbox.draw', bbox);
 				console.log("show", bbox);
@@ -70,7 +70,7 @@ angular.module("icsm.list", [])
 			scope.hide = function(data) {
             $rootScope.$broadcast('icsm.bbox.draw', null);
 				console.log("hide");
-			};
+		};
 
          function decorateGroups(item) {
             var filetypeKeys = {};
