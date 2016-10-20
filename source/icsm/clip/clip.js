@@ -86,8 +86,9 @@ angular.module("icsm.clip", ['geo.draw'])
 
 
 .factory("clipService", ['$q', '$rootScope', 'drawService', function($q, $rootScope, drawService) {
-	return {
+	var service = {
 		initiateDraw : function() {
+			this.data = null;
 			return drawService.drawRectangle().then(drawComplete);
 		},
 
@@ -96,8 +97,10 @@ angular.module("icsm.clip", ['geo.draw'])
 		}
 	};
 
+	return service;
+
 	function drawComplete(data) {
-		return {
+		service.data = {
          clip:{
 			   xMax: data.bounds.getEast().toFixed(5),
 			   xMin: data.bounds.getWest().toFixed(5),
@@ -105,6 +108,7 @@ angular.module("icsm.clip", ['geo.draw'])
 			   yMin: data.bounds.getSouth().toFixed(5)
 		   }
       };
+		return service.data;
 	}
 }]);
 

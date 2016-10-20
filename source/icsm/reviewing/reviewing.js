@@ -36,9 +36,9 @@
                                     $uibModalInstance.close(false);
                                  };
 
-                                 $scope.noneSelected = function(products) {
+                                 $scope.noneSelected = function (products) {
                                     return !products.some(product => product.selected);
-                                 }
+                                 };
                               }],
                            resolve: {
                               products: function () {
@@ -47,9 +47,9 @@
                            }
                         });
                         modalInstance.result.then(function (run) {
-                           if(run) {
-                              reviewService.startExtract().then(function() {
-                                 console.log("Ran the data")
+                           if (run) {
+                              reviewService.startExtract().then(function () {
+                                 console.log("Ran the data");
                               });
                            }
                            scope.data.reviewing = false;
@@ -66,17 +66,12 @@
          return {
             template: '<div class="input-group">' +
             '<span class="input-group-addon" id="nedf-email">Email</span>' +
-            '<input required="required" type="email" ng-change="changeEmail(email)" ng-model="email" class="form-control" placeholder="Email address to send download link" aria-describedby="nedf-email">' +
+            '<input required="required" type="email" ng-model="data.email" class="form-control" placeholder="Email address to send download link" aria-describedby="nedf-email">' +
             '</div>',
             restrict: "AE",
             link: function (scope, element) {
-               reviewService.getEmail().then(function (email) {
-                  scope.email = email;
-               });
-
-               scope.changeEmail = function (address) {
-                  reviewService.setEmail(address);
-               };
+               scope.data = reviewService.data;
+               console.log("data" + scope.data)
             }
          };
       }])
@@ -87,26 +82,31 @@
          };
       })
 
-      .factory('reviewService', ['listService', 'persistService', function (listService, persistService) {
+      .factory('reviewService', ['clipService', 'configService', 'listService', 'persistService',
+                        function (clipService, configService, listService, persistService) {
          var key = "elvis_download_email";
+         var data = listService.data;
          var service = {
+            data: listService.data,
             get products() {
                return listService.products;
             },
 
-            get data() {
-               return listService.data;
-            },
-
-            startExtract: function() {
+            startExtract: function () {
+               var clip = clipService.data.clip;
                var data = {
-                  json: JSON.stringify(listService.products.filter(product => product.selected)),
-                  maxx: 0,
-                  maxy: 0,
-                  minx: 0,
-                  miny: 0,
+                  json: JSON.stringify(convertFlatToStructured(listService.products.filter(product => product.selected))),
+                  maxx: clip.xMax,
+                  maxy: clip.yMax,
+                  minx: clip.xMin,
+                  miny: clip.yMin,
                   email: this.data.email
-               }
+               };
+               configService.getConfig("processing").then(function(config) {
+                  var url = transformTemplate(config.processingUrl, data);
+                  console.log('clip');
+                  console.log(url);
+               });
             },
 
             setEmail: function (email) {
@@ -121,9 +121,63 @@
                });
             },
          };
+         persistService.getItem(key).then(value => {
+            service.data.email = value;
+         });
 
          return service;
       }]);
 
+   function transformTemplate(template, data) {
+      var response = template;
+      angular.forEach(data, function(value, key) {
+         response = response.replace("{" + key + "}", encodeURIComponent(value));
+      });
+      return response;
+   }
+
+   function convertFlatToStructured(flat) {
+      var fields = ["index_poly_name", "file_name", "file_url", "file_size", "file_last_modified", "bbox"]
+      var response = {
+         available_data: []
+      };
+      var available = response.available_data;
+      var sourceMap = {};
+
+      flat.forEach(dataset => {
+         var item = {};
+         fields.forEach(field => {
+            if(typeof dataset[field] !== "undefined") {
+               item[field] = dataset[field];
+            }
+         });
+
+         var data = sourceMap[dataset.source]
+         if(!data) {
+            data = {
+               source: dataset.source,
+               downloadables : {}
+            };
+            sourceMap[dataset.source] = data;
+            available.push(data);
+         }
+
+         var downloadable = data.downloadables[dataset.type];
+         if(!downloadable) {
+            downloadable = {};
+            data.downloadables[dataset.type] = downloadable;
+         }
+
+         var group = downloadable[dataset.group];
+         if(!group) {
+            group = [];
+            downloadable[dataset.group] = group;
+         }
+
+         group.push(item);
+      });
+
+      return response;
+   }
 
 })(angular);
