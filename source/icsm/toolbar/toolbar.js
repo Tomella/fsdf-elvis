@@ -43,7 +43,7 @@ angular.module("icsm.toolbar", [])
 
 	$scope.item = "";
 	$scope.toggleItem = function(item) {
-		$scope.item = ($scope.item == item) ? "" : item;
+		$scope.item = ($scope.item === item) ? "" : item;
 	};
 
 }]);
