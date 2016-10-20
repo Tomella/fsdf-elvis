@@ -57,6 +57,7 @@
 	},
 	"elevationAndDepth": {
 		"heading": "Explorer Elevation and Depth",
+		"enabled": true,
 		"headingtitle": "Elevation and Depth",
 		"breadcrumbs": [{"name": "ELVIS", "title": "Reload ELVIS - Foundation Spatial Data", "url": "/"}],
 		"helptitle": "Get help about Elevation and Depth",
