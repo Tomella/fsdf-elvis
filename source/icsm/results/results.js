@@ -6,60 +6,81 @@
 
     'use strict';
 
-    angular.module("elvis.results", [])
+    angular.module("elvis.results", ['elvis.results.continue'])
 
         .directive('icsmList', ['$rootScope', 'listService', function ($rootScope, listService) {
             return {
-                templateUrl: 'icsm/list/list.html',
+                templateUrl: 'icsm/results/results.html',
                 link: function (scope) {
                     listService.getMappings().then(function (response) {
                         scope.mappings = response;
                     });
 
-                    listService.getFiletypes().then(function (response) {
-                        scope.filetypes = response;
-                    });
-                    scope.filter = "";
-
-                    scope.matched = function () {
-                        var count = 0;
-                        if (scope.list) {
-                            scope.list.forEach(function (item) {
-                                if (item.downloadables) {
-                                    angular.forEach(item.downloadables, (group) => {
-                                        count += group.length;
-                                    });
-                                }
-                            });
-                        }
-                        return count;
-                    };
-
-                    scope.fullCount = function (name) {
-                        var count = 0;
-                        scope.list.forEach(function (available) {
-                            var count = 0;
-                            if (available.source == name) {
-                                angular.forEach(item.downloadables, (group) => {
-                                    count += group.length;
-                                });
-                            }
-                        });
-                        return count;
-                    };
+                    scope.filters = listService.data;
 
                     scope.update = function () {
-                        var filteredText = filterText(scope.list, scope.filter);
-                        scope.filteredList = filterTypes(filteredText, scope.filetypes);
-                        scope.typeCounts = decorateCounts(filteredText, scope.filetypes);
+                        var filterExists = !!scope.filters.filter;
+                        var types  = [];
+
+                        var typesExists = scope.filters.types.some(type => type.selected) && !scope.filters.types.every(type => type.selected);
+                        // Set up the default
+                        scope.products.forEach(function (product) {
+                            product.matched = !filterExists;
+                        });
+
+                        // Do the types first
+                        if (typesExists) {
+                            scope.products.forEach(function (product) {
+                                product.matched = false;
+                                scope.filters.types.filter(type => type.selected).forEach(type => {
+                                    if (type.match && type.match[product.type]) {
+                                        product.matched = true;
+                                    } else if (type.noMatch && !type.noMatch[product.type]) {
+                                        product.matched = true;
+                                    }
+                                });
+                            });
+                        }
+
+                        // Now do the filters
+                        if (filterExists) {
+                            var upperFilter = scope.filters.filter.toUpperCase();
+                            var products = scope.products;
+                            if (typesExists) {
+                                products = products.filter(item => item.matched);
+                            }
+
+                            products.forEach(function (product) {
+                                product.matched = product.file_name.toUpperCase().indexOf(upperFilter) > -1;
+                            });
+                        }
                     };
 
                     $rootScope.$on('site.selection', function (event, data) {
-                        scope.list = [];
+                        scope.list = null;
+                        scope.products = [];
+                        scope.productsMap = [];
+
                         if (data.available_data) {
-                            scope.list = data.available_data;
+                            scope.list = data.available_data.filter(function (org) {
+                                return org.downloadables;
+                            });
+
+                            scope.list.forEach(function (org) {
+                                angular.forEach(org.downloadables, function (types, type) {
+                                    angular.forEach(types, function (group, groupType) {
+                                        group.forEach(function (product) {
+                                            product.source = org.source;
+                                            product.group = groupType;
+                                            product.type = type;
+                                            scope.productsMap[product.file_url] = product;
+                                            scope.products.push(product);
+                                        });
+                                    });
+                                });
+                            });
+                            listService.products = scope.products;
                         }
-                        scope.expansions = listService.createExpansions();
                         scope.update();
                     });
 
@@ -93,46 +114,6 @@
                         }
                     }
 
-                    function filterText(list, filter) {
-                        var NAME_KEY = "index_poly_name";
-                        var response = [];
-
-                        // If we have no text filter we can return now.
-                        if (!filter) {
-                            return list;
-                        }
-
-                        list.forEach(function (item) {
-                            if (item && item.downloadables && item.downloadables.length) {
-                                var downloadables = [];
-                                item.downloadables.forEach(function (download) {
-                                    var add = null;
-                                    angular.forEach(download, function (item, key) {
-                                        if (key.indexOf("name") == -1) {
-                                            return;
-                                        }
-                                        if (("" + item).toUpperCase().search(filter.toUpperCase()) > -1) {
-                                            add = download;
-                                        }
-                                    });
-
-                                    if (add) {
-                                        downloadables.push(add);
-                                    }
-                                });
-                                if (downloadables.length) {
-                                    let holder = {
-                                        downloadables: downloadables,
-                                        source: item.source
-                                    };
-                                    decorateGroups(holder);
-                                    response.push(holder);
-                                }
-                            }
-                        });
-                        return response;
-                    }
-
                     function toNumberArray(numbs) {
                         if (angular.isArray(numbs) || !numbs) {
                             return numbs;
@@ -145,43 +126,112 @@
             };
         }])
 
+        .controller('listCtrl', ListCtrl)
 
         .factory('listService', ['$http', function ($http) {
             var service = {};
             var expansions = {};
 
-            service.createExpansions = function () {
-                expansions = {};
-                return expansions;
+            service.data = {
+                filter: "",
+                types: [],
             };
+
+            $http.get('icsm/resources/config/filetypes.json').then(function (response) {
+                service.data.typesMap = response.data;
+                service.data.types = [];
+                angular.forEach(response.data, function(value, key) {
+                    service.data.types.push(value);
+                });
+            });
 
             service.getMappings = function () {
                 return $http.get('icsm/resources/config/list.json').then(function (response) {
                     return response.data;
                 });
             };
-
-            service.getFiletypes = function () {
-                return $http.get('icsm/resources/config/filetypes.json').then(function (response) {
-                    return response.data;
-                });
-            };
-
             return service;
         }])
 
-        .filter('downloadables', function () {
-            return function (available) {
-                console.log(available);
-                var response = [];
-                if (available) {
-                    available.forEach(function (item) {
-                        if (item && item.downloadables && item.downloadables.length) {
-                            response.push(item);
+        .filter("allowedTypes", ['listService', function (listService) {
+            return function (types) {
+                if(!listService.data.types.some(type => type.selected)) {
+                    return types;
+                }
+                var response = {};
+                angular.forEach(types, function(item, key) {
+                    if(listService.data.typesMap && listService.data.typesMap[key] && listService.data.typesMap[key].selected) {
+                        response[key] = item;
+                    }
+                });
+                console.log(response);
+                return response;
+            };
+        }])
+
+        .filter("countMatchedDownloadables", function () {
+            return function (downloadables) {
+                if (!downloadables) {
+                    return "-";
+                } else {
+                    var count = 0;
+                    angular.forEach(downloadables, function (types, key) {
+                        angular.forEach(types, function (items) {
+                            count += items.filter(item => item.matched).length;
+                        });
+                    });
+                    return count;
+                }
+            };
+        })
+
+        .filter("matchedTypes", function () {
+            var data = listService.data;
+
+            return function (obj) {
+                var response = {};
+                angular.forEach(obj, function (group, key) {
+                    if (group.some(item => item.matched)) {
+                        response[key] = group;
+                    }
+                });
+                return response;
+            };
+        })
+
+        .filter("matchedGroups", ['listService', function (listService) {
+            return function (obj) {
+                var response = {};
+                if (obj) {
+                    angular.forEach(obj, function (group, key) {
+                        if (group.some(item => item.matched)) {
+                            response[key] = group;
                         }
                     });
                 }
                 return response;
+            };
+        }])
+
+        .filter("matchedItems", ['listService', function (listService) {
+            return function (list) {
+                return list.filter(item => item.matched);
+            };
+        }])
+
+        .filter("countDownloadables", function () {
+            return function (downloadables) {
+                if (!downloadables) {
+                    return "-";
+                } else {
+                    var count = 0;
+                    angular.forEach(downloadables, function (group, key) {
+                        angular.forEach(group, function (value, key) {
+                            count += value.length;
+                        });
+                    });
+                    return count;
+                }
             };
         })
 
@@ -194,6 +244,7 @@
                 if (!size) {
                     return "-";
                 }
+
                 if (("" + size).indexOf(" ") > -1) {
                     return size;
                 }
@@ -215,5 +266,55 @@
                 return (size / ter).toFixed(1) + " TB";
             };
         });
+
+
+    ListCtrl.$inject = ['listService'];
+    function ListCtrl(listService) {
+        this.service = listService;
+
+        this.checkChildren = function (children) {
+            var allChecked = this.childrenChecked(children);
+            children.filter(child => child.matched).forEach(child => {
+                if (allChecked) {
+                    delete child.selected;
+                } else {
+                    child.selected = true;
+                }
+            });
+        };
+
+        this.childrenChecked = function (children) {
+            return !children.filter(child => child.matched).some(child => !child.selected);
+        };
+
+        this.someMatches = function (products) {
+            var matches = false;
+            angular.forEach(products.downloadables, function (group) {
+                angular.forEach(group, function (subGroup) {
+                    matches |= subGroup.some(item => item.matched);
+                });
+            });
+            return matches;
+        };
+
+        this.review = function() {
+            this.service.data.reviewing = true;
+        };
+
+        this.cancelReview = function() {
+            this.service.data.reviewing = false;
+        };
+    }
+
+    ListCtrl.prototype = {
+        get products() {
+            return this.service.products;
+        },
+
+        get selected () {
+            var products = this.service.products;
+            return products? products.filter(item => item.selected): [];
+        }
+    };
 
 })(angular);
