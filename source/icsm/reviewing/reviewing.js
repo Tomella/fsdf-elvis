@@ -8,8 +8,8 @@
 
    angular.module("elvis.reviewing", [])
 
-      .directive('icsmReview', ['$rootScope', '$uibModal', '$log', 'reviewService',
-         function ($rootScope, $uibModal, $log, reviewService) {
+      .directive('icsmReview', ['$rootScope', '$uibModal', '$log', 'messageService', 'reviewService',
+         function ($rootScope, $uibModal, $log, messageService, reviewService) {
             return {
                controller: ['$scope', function ($scope, reviewService) {
 
@@ -49,6 +49,7 @@
                         modalInstance.result.then(function (run) {
                            if (run) {
                               reviewService.startExtract();
+                              messageService.success("Your job has been submitted. An email will be sent on job completion.")
                            }
                            scope.data.reviewing = false;
                         }, function () {

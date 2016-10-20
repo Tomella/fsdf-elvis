@@ -1025,29 +1025,6 @@ under the License.
 (function (angular) {
 	'use strict';
 
-	angular.module("icsm.plot", []).directive("icsmPlot", ['$log', function ($log) {
-		return {
-			restrict: "AE",
-			scope: {
-				line: "="
-			},
-			link: function link(scope, element, attrs, ctrl) {
-				scope.$watch("line", function (newValue, oldValue) {
-					$log.info(newValue);
-				});
-			}
-		};
-	}]);
-})(angular);
-"use strict";
-
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
-(function (angular) {
-	'use strict';
-
 	angular.module("icsm.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
 		return {
 			templateUrl: "icsm/panes/panes.html",
@@ -1115,6 +1092,29 @@ under the License.
 			remove: function remove(item) {}
 		};
 	}
+})(angular);
+"use strict";
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function (angular) {
+	'use strict';
+
+	angular.module("icsm.plot", []).directive("icsmPlot", ['$log', function ($log) {
+		return {
+			restrict: "AE",
+			scope: {
+				line: "="
+			},
+			link: function link(scope, element, attrs, ctrl) {
+				scope.$watch("line", function (newValue, oldValue) {
+					$log.info(newValue);
+				});
+			}
+		};
+	}]);
 })(angular);
 'use strict';
 
@@ -1492,7 +1492,7 @@ under the License.
 
    'use strict';
 
-   angular.module("elvis.reviewing", []).directive('icsmReview', ['$rootScope', '$uibModal', '$log', 'reviewService', function ($rootScope, $uibModal, $log, reviewService) {
+   angular.module("elvis.reviewing", []).directive('icsmReview', ['$rootScope', '$uibModal', '$log', 'messageService', 'reviewService', function ($rootScope, $uibModal, $log, messageService, reviewService) {
       return {
          controller: ['$scope', function ($scope, reviewService) {}],
          link: function link(scope, element) {
@@ -1531,6 +1531,7 @@ under the License.
                   modalInstance.result.then(function (run) {
                      if (run) {
                         reviewService.startExtract();
+                        messageService.success("Your job has been submitted. An email will be sent on job completion.");
                      }
                      scope.data.reviewing = false;
                   }, function () {
@@ -2287,6 +2288,32 @@ under the License.
 })(angular);
 'use strict';
 
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function (angular) {
+
+	'use strict';
+
+	angular.module('icsm.state', []).directive("icsmStateToggle", ['downloadService', function (downloadService) {
+		return {
+			restrict: 'AE',
+			template: '<button ng-click="toggle(false)" ng-disabled="state.show" class="btn btn-default" title="Start downlaod selection."><i class="fa fa-lg fa-object-group"></i></button>',
+			link: function link(scope) {
+				downloadService.data().then(function (data) {
+					scope.state = data;
+				});
+
+				scope.toggle = function () {
+					scope.state.show = !scope.state.show;
+				};
+			}
+		};
+	}]);
+})(angular);
+'use strict';
+
 (function (angular) {
 
 	'use strict';
@@ -2386,32 +2413,6 @@ under the License.
 		};
 
 		return this;
-	}]);
-})(angular);
-'use strict';
-
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module('icsm.state', []).directive("icsmStateToggle", ['downloadService', function (downloadService) {
-		return {
-			restrict: 'AE',
-			template: '<button ng-click="toggle(false)" ng-disabled="state.show" class="btn btn-default" title="Start downlaod selection."><i class="fa fa-lg fa-object-group"></i></button>',
-			link: function link(scope) {
-				downloadService.data().then(function (data) {
-					scope.state = data;
-				});
-
-				scope.toggle = function () {
-					scope.state.show = !scope.state.show;
-				};
-			}
-		};
 	}]);
 })(angular);
 "use strict";
