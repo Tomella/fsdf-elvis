@@ -668,6 +668,9 @@ img.elvis-logo {
   padding-top: 30px;
   font-size: 80%;
 }
+.continue-container {
+  padding: 4px;
+}
 .resultsItemHeading {
   font-weight: bold;
 }
@@ -725,6 +728,9 @@ img.elvis-logo {
 
 i.fa.active {
   color: red;
+}
+.reviewing-odd {
+  background-color: #eeeeee;
 }
 .icsm-icon {
   background: url("icsm/img/global-sprites.svg") no-repeat;
@@ -837,6 +843,19 @@ div.leaflet-control-scale-line {
 .downloadPane {
   padding-left: 5px !important;
   padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 42px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
 }
 .start-content-container {
   position: fixed;

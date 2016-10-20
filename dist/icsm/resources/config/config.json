@@ -172,8 +172,7 @@
 	},
 
 	"processing": {
-	    "intersectsUrl1": "icsm/resources/config/response.json",
-        "intersectsUrl2": "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/dev_space/LPI_ReturnDownloadables.fmw?ymin={miny}&ymax={maxy}&xmin={minx}&xmax={maxx}",
-        "intersectsUrl": "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/elvis_test/ReturnDownloadables.fmw?ymin={miny}&ymax={maxy}&xmin={minx}&xmax={maxx}"
+	    "processingUrl": "https://elvis20161a-ga.fmecloud.com/fmejobsubmitter/fsdf_elvis_test/ZipDownloadables.fmw?SELECTION_JSON={json}&XMIN={minx}&XMAX={maxx}&YMIN={miny}YMAX={maxy}&EMAIL_ADDRESS={email}&opt_showresult=false&opt_servicemode=async",
+	    "intersectsUrl": "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/fsdf_elvis_test/ReturnDownloadables.fmw?ymin={miny}&ymax={maxy}&xmin={minx}&xmax={maxx}"
 	}
 }
