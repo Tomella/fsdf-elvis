@@ -8,7 +8,7 @@
    },
    "DEMs": {
       "label": "DEM",
-      "description": "GeoTiff digital elevation model",
+      "description": "Digital Elevation Model",
       "match": {
          "DEMs": true
       }
