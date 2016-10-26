@@ -26,7 +26,6 @@ function GlossaryCtrl($log, glossaryService) {
 	});
 }
 
-
 GlossaryService.$inject = ['$http'];
 function GlossaryService($http) {
 	var TERMS_SERVICE = "icsm/resources/config/glossary.json";

@@ -49,7 +49,7 @@
                         modalInstance.result.then(function (run) {
                            if (run) {
                               reviewService.startExtract();
-                              messageService.success("Your job has been submitted. An email will be sent on job completion.")
+                              messageService.success("Your job has been submitted. An email will be sent on job completion.");
                            }
                            scope.data.reviewing = false;
                         }, function () {
@@ -70,7 +70,7 @@
             restrict: "AE",
             link: function (scope, element) {
                scope.data = reviewService.data;
-               console.log("data" + scope.data)
+               console.log("data" + scope.data);
             }
          };
       }])
@@ -130,7 +130,7 @@
    }
 
    function convertFlatToStructured(flat) {
-      var fields = ["index_poly_name", "file_name", "file_url", "file_size", "file_last_modified", "bbox"]
+      var fields = ["file_url"]; // ["index_poly_name", "file_name", "file_url", "file_size", "file_last_modified", "bbox"]
       var response = {
          available_data: []
       };
@@ -145,7 +145,7 @@
             }
          });
 
-         var data = sourceMap[dataset.source]
+         var data = sourceMap[dataset.source];
          if(!data) {
             data = {
                source: dataset.source,

@@ -61,7 +61,15 @@ angular.module("icsm.clip", ['geo.draw'])
             }, 4000);
          };
 
-         $rootScope.$on('icsm.clip.draw', function() {
+         $rootScope.$on('icsm.clip.draw', function(event, data) {
+				if(data && data.message === "oversize") {
+					scope.oversize = true;
+					$timeout(() => {
+						delete scope.oversize;
+					}, 4000);
+				} else {
+					delete scope.oversize;
+				}
             scope.initiateDraw();
          });
 
@@ -111,6 +119,5 @@ angular.module("icsm.clip", ['geo.draw'])
 		return service.data;
 	}
 }]);
-
 
 })(angular);

@@ -51,7 +51,7 @@
          "description": "The Transport network provides the means for moving people, goods and freight, and other services from one location to another.",
          "className": "altthemes-ship",
          "url": "comingSoon.html",
-         "urlPending": "/transport.html"
+         "urlPending": "transport.html"
       },
       {
          "code": "water",

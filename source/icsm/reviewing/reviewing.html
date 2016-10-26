@@ -41,10 +41,13 @@
             <i class="fa fa-times-circle fa-2x" aria-hidden="true"></i>
          </button> {{product.file_name}}
 			</div>
-			<div class="col-md-5" style="padding:6px">
+			<div class="col-md-4" style="padding:6px">
 				({{product.source}}
 				<i class="fa fa-arrow-right" aria-hidden="true"></i> {{product.type}}
 				<i class="fa fa-arrow-right" aria-hidden="true"></i> {{product.group}})
+			</div>
+			<div class="col-md-1" style="padding:6px">
+				{{product.file_size | fileSize}}
 			</div>
 		</div>
 		<div class="row">

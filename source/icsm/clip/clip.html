@@ -1,16 +1,11 @@
 <div class="well well-sm">
 	<div class="container-fluid">
 		<div class="row">
-			<div class="col-md-2">
-				<strong style="font-size:120%">Select area:</strong>
-			</div>
-			<div class="col-md-1">
-			</div>
-			<div class="col-md-9">
+			<div class="col-md-12">
 				<div class="btn-group" role="group" aria-label="...">
 					<button ng-click="initiateDraw()" ng-disable="client.drawing" tooltip-placement="bottom" uib-tooltip="Enable drawing of a bounding box. On enabling, click on the map and drag diagonally"
-						class="btn btn-primary btn-default">Draw...</button>
-					<button ng-click="typing = !typing"  tooltip-placement="bottom" uib-tooltip="Type coordinates of a bounding box. Restricted to maximum of 2x2 degrees."
+						class="btn btn-primary btn-default">Select an area...</button>
+					<button ng-click="typing = !typing" tooltip-placement="bottom" uib-tooltip="Type coordinates of a bounding box. Restricted to maximum of 2x2 degrees."
 						class="btn btn-primary btn-default">Manual entry...</button>
 					<button ng-click="showInfo = !showInfo" tooltip-placement="bottom" uib-tooltip="Information." class="btn btn-primary btn-default"><i class="fa fa-info"></i></button>
 				</div>
@@ -20,9 +15,14 @@
 			</div>
 		</div>
 
+		<div ng-show="oversize" style="margin-top:15px">
+			<div class="alert alert-danger" role="alert">Please restrict the size of your selected area to no more than 4 square degrees.</div>
+		</div>
+
 		<div class="row" ng-hide="!clip.xMin && clip.xMin != 0" style="padding-top:7px;">
 			<div class="col-md-12">
-				Selected {{clip.xMin|number : 4}}&deg; west, {{clip.yMax|number : 4}}&deg; north, {{clip.yMax|number : 4}}&deg; east, {{clip.xMin|number : 4}}&deg; south
+				Selected {{clip.xMin|number : 4}}&deg; west, {{clip.yMax|number : 4}}&deg; north, {{clip.yMax|number : 4}}&deg; east, {{clip.xMin|number
+				: 4}}&deg; south
 			</div>
 		</div>
 	</div>

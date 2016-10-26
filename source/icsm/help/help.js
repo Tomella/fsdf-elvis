@@ -2,58 +2,56 @@
  * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
  */
 
-(function(angular) {
+(function (angular) {
 
-'use strict';
+	'use strict';
 
-angular.module("icsm.help", [])
+	angular.module("icsm.help", [])
 
-.directive("icsmHelp", [function() {
-	return {
-		templateUrl : "icsm/help/help.html"
-	};
-}])
-
-.directive("icsmFaqs", [function() {
-	return {
-		restrict:"AE",
-		templateUrl : "icsm/help/faqs.html",
-		scope : {
-			faqs : "="
-		},
-		link : function(scope) {
-			scope.focus = function(key) {
-				$("#faqs_" + key).focus();
+		.directive("icsmHelp", [function () {
+			return {
+				templateUrl: "icsm/help/help.html"
 			};
-		}
-	};
-}])
+		}])
 
-.controller("HelpCtrl", HelpCtrl)
-.factory("helpService", HelpService);
+		.directive("icsmFaqs", [function () {
+			return {
+				restrict: "AE",
+				templateUrl: "icsm/help/faqs.html",
+				scope: {
+					faqs: "="
+				},
+				link: function (scope) {
+					scope.focus = function (key) {
+						$("#faqs_" + key).focus();
+					};
+				}
+			};
+		}])
 
-HelpCtrl.$inject = ['$log', 'helpService'];
-function HelpCtrl($log, helpService) {
-	var self = this;
-	$log.info("HelpCtrl");
-	helpService.getFaqs().then(function(faqs) {
-		self.faqs = faqs;
-	});
-}
+		.controller("HelpCtrl", HelpCtrl)
+		.factory("helpService", HelpService);
 
+	HelpCtrl.$inject = ['$log', 'helpService'];
+	function HelpCtrl($log, helpService) {
+		var self = this;
+		$log.info("HelpCtrl");
+		helpService.getFaqs().then(function (faqs) {
+			self.faqs = faqs;
+		});
+	}
 
-HelpService.$inject = ['$http'];
-function HelpService($http) {
-	var FAQS_SERVICE = "icsm/resources/config/faqs.json";
+	HelpService.$inject = ['$http'];
+	function HelpService($http) {
+		var FAQS_SERVICE = "icsm/resources/config/faqs.json";
 
-	return {
-		getFaqs : function() {
-			return $http.get(FAQS_SERVICE, {cache : true}).then(function(response) {
-				return response.data;
-			});
-		}
-	};
-}
-
+		return {
+			getFaqs: function () {
+				return $http.get(FAQS_SERVICE, { cache: true }).then(function (response) {
+					return response.data;
+				});
+			}
+		};
+	}
 
 })(angular);

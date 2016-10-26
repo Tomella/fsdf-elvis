@@ -14,7 +14,6 @@
             controller: 'listCtrl',
             controllerAs: 'ctrl',
             link: function (scope, element) {
-               console.log("FF");
                scope.data = continueService.data;
             }
          };

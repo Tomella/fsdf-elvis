@@ -41,9 +41,6 @@
 
 		//'geo.baselayer.control',
 		'geo.draw',
-		// 'geo.elevation',
-		//'icsm.elevation',
-		//'geo.extent',
 		'geo.geosearch',
 		'geo.map',
 		'geo.maphelper',
@@ -57,7 +54,6 @@
 		'elvis.header',
 		'elvis.results',
 		'elvis.reviewing',
-		//'icsm.list',
       'icsm.mapevents',
 		'icsm.select',
 		'icsm.state',
@@ -74,63 +70,6 @@
 				projectsServiceProvider.setProject("icsm");
 				persistServiceProvider.handler("local");
 			}])
-
-		.config(['$routeProvider', function ($routeProvider) {
-			$routeProvider.
-				when('/administrativeBoundaries', {
-					templateUrl: "admin/app/app.html",
-					controller: "adminCtrl",
-					controllerAs: "admin"
-				}).
-				when('/positioning', {
-					templateUrl: "positioning/app/app.html",
-					controller: "positioningCtrl",
-					controllerAs: "positioning"
-				}).
-				when('/placeNames', {
-					templateUrl: "placenames/app/app.html",
-					controller: "placeNamesCtrl",
-					controllerAs: "placeNames"
-				}).
-				when('/landParcelAndProperty', {
-					templateUrl: "landParcelAndProperty/app/app.html",
-					controller: "landParcelAndPropertyCtrl",
-					controllerAs: "landParcelAndProperty"
-				}).
-				when('/imagery', {
-					templateUrl: "imagery/app/app.html",
-					controller: "imageryCtrl",
-					controllerAs: "imagery"
-				}).
-				when('/transport', {
-					templateUrl: "transport/app/app.html",
-					controller: "transportCtrl",
-					controllerAs: "transport"
-				}).
-				when('/water', {
-					templateUrl: "water/app/app.html",
-					controller: "waterCtrl",
-					controllerAs: "water"
-				}).
-				when('/elevationAndDepth', {
-					templateUrl: "elevationAndDepth/app/app.html",
-					controller: "elevationAndDepthCtrl",
-					controllerAs: "elevationAndDepth"
-				}).
-				when('/landCover', {
-					templateUrl: "landCover/app/app.html",
-					controller: "landCoverCtrl",
-					controllerAs: "landCover"
-				}).
-				when('/icsm', {
-					templateUrl: "icsm/app/app.html",
-					controller: "icsmCtrl",
-					controllerAs: "icsm"
-				}).
-				otherwise({
-					redirectTo: "/icsm"
-				});
-		}])
 
 		.factory("userService", [function () {
 			return {

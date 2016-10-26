@@ -624,6 +624,10 @@ input.ng-valid.ng-touched {
 img.elvis-logo {
   height: 75px;
 }
+.continue-container {
+  padding: 4px;
+}
+
 .listItemHeading {
   font-weight: bold;
 }
@@ -666,9 +670,6 @@ img.elvis-logo {
   float: right;
   padding-top: 30px;
   font-size: 80%;
-}
-.continue-container {
-  padding: 4px;
 }
 .resultsItemHeading {
   font-weight: bold;
@@ -856,6 +857,21 @@ div.leaflet-control-scale-line {
   right: 0;
   bottom: 8px;
 }
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
+}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -901,21 +917,6 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
-}
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
 }
 .vector-tooltip {
   min-width: 25em;
