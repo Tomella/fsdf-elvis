@@ -170,9 +170,8 @@
 		"keywordMappedDescription" :"The entries look the same as the default keywords but there but doesn't need the default attribute or at least it should be false",
 		"keywordMapped": []
 	},
-
 	"processing": {
-	    "processingUrl": "https://elvis20161a-ga.fmecloud.com/fmejobsubmitter/fsdf_elvis_test/ZipDownloadables.fmw?SELECTION_JSON={json}&XMIN={minx}&XMAX={maxx}&YMIN={miny}YMAX={maxy}&EMAIL_ADDRESS={email}&opt_showresult=false&opt_servicemode=async",
+	    "processingUrl": "https://elvis20161a-ga.fmecloud.com/fmejobsubmitter/fsdf_elvis_test/ZipDownloadables.fmw?SELECTION_JSON={json}&XMIN={minx}&XMAX={maxx}&YMIN={miny}&YMAX={maxy}&EMAIL_ADDRESS={email}&opt_showresult=false&opt_servicemode=async",
 	    "intersectsUrl": "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/fsdf_elvis_test/ReturnDownloadables.fmw?ymin={miny}&ymax={maxy}&xmin={minx}&xmax={maxx}"
 	}
 }
