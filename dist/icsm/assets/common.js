@@ -19,6 +19,58 @@ under the License.
 
 'use strict';
 
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+(function (angular) {
+	'use strict';
+	/**
+  * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
+  */
+
+	angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider']).directive('commonBaselayerControl', ['$rootScope', 'mapHelper', 'mapService', function ($rootScope, mapHelper, mapService) {
+		var DEFAULTS = {
+			maxZoom: 12
+		};
+
+		return {
+			template: '<slider min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
+			scope: {
+				maxZoom: "="
+			},
+			link: function link(scope, element) {
+				if (typeof scope.maxZoom === "undefined") {
+					scope.maxZoom = DEFAULTS.maxZoom;
+				}
+				scope.slider = {
+					opacity: -1,
+					visibility: true,
+					lastOpacity: 1
+				};
+
+				// Get the initial value
+				mapHelper.getPseudoBaseLayer().then(function (layer) {
+					scope.layer = layer;
+					scope.slider.opacity = layer.options.opacity;
+				});
+
+				scope.$watch('slider.opacity', function (newValue, oldValue) {
+					if (oldValue < 0) return;
+
+					mapService.getMap().then(function (map) {
+						map.eachLayer(function (layer) {
+							if (layer.pseudoBaseLayer) {
+								layer.setOpacity(scope.slider.opacity);
+							}
+						});
+					});
+				});
+			}
+		};
+	}]);
+})(angular);
+'use strict';
+
 (function (angular) {
 
 	'use strict';
@@ -124,58 +176,6 @@ under the License.
 })(angular);
 'use strict';
 
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-(function (angular) {
-	'use strict';
-	/**
-  * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
-  */
-
-	angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider']).directive('commonBaselayerControl', ['$rootScope', 'mapHelper', 'mapService', function ($rootScope, mapHelper, mapService) {
-		var DEFAULTS = {
-			maxZoom: 12
-		};
-
-		return {
-			template: '<slider min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
-			scope: {
-				maxZoom: "="
-			},
-			link: function link(scope, element) {
-				if (typeof scope.maxZoom === "undefined") {
-					scope.maxZoom = DEFAULTS.maxZoom;
-				}
-				scope.slider = {
-					opacity: -1,
-					visibility: true,
-					lastOpacity: 1
-				};
-
-				// Get the initial value
-				mapHelper.getPseudoBaseLayer().then(function (layer) {
-					scope.layer = layer;
-					scope.slider.opacity = layer.options.opacity;
-				});
-
-				scope.$watch('slider.opacity', function (newValue, oldValue) {
-					if (oldValue < 0) return;
-
-					mapService.getMap().then(function (map) {
-						map.eachLayer(function (layer) {
-							if (layer.pseudoBaseLayer) {
-								layer.setOpacity(scope.slider.opacity);
-							}
-						});
-					});
-				});
-			}
-		};
-	}]);
-})(angular);
-'use strict';
-
 (function (angular) {
 
    'use strict';
@@ -188,6 +188,77 @@ under the License.
          }
       };
    }]);
+})(angular);
+'use strict';
+
+(function (angular) {
+
+	'use strict';
+
+	angular.module("common.clip", ['geo.draw']).directive("wizardClip", ['$timeout', 'clipService', 'flashService', function ($timeout, clipService, flashService) {
+		return {
+			templateUrl: "common/clip/clip.html",
+			scope: {
+				clip: "=",
+				bounds: "=",
+				trigger: "=",
+				drawn: "&"
+			},
+			link: function link(scope, element) {
+				if (typeof scope.showBounds === "undefined") {
+					scope.showBounds = false;
+				}
+				scope.$watch("bounds", function (bounds) {
+					if (bounds && scope.trigger) {
+						$timeout(function () {
+							scope.initiateDraw();
+						});
+					} else if (!bounds) {
+						clipService.cancelDraw();
+					}
+				});
+
+				scope.initiateDraw = function () {
+					clipService.initiateDraw().then(drawComplete);
+
+					function drawComplete(data) {
+						var c = scope.clip;
+						var response;
+
+						c.xMax = +data.clip.xMax;
+						c.xMin = +data.clip.xMin;
+						c.yMax = +data.clip.yMax;
+						c.yMin = +data.clip.yMin;
+						if (scope.drawn) {
+							response = scope.drawn();
+							if (response && response.code && response.code == "oversize") {
+								scope.initiateDraw();
+							}
+						}
+					}
+				};
+			}
+		};
+	}]).factory("clipService", ['$q', '$rootScope', 'drawService', function ($q, $rootScope, drawService) {
+		return {
+			initiateDraw: function initiateDraw() {
+				return drawService.drawRectangle().then(drawComplete);
+			},
+
+			cancelDraw: function cancelDraw() {
+				drawService.cancelDrawRectangle();
+			}
+		};
+
+		function drawComplete(data) {
+			return { clip: {
+					xMax: data.bounds.getEast().toFixed(5),
+					xMin: data.bounds.getWest().toFixed(5),
+					yMax: data.bounds.getNorth().toFixed(5),
+					yMin: data.bounds.getSouth().toFixed(5)
+				} };
+		}
+	}]);
 })(angular);
 'use strict';
 
@@ -397,77 +468,6 @@ under the License.
 		return service;
 	}
 })(angular, $);
-'use strict';
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module("common.clip", ['geo.draw']).directive("wizardClip", ['$timeout', 'clipService', 'flashService', function ($timeout, clipService, flashService) {
-		return {
-			templateUrl: "common/clip/clip.html",
-			scope: {
-				clip: "=",
-				bounds: "=",
-				trigger: "=",
-				drawn: "&"
-			},
-			link: function link(scope, element) {
-				if (typeof scope.showBounds === "undefined") {
-					scope.showBounds = false;
-				}
-				scope.$watch("bounds", function (bounds) {
-					if (bounds && scope.trigger) {
-						$timeout(function () {
-							scope.initiateDraw();
-						});
-					} else if (!bounds) {
-						clipService.cancelDraw();
-					}
-				});
-
-				scope.initiateDraw = function () {
-					clipService.initiateDraw().then(drawComplete);
-
-					function drawComplete(data) {
-						var c = scope.clip;
-						var response;
-
-						c.xMax = +data.clip.xMax;
-						c.xMin = +data.clip.xMin;
-						c.yMax = +data.clip.yMax;
-						c.yMin = +data.clip.yMin;
-						if (scope.drawn) {
-							response = scope.drawn();
-							if (response && response.code && response.code == "oversize") {
-								scope.initiateDraw();
-							}
-						}
-					}
-				};
-			}
-		};
-	}]).factory("clipService", ['$q', '$rootScope', 'drawService', function ($q, $rootScope, drawService) {
-		return {
-			initiateDraw: function initiateDraw() {
-				return drawService.drawRectangle().then(drawComplete);
-			},
-
-			cancelDraw: function cancelDraw() {
-				drawService.cancelDrawRectangle();
-			}
-		};
-
-		function drawComplete(data) {
-			return { clip: {
-					xMax: data.bounds.getEast().toFixed(5),
-					xMin: data.bounds.getWest().toFixed(5),
-					yMax: data.bounds.getNorth().toFixed(5),
-					yMin: data.bounds.getSouth().toFixed(5)
-				} };
-		}
-	}]);
-})(angular);
 "use strict";
 
 (function (angular) {
@@ -1136,6 +1136,146 @@ under the License.
 })(angular);
 'use strict';
 
+(function (angular) {
+
+	'use strict';
+
+	angular.module('common.altthemes', [])
+
+	/**
+ 	*
+ 	* Override the original mars user.
+ 	*
+ 	  */
+	.directive('altThemes', ['altthemesService', function (themesService) {
+		return {
+			restrict: 'AE',
+			templateUrl: 'common/navigation/altthemes.html',
+			link: function link(scope) {
+				themesService.getThemes().then(function (themes) {
+					scope.themes = themes;
+				});
+
+				themesService.getCurrentTheme().then(function (theme) {
+					scope.theme = theme;
+				});
+
+				scope.changeTheme = function (theme) {
+					scope.theme = theme;
+					themesService.setTheme(theme.key);
+				};
+			}
+		};
+	}]).controller('altthemesCtrl', ['altthemesService', function (altthemesService) {
+		this.service = altthemesService;
+	}]).filter('altthemesFilter', function () {
+		return function (features, theme) {
+			var response = [];
+			// Give 'em all if they haven't set a theme.
+			if (!theme) {
+				return features;
+			}
+
+			if (features) {
+				features.forEach(function (feature) {
+					if (feature.themes) {
+						if (feature.themes.some(function (name) {
+							return name === theme.key;
+						})) {
+							response.push(feature);
+						}
+					}
+				});
+			}
+			return response;
+		};
+	}).factory('altthemesService', ['$q', '$http', 'storageService', function ($q, $http, storageService) {
+		var THEME_PERSIST_KEY = 'icsm.current.theme';
+		var THEMES_LOCATION = 'icsm/resources/config/themes.json';
+		var DEFAULT_THEME = "All";
+		var waiting = [];
+		var self = this;
+
+		this.themes = [];
+		this.theme = null;
+
+		storageService.getItem(THEME_PERSIST_KEY).then(function (value) {
+			if (!value) {
+				value = DEFAULT_THEME;
+			}
+			$http.get(THEMES_LOCATION, { cache: true }).then(function (response) {
+				var themes = response.data.themes;
+
+				self.themes = themes;
+				self.theme = themes[value];
+				// Decorate the key
+				angular.forEach(themes, function (theme, key) {
+					theme.key = key;
+				});
+				waiting.forEach(function (wait) {
+					wait.resolve(self.theme);
+				});
+			});
+		});
+
+		this.getCurrentTheme = function () {
+			if (this.theme) {
+				return $q.when(self.theme);
+			} else {
+				var waiter = $q.defer();
+				waiting.push(waiter);
+				return waiter.promise;
+			}
+		};
+
+		this.getThemes = function () {
+			return $http.get(THEMES_LOCATION, { cache: true }).then(function (response) {
+				return response.data.themes;
+			});
+		};
+
+		this.setTheme = function (key) {
+			this.theme = this.themes[key];
+			storageService.setItem(THEME_PERSIST_KEY, key);
+		};
+
+		return this;
+	}]).filter('altthemesEnabled', function () {
+		return function (headers) {
+			if (headers) {
+				return headers.filter(function (value) {
+					return !!value.enabled;
+				});
+			}
+			return headers;
+		};
+	});
+})(angular);
+'use strict';
+
+(function (angular) {
+	'use strict';
+
+	angular.module('common.navigation', [])
+	/**
+  *
+  * Override the original mars user.
+  *
+  */
+	.directive('commonNavigation', [function () {
+		return {
+			restrict: 'AE',
+			template: "<alt-themes></alt-themes>",
+			link: function link(scope) {
+				scope.username = "Anonymous";
+			}
+		};
+	}]).factory('navigationService', [function () {
+		return {};
+	}]);
+})(angular);
+'use strict';
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -1366,146 +1506,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
       return MetaviewService;
    }();
-})(angular);
-'use strict';
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module('common.altthemes', [])
-
-	/**
- 	*
- 	* Override the original mars user.
- 	*
- 	  */
-	.directive('altThemes', ['altthemesService', function (themesService) {
-		return {
-			restrict: 'AE',
-			templateUrl: 'common/navigation/altthemes.html',
-			link: function link(scope) {
-				themesService.getThemes().then(function (themes) {
-					scope.themes = themes;
-				});
-
-				themesService.getCurrentTheme().then(function (theme) {
-					scope.theme = theme;
-				});
-
-				scope.changeTheme = function (theme) {
-					scope.theme = theme;
-					themesService.setTheme(theme.key);
-				};
-			}
-		};
-	}]).controller('altthemesCtrl', ['altthemesService', function (altthemesService) {
-		this.service = altthemesService;
-	}]).filter('altthemesFilter', function () {
-		return function (features, theme) {
-			var response = [];
-			// Give 'em all if they haven't set a theme.
-			if (!theme) {
-				return features;
-			}
-
-			if (features) {
-				features.forEach(function (feature) {
-					if (feature.themes) {
-						if (feature.themes.some(function (name) {
-							return name === theme.key;
-						})) {
-							response.push(feature);
-						}
-					}
-				});
-			}
-			return response;
-		};
-	}).factory('altthemesService', ['$q', '$http', 'storageService', function ($q, $http, storageService) {
-		var THEME_PERSIST_KEY = 'icsm.current.theme';
-		var THEMES_LOCATION = 'icsm/resources/config/themes.json';
-		var DEFAULT_THEME = "All";
-		var waiting = [];
-		var self = this;
-
-		this.themes = [];
-		this.theme = null;
-
-		storageService.getItem(THEME_PERSIST_KEY).then(function (value) {
-			if (!value) {
-				value = DEFAULT_THEME;
-			}
-			$http.get(THEMES_LOCATION, { cache: true }).then(function (response) {
-				var themes = response.data.themes;
-
-				self.themes = themes;
-				self.theme = themes[value];
-				// Decorate the key
-				angular.forEach(themes, function (theme, key) {
-					theme.key = key;
-				});
-				waiting.forEach(function (wait) {
-					wait.resolve(self.theme);
-				});
-			});
-		});
-
-		this.getCurrentTheme = function () {
-			if (this.theme) {
-				return $q.when(self.theme);
-			} else {
-				var waiter = $q.defer();
-				waiting.push(waiter);
-				return waiter.promise;
-			}
-		};
-
-		this.getThemes = function () {
-			return $http.get(THEMES_LOCATION, { cache: true }).then(function (response) {
-				return response.data.themes;
-			});
-		};
-
-		this.setTheme = function (key) {
-			this.theme = this.themes[key];
-			storageService.setItem(THEME_PERSIST_KEY, key);
-		};
-
-		return this;
-	}]).filter('altthemesEnabled', function () {
-		return function (headers) {
-			if (headers) {
-				return headers.filter(function (value) {
-					return !!value.enabled;
-				});
-			}
-			return headers;
-		};
-	});
-})(angular);
-'use strict';
-
-(function (angular) {
-	'use strict';
-
-	angular.module('common.navigation', [])
-	/**
-  *
-  * Override the original mars user.
-  *
-  */
-	.directive('commonNavigation', [function () {
-		return {
-			restrict: 'AE',
-			template: "<alt-themes></alt-themes>",
-			link: function link(scope) {
-				scope.username = "Anonymous";
-			}
-		};
-	}]).factory('navigationService', [function () {
-		return {};
-	}]);
 })(angular);
 "use strict";
 
@@ -2476,21 +2476,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 angular.module("common.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("common/bbox/bbox.html","<button type=\"button\" class=\"undecorated\" ng-click=\"toggle()\" tooltip-placement=\"right\" tooltip=\"Show data extent on the map.\">\r\n	<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-eye orange\':data.hasBbox,\'fa-eye-slash\':!data.hasBbox}\"></i>\r\n</button>");
 $templateCache.put("common/cc4/cc4.html","<button type=\"button\" class=\"undecorated\" title=\"View CCBy 4.0 licence details\"\r\n      popover-trigger=\"outsideClick\"\r\n      uib-popover-template=\"template\" popover-placement=\"bottom\" popover-append-to-body=\"true\">\r\n	<i ng-class=\"{active:data.isWmsShowing}\" class=\"fa fa-lg fa-gavel\"></i>\r\n</button>");
 $templateCache.put("common/cc4/cc4template.html","<div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-12\">\r\n         <a target=\"_blank\" href=\"https://creativecommons.org/licenses/by/4.0/\">Creative Commons Attribution 4.0 </a>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-2\">\r\n         <span class=\"fa-stack\" aria-hidden=\"true\">\r\n         <i class=\"fa fa-check-circle-o fa-stack-2x\" aria-hidden=\"true\"></i>\r\n      </span>\r\n      </div>\r\n      <div class=\"col-md-10\">\r\n         You may use this work for commercial purposes.\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-2\">\r\n         <span class=\"fa-stack\" aria-hidden=\"true\">\r\n         <i class=\"fa fa-circle-o fa-stack-2x\"></i>\r\n         <i class=\"fa fa-female fa-stack-1x\"></i>\r\n      </span>\r\n      </div>\r\n      <div class=\"col-md-10\">\r\n         You must attribute the creator in your own works.\r\n      </div>\r\n   </div>\r\n</div>");
+$templateCache.put("common/clip/clip.html","<div class=\"well well-sm\">\r\n<div class=\"container-fluid\">\r\n	<div class=\"row\">\r\n		<div class=\"col-md-12\">\r\n			<button style=\"margin-top:0px;\" ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" class=\"btn btn-primary btn-xs\">Draw</button>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-3\"> </div>\r\n		<div class=\"col-md-8\">\r\n			<strong>Y Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-6\">\r\n			<strong>X Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMin|number : 4}} min)</span></span>\r\n		</div>\r\n		<div class=\"col-md-6\">\r\n			<strong>X Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-offset-3 col-md-8\">\r\n			<strong>Y Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMin|number : 4}} min)</span></span>\r\n		</div>\r\n	</div>\r\n</div>\r\n</div>");
 $templateCache.put("common/download/download.html","<exp-modal ng-controller=\"DownloadCtrl as dl\" icon-class=\"fa-download\" is-open=\"dl.data.item.download\" title=\"Download data\" on-close=\"dl.remove()\" is-modal=\"true\">\r\n	<div style=\"padding:5px;\">\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><common-wms data=\"dl.data.item\"></common-wms><common-tile data=\"dl.data.item\"></common-tile>{{dl.data.item.title}}</h4>\r\n				{{dl.data.item.abstract}}\r\n   			</div>\r\n		</div>\r\n		<nedf-geoprocess data=\"dl.data.item\"></nedf-geoprocess>\r\n	</div>\r\n</exp-modal>");
 $templateCache.put("common/download/popup.html","<exp-modal icon-class=\"fa-download\"  is-open=\"data.item.download\" title=\"Download wizard\" on-close=\"dl.remove()\">\r\n	<div class=\"container-fluid downloadInner\" >\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><common-wms data=\"dl.data.item\"></common-wms>\r\n					<a href=\"http://www.ga.gov.au/metadata-gateway/metadata/record/{{dl.data.item.sysId}}\" target=\"_blank\"><strong class=\"ng-binding\">{{dl.data.item.title}}</strong></a>\r\n				</h4>\r\n   			</div>\r\n		</div>\r\n		<wizard-geoprocess data=\"dl.data.item\"></wizard-geoprocess>\r\n	</div>\r\n</exp-modal>");
-$templateCache.put("common/clip/clip.html","<div class=\"well well-sm\">\r\n<div class=\"container-fluid\">\r\n	<div class=\"row\">\r\n		<div class=\"col-md-12\">\r\n			<button style=\"margin-top:0px;\" ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" class=\"btn btn-primary btn-xs\">Draw</button>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-3\"> </div>\r\n		<div class=\"col-md-8\">\r\n			<strong>Y Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-6\">\r\n			<strong>X Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMin|number : 4}} min)</span></span>\r\n		</div>\r\n		<div class=\"col-md-6\">\r\n			<strong>X Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-offset-3 col-md-8\">\r\n			<strong>Y Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMin|number : 4}} min)</span></span>\r\n		</div>\r\n	</div>\r\n</div>\r\n</div>");
 $templateCache.put("common/extent/extent.html","<div class=\"row\" style=\"border-top: 1px solid gray; padding-top:5px\">\r\n	<div class=\"col-md-5\">\r\n		<div class=\"form-inline\">\r\n			<label>\r\n				<input id=\"extentEnable\" type=\"checkbox\" ng-model=\"parameters.fromMap\" ng-click=\"change()\"></input> \r\n				Restrict area to map\r\n			</label>\r\n		</div>\r\n	</div>\r\n	 \r\n	<div class=\"col-md-7\" ng-show=\"parameters.fromMap\">\r\n		<div class=\"container-fluid\">\r\n			<div class=\"row\">\r\n				<div class=\"col-md-offset-3 col-md-8\">\r\n					<strong>Y Max:</strong> \r\n					<span>{{parameters.yMax | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n			<div class=\"row\">\r\n				<div class=\"col-md-6\">\r\n					<strong>X Min:</strong>\r\n					<span>{{parameters.xMin | number : 4}}</span> \r\n				</div>\r\n				<div class=\"col-md-6\">\r\n					<strong>X Max:</strong>\r\n					<span>{{parameters.xMax | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n			<div class=\"row\">\r\n				<div class=\"col-md-offset-3 col-md-8\">\r\n					<strong>Y Min:</strong>\r\n					<span>{{parameters.yMin | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/geoprocess/geoprocess.html","<div class=\"container-fluid\" style=\"overflow-x:hidden\" ng-form>\r\n	<div ng-show=\"stage==\'bbox\'\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12\">\r\n				<wizard-clip trigger=\"stage == \'bbox\'\" drawn=\"drawn()\" clip=\"data.processing.clip\" bounds=\"data.bounds\"></wizard-clip>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n 			<div class=\"col-md-12\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!validClip(data) || checkingOrFailed\" ng-click=\"stage=\'formats\'\">Next</button>\r\n			</div>\r\n		</div>\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Select an area of interest.</strong> There are two ways to select your area of interest:\r\n			<ol>\r\n				<li>Draw an area on the map with the mouse by clicking a corner and while holding the left mouse button\r\n					down drag diagonally across the map to the opposite corner or</li>\r\n				<li>Type your co-ordinates into the areas above.</li>\r\n			</ol>\r\n			Once drawn the points can be modified by the overwriting the values above or drawing another area by clicking the draw button again.\r\n			Ensure you select from the highlighted areas as the data can be quite sparse for some data.<br/>\r\n			<p style=\"padding-top:5px\">\r\n			<strong>Warning:</strong> Some extracts can be huge. It is best if you start with a small area to experiment with first. An email will be sent\r\n			with the size of the extract. Download judiciously.\r\n			</p>\r\n			<p style=\"padding-top\"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n				You can zoom in and out using the mouse wheel or the \"+\" and \"-\" map control on the top left of the map. If you\r\n				don\'t like the position of your drawn area, hit the \"Draw\" button and draw a new bounding box.\r\n			</p>\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'formats\'\">\r\n		<div class=\"well\">\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-3\">\r\n				<label for=\"geoprocessOutputFormat\">\r\n					Output Format\r\n				</label>\r\n			</div>\r\n			<div class=\"col-md-9\">\r\n				<select id=\"geoprocessOutputFormat\" style=\"width:95%\" ng-model=\"data.processing.outFormat\" ng-options=\"opt.value for opt in config.outFormat\"></select>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\">\r\n			<div class=\"col-md-3\">\r\n				<label for=\"geoprocessOutCoordSys\">\r\n					Coordinate System\r\n				</label>\r\n			</div>\r\n			<div class=\"col-md-9\">\r\n				<select id=\"geoprocessOutCoordSys\" style=\"width:95%\" ng-model=\"data.processing.outCoordSys\" ng-options=\"opt.value for opt in config.outCoordSys | sysIntersect : data.processing.clip\"></select>\r\n			</div>\r\n		</div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" ng-click=\"stage=\'bbox\'\">Previous</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!validSansEmail(data)\" ng-click=\"stage=\'email\'\">Next</button>\r\n   			</div>\r\n		</div>\r\n\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Data representation.</strong> Select how you want your data presented.<br/>\r\n			Output format is the structure of the data and you should choose a format compatible with the tools that you will use to manipulate the data.\r\n			<ul>\r\n				<li ng-repeat=\"format in outFormats\"><strong>{{format.value}}</strong> - {{format.description}}</li>\r\n			</ul>\r\n			Select what <i>coordinate system</i> or projection you would like. If in doubt select WGS84.<br/>\r\n			Not all projections cover all of Australia. If the area you select is not covered by a particular projection then the option to download in that projection will not be available.\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'email\'\">\r\n		<div class=\"well\" exp-enter=\"stage=\'confirm\'\">\r\n			<div download-email></div>\r\n			<br/>\r\n			<div download-filename data=\"data.processing\"></div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" ng-click=\"stage=\'formats\'\">Previous</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!allDataSet(data)\" ng-click=\"stage=\'confirm\'\">Submit</button>\r\n   			</div>\r\n		</div>\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Email notification</strong> The extract of data can take some time. By providing an email address we will be able to notify you when the job is complete. The email will provide a link to the extracted\r\n			data which will be packaged up as a single file. To be able to proceed you need to have provided:\r\n			<ul>\r\n				<li>An area of interest to extract the data (referred to as a bounding box).</li>\r\n				<li>An output format.</li>\r\n				<li>A valid coordinate system or projection.</li>\r\n				<li>An email address to receive the details of the extraction.</li>\r\n				<li><strong>Note:</strong>Email addresses need to be and are stored in the system.</li>\r\n			</ul>\r\n			<strong style=\"font-size:120%\">Optional filename</strong> The extract of data can take some time. By providing an optional filename it will allow you\r\n			to associate extracted data to your purpose for downloading data. For example:\r\n			<ul>\r\n				<li>myHouse will have a file named myHouse.zip</li>\r\n				<li>Sorrento would result in a file named Sorrento.zip</li>\r\n			</ul>\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'confirm\'\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12 abstractContainer\">\r\n				{{data.abstract}}\r\n			</div>\r\n		</div>\r\n		<h3>You have chosen:</h3>\r\n		<table class=\"table table-striped\">\r\n			<tbody>\r\n				<tr>\r\n					<th>Area</th>\r\n					<td>\r\n						<span style=\"display:inline-block; width: 10em\">Lower left (lat/lng&deg;):</span> {{data.processing.clip.yMin | number : 6}}, {{data.processing.clip.xMin | number : 6}}<br/>\r\n						<span style=\"display:inline-block;width: 10em\">Upper right (lat/lng&deg;):</span> {{data.processing.clip.yMax | number : 6}}, {{data.processing.clip.xMax | number : 6}}\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Output format</th>\r\n					<td>{{data.processing.outFormat.value}}</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Coordinate system</th>\r\n					<td>{{data.processing.outCoordSys.value}}</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Email address</th>\r\n					<td>{{email}}</td>\r\n				</tr>\r\n				<tr ng-show=\"data.processing.filename\">\r\n					<th>Filename</th>\r\n					<td>{{data.processing.filename}}</td>\r\n				</tr>\r\n			</tbody>\r\n		</table>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" style=\"width:6em\" ng-click=\"stage=\'email\'\">Back</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-click=\"startExtract()\">Confirm</button>\r\n   			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-header\">\r\n\r\n        <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".ga-header-collapse\">\r\n            <span class=\"sr-only\">Toggle navigation</span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n        </button>\r\n\r\n        <a href=\"http://www.ga.gov.au\" class=\"hidden-xs header-logo\">\r\n            <img src=\"icsm/resources/img/fsdf-logo.png\" alt=\"ANZLIC the Spatial Information Council\" class=\"logo\"></img>\r\n        </a>\r\n        <a href=\"http://www.ga.gov.au\" class=\"visible-xs\">\r\n            <img src=\"icsm/resources/img/icsm-logo-sml.gif\" alt=\"ICSM - ANZLIC Committee on Surveying &amp; Mapping\" class=\"logo-stacked\"></img>\r\n        </a>\r\n        <a href=\"/\" class=\"appTitle visible-xs\">\r\n            <h1 style=\"font-size:120%\">{{heading}}</h1>\r\n        </a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n        	<li common-navigation ng-show=\"username\" role=\"menuitem\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");
 $templateCache.put("common/iso19115/contact.html","<ul ng-show=\"node.hierarchyLevel\">\r\n   <li>\r\n      <span class=\"iso19115-head\">Contact</span>\r\n      <iso19115-node name=\"MD_ScopeCode\" node=\"node.hierarchyLevel.MD_ScopeCode\" type=\"_codeListValue\"></iso19115-node>\r\n    </li>\r\n</ul>");
 $templateCache.put("common/iso19115/double.html","\r\n<ul ng-show=\"node\">\r\n   <li>\r\n      <span class=\"iso19115-head\">{{name | iso19115NodeName}}</span>\r\n      <iso19115-node name=\"name\" node=\"node[name]\" type=\"type\"></iso19115-node>\r\n   </li>\r\n</ul>\r\n");
 $templateCache.put("common/iso19115/metadata.html","<div class=\"iso19115\">\r\n   <ul>\r\n      <li>\r\n         <span class=\"iso19115-head\">Metadata</span>\r\n         <iso19115-node name=\"fileIdentifier\" node=\"node.fileIdentifier\" type=\"CharacterString\"></iso19115-node>\r\n         <iso19115-node name=\"language\" node=\"node.language\" type=\"LanguageCode\"></iso19115-node>\r\n         <ul ng-show=\"node.characterSet\">\r\n            <li>\r\n               <span class=\"iso19115-head\">Character Set</span>\r\n               <iso19115-node name=\"CharacterSetCode\" node=\"node.characterSet.MD_CharacterSetCode\" type=\"_codeListValue\"></iso19115-node>\r\n            </li>\r\n         </ul>\r\n\r\n         <ul ng-show=\"node.hierarchyLevel\">\r\n            <li>\r\n               <span class=\"iso19115-head\">Hierarchy Level</span>\r\n               <iso19115-node name=\"MD_ScopeCode\" node=\"node.hierarchyLevel.MD_ScopeCode\" type=\"_codeListValue\"></iso19115-node>\r\n            </li>\r\n         </ul>\r\n         <iso19115-node name=\"hierarchyLevelName\" node=\"node.hierarchyLevelName\" type=\"CharacterString\"></iso19115-node>\r\n         <iso19115-contact ng-if=\"node.contact\" node=\"node.contact\" key=\"\'contact\'\"></iso19115-contact>\r\n      </li>\r\n   </ul>\r\n</div>");
+$templateCache.put("common/navigation/altthemes.html","<span class=\"altthemes-container\">\r\n	<span ng-repeat=\"item in themes | altthemesEnabled\">\r\n       <a title=\"{{item.label}}\" ng-href=\"{{item.url}}\" class=\"altthemesItemCompact\">\r\n         <span class=\"altthemes-icon\" ng-class=\"item.className\"></span>\r\n       </a>\r\n    </li>\r\n</span>");
 $templateCache.put("common/metaview/dublincore.html","Dublin core");
 $templateCache.put("common/metaview/iso19115.html","<iso19115-metadata node=\"data.metadata.GetRecordByIdResponse.MD_Metadata\" key=\"\'MD_Metadata\'\"></iso19115-metadata>\r\n");
 $templateCache.put("common/metaview/iso19115node.html","<ul>\r\n   <li>\r\n      <span class=\"metaview-head\">{{key | metaviewNodeName}}</span>\r\n      <span>{{node | metaviewText}}</span>\r\n      <ng-repeat ng-if=\"isArray()\" ng-repeat=\"next in node\" node=\"next]\">\r\n         <metaview-iso19115-array ng-repeat=\"nextKey in getKeys() track by $index\" node=\"node[nextKey]\" key=\"nextKey\"></metaview-iso19115-array>\r\n      </ng-repeat>\r\n      <metaview-iso19115-node ng-if=\"!isArray()\" ng-repeat=\"nextKey in getKeys() track by $index\" node=\"node[nextKey]\" key=\"nextKey\"></metaview-iso19115-node>\r\n   </li>\r\n</ul>");
 $templateCache.put("common/metaview/item.html","<div>\r\n	<button class=\"btn btn-sm btn-outline-primary\" ng-click=\"container.selected = null\"><i class=\"fa fa-angle-double-left\"></i> Back</button>\r\n      <span style=\"font-weight: bold;padding-left:10px; font-size:130%\">{{container.selected.title}}</span>\r\n      <metaview-iso19115 data=\"container.selected\"></metaview-iso19115>\r\n</div>");
 $templateCache.put("common/metaview/metaview.html","<button type=\"button\" class=\"undecorated\" title=\"View metadata\" ng-click=\"select()\">\r\n	<i class=\"fa fa-lg fa-info metaview-info\"></i>\r\n</button>");
-$templateCache.put("common/navigation/altthemes.html","<span class=\"altthemes-container\">\r\n	<span ng-repeat=\"item in themes | altthemesEnabled\">\r\n       <a title=\"{{item.label}}\" ng-href=\"{{item.url}}\" class=\"altthemesItemCompact\">\r\n         <span class=\"altthemes-icon\" ng-class=\"item.className\"></span>\r\n       </a>\r\n    </li>\r\n</span>");
 $templateCache.put("common/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" icsm-toolbar-row map=\"root.map\" title=\"\'fred\'\"></div>\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div class=\"common-legend\" common-legend map=\"data.map\"></div>\r\n    		<div icsm-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'download\'\" icsm-view></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'maps\'\" icsm-maps></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" icsm-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" icsm-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n		<button class=\"undecorated\">Download</button>\r\n	</div>\r\n	<!-- \r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n	-->\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");
 $templateCache.put("common/search/basin.html","<div class=\"btn-group pull-left radSearch\" style=\"position:relative;width:27em;opacity:0.9\">\r\n	<div class=\"input-group\" style=\"width:100%;\">\r\n		<input type=\"text\" size=\"32\" class=\"form-control\" style=\"border-top-right-radius:4px;border-bottom-right-radius:4px;\"\r\n				ng-keyup=\"keyup($event)\" ng-focus=\"changing()\" ng-model=\"nameFilter\" placeholder=\"Find a basin of interest\">\r\n		<div class=\"input-group-btn\"></div>\r\n	</div>\r\n	<div style=\"width:26em; position:absolute;left:15px\">\r\n		<div class=\"row\" ng-repeat=\"region in basinData.basins | basinFilterList : nameFilter : 10 | orderBy : \'name\'\"\r\n				style=\"background-color:white;\">\r\n			<div class=\"col-md-12 rw-sub-list-trigger\">\r\n				<button class=\"undecorated zoomButton\" ng-click=\"zoomToLocation(region);\">{{region.name}}</button>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");

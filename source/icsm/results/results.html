@@ -14,33 +14,23 @@
 			</div>
 		</div>
 	</div>
-	<div class="row">
-		<div class="col-md-12">
-			<div class="panel panel-default">
-				<div class="panel-body">
-					<span class="listTypeLabel">Filter by type:</span>
-					<span ng-repeat="type in filters.types" class="listType">
-                  <input type="checkbox" ng-model="type.selected" ng-change="update()"/>
-                  <span uib-tooltip="{{type.description}}">{{type.label}}</span>
-					</span>
-				</div>
-			</div>
-		</div>
+	<div class="panel panel-default">
+		<div class="panel-body" style="float:clear">
+		   <span style="padding:10px; float:left">
+				<span class="listTypeLabel">Filter by type:</span>
+				<span ng-repeat="type in filters.types" class="listType">
+               <input type="checkbox" ng-model="type.selected" ng-change="update()"/>
+               <span uib-tooltip="{{type.description}}">{{type.label}}</span>
+				</span>
+			</span>
+         <span style="float:right">
+            <icsm-search-continue></icsm-search-continue>
+         </span>
+      </div>
 	</div>
 
 	<div ng-repeat="available in list" class="well" ng-show="list.someMatches(available)" ng-controller="listCtrl as list">
-		<h5>
-			<button class="undecorated" ng-click="expansions[available.source] = !expansions[available.source]" uib-tooltip="Click to collapse/expand this group"
-				aria-expanded="true" aria-controls="collapse{{mappings[available.source].code}}">
-            <img ng-src="{{mappings[available.source].image}}" ng-attr-style="height:{{mappings[available.source].height}}px"></img>
-         </button>
-			<strong>{{available.source}}</strong> (Showing {{available.downloadables | countMatchedDownloadables}} of {{available.downloadables	| countDownloadables}})
-			<span class="listTopExpander">
-            <button class="undecorated" ng-click="expansions[available.source] = !expansions[available.source]">
-               [{{expansions[available.source]?"collapse":"expand"}}]
-            </button>
-         </span>
-		</h5>
+      <icsm-org-heading org="available" expansions="expansions" mappings="mappings" products="products"></icsm-org-heading>
 		<div uib-collapse="!expansions[available.source]">
 			<div class="listRow" ng-class-odd="'listEven'" ng-repeat="(typeKey, types) in available.downloadables | allowedTypes">
 				<h5><strong>{{typeKey}}</strong></h5>

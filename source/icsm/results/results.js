@@ -8,6 +8,36 @@
 
     angular.module("elvis.results", ['elvis.results.continue'])
 
+    .directive('icsmOrgHeading', [function() {
+       return {
+          templateUrl: 'icsm/results/orgheading.html',
+          restrict: 'AE',
+          scope: {
+             org: "=",
+             expansions: "=",
+             mappings: "=",
+             products: "="
+          },
+          link: function(scope) {
+             scope.orgHasSelections = function() {
+                var source = scope.org.source;
+                return scope.products.some(product => {
+                   return product.source === source && product.selected;
+                });
+             };
+
+             scope.deselectAll = function() {
+                var source = scope.org.source;
+                scope.products.filter(product => {
+                   return product.source === source && product.selected;
+                }).forEach(product => {
+                   product.selected = false;
+                });
+             }
+          }
+       };
+    }])
+
         .directive('icsmList', ['$rootScope', 'listService', function ($rootScope, listService) {
             return {
                 templateUrl: 'icsm/results/results.html',
@@ -314,6 +344,17 @@
         get selected () {
             var products = this.service.products;
             return products? products.filter(item => item.selected): [];
+        },
+
+        get selectedSize () {
+            var products = this.service.products;
+
+            return (products? products.filter(item => item.selected): []
+               ).map(product => {
+                  return product.file_size?(+product.file_size) : 500000000;
+               }).reduce((prev, curr) => {
+                  return prev + curr;
+               }, 0);
         }
     };
 

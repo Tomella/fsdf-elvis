@@ -1,0 +1,15 @@
+<h5>
+	<button class="undecorated" ng-click="expansions[org.source] = !expansions[org.source]" uib-tooltip="Click to collapse/expand this group"
+		aria-expanded="true" aria-controls="collapse{{mappings[org.source].code}}">
+      <img ng-src="{{mappings[org.source].image}}" ng-attr-style="height:{{mappings[org.source].height}}px"></img>
+   </button>
+   <strong>{{org.source}}</strong> (Showing {{org.downloadables | countMatchedDownloadables}} of {{org.downloadables	| countDownloadables}})
+	<span class="listTopExpander">
+      <button class="undecorated" ng-show="orgHasSelections()" ng-click="deselectAll()">
+         [Deselect all]
+      </button>
+      <button class="undecorated" ng-click="expansions[org.source] = !expansions[org.source]">
+         [{{expansions[org.source]?"collapse":"expand"}}]
+      </button>
+   </span>
+</h5>
