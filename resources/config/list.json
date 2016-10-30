@@ -18,5 +18,12 @@
       "image": "icsm/resources/img/NSW.jpg",
       "height": 42,
       "showText": false
+   },
+
+   "Queensland Government": {
+      "code": "qld",
+      "image": "icsm/resources/img/Qld.jpg",
+      "height": 42,
+      "showText": false
    }
 }

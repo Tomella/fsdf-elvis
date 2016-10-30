@@ -51,6 +51,9 @@
                               reviewService.startExtract();
                               messageService.success("Your job has been submitted. An email will be sent on job completion.");
                            }
+
+                           reviewService.removeRemoved();
+
                            scope.data.reviewing = false;
                         }, function () {
                            $log.info('Cancelled');
@@ -94,7 +97,7 @@
             startExtract: function () {
                var clip = clipService.data.clip;
                var data = {
-                  json: JSON.stringify(convertFlatToStructured(listService.products.filter(product => product.selected))),
+                  json: JSON.stringify(convertFlatToStructured(listService.products.filter(product => product.selected && !product.removed))),
                   maxx: clip.xMax,
                   maxy: clip.yMax,
                   minx: clip.xMin,
@@ -105,6 +108,15 @@
 
                configService.getConfig("processing").then(function(config) {
                   $("#launcher")[0].src = transformTemplate(config.processingUrl, data);
+                  listService.products.forEach(product => {
+                     product.selected = product.removed = false;
+                  });
+               });
+            },
+
+            removeRemoved: function() {
+               listService.products.forEach(product => {
+                  product.removed = false;
                });
             },
 

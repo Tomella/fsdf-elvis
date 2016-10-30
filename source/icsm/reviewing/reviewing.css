@@ -1,3 +1,8 @@
 .reviewing-odd {
    background-color: #eeeeee;
 }
+
+.exclude {
+   color: #777777;
+   text-decoration: line-through;
+}

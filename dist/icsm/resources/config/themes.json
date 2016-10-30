@@ -7,7 +7,7 @@
          "description": "The Administrative Boundaries datasets are Australiaâs most comprehensive national collection of boundaries including government, statistical and electoral boundaries.",
          "className": "altthemes-map",
          "url": "comingSoon.html",
-         "urlPending": "/administrativeBoundaries.html"
+         "urlPending": "administrativeBoundaries.html"
       },
       {
          "code": "crosshair",
@@ -16,7 +16,7 @@
          "description": "Positioning is Australia's authoritative, reliable, high accuracy spatial referencing system. The positioning service defined under this theme includes the coordinates and their uncertainty of data directly promulgated from, or related to, the Australian Fiducial Network (AFN) and the Australian National Levelling Network (ANLN)",
          "className": "altthemes-crosshair",
          "url": "comingSoon.html",
-         "urlPending": "/positioning.html"
+         "urlPending": "positioning.html"
       },
       {
          "code": "sign",
@@ -25,7 +25,7 @@
          "description": "Place Names are the names of cultural and physical features and their associated spatial identifiers, location and extent. Place Names constitute the most commonly used spatial references and can be approved, unapproved, commonly used or historical.",
          "className": "altthemes-sign",
          "url": "comingSoon.html",
-         "urlPending": "/placeNames.html"
+         "urlPending": "placeNames.html"
       },
       {
          "code": "parcel",
@@ -34,7 +34,7 @@
          "description": "Land Parcel and Property is a land boundary system. The term Land Parcel and Property can be interchangeable with cadastral, land administration and property systems.",
          "className": "altthemes-parcel",
          "url": "comingSoon.html",
-         "urlPending": "/landParcelAndProperty.html"
+         "urlPending": "landParcelAndProperty.html"
       },
       {
          "code": "satellite",
@@ -68,7 +68,7 @@
          "title": "Elevation and Depth is the measurement of the Earthâs surface (wet or dry) above or below a vertical datum to obtain either the height of the land or a bathymetric depth.",
          "description": "Elevation and Depth is the measurement of the Earthâs surface (wet or dry) above or below a vertical datum to obtain either the height of the land or a bathymetric depth. Elevation and Depth information data is collected using a range of sensors; including laser, sound navigation and ranging (sonar), radio detection and ranging (radar), optical remote sensing and survey techniques to derive spot heights, raster surfaces, contours and digital models of terrain.",
          "className": "altthemes-shore",
-		   "url": "elvis.html"
+		   "url": "index.html"
       },
       {
          "code": "land",

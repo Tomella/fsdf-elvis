@@ -341,20 +341,20 @@
             return this.service.products;
         },
 
-        get selected () {
-            var products = this.service.products;
-            return products? products.filter(item => item.selected): [];
-        },
-
         get selectedSize () {
             var products = this.service.products;
 
-            return (products? products.filter(item => item.selected): []
+            return (products? products.filter(item => item.selected && !item.removed): []
                ).map(product => {
                   return product.file_size?(+product.file_size) : 500000000;
                }).reduce((prev, curr) => {
                   return prev + curr;
                }, 0);
+        },
+
+        get selected () {
+            var products = this.service.products;
+            return products? products.filter(item => item.selected && !item.removed): [];
         }
     };
 
