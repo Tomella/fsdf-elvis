@@ -66,7 +66,7 @@
             "type":["TileLayer", "WMS"],
             "key":"topography",
             "parameters":[
-                "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/dev_space/GetPNG.fmw",
+                "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetPNG_GA5mDEM.fmw",
                 {
                    "layers" : "public.5dem_ProjectsIndex",
                    "format" : "image/png",
