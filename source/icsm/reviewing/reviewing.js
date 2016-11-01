@@ -84,8 +84,8 @@
          };
       })
 
-      .factory('reviewService', ['clipService', 'configService', 'listService', 'persistService',
-                        function (clipService, configService, listService, persistService) {
+      .factory('reviewService', ['$http', 'clipService', 'configService', 'listService', 'persistService',
+                        function ($http, clipService, configService, listService, persistService) {
          var key = "elvis_download_email";
          var data = listService.data;
          var service = {
@@ -96,18 +96,40 @@
 
             startExtract: function () {
                var clip = clipService.data.clip;
-               var data = {
-                  json: JSON.stringify(convertFlatToStructured(listService.products.filter(product => product.selected && !product.removed))),
-                  maxx: clip.xMax,
-                  maxy: clip.yMax,
-                  minx: clip.xMin,
-                  miny: clip.yMin,
-                  email: this.data.email
-               };
                this.setEmail(data.email);
 
                configService.getConfig("processing").then(function(config) {
-                  $("#launcher")[0].src = transformTemplate(config.processingUrl, data);
+                  if(config.method === 'POST') {
+                     let postData = convertFlatToStructured(listService.products.filter(product => product.selected && !product.removed));
+                     postData.parameters = {
+                        xmin: clip.xMin,
+                        xmax: clip.xMax,
+                        ymin: clip.yMin,
+                        ymax: clip.yMax,
+                        email: data.email
+                     };
+
+                     $http({
+                        method: 'POST',
+                        url: config.postProcessingUrl,
+                        data: postData,
+                        headers: { "Content-Type": "application/json" }
+                     }).then(function(response) {
+                        console.log(response.data);
+                     }, function(d) {
+                        console.log(d);
+                     });
+                  } else {
+                     let getData = {
+                        json: JSON.stringify(convertFlatToStructured(listService.products.filter(product => product.selected && !product.removed))),
+                        maxx: clip.xMax,
+                        maxy: clip.yMax,
+                        minx: clip.xMin,
+                        miny: clip.yMin,
+                        email: data.email
+                     };
+                     $("#launcher")[0].src = transformTemplate(config.processingUrl, getData);
+                  }
                   listService.products.forEach(product => {
                      product.selected = product.removed = false;
                   });

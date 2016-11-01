@@ -79,6 +79,122 @@ under the License.
 
 	'use strict';
 
+	angular.module("icsm.clip", ['geo.draw']).directive('icsmInfoBbox', function () {
+		return {
+			restrict: 'AE',
+			templateUrl: 'icsm/clip/infobbox.html'
+		};
+	}).directive("icsmClip", ['$rootScope', '$timeout', 'clipService', 'messageService', 'mapService', function ($rootScope, $timeout, clipService, messageService, mapService) {
+		return {
+			templateUrl: "icsm/clip/clip.html",
+			scope: {
+				bounds: "=",
+				trigger: "=",
+				drawn: "&"
+			},
+			link: function link(scope, element) {
+				var timer;
+
+				scope.clip = {
+					xMax: null,
+					xMin: null,
+					yMax: null,
+					yMin: null
+				};
+				scope.typing = false;
+
+				if (typeof scope.showBounds === "undefined") {
+					scope.showBounds = false;
+				}
+				mapService.getMap().then(function (map) {
+					scope.$watch("bounds", function (bounds) {
+						if (bounds && scope.trigger) {
+							$timeout(function () {
+								scope.initiateDraw();
+							});
+						} else if (!bounds) {
+							clipService.cancelDraw();
+						}
+					});
+					$timeout(function () {
+						console.info("start draw");
+						scope.initiateDraw();
+					}, 100);
+				});
+
+				scope.check = function () {
+					$timeout.cancel(timer);
+					timer = $timeout(function () {
+						$rootScope.$broadcast('icsm.clip.drawn', scope.clip);
+					}, 4000);
+				};
+
+				$rootScope.$on('icsm.clip.draw', function (event, data) {
+					if (data && data.message === "oversize") {
+						scope.oversize = true;
+						$timeout(function () {
+							delete scope.oversize;
+						}, 4000);
+					} else {
+						delete scope.oversize;
+					}
+					scope.initiateDraw();
+				});
+
+				scope.initiateDraw = function () {
+					messageService.info("Click on the map and drag to define your area of interest.");
+					clipService.initiateDraw().then(drawComplete);
+				};
+
+				function drawComplete(data) {
+					var c = scope.clip;
+					var response;
+
+					c.xMax = +data.clip.xMax;
+					c.xMin = +data.clip.xMin;
+					c.yMax = +data.clip.yMax;
+					c.yMin = +data.clip.yMin;
+					$rootScope.$broadcast('icsm.clip.drawn', c);
+				}
+			}
+		};
+	}]).factory("clipService", ['$q', '$rootScope', 'drawService', function ($q, $rootScope, drawService) {
+		var service = {
+			initiateDraw: function initiateDraw() {
+				this.data = null;
+				return drawService.drawRectangle().then(drawComplete);
+			},
+
+			cancelDraw: function cancelDraw() {
+				drawService.cancelDrawRectangle();
+			}
+		};
+
+		return service;
+
+		function drawComplete(data) {
+			service.data = {
+				clip: {
+					xMax: data.bounds.getEast().toFixed(5),
+					xMin: data.bounds.getWest().toFixed(5),
+					yMax: data.bounds.getNorth().toFixed(5),
+					yMin: data.bounds.getSouth().toFixed(5)
+				}
+			};
+			return service.data;
+		}
+	}]);
+})(angular);
+'use strict';
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function (angular) {
+
+	'use strict';
+
 	angular.module("icsm.bounds", []).directive('icsmBounds', ['flashService', 'messageService', 'boundsService', function (flashService, messageService, boundsService) {
 		var flasher;
 		return {
@@ -240,122 +356,6 @@ under the License.
 		}
 	}]);
 })(angular);
-'use strict';
-
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module("icsm.clip", ['geo.draw']).directive('icsmInfoBbox', function () {
-		return {
-			restrict: 'AE',
-			templateUrl: 'icsm/clip/infobbox.html'
-		};
-	}).directive("icsmClip", ['$rootScope', '$timeout', 'clipService', 'messageService', 'mapService', function ($rootScope, $timeout, clipService, messageService, mapService) {
-		return {
-			templateUrl: "icsm/clip/clip.html",
-			scope: {
-				bounds: "=",
-				trigger: "=",
-				drawn: "&"
-			},
-			link: function link(scope, element) {
-				var timer;
-
-				scope.clip = {
-					xMax: null,
-					xMin: null,
-					yMax: null,
-					yMin: null
-				};
-				scope.typing = false;
-
-				if (typeof scope.showBounds === "undefined") {
-					scope.showBounds = false;
-				}
-				mapService.getMap().then(function (map) {
-					scope.$watch("bounds", function (bounds) {
-						if (bounds && scope.trigger) {
-							$timeout(function () {
-								scope.initiateDraw();
-							});
-						} else if (!bounds) {
-							clipService.cancelDraw();
-						}
-					});
-					$timeout(function () {
-						console.info("start draw");
-						scope.initiateDraw();
-					}, 100);
-				});
-
-				scope.check = function () {
-					$timeout.cancel(timer);
-					timer = $timeout(function () {
-						$rootScope.$broadcast('icsm.clip.drawn', scope.clip);
-					}, 4000);
-				};
-
-				$rootScope.$on('icsm.clip.draw', function (event, data) {
-					if (data && data.message === "oversize") {
-						scope.oversize = true;
-						$timeout(function () {
-							delete scope.oversize;
-						}, 4000);
-					} else {
-						delete scope.oversize;
-					}
-					scope.initiateDraw();
-				});
-
-				scope.initiateDraw = function () {
-					messageService.info("Click on the map and drag to define your area of interest.");
-					clipService.initiateDraw().then(drawComplete);
-				};
-
-				function drawComplete(data) {
-					var c = scope.clip;
-					var response;
-
-					c.xMax = +data.clip.xMax;
-					c.xMin = +data.clip.xMin;
-					c.yMax = +data.clip.yMax;
-					c.yMin = +data.clip.yMin;
-					$rootScope.$broadcast('icsm.clip.drawn', c);
-				}
-			}
-		};
-	}]).factory("clipService", ['$q', '$rootScope', 'drawService', function ($q, $rootScope, drawService) {
-		var service = {
-			initiateDraw: function initiateDraw() {
-				this.data = null;
-				return drawService.drawRectangle().then(drawComplete);
-			},
-
-			cancelDraw: function cancelDraw() {
-				drawService.cancelDrawRectangle();
-			}
-		};
-
-		return service;
-
-		function drawComplete(data) {
-			service.data = {
-				clip: {
-					xMax: data.bounds.getEast().toFixed(5),
-					xMin: data.bounds.getWest().toFixed(5),
-					yMax: data.bounds.getNorth().toFixed(5),
-					yMin: data.bounds.getSouth().toFixed(5)
-				}
-			};
-			return service.data;
-		}
-	}]);
-})(angular);
 "use strict";
 
 /*!
@@ -494,6 +494,83 @@ under the License.
 					return response.data;
 				});
 			}
+		};
+	}
+})(angular);
+"use strict";
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function (angular) {
+	'use strict';
+
+	angular.module("icsm.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
+		return {
+			templateUrl: "icsm/panes/panes.html",
+			transclude: true,
+			scope: {
+				defaultItem: "@",
+				data: "="
+			},
+			controller: ['$scope', function ($scope) {
+				var changeSize = false;
+
+				$scope.view = $scope.defaultItem;
+
+				$scope.setView = function (what) {
+					var oldView = $scope.view;
+
+					if ($scope.view == what) {
+						if (what) {
+							changeSize = true;
+						}
+						$scope.view = "";
+					} else {
+						if (!what) {
+							changeSize = true;
+						}
+						$scope.view = what;
+					}
+
+					$rootScope.$broadcast("view.changed", $scope.view, oldView);
+
+					if (changeSize) {
+						mapService.getMap().then(function (map) {
+							map._onResize();
+						});
+					}
+				};
+				$timeout(function () {
+					$rootScope.$broadcast("view.changed", $scope.view, null);
+				}, 50);
+			}]
+		};
+	}]).directive("icsmTabs", [function () {
+		return {
+			templateUrl: "icsm/panes/tabs.html",
+			require: "^icsmPanes"
+		};
+	}]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
+
+	PaneCtrl.$inject = ["paneService"];
+	function PaneCtrl(paneService) {
+		var _this = this;
+
+		paneService.data().then(function (data) {
+			_this.data = data;
+		});
+	}
+
+	PaneService.$inject = [];
+	function PaneService() {
+		var data = {};
+
+		return {
+			add: function add(item) {},
+
+			remove: function remove(item) {}
 		};
 	}
 })(angular);
@@ -686,83 +763,6 @@ under the License.
       };
    }]);
 })();
-"use strict";
-
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
-(function (angular) {
-	'use strict';
-
-	angular.module("icsm.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
-		return {
-			templateUrl: "icsm/panes/panes.html",
-			transclude: true,
-			scope: {
-				defaultItem: "@",
-				data: "="
-			},
-			controller: ['$scope', function ($scope) {
-				var changeSize = false;
-
-				$scope.view = $scope.defaultItem;
-
-				$scope.setView = function (what) {
-					var oldView = $scope.view;
-
-					if ($scope.view == what) {
-						if (what) {
-							changeSize = true;
-						}
-						$scope.view = "";
-					} else {
-						if (!what) {
-							changeSize = true;
-						}
-						$scope.view = what;
-					}
-
-					$rootScope.$broadcast("view.changed", $scope.view, oldView);
-
-					if (changeSize) {
-						mapService.getMap().then(function (map) {
-							map._onResize();
-						});
-					}
-				};
-				$timeout(function () {
-					$rootScope.$broadcast("view.changed", $scope.view, null);
-				}, 50);
-			}]
-		};
-	}]).directive("icsmTabs", [function () {
-		return {
-			templateUrl: "icsm/panes/tabs.html",
-			require: "^icsmPanes"
-		};
-	}]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
-
-	PaneCtrl.$inject = ["paneService"];
-	function PaneCtrl(paneService) {
-		var _this = this;
-
-		paneService.data().then(function (data) {
-			_this.data = data;
-		});
-	}
-
-	PaneService.$inject = [];
-	function PaneService() {
-		var data = {};
-
-		return {
-			add: function add(item) {},
-
-			remove: function remove(item) {}
-		};
-	}
-})(angular);
 "use strict";
 
 /*!
@@ -1268,7 +1268,7 @@ under the License.
             return product.selected;
          });
       };
-   }).factory('reviewService', ['clipService', 'configService', 'listService', 'persistService', function (clipService, configService, listService, persistService) {
+   }).factory('reviewService', ['$http', 'clipService', 'configService', 'listService', 'persistService', function ($http, clipService, configService, listService, persistService) {
       var key = "elvis_download_email";
       var data = listService.data;
       var service = {
@@ -1279,20 +1279,44 @@ under the License.
 
          startExtract: function startExtract() {
             var clip = clipService.data.clip;
-            var data = {
-               json: JSON.stringify(convertFlatToStructured(listService.products.filter(function (product) {
-                  return product.selected && !product.removed;
-               }))),
-               maxx: clip.xMax,
-               maxy: clip.yMax,
-               minx: clip.xMin,
-               miny: clip.yMin,
-               email: this.data.email
-            };
             this.setEmail(data.email);
 
             configService.getConfig("processing").then(function (config) {
-               $("#launcher")[0].src = transformTemplate(config.processingUrl, data);
+               if (config.method === 'POST') {
+                  var postData = convertFlatToStructured(listService.products.filter(function (product) {
+                     return product.selected && !product.removed;
+                  }));
+                  postData.parameters = {
+                     xmin: clip.xMin,
+                     xmax: clip.xMax,
+                     ymin: clip.yMin,
+                     ymax: clip.yMax,
+                     email: data.email
+                  };
+
+                  $http({
+                     method: 'POST',
+                     url: config.postProcessingUrl,
+                     data: postData,
+                     headers: { "Content-Type": "application/json" }
+                  }).then(function (response) {
+                     console.log(response.data);
+                  }, function (d) {
+                     console.log(d);
+                  });
+               } else {
+                  var getData = {
+                     json: JSON.stringify(convertFlatToStructured(listService.products.filter(function (product) {
+                        return product.selected && !product.removed;
+                     }))),
+                     maxx: clip.xMax,
+                     maxy: clip.yMax,
+                     minx: clip.xMin,
+                     miny: clip.yMin,
+                     email: data.email
+                  };
+                  $("#launcher")[0].src = transformTemplate(config.processingUrl, getData);
+               }
                listService.products.forEach(function (product) {
                   product.selected = product.removed = false;
                });

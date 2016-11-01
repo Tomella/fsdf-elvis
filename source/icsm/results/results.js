@@ -33,7 +33,7 @@
                 }).forEach(product => {
                    product.selected = false;
                 });
-             }
+             };
           }
        };
     }])
