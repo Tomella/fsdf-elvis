@@ -48,12 +48,11 @@
                         });
                         modalInstance.result.then(function (run) {
                            if (run) {
-                              reviewService.startExtract();
-                              messageService.success("Your job has been submitted. An email will be sent on job completion.");
+                              reviewService.startExtract().then(response => {
+                                 messageService[response.status](response.message);
+                              });
                            }
-
                            reviewService.removeRemoved();
-
                            scope.data.reviewing = false;
                         }, function () {
                            $log.info('Cancelled');
@@ -98,7 +97,7 @@
                var clip = clipService.data.clip;
                this.setEmail(data.email);
 
-               configService.getConfig("processing").then(function(config) {
+               return configService.getConfig("processing").then(function(config) {
                   if(config.method === 'POST') {
                      let postData = convertFlatToStructured(listService.products.filter(product => product.selected && !product.removed));
                      postData.parameters = {
@@ -109,15 +108,25 @@
                         email: data.email
                      };
 
-                     $http({
+                     listService.products.forEach(product => {
+                        product.selected = product.removed = false;
+                     });
+
+                     return $http({
                         method: 'POST',
                         url: config.postProcessingUrl,
                         data: postData,
                         headers: { "Content-Type": "application/json" }
                      }).then(function(response) {
-                        console.log(response.data);
+                        return {
+                           status: "success",
+                           message: "Your job has been submitted. An email will be sent on job completion."
+                        };
                      }, function(d) {
-                        console.log(d);
+                        return {
+                           status: "error",
+                           message: "Sorry but the service failed to respond. Try again later."
+                        };
                      });
                   } else {
                      let getData = {
@@ -129,10 +138,16 @@
                         email: data.email
                      };
                      $("#launcher")[0].src = transformTemplate(config.processingUrl, getData);
+
+                     listService.products.forEach(product => {
+                        product.selected = product.removed = false;
+                     });
+
+                     return {
+                        status: "success",
+                        message: "Your job has been submitted. An email will be sent on job completion."
+                     };
                   }
-                  listService.products.forEach(product => {
-                     product.selected = product.removed = false;
-                  });
                });
             },
 

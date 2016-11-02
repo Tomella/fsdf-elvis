@@ -48,10 +48,6 @@ angular.module("icsm.clip", ['geo.draw'])
 					   clipService.cancelDraw();
 				   }
             });
-            $timeout(function() {
-               console.info("start draw");
-               scope.initiateDraw();
-            },100);
 			});
 
          scope.check = function() {
