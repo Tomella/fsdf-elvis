@@ -20,9 +20,37 @@
       "showText": false
    },
 
-   "Queensland Government": {
+   "QLD Government": {
       "code": "qld",
       "image": "icsm/resources/img/Qld.jpg",
+      "height": 42,
+      "showText": false
+   },
+
+   "NT Government": {
+      "code": "nt",
+      "image": "icsm/resources/img/logo-NT.jpg",
+      "height": 42,
+      "showText": false
+   },
+
+   "SA Government": {
+      "code": "sa",
+      "image": "icsm/resources/img/logo-SA.jpg",
+      "height": 42,
+      "showText": false
+   },
+
+   "TAS Government": {
+      "code": "tas",
+      "image": "icsm/resources/img/logo-Tas.jpg",
+      "height": 42,
+      "showText": false
+   },
+
+   "WA Government": {
+      "code": "wa",
+      "image": "icsm/resources/img/logo-WA.jpg",
       "height": 42,
       "showText": false
    }
