@@ -497,83 +497,6 @@ under the License.
 		};
 	}
 })(angular);
-"use strict";
-
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
-(function (angular) {
-	'use strict';
-
-	angular.module("icsm.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
-		return {
-			templateUrl: "icsm/panes/panes.html",
-			transclude: true,
-			scope: {
-				defaultItem: "@",
-				data: "="
-			},
-			controller: ['$scope', function ($scope) {
-				var changeSize = false;
-
-				$scope.view = $scope.defaultItem;
-
-				$scope.setView = function (what) {
-					var oldView = $scope.view;
-
-					if ($scope.view == what) {
-						if (what) {
-							changeSize = true;
-						}
-						$scope.view = "";
-					} else {
-						if (!what) {
-							changeSize = true;
-						}
-						$scope.view = what;
-					}
-
-					$rootScope.$broadcast("view.changed", $scope.view, oldView);
-
-					if (changeSize) {
-						mapService.getMap().then(function (map) {
-							map._onResize();
-						});
-					}
-				};
-				$timeout(function () {
-					$rootScope.$broadcast("view.changed", $scope.view, null);
-				}, 50);
-			}]
-		};
-	}]).directive("icsmTabs", [function () {
-		return {
-			templateUrl: "icsm/panes/tabs.html",
-			require: "^icsmPanes"
-		};
-	}]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
-
-	PaneCtrl.$inject = ["paneService"];
-	function PaneCtrl(paneService) {
-		var _this = this;
-
-		paneService.data().then(function (data) {
-			_this.data = data;
-		});
-	}
-
-	PaneService.$inject = [];
-	function PaneService() {
-		var data = {};
-
-		return {
-			add: function add(item) {},
-
-			remove: function remove(item) {}
-		};
-	}
-})(angular);
 'use strict';
 
 (function (mapevents) {
@@ -785,6 +708,83 @@ under the License.
 			}
 		};
 	}]);
+})(angular);
+"use strict";
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function (angular) {
+	'use strict';
+
+	angular.module("icsm.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
+		return {
+			templateUrl: "icsm/panes/panes.html",
+			transclude: true,
+			scope: {
+				defaultItem: "@",
+				data: "="
+			},
+			controller: ['$scope', function ($scope) {
+				var changeSize = false;
+
+				$scope.view = $scope.defaultItem;
+
+				$scope.setView = function (what) {
+					var oldView = $scope.view;
+
+					if ($scope.view == what) {
+						if (what) {
+							changeSize = true;
+						}
+						$scope.view = "";
+					} else {
+						if (!what) {
+							changeSize = true;
+						}
+						$scope.view = what;
+					}
+
+					$rootScope.$broadcast("view.changed", $scope.view, oldView);
+
+					if (changeSize) {
+						mapService.getMap().then(function (map) {
+							map._onResize();
+						});
+					}
+				};
+				$timeout(function () {
+					$rootScope.$broadcast("view.changed", $scope.view, null);
+				}, 50);
+			}]
+		};
+	}]).directive("icsmTabs", [function () {
+		return {
+			templateUrl: "icsm/panes/tabs.html",
+			require: "^icsmPanes"
+		};
+	}]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
+
+	PaneCtrl.$inject = ["paneService"];
+	function PaneCtrl(paneService) {
+		var _this = this;
+
+		paneService.data().then(function (data) {
+			_this.data = data;
+		});
+	}
+
+	PaneService.$inject = [];
+	function PaneService() {
+		var data = {};
+
+		return {
+			add: function add(item) {},
+
+			remove: function remove(item) {}
+		};
+	}
 })(angular);
 'use strict';
 
@@ -1914,6 +1914,32 @@ under the License.
 /*!
  * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
  */
+
+(function (angular) {
+
+	'use strict';
+
+	angular.module('icsm.state', []).directive("icsmStateToggle", ['downloadService', function (downloadService) {
+		return {
+			restrict: 'AE',
+			template: '<button ng-click="toggle(false)" ng-disabled="state.show" class="btn btn-default" title="Start downlaod selection."><i class="fa fa-lg fa-object-group"></i></button>',
+			link: function link(scope) {
+				downloadService.data().then(function (data) {
+					scope.state = data;
+				});
+
+				scope.toggle = function () {
+					scope.state.show = !scope.state.show;
+				};
+			}
+		};
+	}]);
+})(angular);
+'use strict';
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
 (function (angular) {
 
 	'use strict';
@@ -2028,32 +2054,6 @@ under the License.
 				}
 			});
 			return response;
-		};
-	}]);
-})(angular);
-'use strict';
-
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module('icsm.state', []).directive("icsmStateToggle", ['downloadService', function (downloadService) {
-		return {
-			restrict: 'AE',
-			template: '<button ng-click="toggle(false)" ng-disabled="state.show" class="btn btn-default" title="Start downlaod selection."><i class="fa fa-lg fa-object-group"></i></button>',
-			link: function link(scope) {
-				downloadService.data().then(function (data) {
-					scope.state = data;
-				});
-
-				scope.toggle = function () {
-					scope.state.show = !scope.state.show;
-				};
-			}
 		};
 	}]);
 })(angular);
@@ -2337,7 +2337,7 @@ $templateCache.put("icsm/panes/panes.html","<div class=\"container contentContai
 $templateCache.put("icsm/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n		<button class=\"undecorated\">Download</button>\r\n	</div>\r\n	<!-- \r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n	-->\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");
 $templateCache.put("icsm/results/continue.html","<div class=\"continue-container\" ng-show=\"ctrl.selected.length\">\r\n   <button class=\"btn btn-primary\" ng-click=\"ctrl.review()\">Review {{ctrl.selected.length}} selected datasets (Approx: {{ctrl.selectedSize | fileSize}})</button>\r\n</div>\r\n\r\n");
 $templateCache.put("icsm/results/orgheading.html","<h5>\r\n	<button class=\"undecorated\" ng-click=\"expansions[org.source] = !expansions[org.source]\" uib-tooltip=\"Click to collapse/expand this group\"\r\n		aria-expanded=\"true\" aria-controls=\"collapse{{mappings[org.source].code}}\">\r\n      <img ng-src=\"{{mappings[org.source].image}}\" ng-attr-style=\"height:{{mappings[org.source].height}}px\"></img>\r\n   </button>\r\n   <strong>{{org.source}}</strong> (Showing {{org.downloadables | countMatchedDownloadables}} of {{org.downloadables	| countDownloadables}})\r\n	<span class=\"listTopExpander\">\r\n      <button class=\"undecorated\" ng-show=\"orgHasSelections()\" ng-click=\"deselectAll()\">\r\n         [Deselect all]\r\n      </button>\r\n      <button class=\"undecorated\" ng-click=\"expansions[org.source] = !expansions[org.source]\">\r\n         [{{expansions[org.source]?\"collapse\":\"expand\"}}]\r\n      </button>\r\n   </span>\r\n</h5>");
-$templateCache.put("icsm/results/results.html","<div ng-show=\"!list || !list.length\">\r\n	<div class=\"alert alert-warning\" role=\"alert\"><strong>Select an area</strong> to find datasets within.</div>\r\n</div>\r\n\r\n<div ng-show=\"list.length\">\r\n	<div class=\"row\">\r\n		<div class=\"col-md-5\" uib-tooltip=\"Number of intersecting or very near datasets to your area of interest.\">\r\n			<h4 style=\"display:inline-block\">Found {{products.length}} datasets</h4>\r\n		</div>\r\n		<div class=\"col-md-7\">\r\n			<div class=\"input-group input-group-sm\">\r\n				<span class=\"input-group-addon\" id=\"names1\">Filter:</span>\r\n				<input type=\"text\" ng-model=\"filters.filter\" class=\"form-control\" ng-change=\"update()\" placeholder=\"Filter names\" aria-describedby=\"names1\">\r\n			</div>\r\n		</div>\r\n	</div>\r\n	<div class=\"panel panel-default\">\r\n		<div class=\"panel-body\" style=\"float:clear\">\r\n		   <span style=\"padding:10px; float:left\">\r\n				<span class=\"listTypeLabel\">Filter by type:</span>\r\n				<span ng-repeat=\"type in filters.types\" class=\"listType\">\r\n               <input type=\"checkbox\" ng-model=\"type.selected\" ng-change=\"update()\"/>\r\n               <span uib-tooltip=\"{{type.description}}\">{{type.label}}</span>\r\n				</span>\r\n			</span>\r\n         <span style=\"float:right\">\r\n            <icsm-search-continue></icsm-search-continue>\r\n         </span>\r\n      </div>\r\n	</div>\r\n\r\n	<div ng-repeat=\"available in list\" class=\"well\" ng-show=\"list.someMatches(available)\" ng-controller=\"listCtrl as list\">\r\n      <icsm-org-heading org=\"available\" expansions=\"expansions\" mappings=\"mappings\" products=\"products\"></icsm-org-heading>\r\n		<div uib-collapse=\"!expansions[available.source]\">\r\n			<div class=\"listRow\" ng-class-odd=\"\'listEven\'\" ng-repeat=\"(typeKey, types) in available.downloadables | allowedTypes\">\r\n				<h5><strong>{{typeKey}}</strong></h5>\r\n				<div  ng-repeat=\"(key, items) in types\">\r\n					<div>\r\n						<h5>\r\n							<button ng-click=\"list.checkChildren(items)\" style=\"width:7em\" class=\"btn btn-xs btn-default\">\r\n                        <span ng-show=\"!list.childrenChecked(items)\">Select all</span>\r\n                        <span ng-show=\"list.childrenChecked(items)\">Deselect all</span>\r\n                  </button>\r\n							<strong uib-tooltip=\"{{filter.types[key].description}}\">{{key}}</strong>\r\n						</h5>\r\n						<div ng-repeat=\"item in items | matchedItems\" data-ng-mouseenter=\"show(item)\" data-ng-mouseleave=\"hide(item)\">\r\n							<input type=\"checkbox\" ng-model=\"item.selected\" />\r\n							<common-cc4></common-cc4>\r\n							<spam class=\"listItem\">{{item.file_name}}</spam>\r\n							<span style=\"float:right;width:8em\">Size: {{item.file_size | fileSize}}</span>\r\n						</div>\r\n					</div>\r\n				</div>\r\n				<div style=\"text-align:right\"><button class=\"undecorated\" ng-click=\"expansions[available.source] = false\">[collapse]</button></div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
+$templateCache.put("icsm/results/results.html","<div ng-show=\"!list || !list.length\">\r\n	<div class=\"alert alert-warning\" role=\"alert\"><strong>Select an area</strong> to find datasets within.</div>\r\n</div>\r\n\r\n<div ng-show=\"list.length\">\r\n	<div class=\"row\">\r\n		<div class=\"col-md-5\" uib-tooltip=\"Number of intersecting or very near datasets to your area of interest.\">\r\n			<h4 style=\"display:inline-block\">Found {{products.length}} datasets</h4>\r\n		</div>\r\n		<div class=\"col-md-7\">\r\n			<div class=\"input-group input-group-sm\">\r\n				<span class=\"input-group-addon\" id=\"names1\">Filter:</span>\r\n				<input type=\"text\" ng-model=\"filters.filter\" class=\"form-control\" ng-change=\"update()\" placeholder=\"Filter names\" aria-describedby=\"names1\">\r\n			</div>\r\n		</div>\r\n	</div>\r\n	<div class=\"panel panel-default\">\r\n		<div class=\"panel-body\" style=\"float:clear\">\r\n		   <span style=\"padding:10px; float:left\">\r\n				<span class=\"listTypeLabel\">Filter by type:</span>\r\n				<span ng-repeat=\"type in filters.types\" class=\"listType\">\r\n               <input type=\"checkbox\" ng-model=\"type.selected\" ng-change=\"update()\"/>\r\n               <span uib-tooltip=\"{{type.description}}\">{{type.label}}</span>\r\n				</span>\r\n			</span>\r\n         <span style=\"float:right\">\r\n            <icsm-search-continue></icsm-search-continue>\r\n         </span>\r\n      </div>\r\n	</div>\r\n\r\n	<div ng-repeat=\"available in list\" class=\"well\" style=\"padding-left:4px;padding-right:4px\" ng-show=\"list.someMatches(available)\" ng-controller=\"listCtrl as list\">\r\n      <icsm-org-heading org=\"available\" expansions=\"expansions\" mappings=\"mappings\" products=\"products\"></icsm-org-heading>\r\n		<div uib-collapse=\"!expansions[available.source]\">\r\n			<div class=\"listRow\" ng-class-odd=\"\'listEven\'\" ng-repeat=\"(typeKey, types) in available.downloadables | allowedTypes\">\r\n				<h5><strong>{{typeKey}}</strong></h5>\r\n				<div  ng-repeat=\"(key, items) in types\">\r\n					<div>\r\n						<h5>\r\n							<button ng-click=\"list.checkChildren(items)\" style=\"width:7em\" class=\"btn btn-xs btn-default\">\r\n                        <span ng-show=\"!list.childrenChecked(items)\">Select all</span>\r\n                        <span ng-show=\"list.childrenChecked(items)\">Deselect all</span>\r\n                  </button>\r\n							<strong uib-tooltip=\"{{filter.types[key].description}}\">{{key}}</strong>\r\n						</h5>\r\n						<div ng-repeat=\"item in items | matchedItems\" data-ng-mouseenter=\"show(item)\" data-ng-mouseleave=\"hide(item)\">\r\n							<input type=\"checkbox\" ng-model=\"item.selected\" />\r\n							<common-cc4></common-cc4>\r\n							<spam class=\"listItem\">{{item.file_name}}</spam>\r\n							<span style=\"float:right;padding-top:3px\">({{item.file_size | fileSize}})</span>\r\n						</div>\r\n					</div>\r\n				</div>\r\n				<div style=\"text-align:right\"><button class=\"undecorated\" ng-click=\"expansions[available.source] = false\">[collapse]</button></div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/reviewing/reviewing.html","<div class=\"modal-header\">\r\n	<h3 class=\"modal-title splash\">Provide email, review datasets and continue</h3>\r\n</div>\r\n<div class=\"modal-body\" id=\"accept\" ng-form exp-enter=\"accept()\" icsm-splash-modal style=\"width: 100%; margin-left: auto; margin-right: auto;\">\r\n	<div class=\"row\">\r\n		<div class=\"col-md-12\">\r\n			<p>\r\n				<strong>Email notification</strong> The extract of data can take some time. By providing an email address we will be\r\n				able to notify you when the job is complete. The email will provide a link to the extracted data which will be packaged\r\n				up as a single compressed file.\r\n			</p>\r\n			<div review-email></div>\r\n		</div>\r\n	</div>\r\n	<div class=\"row bg-warning\" ng-show=\"noneSelected(products)\">\r\n		<div class=\"col-md-10 center-block\" style=\"padding:5px; text-align:center\">\r\n			<strong>All datasets have been removed.</strong>\r\n		</div>\r\n		<div class=\"col-md-2\">\r\n			<button type=\"button\" style=\"float:right\" class=\"btn btn-primary\" ng-click=\"cancel()\">Close</button>\r\n		</div>\r\n	</div>\r\n	<div ng-hide=\"noneSelected(products)\" ng-controller=\"listCtrl as list\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12\">\r\n				<div class=\"pull-right\" style=\"padding:8px;\">\r\n					<button type=\"button\" class=\"btn btn-primary\" ng-click=\"accept()\" ng-disabled=\"!data.email || !list.selected.length\">Start extract of {{list.selected.length}} datasets\r\n                  <span ng-show=\"list.selectedSize\">(Approx: {{list.selectedSize | fileSize}})</span>\r\n               </button>\r\n					<button type=\"button\" class=\"btn btn-primary\" ng-click=\"cancel()\">Cancel</button>\r\n				</div>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12\">\r\n				<h4>Selected datasets</h4>\r\n				Review and delete unwanted datasets.\r\n			</div>\r\n		</div>\r\n		<div class=\"row\" ng-repeat=\"product in products | reviewProductsSelected\"  ng-class-odd=\"\'reviewing-odd\'\">\r\n			<div class=\"col-md-7\">\r\n				<button type=\"button\" class=\"btn btn-default btn-xs\" ng-click=\"product.removed = !product.removed\">\r\n            <i class=\"fa fa-2x\" ng-class=\"{\'fa-times-circle\': !product.removed, \'fa-check-circle\': product.removed}\" aria-hidden=\"true\"></i>\r\n         </button><span style=\"padding-left:7px\" ng-class=\"{\'exclude\': product.removed}\">{{product.file_name}}</span>\r\n			</div>\r\n			<div class=\"col-md-4\" style=\"padding:6px\">\r\n				({{product.source}}\r\n				<i class=\"fa fa-arrow-right\" aria-hidden=\"true\"></i> {{product.type}}\r\n				<i class=\"fa fa-arrow-right\" aria-hidden=\"true\"></i> {{product.group}})\r\n			</div>\r\n			<div class=\"col-md-1\" style=\"padding:6px\">\r\n				{{product.file_size | fileSize}}\r\n			</div>\r\n		</div>\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12\">\r\n				<div class=\"pull-right\" style=\"padding:8px;\">\r\n					<button type=\"button\" class=\"btn btn-primary\" ng-click=\"accept()\" ng-disabled=\"!data.email || !list.selected.length\">Start extract of {{list.selected.length}} datasets\r\n                  <span ng-show=\"list.selectedSize\">(Approx: {{list.selectedSize | fileSize}})</span>\r\n               </button>\r\n					<button type=\"button\" class=\"btn btn-primary\" ng-click=\"cancel()\">Cancel</button>\r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/select/doc.html","<div ng-class-odd=\"\'odd\'\" ng-class-even=\"\'even\'\" ng-mouseleave=\"select.lolight(doc)\" ng-mouseenter=\"select.hilight(doc)\">\r\n	<span ng-class=\"{ellipsis:!expanded}\" tooltip-enable=\"!expanded\" style=\"width:100%;display:inline-block;\" \r\n			tooltip-class=\"selectAbstractTooltip\" tooltip=\"{{doc.abstract | truncate : 250}}\" tooltip-placement=\"bottom\">\r\n		<button type=\"button\" class=\"undecorated\" ng-click=\"expanded = !expanded\" title=\"Click to see more about this dataset\">\r\n			<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-caret-down\':expanded,\'fa-caret-right\':(!expanded)}\"></i>\r\n		</button>\r\n		<download-add item=\"doc\" group=\"group\"></download-add>\r\n		<icsm-wms data=\"doc\"></icsm-wms>\r\n		<icsm-bbox data=\"doc\" ng-if=\"doc.showExtent\"></icsm-bbox>\r\n		<a href=\"http://www.ga.gov.au/metadata-gateway/metadata/record/{{doc.sysId}}\" target=\"_blank\" ><strong>{{doc.title}}</strong></a>\r\n	</span>\r\n	<span ng-class=\"{ellipsis:!expanded}\" style=\"width:100%;display:inline-block;padding-right:15px;\">\r\n		{{doc.abstract}}\r\n	</span>\r\n	<div ng-show=\"expanded\" style=\"padding-bottom: 5px;\">\r\n		<h5>Keywords</h5>\r\n		<div>\r\n			<span class=\"badge\" ng-repeat=\"keyword in doc.keywords track by $index\">{{keyword}}</span>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/select/group.html","<div class=\"panel panel-default\" style=\"margin-bottom:-5px;\" >\r\n	<div class=\"panel-heading\"><icsm-wms data=\"group\"></icsm-wms> <strong>{{group.title}}</strong></div>\r\n	<div class=\"panel-body\">\r\n   		<div ng-repeat=\"doc in group.docs\">\r\n   			<div select-doc doc=\"doc\" group=\"group\"></div>\r\n		</div>\r\n	</div>\r\n</div>\r\n");

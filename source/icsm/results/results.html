@@ -29,7 +29,7 @@
       </div>
 	</div>
 
-	<div ng-repeat="available in list" class="well" ng-show="list.someMatches(available)" ng-controller="listCtrl as list">
+	<div ng-repeat="available in list" class="well" style="padding-left:4px;padding-right:4px" ng-show="list.someMatches(available)" ng-controller="listCtrl as list">
       <icsm-org-heading org="available" expansions="expansions" mappings="mappings" products="products"></icsm-org-heading>
 		<div uib-collapse="!expansions[available.source]">
 			<div class="listRow" ng-class-odd="'listEven'" ng-repeat="(typeKey, types) in available.downloadables | allowedTypes">
@@ -47,7 +47,7 @@
 							<input type="checkbox" ng-model="item.selected" />
 							<common-cc4></common-cc4>
 							<spam class="listItem">{{item.file_name}}</spam>
-							<span style="float:right;width:8em">Size: {{item.file_size | fileSize}}</span>
+							<span style="float:right;padding-top:3px">({{item.file_size | fileSize}})</span>
 						</div>
 					</div>
 				</div>
