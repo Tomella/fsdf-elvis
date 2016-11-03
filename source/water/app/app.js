@@ -8,7 +8,7 @@
 		'common.basin',
 		'common.bbox',
       'common.catchment',
-      'common.cc4',
+      'common.cc',
       'common.clip',
       'common.download',
 		'common.extent',

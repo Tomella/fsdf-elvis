@@ -45,7 +45,7 @@
 						</h5>
 						<div ng-repeat="item in items | matchedItems" data-ng-mouseenter="show(item)" data-ng-mouseleave="hide(item)">
 							<input type="checkbox" ng-model="item.selected" />
-							<common-cc4></common-cc4>
+							<common-cc version="mappings[item.source].ccLicence"></common-cc>
 							<spam class="listItem">{{item.file_name}}</spam>
 							<span style="float:right;padding-top:3px">({{item.file_size | fileSize}})</span>
 						</div>
