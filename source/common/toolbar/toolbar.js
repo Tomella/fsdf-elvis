@@ -21,12 +21,12 @@ angular.module("common.toolbar", [])
 	return {
 		scope:{
 			map:"=",
-			title: "="
+			overlaytitle: "=?"
 		},
 		restrict:'AE',
 		templateUrl:'common/toolbar/toolbar.html',
 		link: function(scope) {
-			scope.title = scope.title? scope.title: DEFAULT_TITLE;
+			scope.overlaytitle = scope.overlaytitle? scope.overlaytitle: DEFAULT_TITLE;
 		}
 	};
 }])
