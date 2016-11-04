@@ -179,7 +179,7 @@
    }
 
    function convertFlatToStructured(flat) {
-      var fields = ["file_url"]; // ["index_poly_name", "file_name", "file_url", "file_size", "file_last_modified", "bbox"]
+      var fields = ["file_url", "file_name", "file_size", "bbox"]; // ["index_poly_name", "file_name", "file_url", "file_size", "file_last_modified", "bbox"]
       var response = {
          available_data: []
       };
