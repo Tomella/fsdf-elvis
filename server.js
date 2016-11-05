@@ -39,7 +39,8 @@ var dontProxyHeaderRegex = /^(?:Host|Proxy-Connection|Accept-Encoding|Connection
 var validHosts = [
     "localhost",
     ".ga.gov.au",
-    ".motogp.com"
+    ".motogp.com",
+    "elvis20161a-ga.fmecloud.com"
 ];
 var upstreamProxy = argv['upstream-proxy'];
 
