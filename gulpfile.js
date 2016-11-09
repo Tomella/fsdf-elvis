@@ -55,7 +55,7 @@ gulp.task('views', function () {
 });
 
 //Concatenate & Minify JS
-gulp.task('scripts', ["commonScripts", "icsmScripts", "waterScripts", 'imageryScripts', 'startScripts', 'ltScripts']);
+gulp.task('scripts', ["commonScripts", "dashboardScripts", "icsmScripts", "waterScripts", 'imageryScripts', 'startScripts', 'ltScripts']);
 
 //Concatenate & Minify JS
 gulp.task('commonScripts', function() {
@@ -86,6 +86,11 @@ gulp.task('ltScripts', function() {
    return prepareScripts('lt');
 });
 
+//Concatenate & Minify JS
+gulp.task('dashboardScripts', function() {
+   return prepareScripts('dashboard');
+});
+
 function prepareScripts(name) {
    return gulp.src(directories.source + '/' + name + '/**/*.js')
       .pipe(babel({
@@ -107,12 +112,15 @@ gulp.task('squashCommon', function() {
       .pipe(header(fs.readFileSync(directories.source + '/licence.txt', 'utf8')))
 		.pipe(gulp.dest(directories.assets + "/min"));
 });
+
 gulp.task('squashIcsm', function() {
 	return squashJs('icsm');
 });
+
 gulp.task('squashWater', function() {
 	return squashJs('water');
 });
+
 gulp.task('squashStart', function() {
 	return squashJs('start');
 });
@@ -138,6 +146,7 @@ gulp.task('watch', function() {
     gulp.watch(directories.source + '/**/*(*.js|*.html)', ['lint']);
     gulp.watch(directories.source + '/common/**/*(*.js|*.html)', ['commonScripts']);
     gulp.watch(directories.source + '/icsm/**/*(*.js|*.html)', ['icsmScripts']);
+    gulp.watch(directories.source + '/dashboard/**/*(*.js|*.html)', ['dashboardScripts']);
     gulp.watch(directories.source + '/water/**/*(*.js|*.html)', ['waterScripts']);
     gulp.watch(directories.source + '/start/**/*(*.js|*.html)', ['startScripts']);
     gulp.watch(directories.source + '/imagery/**/*(*.js|*.html)', ['imageryScripts']);

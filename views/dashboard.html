@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en-us" id="ng-app" ng-app="DashboardApp">
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title>ELVIS - Dashboard</title>
+    <meta charset="utf-8">
+	<link rel="icon" type="image/png" href="icsm/resources/img/SiteFavIcon.png" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Geoscience Australia">
+    <meta name="version" content="BUILD-VERSION">
+
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.css" crossorigin="anonymous">
+
+    <link href="icsm/resources/css/ga.css" rel="stylesheet" />
+    <link href="icsm/resources/css/app.header.footer.css?v=VERSION_NO" rel="stylesheet" />
+	<link href="icsm/resources/css/mars.css?v=VERSION_NO" rel="stylesheet" />
+
+	<link href="icsm/bower_components/explorer-ui-components/dist/ga-explorer-ui.css" rel="stylesheet" />
+	<link href="icsm/bower_components/components-font-awesome/css/font-awesome.min.css" rel="stylesheet">
+
+
+	<link href="icsm/assets/icsm.css?v=VERSION_NO" rel="stylesheet"/>
+
+<style>
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
+      background-color: lightblue;
+}
+</style>
+
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+   m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-1501753-1', 'ga.gov.au');
+
+ga('send', 'pageview');
+</script>
+
+<body>
+
+<!--[if lt IE 9]>
+<div style="margin-right:100px; position:absolute; top:0">
+<style>
+.navbar {
+	display:none!important;
+}
+</style>
+<p>
+<img src="icsm/resources/css/images/geoscience_inline_padded_small.png" style="float:left;padding-right:10px;" />
+<br/>
+<strong>ELVIS - Dashboard - browser requirements.</strong><br/>
+Unfortunately this application requires a browser made more recently than what you are using. We will not be providing a lower spec
+version of this application. The latest Firefox, Chrome plus Microsoft Internet Explorer 9 and higher including Edge browsers have been tested to work as of mid-2015.
+</div>
+<![endif]-->
+
+<!-- BEGIN: Sticky Header -->
+<div icsm-header class="navbar navbar-default navbar-fixed-top"
+			heading="'ELVIS - Dashboard'"
+			headingtitle="'ELVIS - Dashboard'"
+			breadcrumbs="[{name:'ELVIS', title: 'Reload ELVIS - Dashboard', url: '.'}]"
+			helptitle="'Get help about ELVIS - Dashboard'"
+			helpalttext="'Get help about ELVIS - Dashboard'">
+</div>
+<!-- END: Sticky Header -->
+
+
+<!-- BEGIN: Page Content -->
+<br/>
+<div ng-controller="dashCtrl as dash">
+<uib-tabset active="activeJustified" justified="true">
+    <uib-tab ng-repeat="tab in dash.config.tabs" index="$index" select="dash.selected(tab.select)" heading="{{tab.heading}}"></uib-tab>
+ </uib-tabset>
+</div>
+<div  style="position:fixed; left:0px; right:0px; top:126px; bottom:8px;">
+   <iframe id="launcher" style="border-style:none; height:100%; width: 100%"></iframe>
+</div>
+
+<!-- BEGIN: Sticky Footer -->
+<div page-footer style="z-index:5; " class="noPrint"></div>
+<!-- END: Sticky Footer -->
+<script>
+var d3 = {};
+var L = {};
+</script>
+
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.11/angular.min.js"></script>
+  	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.11/angular-animate.min.js"></script>
+  	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.11/angular-route.min.js"></script>
+  	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.11/angular-aria.min.js"></script>
+   <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/1.3.3/ui-bootstrap-tpls.min.js"></script>
+
+	<script src="icsm/bower_components/explorer-ui-components/dist/ga-explorer-ui.js"></script>
+
+	<!-- These are the "ICSM" specific includes of modules -->
+	<script src="icsm/assets/common.js?v=VERSION_NO"></script>
+	<script src="icsm/assets/dashboard.js?v=VERSION_NO"></script>
+
+</body>
+</html>
