@@ -1,13 +1,3 @@
-<span ng-show="!item.metadata">
-   {{item.metadata.title}} - {{item.metadata.abstractText}}
-</span>
-<div ng-show="item.metadata.abstract != null">
-   <div ng-show="item.metadata.abstract">
-      {{item.metadata.title}} -
-      <span class="icsm-abstract-body" ng-bind-html="item.metadata.abstractText"></span >
-   </div>
-   <div ng-show="item.metadata.abstract == null">
-      <i class="fa fa-3x fa-exclamation-triangle" style="color:orange"></i>
-      There is no abstract available for this dataset.
-   </div>
+<div>
+{{item.metadata.title? item.metadata.title: 'Loading...'}}
 </div>
