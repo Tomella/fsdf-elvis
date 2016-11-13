@@ -45,7 +45,8 @@
                      <strong uib-tooltip="{{filter.types[key].description}}">{{key}}</strong>
                   </h5>
                   <div ng-repeat="item in items | matchedItems" icsm-abstract-hover item="item" >
-                     <div tooltip-append-to-body="true" uib-tooltip-template="'icsm/results/abstracttooltip.html'" tooltip-popup-delay="400">
+                     <div tooltip-append-to-body="true" uib-tooltip-template="'icsm/results/abstracttooltip.html'" tooltip-popup-delay="400"
+                              data-ng-mouseenter="show(item)" data-ng-mouseleave="hide(item)">
                         <input type="checkbox" ng-model="item.selected" />
                         <icsm-abstract item="item" ng-if="item.source == 'NSW Government'"></icsm-abstract>
                         <common-cc version="mappings[item.source].ccLicence"></common-cc>

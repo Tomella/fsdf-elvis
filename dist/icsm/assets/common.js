@@ -19,6 +19,92 @@ under the License.
 
 'use strict';
 
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+(function (angular) {
+	'use strict';
+	/**
+  * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
+  */
+
+	angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider']).directive('commonBaselayerControl', ['$rootScope', 'mapHelper', 'mapService', function ($rootScope, mapHelper, mapService) {
+		var DEFAULTS = {
+			maxZoom: 12
+		};
+
+		return {
+			template: '<slider min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
+			scope: {
+				maxZoom: "="
+			},
+			link: function link(scope, element) {
+				if (typeof scope.maxZoom === "undefined") {
+					scope.maxZoom = DEFAULTS.maxZoom;
+				}
+				scope.slider = {
+					opacity: -1,
+					visibility: true,
+					lastOpacity: 1
+				};
+
+				// Get the initial value
+				mapHelper.getPseudoBaseLayer().then(function (layer) {
+					scope.layer = layer;
+					scope.slider.opacity = layer.options.opacity;
+				});
+
+				scope.$watch('slider.opacity', function (newValue, oldValue) {
+					if (oldValue < 0) return;
+
+					mapService.getMap().then(function (map) {
+						map.eachLayer(function (layer) {
+							if (layer.pseudoBaseLayer) {
+								layer.setOpacity(scope.slider.opacity);
+							}
+						});
+					});
+				});
+			}
+		};
+	}]);
+})(angular);
+"use strict";
+
+(function (angular) {
+
+   'use strict';
+
+   var versions = {
+      3: {
+         version: "3.0",
+         link: "https://creativecommons.org/licenses/by/3.0/au/"
+      },
+      4: {
+         version: "4.0",
+         link: "https://creativecommons.org/licenses/by/4.0/"
+      }
+   };
+
+   angular.module("common.cc", []).directive('commonCc', [function () {
+      return {
+         templateUrl: 'common/cc/cc.html',
+         scope: {
+            version: "=?"
+         },
+         link: function link(scope) {
+            if (!scope.version) {
+               scope.details = versions[4];
+            } else {
+               scope.details = versions[scope.version];
+            }
+            scope.template = 'common/cc/cctemplate.html';
+         }
+      };
+   }]);
+})(angular);
+'use strict';
+
 (function (angular) {
 
 	'use strict';
@@ -121,92 +207,6 @@ under the License.
 			}
 		};
 	}]);
-})(angular);
-'use strict';
-
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-(function (angular) {
-	'use strict';
-	/**
-  * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
-  */
-
-	angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider']).directive('commonBaselayerControl', ['$rootScope', 'mapHelper', 'mapService', function ($rootScope, mapHelper, mapService) {
-		var DEFAULTS = {
-			maxZoom: 12
-		};
-
-		return {
-			template: '<slider min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
-			scope: {
-				maxZoom: "="
-			},
-			link: function link(scope, element) {
-				if (typeof scope.maxZoom === "undefined") {
-					scope.maxZoom = DEFAULTS.maxZoom;
-				}
-				scope.slider = {
-					opacity: -1,
-					visibility: true,
-					lastOpacity: 1
-				};
-
-				// Get the initial value
-				mapHelper.getPseudoBaseLayer().then(function (layer) {
-					scope.layer = layer;
-					scope.slider.opacity = layer.options.opacity;
-				});
-
-				scope.$watch('slider.opacity', function (newValue, oldValue) {
-					if (oldValue < 0) return;
-
-					mapService.getMap().then(function (map) {
-						map.eachLayer(function (layer) {
-							if (layer.pseudoBaseLayer) {
-								layer.setOpacity(scope.slider.opacity);
-							}
-						});
-					});
-				});
-			}
-		};
-	}]);
-})(angular);
-"use strict";
-
-(function (angular) {
-
-   'use strict';
-
-   var versions = {
-      3: {
-         version: "3.0",
-         link: "https://creativecommons.org/licenses/by/3.0/au/"
-      },
-      4: {
-         version: "4.0",
-         link: "https://creativecommons.org/licenses/by/4.0/"
-      }
-   };
-
-   angular.module("common.cc", []).directive('commonCc', [function () {
-      return {
-         templateUrl: 'common/cc/cc.html',
-         scope: {
-            version: "=?"
-         },
-         link: function link(scope) {
-            if (!scope.version) {
-               scope.details = versions[4];
-            } else {
-               scope.details = versions[scope.version];
-            }
-            scope.template = 'common/cc/cctemplate.html';
-         }
-      };
-   }]);
 })(angular);
 'use strict';
 
@@ -545,36 +545,6 @@ under the License.
 		}
 	}
 })(angular);
-"use strict";
-
-(function (angular, L) {
-   'use strict';
-
-   angular.module("common.featureinfo", []).directive("commonFeatureInfo", ['$http', '$log', function ($http, $log) {
-      return {
-         require: "^geoMap",
-         restrict: "AE",
-         link: function link(scope, element, attrs, ctrl) {
-            if (typeof scope.options === "undefined") {
-               scope.options = {};
-            }
-
-            ctrl.getMap().then(function (map) {
-               map.on("click", clicked);
-
-               var url = "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetFeatureInfo_GA5mDEM.fmw?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&SRS=EPSG%3A4326&BBOX=152.73734400000001%2C-27.930875631314006%2C152.99586285714287%2C-27.656022654400271&WIDTH=823&HEIGHT=875&LAYERS=public.5dem_ProjectsIndex&STYLES=&QUERY_LAYERS=public.5dem_ProjectsIndex&INFO_FORMAT=application%2Fjson&FEATURE_COUNT=100&X=700&Y=500";
-               function clicked(event) {
-                  $http.get(url).then(function (data) {
-                     console.log(event);
-                     console.log(data);
-                     scope.data = data;
-                  });
-               }
-            });
-         }
-      };
-   }]);
-})(angular, L);
 "use strict";
 
 (function (angular, L) {
@@ -1015,6 +985,36 @@ under the License.
 			}
 		};
 	}
+})(angular, L);
+"use strict";
+
+(function (angular, L) {
+   'use strict';
+
+   angular.module("common.featureinfo", []).directive("commonFeatureInfo", ['$http', '$log', function ($http, $log) {
+      return {
+         require: "^geoMap",
+         restrict: "AE",
+         link: function link(scope, element, attrs, ctrl) {
+            if (typeof scope.options === "undefined") {
+               scope.options = {};
+            }
+
+            ctrl.getMap().then(function (map) {
+               map.on("click", clicked);
+
+               var url = "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetFeatureInfo_GA5mDEM.fmw?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&SRS=EPSG%3A4326&BBOX=152.73734400000001%2C-27.930875631314006%2C152.99586285714287%2C-27.656022654400271&WIDTH=823&HEIGHT=875&LAYERS=public.5dem_ProjectsIndex&STYLES=&QUERY_LAYERS=public.5dem_ProjectsIndex&INFO_FORMAT=application%2Fjson&FEATURE_COUNT=100&X=700&Y=500";
+               function clicked(event) {
+                  $http.get(url).then(function (data) {
+                     console.log(event);
+                     console.log(data);
+                     scope.data = data;
+                  });
+               }
+            });
+         }
+      };
+   }]);
 })(angular, L);
 'use strict';
 
@@ -2308,48 +2308,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 	'use strict';
 
-	angular.module("common.toolbar", []).directive("icsmToolbar", [function () {
-		return {
-			controller: 'toolbarLinksCtrl'
-		};
-	}])
-
-	/**
-  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
-  */
-	.directive('icsmToolbarRow', [function () {
-		var DEFAULT_TITLE = "Satellite to Topography bias on base map.";
-
-		return {
-			scope: {
-				map: "=",
-				overlaytitle: "=?"
-			},
-			restrict: 'AE',
-			templateUrl: 'common/toolbar/toolbar.html',
-			link: function link(scope) {
-				scope.overlaytitle = scope.overlaytitle ? scope.overlaytitle : DEFAULT_TITLE;
-			}
-		};
-	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
-
-		var self = this;
-		configService.getConfig().then(function (config) {
-			self.links = config.toolbarLinks;
-		});
-
-		$scope.item = "";
-		$scope.toggleItem = function (item) {
-			$scope.item = $scope.item == item ? "" : item;
-		};
-	}]);
-})(angular);
-"use strict";
-
-(function (angular) {
-
-	'use strict';
-
 	angular.module("common.wms", []).directive("commonWms", ['$rootScope', '$timeout', 'flashService', 'wmsService', function ($rootScope, $timeout, flashService, wmsService) {
 		return {
 			scope: {
@@ -2522,9 +2480,51 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}
 	}]);
 })(angular);
-angular.module("common.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("common/bbox/bbox.html","<button type=\"button\" class=\"undecorated\" ng-click=\"toggle()\" tooltip-placement=\"right\" tooltip=\"Show data extent on the map.\">\r\n	<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-eye orange\':data.hasBbox,\'fa-eye-slash\':!data.hasBbox}\"></i>\r\n</button>");
-$templateCache.put("common/cc/cc.html","<button type=\"button\" class=\"undecorated\" title=\"View CCBy {{details.version}} licence details\"\r\n      popover-trigger=\"outsideClick\"\r\n      uib-popover-template=\"template\" popover-placement=\"bottom\" popover-append-to-body=\"true\">\r\n	<i ng-class=\"{active:data.isWmsShowing}\" class=\"fa fa-lg fa-gavel\"></i>\r\n</button>");
+"use strict";
+
+(function (angular) {
+
+	'use strict';
+
+	angular.module("common.toolbar", []).directive("icsmToolbar", [function () {
+		return {
+			controller: 'toolbarLinksCtrl'
+		};
+	}])
+
+	/**
+  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
+  */
+	.directive('icsmToolbarRow', [function () {
+		var DEFAULT_TITLE = "Satellite to Topography bias on base map.";
+
+		return {
+			scope: {
+				map: "=",
+				overlaytitle: "=?"
+			},
+			restrict: 'AE',
+			templateUrl: 'common/toolbar/toolbar.html',
+			link: function link(scope) {
+				scope.overlaytitle = scope.overlaytitle ? scope.overlaytitle : DEFAULT_TITLE;
+			}
+		};
+	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
+
+		var self = this;
+		configService.getConfig().then(function (config) {
+			self.links = config.toolbarLinks;
+		});
+
+		$scope.item = "";
+		$scope.toggleItem = function (item) {
+			$scope.item = $scope.item == item ? "" : item;
+		};
+	}]);
+})(angular);
+angular.module("common.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("common/cc/cc.html","<button type=\"button\" class=\"undecorated\" title=\"View CCBy {{details.version}} licence details\"\r\n      popover-trigger=\"outsideClick\"\r\n      uib-popover-template=\"template\" popover-placement=\"bottom\" popover-append-to-body=\"true\">\r\n	<i ng-class=\"{active:data.isWmsShowing}\" class=\"fa fa-lg fa-gavel\"></i>\r\n</button>");
 $templateCache.put("common/cc/cctemplate.html","<div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-12\">\r\n         <a target=\"_blank\" ng-href=\"{{details.link}}\">Creative Commons Attribution {{details.version}} </a>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-2\">\r\n         <span class=\"fa-stack\" aria-hidden=\"true\">\r\n         <i class=\"fa fa-check-circle-o fa-stack-2x\" aria-hidden=\"true\"></i>\r\n      </span>\r\n      </div>\r\n      <div class=\"col-md-10\">\r\n         You may use this work for commercial purposes.\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-2\">\r\n         <span class=\"fa-stack\" aria-hidden=\"true\">\r\n         <i class=\"fa fa-circle-o fa-stack-2x\"></i>\r\n         <i class=\"fa fa-female fa-stack-1x\"></i>\r\n      </span>\r\n      </div>\r\n      <div class=\"col-md-10\">\r\n         You must attribute the creator in your own works.\r\n      </div>\r\n   </div>\r\n</div>");
+$templateCache.put("common/bbox/bbox.html","<button type=\"button\" class=\"undecorated\" ng-click=\"toggle()\" tooltip-placement=\"right\" tooltip=\"Show data extent on the map.\">\r\n	<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-eye orange\':data.hasBbox,\'fa-eye-slash\':!data.hasBbox}\"></i>\r\n</button>");
 $templateCache.put("common/clip/clip.html","<div class=\"well well-sm\">\r\n<div class=\"container-fluid\">\r\n	<div class=\"row\">\r\n		<div class=\"col-md-12\">\r\n			<button style=\"margin-top:0px;\" ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" class=\"btn btn-primary btn-xs\">Draw</button>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-3\"> </div>\r\n		<div class=\"col-md-8\">\r\n			<strong>Y Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-6\">\r\n			<strong>X Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMin|number : 4}} min)</span></span>\r\n		</div>\r\n		<div class=\"col-md-6\">\r\n			<strong>X Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-offset-3 col-md-8\">\r\n			<strong>Y Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMin|number : 4}} min)</span></span>\r\n		</div>\r\n	</div>\r\n</div>\r\n</div>");
 $templateCache.put("common/download/download.html","<exp-modal ng-controller=\"DownloadCtrl as dl\" icon-class=\"fa-download\" is-open=\"dl.data.item.download\" title=\"Download data\" on-close=\"dl.remove()\" is-modal=\"true\">\r\n	<div style=\"padding:5px;\">\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><common-wms data=\"dl.data.item\"></common-wms><common-tile data=\"dl.data.item\"></common-tile>{{dl.data.item.title}}</h4>\r\n				{{dl.data.item.abstract}}\r\n   			</div>\r\n		</div>\r\n		<nedf-geoprocess data=\"dl.data.item\"></nedf-geoprocess>\r\n	</div>\r\n</exp-modal>");
 $templateCache.put("common/download/popup.html","<exp-modal icon-class=\"fa-download\"  is-open=\"data.item.download\" title=\"Download wizard\" on-close=\"dl.remove()\">\r\n	<div class=\"container-fluid downloadInner\" >\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><common-wms data=\"dl.data.item\"></common-wms>\r\n					<a href=\"http://www.ga.gov.au/metadata-gateway/metadata/record/{{dl.data.item.sysId}}\" target=\"_blank\"><strong class=\"ng-binding\">{{dl.data.item.title}}</strong></a>\r\n				</h4>\r\n   			</div>\r\n		</div>\r\n		<wizard-geoprocess data=\"dl.data.item\"></wizard-geoprocess>\r\n	</div>\r\n</exp-modal>");

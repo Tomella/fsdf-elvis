@@ -29,7 +29,7 @@ var config = {
       }
    ],
    baseUrl: "https://elvis20161a-ga.fmecloud.com/fmeserver/#/dashboards"
-}
+};
 
 angular.module("DashboardApp", [
       'exp.ui.templates',
@@ -48,7 +48,7 @@ angular.module("DashboardApp", [
          }
          document.getElementById("launcher").src = config.baseUrl + value;
          console.log("Value = " + value);
-      }
+      };
    });
 
 })(angular);

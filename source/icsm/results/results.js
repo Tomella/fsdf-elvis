@@ -86,6 +86,17 @@
                         }
                     };
 
+         			  scope.show = function(data) {
+                       var bbox = toNumberArray(data.bbox);
+                       $rootScope.$broadcast('icsm.bbox.draw', bbox);
+ 				           console.log("show", bbox);
+ 			           };
+
+ 			           scope.hide = function(data) {
+                       $rootScope.$broadcast('icsm.bbox.draw', null);
+ 				           console.log("hide");
+ 			           };
+
                     $rootScope.$on('site.selection', function (event, data) {
                         scope.list = null;
                         scope.products = [];
@@ -168,7 +179,7 @@
                     if(scope.item.showAbstract) {
                        load();
                     }
-                 }
+                 };
 
                  function load() {
                     if(!scope.fetched) {
@@ -177,7 +188,7 @@
                           scope.item.metadata = data;
                        });
                     }
-                 };
+                 }
               }
            };
         }])
