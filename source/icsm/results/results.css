@@ -39,3 +39,21 @@
    padding-top:30px;
    font-size: 80%;
 }
+
+.popover.icsm-abstract-popover {
+   max-width: 750px;
+}
+
+.popover.icsm-abstract-popover h3 {
+   font-size: 110%;
+   font-weight: bold;
+}
+
+.popover.icsm-abstract-popover .popover-content {
+   max-height:300px;
+   overflow-y:auto;
+}
+
+.icsm-abstract-body h3 {
+   display: none;
+}

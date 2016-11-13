@@ -36,7 +36,6 @@ angular.module("DashboardApp", [
 		'common.header',
       'common.templates',
 		'page.footer',
-
       'ui.bootstrap'
    ])
 
@@ -48,7 +47,7 @@ angular.module("DashboardApp", [
             value = value + ".html";
          }
          document.getElementById("launcher").src = config.baseUrl + value;
-         console.log("Value = " + value)
+         console.log("Value = " + value);
       }
    });
 

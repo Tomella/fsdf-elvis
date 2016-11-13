@@ -76,6 +76,23 @@
             ],
             "addLayerControl":false,
             "visible":true
+         },
+         {
+            "name":"Available data",
+            "pseudoBaseLayer" : true,
+            "type":["TileLayer", "WMS"],
+            "key":"available",
+            "parameters":[
+                "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetPNG_ElevationAvailableData.fmw",
+                {
+                   "layers" : "public.NSW_100k_Index",
+                   "format" : "image/png",
+                   "transparent" : true,
+                   "opacity" : 0.7
+                }
+            ],
+            "addLayerControl":false,
+            "visible":true
          }
       ],
       "drawOptions" : {

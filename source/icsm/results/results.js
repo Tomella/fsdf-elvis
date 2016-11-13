@@ -156,9 +156,76 @@
             };
         }])
 
+        .directive('icsmAbstract', ['listService', function(listService) {
+           return {
+              templateUrl: "icsm/results/abstractbutton.html",
+              scope: {
+                 item: "="
+              },
+              link: function(scope) {
+                 scope.toggle = function() {
+                    scope.item.showAbstract = !scope.item.showAbstract;
+                    if(scope.item.showAbstract) {
+                       load();
+                    }
+                 }
+
+                 function load() {
+                    if(!scope.fetched) {
+                       scope.fetched = true;
+                       listService.getMetadata(scope.item.file_name).then(data => {
+                          scope.item.metadata = data;
+                       });
+                    }
+                 };
+              }
+           };
+        }])
+
+        // All this does is set up the data on mouse hover. The UI can do whatever it wants with the data when it arrives
+        .directive('icsmAbstractHover', ['$timeout', 'listService', function($timeout, listService) {
+           const TIME_DELAY = 250; // ms
+           return {
+              restrict: 'AE',
+              scope: {
+                 item: "="
+              },
+              link: function(scope, element) {
+                 var promise;
+
+                 element.on('mouseenter', function() {
+                    if(promise) {
+                       $timeout.cancel(promise);
+                    }
+                    promise = $timeout(load, TIME_DELAY);
+                 });
+
+                 element.on('mouseleave', function() {
+                    if(promise) {
+                       $timeout.cancel(promise);
+                       promise = null;
+                    }
+                 });
+
+                 function load() {
+                    if(!scope.fetched) {
+                       scope.fetched = true;
+                       listService.getMetadata(scope.item.file_name).then(data => {
+                          scope.item.metadata = data;
+                       });
+                    }
+                 }
+              }
+           };
+        }])
+
+
         .controller('listCtrl', ListCtrl)
 
         .factory('listService', ['$http', function ($http) {
+            const METADATA_URL = "nswAbstract/";
+            const NO_METADATA = "No metadata found for this dataset.";
+
             var service = {};
             var expansions = {};
 
@@ -174,6 +241,16 @@
                     service.data.types.push(value);
                 });
             });
+
+            service.getMetadata = function(filename) {
+               return $http.get(METADATA_URL + filename).then(function (response) {
+                  var data = response.data;
+                  if(!data.title) {
+                     data.title = NO_METADATA;
+                  }
+                  return data;
+               });
+            };
 
             service.getMappings = function () {
                 return $http.get('icsm/resources/config/list.json').then(function (response) {
