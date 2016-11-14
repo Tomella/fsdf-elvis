@@ -1,3 +1,474 @@
+
+/* Overrides */
+
+img.logo {
+  width: 218px;
+}
+
+/* End overrides */
+
+.marsFlash {
+  font-size: 120%;
+}
+
+.marsMessages div.alert {
+  font-size: 120%;
+  font-weight: bold;
+}
+
+.lgaContainer {
+  border-left: 1px solid lightgray;
+  border-right: 1px solid lightgray;
+  border-bottom: 1px solid lightgray;
+  background-color: white;
+}
+
+.elevationFixedBottom {
+  position: fixed;
+  bottom: 10px;
+  left: 6px;
+  right: 15px;
+  opacity: 0.95;
+  z-index: 6;
+}
+
+.toggle-switch .switch-left {
+  background: #337ab7;
+}
+
+.custom-checkbox {
+  position: relative;
+  display: inline-block;
+  padding-top: 5px;
+}
+
+.helpTooltip {
+  left: 100px;
+}
+
+.custom-checkbox>.box {
+  position: relative;
+  display: block;
+  width: 14px;
+  height: 14px;
+  border: 1px solid #ccc;
+  background-color: #eee;
+  border-radius: 4px;
+}
+
+.custom-checkbox>.box>.tick {
+  position: absolute;
+  left: 2px;
+  top: -2px;
+  width: 14px;
+  height: 6px;
+  border-bottom: 2px solid #333;
+  border-left: 2px solid #333;
+  -webkit-transform: rotate(-45deg);
+  -moz-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+  display: none;
+}
+
+.oldie .custom-checkbox>.box>.tick {
+  left: 1px;
+  top: -5px;
+  zoom: 1;
+}
+
+.custom-checkbox>input:checked+.box>.tick {
+  display: block;
+}
+
+.custom-checkbox.checked>.box>.tick {
+  display: block;
+}
+
+.custom-checkbox>input {
+  position: absolute;
+  outline: none;
+  left: 0;
+  top: 0;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  border: none;
+  margin: 0;
+  opacity: 0;
+  z-index: 1;
+}
+
+.custom-checkbox>input:active+.box {
+  border-color: #aaa;
+  background-color: #ddd;
+}
+
+.contentContainer {
+  position: fixed;
+  top: 83px;
+  bottom: 8px;
+  left: 0;
+  right: 0px;
+  width: 100%;
+  margin: 0;
+  padding: 0px;
+}
+
+.mapContainer {
+  width: 100%;
+  height: 100%;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.expToolbar {
+  height: 32px;
+  position: absolute;
+  left: 91px;
+  right: 40px;
+  top: 10px;
+  z-index: 1;
+}
+
+.leaflet-legend {
+  position: fixed;
+  left: 37px;
+  top: 126px;
+  max-height: 600px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 1px 1px 1px gray;
+  border-radius: 4px;
+  border: 3px solid white;
+}
+
+@media only screen and (max-height:786px) {
+  .leaflet-legend {
+    max-height: 350px;
+  }
+}
+
+@media (max-width: 995px) {
+  .leaflet-zoom-box-control,
+  .icsmTabs {
+    display: none;
+  }
+
+  .container-full button.navbar-toggle {
+    display: none;
+  }
+}
+
+.leaflet-legend img {
+  border: 3px solid white;
+}
+
+.icsmDaterange .slider {
+  width: 100%;
+}
+
+.icsmDownloadModal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  min-height: 120px;
+  max-height: 100%;
+  overflow-y: auto;
+  z-index: 50;
+}
+
+.exp-backdrop {
+  position: absolute;
+}
+
+.downloadAbstract {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+@media only screen and (max-height:786px) {
+  .downloadAbstract {
+    max-height: 350px;
+  }
+}
+
+input.ng-invalid.ng-touched {
+  background-color: #FFFCFC;
+}
+
+input.ng-valid.ng-touched {
+  background-color: white;
+}
+
+/* Overrides */
+
+.footerAccessibilityItem {
+  display: none!important;
+}
+img.elvis-logo {
+  height: 75px;
+}
+.continue-container {
+  padding: 4px;
+}
+
+.listItemHeading {
+  font-weight: bold;
+}
+
+.listItemLas,
+.listItemPrj,
+.listItemAsc {
+  padding-left: 10px;
+}
+
+.listEven {
+  background-color: #eee;
+}
+
+.listRow {
+  border-bottom: 1px solid lightgray;
+}
+
+.listRow div {
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+
+.listTypeLabel {
+  font-weight: bold;
+}
+
+.listType {
+  padding-left: 7px;
+  display: inline-block;
+}
+
+.listItem {
+  padding-left: 6px;
+  padding-bottom: 6px;
+}
+
+.listTopExpander {
+  float: right;
+  padding-top: 30px;
+  font-size: 80%;
+}
+.resultsItemHeading {
+  font-weight: bold;
+}
+
+.resultsItemLas,
+.resultsItemPrj,
+.resultsItemAsc {
+  padding-left: 10px;
+}
+
+.resultsEven {
+  background-color: #eee;
+}
+
+.resultsRow {
+  border-bottom: 1px solid lightgray;
+}
+
+.resultsRow div {
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+
+.resultsTypeLabel {
+  font-weight: bold;
+}
+
+.resultsType {
+  padding-left: 7px;
+  display: inline-block;
+}
+
+.resultsItem {
+  padding-left: 8px;
+  padding-bottom: 6px;
+  font-size: 110%;
+}
+
+.resultsTopExpander {
+  float: right;
+  padding-top: 30px;
+  font-size: 80%;
+}
+
+.popover.icsm-abstract-popover {
+  max-width: 750px;
+}
+
+.popover.icsm-abstract-popover h3 {
+  font-size: 110%;
+  font-weight: bold;
+}
+
+.popover.icsm-abstract-popover .popover-content {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.icsm-abstract-body h3 {
+  display: none;
+}
+.reviewing-odd {
+  background-color: #eeeeee;
+}
+
+.exclude {
+  color: #777777;
+  text-decoration: line-through;
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
+}
+.icsm-icon {
+  background: url("icsm/img/global-sprites.svg") no-repeat;
+  display: inline-block;
+  width: 19px;
+  height: 30px;
+  margin: 0 auto 0 auto;
+}
+
+.icsm-pin {
+  background-position: 0px;
+}
+
+.icsm-map {
+  background-position: -63px;
+}
+
+.icsm-crosshair {
+  background-position: -82px;
+}
+
+.icsm-sign {
+  background-position: -102px;
+}
+
+.icsm-parcel {
+  background-position: -121px;
+}
+
+.icsm-satellite {
+  background-position: -140px;
+}
+
+.icsm-ship {
+  background-position: -160px;
+}
+
+.icsm-water {
+  background-position: -179px;
+}
+
+.icsm-shore {
+  background-position: -199px;
+}
+
+.icsm-land {
+  background-position: -218px;
+}
+
+.themesItemCompact {
+  margin-top: 0px !important;
+}
+
+.themesdropdown {
+  margin-top: -8px;
+  padding-right: 20px;
+  z-index: 100000;
+}
+
+.themesdropdown .themescurrent {
+  color: #fff;
+  background-color: #777;
+}
+.radCore {
+  margin-right: 3px;
+  display: inline-block;
+}
+
+.searchBar {
+  width: 27em;
+  opacity: 0.9;
+}
+
+@media only screen and (max-width:1100px) {
+  .searchBar {
+    width: 23em;
+  }
+}
+
+@media only screen and (max-width:1025px) {
+  .searchBar {
+    width: 20em;
+  }
+}
+
+@media only screen and (max-width:645px) {
+  .searchBar {
+    display: none;
+  }
+}
+
+@media only screen and (max-width:965px) {
+  .radCore,
+  .hideWhenSmall,
+  .steps-indicator,
+  .secondToolbarInfo {
+    display: none;
+  }
+}
+
+div.leaflet-control-scale-line {
+  text-align: center;
+}
+
+@media only screen and (max-width:965px) {
+  div.leaflet-control-scale-line {
+    display: none;
+  }
+}
+.downloadPane {
+  padding-left: 0px !important;
+  padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 42px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
+}
 .wizardPopup {
   position: fixed;
   top: 20px;
@@ -51,6 +522,11 @@
 .leaflet-popup {
   position: absolute;
   text-align: center;
+}
+
+.fi-popup hr {
+  margin-top: 3px;
+  margin-bottom: 3px;
 }
 .nav-icons {
   margin-top: 7px !important;
@@ -413,475 +889,68 @@ div.leaflet-control-scale-line {
     display: none;
   }
 }
-/* Overrides */
-
-img.logo {
-  width: 218px;
-}
-
-/* End overrides */
-
-.marsFlash {
-  font-size: 120%;
-}
-
-.marsMessages div.alert {
-  font-size: 120%;
-  font-weight: bold;
-}
-
-.lgaContainer {
-  border-left: 1px solid lightgray;
-  border-right: 1px solid lightgray;
-  border-bottom: 1px solid lightgray;
-  background-color: white;
-}
-
-.elevationFixedBottom {
+.start-content-container {
   position: fixed;
-  bottom: 10px;
-  left: 6px;
-  right: 15px;
-  opacity: 0.95;
-  z-index: 6;
-}
-
-.toggle-switch .switch-left {
-  background: #337ab7;
-}
-
-.custom-checkbox {
-  position: relative;
-  display: inline-block;
-  padding-top: 5px;
-}
-
-.helpTooltip {
-  left: 100px;
-}
-
-.custom-checkbox>.box {
-  position: relative;
-  display: block;
-  width: 14px;
-  height: 14px;
-  border: 1px solid #ccc;
-  background-color: #eee;
-  border-radius: 4px;
-}
-
-.custom-checkbox>.box>.tick {
-  position: absolute;
-  left: 2px;
-  top: -2px;
-  width: 14px;
-  height: 6px;
-  border-bottom: 2px solid #333;
-  border-left: 2px solid #333;
-  -webkit-transform: rotate(-45deg);
-  -moz-transform: rotate(-45deg);
-  -o-transform: rotate(-45deg);
-  -ms-transform: rotate(-45deg);
-  transform: rotate(-45deg);
-  display: none;
-}
-
-.oldie .custom-checkbox>.box>.tick {
-  left: 1px;
-  top: -5px;
-  zoom: 1;
-}
-
-.custom-checkbox>input:checked+.box>.tick {
-  display: block;
-}
-
-.custom-checkbox.checked>.box>.tick {
-  display: block;
-}
-
-.custom-checkbox>input {
-  position: absolute;
-  outline: none;
-  left: 0;
-  top: 0;
-  padding: 0;
-  width: 16px;
-  height: 16px;
-  border: none;
-  margin: 0;
-  opacity: 0;
-  z-index: 1;
-}
-
-.custom-checkbox>input:active+.box {
-  border-color: #aaa;
-  background-color: #ddd;
-}
-
-.contentContainer {
-  position: fixed;
-  top: 83px;
-  bottom: 8px;
-  left: 0;
-  right: 0px;
-  width: 100%;
-  margin: 0;
-  padding: 0px;
-}
-
-.mapContainer {
-  width: 100%;
-  height: 100%;
-}
-
-.bold {
-  font-weight: bold;
-}
-
-.expToolbar {
-  height: 32px;
-  position: absolute;
-  left: 91px;
-  right: 40px;
-  top: 10px;
-  z-index: 1;
-}
-
-.leaflet-legend {
-  position: fixed;
-  left: 37px;
-  top: 126px;
-  max-height: 600px;
+  top: 95px;
+  bottom: 6px;
   overflow-y: auto;
-  overflow-x: hidden;
-  box-shadow: 1px 1px 1px gray;
-  border-radius: 4px;
-  border: 3px solid white;
-}
-
-@media only screen and (max-height:786px) {
-  .leaflet-legend {
-    max-height: 350px;
-  }
-}
-
-@media (max-width: 995px) {
-  .leaflet-zoom-box-control,
-  .icsmTabs {
-    display: none;
-  }
-
-  .container-full button.navbar-toggle {
-    display: none;
-  }
-}
-
-.leaflet-legend img {
-  border: 3px solid white;
-}
-
-.icsmDaterange .slider {
-  width: 100%;
-}
-
-.icsmDownloadModal {
-  position: absolute;
-  top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  min-height: 120px;
-  max-height: 100%;
-  overflow-y: auto;
-  z-index: 50;
 }
 
-.exp-backdrop {
-  position: absolute;
-}
-
-.downloadAbstract {
-  max-height: 500px;
-  overflow-y: auto;
-}
-
-@media only screen and (max-height:786px) {
-  .downloadAbstract {
-    max-height: 350px;
+@media (min-width: 1200px) {
+  .start-content-container .panel {
+    margin-left: 150px;
+    margin-right: 150px;
   }
 }
 
-input.ng-invalid.ng-touched {
-  background-color: #FFFCFC;
-}
-
-input.ng-valid.ng-touched {
-  background-color: white;
-}
-
-/* Overrides */
-
-.footerAccessibilityItem {
-  display: none!important;
-}
-img.elvis-logo {
-  height: 75px;
-}
-.continue-container {
-  padding: 4px;
-}
-
-.listItemHeading {
-  font-weight: bold;
-}
-
-.listItemLas,
-.listItemPrj,
-.listItemAsc {
-  padding-left: 10px;
-}
-
-.listEven {
-  background-color: #eee;
-}
-
-.listRow {
-  border-bottom: 1px solid lightgray;
-}
-
-.listRow div {
-  padding-top: 1px;
-  padding-bottom: 1px;
-}
-
-.listTypeLabel {
-  font-weight: bold;
-}
-
-.listType {
-  padding-left: 7px;
+.select-icon {
+  background: url("../resources/img/sprites.svg") no-repeat;
   display: inline-block;
-}
-
-.listItem {
-  padding-left: 6px;
-  padding-bottom: 6px;
-}
-
-.listTopExpander {
-  float: right;
-  padding-top: 30px;
-  font-size: 80%;
-}
-.resultsItemHeading {
-  font-weight: bold;
-}
-
-.resultsItemLas,
-.resultsItemPrj,
-.resultsItemAsc {
-  padding-left: 10px;
-}
-
-.resultsEven {
-  background-color: #eee;
-}
-
-.resultsRow {
-  border-bottom: 1px solid lightgray;
-}
-
-.resultsRow div {
-  padding-top: 1px;
-  padding-bottom: 1px;
-}
-
-.resultsTypeLabel {
-  font-weight: bold;
-}
-
-.resultsType {
-  padding-left: 7px;
-  display: inline-block;
-}
-
-.resultsItem {
-  padding-left: 8px;
-  padding-bottom: 6px;
-  font-size: 110%;
-}
-
-.resultsTopExpander {
-  float: right;
-  padding-top: 30px;
-  font-size: 80%;
-}
-
-.popover.icsm-abstract-popover {
-  max-width: 750px;
-}
-
-.popover.icsm-abstract-popover h3 {
-  font-size: 110%;
-  font-weight: bold;
-}
-
-.popover.icsm-abstract-popover .popover-content {
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.icsm-abstract-body h3 {
-  display: none;
-}
-.reviewing-odd {
-  background-color: #eeeeee;
-}
-
-.exclude {
-  color: #777777;
-  text-decoration: line-through;
-}
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
-.radCore {
-  margin-right: 3px;
-  display: inline-block;
-}
-
-.searchBar {
-  width: 27em;
-  opacity: 0.9;
-}
-
-@media only screen and (max-width:1100px) {
-  .searchBar {
-    width: 23em;
-  }
-}
-
-@media only screen and (max-width:1025px) {
-  .searchBar {
-    width: 20em;
-  }
-}
-
-@media only screen and (max-width:645px) {
-  .searchBar {
-    display: none;
-  }
-}
-
-@media only screen and (max-width:965px) {
-  .radCore,
-  .hideWhenSmall,
-  .steps-indicator,
-  .secondToolbarInfo {
-    display: none;
-  }
-}
-
-div.leaflet-control-scale-line {
-  text-align: center;
-}
-
-@media only screen and (max-width:965px) {
-  div.leaflet-control-scale-line {
-    display: none;
-  }
-}
-.icsm-icon {
-  background: url("icsm/img/global-sprites.svg") no-repeat;
-  display: inline-block;
-  width: 19px;
-  height: 30px;
+  width: 75px;
+  height: 120px;
   margin: 0 auto 0 auto;
 }
 
-.icsm-pin {
+.select-pin {
   background-position: 0px;
 }
 
-.icsm-map {
-  background-position: -63px;
+.select-map {
+  background-position: -75px;
 }
 
-.icsm-crosshair {
-  background-position: -82px;
+.select-crosshair {
+  background-position: -150px;
 }
 
-.icsm-sign {
-  background-position: -102px;
+.select-sign {
+  background-position: -225px;
 }
 
-.icsm-parcel {
-  background-position: -121px;
+.select-parcel {
+  background-position: -300px;
 }
 
-.icsm-satellite {
-  background-position: -140px;
+.select-satellite {
+  background-position: -375px;
 }
 
-.icsm-ship {
-  background-position: -160px;
+.select-ship {
+  background-position: -450px;
 }
 
-.icsm-water {
-  background-position: -179px;
+.select-water {
+  background-position: -525px;
 }
 
-.icsm-shore {
-  background-position: -199px;
+.select-shore {
+  background-position: -600px;
 }
 
-.icsm-land {
-  background-position: -218px;
-}
-
-.themesItemCompact {
-  margin-top: 0px !important;
-}
-
-.themesdropdown {
-  margin-top: -8px;
-  padding-right: 20px;
-  z-index: 100000;
-}
-
-.themesdropdown .themescurrent {
-  color: #fff;
-  background-color: #777;
-}
-.downloadPane {
-  padding-left: 0px !important;
-  padding-right: 5px !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 42px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.downloadCont {
-  position: fixed;
-  right: 0;
-  bottom: 8px;
+.select-land {
+  background-position: -675px;
 }
 .selectContainer {
   width: 100%;
@@ -957,67 +1026,4 @@ div.leaflet-control-scale-line {
 
 .vector-add:disabled {
   color: gray;
-}
-.start-content-container {
-  position: fixed;
-  top: 95px;
-  bottom: 6px;
-  overflow-y: auto;
-  left: 0;
-  right: 0;
-}
-
-@media (min-width: 1200px) {
-  .start-content-container .panel {
-    margin-left: 150px;
-    margin-right: 150px;
-  }
-}
-
-.select-icon {
-  background: url("../resources/img/sprites.svg") no-repeat;
-  display: inline-block;
-  width: 75px;
-  height: 120px;
-  margin: 0 auto 0 auto;
-}
-
-.select-pin {
-  background-position: 0px;
-}
-
-.select-map {
-  background-position: -75px;
-}
-
-.select-crosshair {
-  background-position: -150px;
-}
-
-.select-sign {
-  background-position: -225px;
-}
-
-.select-parcel {
-  background-position: -300px;
-}
-
-.select-satellite {
-  background-position: -375px;
-}
-
-.select-ship {
-  background-position: -450px;
-}
-
-.select-water {
-  background-position: -525px;
-}
-
-.select-shore {
-  background-position: -600px;
-}
-
-.select-land {
-  background-position: -675px;
 }
