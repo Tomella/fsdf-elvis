@@ -56,9 +56,11 @@
 		'elvis.header',
 		'elvis.results',
 		'elvis.reviewing',
+
       'icsm.mapevents',
 		'icsm.select',
 		'icsm.state',
+      'icsm.layerswitch',
 		'icsm.templates',
 		'icsm.view'
 	])

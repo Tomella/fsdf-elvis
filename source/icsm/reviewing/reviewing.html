@@ -1,8 +1,42 @@
 <div class="modal-header">
-	<h3 class="modal-title splash">Provide email, review datasets and continue</h3>
+	<h3 class="modal-title splash">Review datasets, provide email and continue</h3>
 </div>
 <div class="modal-body" id="accept" ng-form exp-enter="accept()" icsm-splash-modal style="width: 100%; margin-left: auto; margin-right: auto;">
-	<div class="row">
+	<div class="row bg-warning" ng-show="noneSelected(products)">
+		<div class="col-md-10 center-block" style="padding:5px; text-align:center">
+			<strong>All datasets have been removed.</strong>
+		</div>
+		<div class="col-md-2">
+			<button type="button" style="float:right" class="btn btn-primary" ng-click="cancel()">Close</button>
+		</div>
+	</div>
+	<div ng-hide="noneSelected(products)" ng-controller="listCtrl as list" >
+		<div class="row">
+			<div class="col-md-12">
+				<h4>{{list.selected.length}} Selected Datasets   <span ng-show="list.selectedSize">(Approx: {{list.selectedSize | fileSize}})</span></h4>
+				Review and delete unwanted datasets.
+			</div>
+		</div>
+      <div class="reviewing-datasets">
+		   <div class="row" ng-repeat="product in products | reviewProductsSelected"  ng-class-odd="'reviewing-odd'">
+			   <div class="col-md-7">
+				   <button type="button" class="btn btn-default btn-xs" ng-click="product.removed = !product.removed">
+                  <i class="fa fa-2x" ng-class="{'fa-times-circle': !product.removed, 'fa-check-circle': product.removed}" aria-hidden="true"></i>
+               </button>
+               <span style="padding-left:7px" ng-class="{'exclude': product.removed}">{{product.file_name}}</span>
+			   </div>
+			   <div class="col-md-4" style="padding:6px">
+				   ({{product.source}}
+				   <i class="fa fa-arrow-right" aria-hidden="true"></i> {{product.type}}
+				   <i class="fa fa-arrow-right" aria-hidden="true"></i> {{product.group}})
+			   </div>
+			   <div class="col-md-1" style="padding:6px">
+			   	{{product.file_size | fileSize}}
+			   </div>
+		   </div>
+      </div>
+	</div>
+   <div class="row reviewing-divider">
 		<div class="col-md-12">
 			<p>
 				<strong>Email notification</strong> The extract of data can take some time. By providing an email address we will be
@@ -12,54 +46,13 @@
 			<div review-email></div>
 		</div>
 	</div>
-	<div class="row bg-warning" ng-show="noneSelected(products)">
-		<div class="col-md-10 center-block" style="padding:5px; text-align:center">
-			<strong>All datasets have been removed.</strong>
-		</div>
-		<div class="col-md-2">
-			<button type="button" style="float:right" class="btn btn-primary" ng-click="cancel()">Close</button>
-		</div>
-	</div>
-	<div ng-hide="noneSelected(products)" ng-controller="listCtrl as list">
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pull-right" style="padding:8px;">
-					<button type="button" class="btn btn-primary" ng-click="accept()" ng-disabled="!data.email || !list.selected.length">Start extract of {{list.selected.length}} datasets
-                  <span ng-show="list.selectedSize">(Approx: {{list.selectedSize | fileSize}})</span>
-               </button>
-					<button type="button" class="btn btn-primary" ng-click="cancel()">Cancel</button>
-				</div>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-md-12">
-				<h4>Selected datasets</h4>
-				Review and delete unwanted datasets.
-			</div>
-		</div>
-		<div class="row" ng-repeat="product in products | reviewProductsSelected"  ng-class-odd="'reviewing-odd'">
-			<div class="col-md-7">
-				<button type="button" class="btn btn-default btn-xs" ng-click="product.removed = !product.removed">
-            <i class="fa fa-2x" ng-class="{'fa-times-circle': !product.removed, 'fa-check-circle': product.removed}" aria-hidden="true"></i>
-         </button><span style="padding-left:7px" ng-class="{'exclude': product.removed}">{{product.file_name}}</span>
-			</div>
-			<div class="col-md-4" style="padding:6px">
-				({{product.source}}
-				<i class="fa fa-arrow-right" aria-hidden="true"></i> {{product.type}}
-				<i class="fa fa-arrow-right" aria-hidden="true"></i> {{product.group}})
-			</div>
-			<div class="col-md-1" style="padding:6px">
-				{{product.file_size | fileSize}}
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pull-right" style="padding:8px;">
-					<button type="button" class="btn btn-primary" ng-click="accept()" ng-disabled="!data.email || !list.selected.length">Start extract of {{list.selected.length}} datasets
-                  <span ng-show="list.selectedSize">(Approx: {{list.selectedSize | fileSize}})</span>
-               </button>
-					<button type="button" class="btn btn-primary" ng-click="cancel()">Cancel</button>
-				</div>
+	<div class="row">
+		<div class="col-md-12">
+			<div class="pull-right" style="padding:8px;">
+				<button type="button" class="btn btn-primary" ng-click="accept()" ng-disabled="!data.email || !list.selected.length">Start extract of datasets
+
+              </button>
+				<button type="button" class="btn btn-primary" ng-click="cancel()">Cancel</button>
 			</div>
 		</div>
 	</div>
