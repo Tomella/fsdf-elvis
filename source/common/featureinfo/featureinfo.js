@@ -94,7 +94,7 @@
                                           status : "Available"
                                     */
                                     popupText.push(
-                                       "<strong>File name:</strong>" + feature.properties.object_name +
+                                       "<strong>File name:</strong> " + feature.properties.object_name +
                                        "</span><br/><strong>Status:</strong> " + feature.properties.status);
                                  }
                               });
