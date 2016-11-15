@@ -48,19 +48,7 @@
 	</div>
    <div style="padding:30px; padding-top:0; padding-bottom:40px; width:100%">
 		<div class="pull-right">
-		  	<button type="button" class="btn btn-primary ng-pristine ng-valid ng-touched" ng-model="seenSplash" ng-focus="" ng-click="accept()">Continue</button>
-		</div>
-	</div>
-	<div ng-show="messages.length > 0" class="container" style="width:100%; max-height:250px; overflow-y:auto">
-		<div class="row" ng-class-even="'grayline'" style="font-weight:bold">
-			<div class="col-sm-12" ><h3>News</h3></div>
-		</div>
-
-		<div class="row"ng-class-even="'grayline'" style="max-height:400px;overflow:auto" ng-repeat="message in messages | sortNotes">
-			<div class="col-sm-12">
-				<h4>{{message.title}} <span class="pull-right" style="font-size:70%">Created: {{message.creationDate | date : "dd/MM/yyyy"}}</span></h4>
-				<div ng-bind-html="message.description"></div>
-			</div>
+		  	<button type="button" class="btn btn-primary" ng-model="seenSplash" ng-focus="" ng-click="accept()">Continue</button>
 		</div>
 	</div>
 </div>
