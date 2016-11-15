@@ -60,6 +60,7 @@
 
       'icsm.mapevents',
 		'icsm.select',
+		'icsm.splash',
 		'icsm.state',
       'icsm.layerswitch',
 		'icsm.templates',

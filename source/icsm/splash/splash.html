@@ -4,7 +4,7 @@
 <div class="modal-body" id="accept" ng-form exp-enter="accept()" icsm-splash-modal style="width: 100%; margin-left: auto; margin-right: auto;">
 	<div>
 		<p>
-			Here you can download datasets sourced from jurisdictions.
+			Here you can download point cloud and elevation datasets sourced from jurisdictions.
 		</p>
 		<p>
 			<a href="http://www.ga.gov.au/topographic-mapping/digital-elevation-data.html" target="_blank">Find out more on our Elevation page.</a>
@@ -18,24 +18,29 @@
       <h5>How to use</h5>
       <p>
          <ul>
+            <li>Pan and zoom the map to your area of interest,</li>
+            <li>Click on the "Select an area..." button to enable drawing,</li>
             <li>Click on the map, holding the button down,</li>
-            <li>Drag to a diagonal corner (not too big, there is a limit of roughly 2x2 degrees)</li>
-            <li>On release we will check for data within or very near yur area of interest</li>
+            <li>Drag to a diagonal corner (not too big, there is a limit of roughly 4 square degrees)</li>
+            <li>On release we will check for data within or very near your area of interest</li>
             <li>If the list is large you can filter:
                <ul>
                   <li>Partial text match by typing in the filter field and/or</li>
-                  <li>By clicking the more button, you can restrict the display to certain file types</li>
+                  <li>You can restrict the display to either elevation (DEM) or point cloud file types</li>
                </ul>
             </li>
-            <li>Click on any file you would like to download. To reiterate, these files can be huge so take note of the file size before downloading</li>
+            <li>Check against any file you would like to download. To reiterate, these files can be huge so take note of the file size before downloading</li>
+            <li>Review your selected datasets and submit.</li>
+            <li>An email will be sent to you with a link to all your data, zipped into a single file.</li>
+            <li>These files can be huge so take note of the file size before submitting or downloading</li>
          </ul>
       </p>
       <h5>Hints</h5>
       <p>
          <ul>
-            <li>You can manually type the coordinates into the boxes. After 5 seconds of no changes the area described is checked, just like drawing the box with the mouse.</li>
             <li>Hovering over many items will give you further information about the purpose of the item</li>
             <li>Drawing a polyline allows you to measure distance along the polyline.</li>
+            <li>On completion on drawing a line the elevation along that line is plotted.</li>
             <li>While the tool to draw your area of interest is enabled it is easiest to pan the map using the arrow keys.</li>
             <li>There are many areas where there is no data though the coverage is improving all the time.</li
          </ul>
