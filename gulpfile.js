@@ -13,7 +13,6 @@ var insert        = require('gulp-insert');
 var uglify        = require('gulp-uglify');
 var rename        = require('gulp-rename');
 var templateCache = require('gulp-angular-templatecache');
-var war           = require('gulp-war');
 var zip           = require('gulp-zip');
 var addStream     = require('add-stream');
 
@@ -25,17 +24,6 @@ var directories = {
    views:      'views',
    outbower:   'dist/icsm/bower_components'
 };
-
-// You can build it as a war file if you want to deploy to a srvlet container like Tomcat.
-gulp.task('war', function () {
-    gulp.src(["dist/**/*"])
-        .pipe(war({
-            welcome: 'index.html',
-            displayName: 'FSDF Elvis WAR',
-        }))
-        .pipe(zip('fsdf-elvis.war'))
-        .pipe(gulp.dest("."));
-});
 
 // Lint Task
 gulp.task('lint', function() {
@@ -50,7 +38,7 @@ gulp.task('resources', function () {
 });
 
 gulp.task('views', function () {
-    return gulp.src(directories.views + '/*')
+    return gulp.src(directories.views + '/**/*')
         .pipe(gulp.dest('dist'));
 });
 

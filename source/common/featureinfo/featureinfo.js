@@ -3,7 +3,7 @@
 
    angular.module("common.featureinfo", [])
 
-      .directive("commonFeatureInfo", ['$http', '$log', '$q', 'featureInfoService', 'flashService', function ($http, $log, $q, featureInfoService, flashService) {
+      .directive("commonFeatureInfo", ['$http', '$log', '$q', '$timeout', 'featureInfoService', 'flashService', function ($http, $log, $q, $timeout, featureInfoService, flashService) {
          var template = "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetFeatureInfo_ElevationAvailableData.fmw?" +
                 "SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&SRS=EPSG%3A4326&BBOX=${bounds}&WIDTH=${width}&HEIGHT=${height}&" +
                 //"LAYERS=public.5dem_ProjectsIndex&" +
@@ -17,6 +17,7 @@
             restrict: "AE",
             link: function (scope, element, attrs, ctrl) {
                var flasher = null;
+               var paused = false;
 
                if (typeof scope.options === "undefined") {
                   scope.options = {};
@@ -25,6 +26,17 @@
                ctrl.getMap().then(function (map) {
                   map.on('popupclose', function(e) {
                      featureInfoService.removeLastLayer(map);
+                  });
+
+                  map.on("draw:drawstart", function() {
+                     paused = true;
+                     $timeout(function() {
+                        paused = false;
+                     }, 60000);
+                  });
+
+                  map.on("draw:drawstop", function() {
+                     paused = false;
                   });
 
                   map.on("click", function (event) {
@@ -40,6 +52,10 @@
                         width: size.x
                      };
                      var url = template;
+
+                     if(paused) {
+                        return;
+                     }
 
                      flashService.remove(flasher);
                      flasher = flashService.add("Checking available data at this point", 5000, true);
