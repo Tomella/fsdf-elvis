@@ -125,6 +125,11 @@
 .iso19115-head {
   font-weight: bold;
 }
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
+}
 .mvt,
 .mvt ul,
 .mvt li {
@@ -168,11 +173,6 @@
 .metaview-info {
   padding-left: 3px;
   padding-right: 3px;
-}
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
 }
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
@@ -637,38 +637,6 @@ input.ng-valid.ng-touched {
 img.elvis-logo {
   height: 75px;
 }
-.reviewing-odd {
-  background-color: #eeeeee;
-}
-
-.row.reviewing-divider {
-  border-top: 1px solid lightgray;
-  padding-top: 5px;
-  margin-top: 5px;
-}
-
-.reviewing-datasets {
-  max-height: 450px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-@media (max-height: 750px) {
-  .reviewing-datasets {
-    max-height: 350px;
-  }
-}
-
-@media (max-height: 650px) {
-  .reviewing-datasets {
-    max-height: 250px;
-  }
-}
-
-.exclude {
-  color: #777777;
-  text-decoration: line-through;
-}
 .continue-container {
   padding: 4px;
 }
@@ -775,6 +743,38 @@ img.elvis-logo {
 
 .icsm-abstract-body h3 {
   display: none;
+}
+.reviewing-odd {
+  background-color: #eeeeee;
+}
+
+.row.reviewing-divider {
+  border-top: 1px solid lightgray;
+  padding-top: 5px;
+  margin-top: 5px;
+}
+
+.reviewing-datasets {
+  max-height: 450px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-height: 750px) {
+  .reviewing-datasets {
+    max-height: 350px;
+  }
+}
+
+@media (max-height: 650px) {
+  .reviewing-datasets {
+    max-height: 250px;
+  }
+}
+
+.exclude {
+  color: #777777;
+  text-decoration: line-through;
 }
 .selectContainer {
   width: 100%;
