@@ -59,7 +59,7 @@
 
                         if(!group.length) {
                            response = responses[0]; // They are the same anyway
-                           popupText.push('No data available at this location.');
+                           flasher = flashService.add("No status information available for this point.", 4000);
                         } else {
                            response = {
                               data: {
@@ -109,18 +109,14 @@
                                     color: "red"
                                  };
                               }
-                           }).addTo(map)
-                           .openPopup()
-                           .on('popupclose', function() {
-                              featureInfoService.removeLastLayer(map);
-                           });
+                           }).addTo(map);
                            featureInfoService.setLayer(layer);
-                        }
 
-                        L.popup()
-                           .setLatLng(latlng)
-                           .setContent("<div class='fi-popup'>" + popupText.join("<hr/>") + "</div>")
-                           .openOn(map);
+                           L.popup()
+                              .setLatLng(latlng)
+                              .setContent("<div class='fi-popup'>" + popupText.join("<hr/>") + "</div>")
+                              .openOn(map);
+                        }
                      });
                   });
                });

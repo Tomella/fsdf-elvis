@@ -42,6 +42,7 @@
 
 		//'geo.baselayer.control',
 		'geo.draw',
+		'geo.elevation',
 		'geo.geosearch',
 		'geo.map',
 		'geo.maphelper',
