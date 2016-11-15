@@ -3,7 +3,6 @@
  */
 
 (function (angular) {
-
     'use strict';
 
     angular.module("elvis.results", ['elvis.results.continue'])
@@ -226,6 +225,30 @@
                        });
                     }
                  }
+              }
+           };
+        }])
+
+        // All this does is set up the data on mouse hover. The UI can do whatever it wants with the data when it arrives
+        .directive('icsmAbstractLink', ['$timeout', 'listService', function($timeout, listService) {
+           const NSW_METADATA_TEMPLATE = "https://s3-ap-southeast-2.amazonaws.com/nsw.elvis/z5${zone}/Metadata/";
+
+           return {
+              restrict: 'AE',
+              template: "<a target='_blank' ng-if='item.source == \"NSW Government\"' ng-href='{{url}}'>{{item.file_name}}</a><span ng-if='item.source != \"NSW Government\"' ng-bind='item.file_name'></span>",
+              scope: {
+                 item: "="
+              },
+              link: function(scope, element) {
+                  var filename = scope.item.file_name;
+                  var re = /\_5\d\_/;
+                  var index = filename.search(re);
+                  var zone = 6;
+                  var url = NSW_METADATA_TEMPLATE;
+                  if (index != -1) {
+                     zone = filename.substr(index + 2, 1);
+                  }
+                  scope.url = url.replace("${zone}", zone) + filename.replace(".zip", "_Metadata.html");
               }
            };
         }])

@@ -1,7 +1,7 @@
 process.env.NO_PROXY = "localhost";
 
 var SERVICES_ROOT = "http://www.ga.gov.au/elvis";
-var NSW_METADATA_TEMPLATE = "https://s3-ap-southeast-2.amazonaws.com/nsw.elvis/z5${zone}/Metadata/"
+var NSW_METADATA_TEMPLATE = "https://s3-ap-southeast-2.amazonaws.com/nsw.elvis/z5${zone}/Metadata/";
 
 var START_ABSTRACT_SENTINEL = "<h3>Abstract:</h3>";
 var START_ABSTRACT_SENTINEL_LENGTH = START_ABSTRACT_SENTINEL.length;
@@ -117,10 +117,7 @@ app.get('/nswAbstract/*', function (req, res, next) {
     if (index != -1) {
        zone = filename.substr(index + 2, 1);
     }
-    url = url.replace("${zone}", zone) + filename.replace(".zip", "_Metadata.html")
-    console.log("filename =  " + filename + " url = " + url);
-
-
+    url = url.replace("${zone}", zone) + filename.replace(".zip", "_Metadata.html");
 
     request(url, function(error, response, html) {
        if(!error) {
