@@ -3,3 +3,5 @@
 cd /home/ec2-user/fsdf-elvis
 git pull
 sudo cp -rf dist/* /var/www/html
+sudo cp -f code-deploy/proxies.conf /etc/httpd/conf.d
+sudo service httpd restart
