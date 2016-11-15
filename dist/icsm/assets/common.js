@@ -548,6 +548,159 @@ under the License.
 "use strict";
 
 (function (angular, L) {
+   'use strict';
+
+   angular.module("common.featureinfo", []).directive("commonFeatureInfo", ['$http', '$log', '$q', '$timeout', 'featureInfoService', 'flashService', function ($http, $log, $q, $timeout, featureInfoService, flashService) {
+      var template = "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetFeatureInfo_ElevationAvailableData.fmw?" + "SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&SRS=EPSG%3A4326&BBOX=${bounds}&WIDTH=${width}&HEIGHT=${height}&" +
+      //"LAYERS=public.5dem_ProjectsIndex&" +
+      "LAYERS=public.NSW_100k_Index&" +
+      //"LAYERS=public.5dem_ProjectsIndex,public.NSW_100k_Index&&cql_Filter=;&" +
+      "STYLES=&QUERY_LAYERS=public.5dem_ProjectsIndex&INFO_FORMAT=application%2Fjson&FEATURE_COUNT=100&X=${x}&Y=${y}&LAYERS=";
+      var layers = ["public.5dem_ProjectsIndex", "public.NSW_100k_Index"];
+
+      return {
+         require: "^geoMap",
+         restrict: "AE",
+         link: function link(scope, element, attrs, ctrl) {
+            var flasher = null;
+            var paused = false;
+
+            if (typeof scope.options === "undefined") {
+               scope.options = {};
+            }
+
+            ctrl.getMap().then(function (map) {
+               map.on('popupclose', function (e) {
+                  featureInfoService.removeLastLayer(map);
+               });
+
+               map.on("draw:drawstart", function () {
+                  paused = true;
+                  $timeout(function () {
+                     paused = false;
+                  }, 60000);
+               });
+
+               map.on("draw:drawstop", function () {
+                  paused = false;
+               });
+
+               map.on("click", function (event) {
+                  var layer = null;
+                  var size = map.getSize();
+                  var point = map.latLngToContainerPoint(event.latlng, map.getZoom());
+                  var latlng = event.latlng;
+                  var data = {
+                     x: point.x,
+                     y: point.y,
+                     bounds: map.getBounds().toBBoxString(),
+                     height: size.y,
+                     width: size.x
+                  };
+                  var url = template;
+
+                  if (paused) {
+                     return;
+                  }
+
+                  flashService.remove(flasher);
+                  flasher = flashService.add("Checking available data at this point", 5000, true);
+
+                  angular.forEach(data, function (value, key) {
+                     url = url.replace("${" + key + "}", value);
+                  });
+
+                  $q.all(layers.map(function (layer) {
+                     return $http.get(url + layer);
+                  })).then(function (responses) {
+                     var group = responses.filter(function (response) {
+                        return response.data;
+                     });
+                     var response;
+                     var popupText = [];
+
+                     map.closePopup();
+                     featureInfoService.removeLastLayer(map);
+                     flashService.remove(flasher);
+
+                     if (!group.length) {
+                        response = responses[0]; // They are the same anyway
+                        flasher = flashService.add("No status information available for this point.", 4000);
+                     } else {
+                        (function () {
+                           response = {
+                              data: {
+                                 name: "public.AllIndexes",
+                                 type: "FeatureCollection",
+                                 crs: {
+                                    type: "name",
+                                    properties: {
+                                       name: "EPSG:4326"
+                                    }
+                                 },
+                                 features: []
+                              }
+                           };
+
+                           var features = response.data.features;
+
+                           group.forEach(function (response) {
+                              response.data.features.forEach(function (feature) {
+                                 features.push(feature);
+                                 if (feature.properties.maptitle) {
+                                    popupText.push("<strong>Map Title:</strong> <span title='Map number: " + feature.properties.mapnumber + "'>" + feature.properties.maptitle + "</span><br/><strong>Status:</strong> " + feature.properties.status);
+                                 } else {
+                                    /*
+                                          object_name : "middledarling2014_z55.tif",
+                                          object_url : "https://s3-ap-southeast-2.amazonaws.com/elvis.ga.gov.au/elevation/5m-dem/mdba/QG/middledarling2014_z55.tif",
+                                          object_size : "5577755073",
+                                          object_last_modified : "20161017",
+                                          area : "5560.00",
+                                          status : "Available"
+                                    */
+                                    popupText.push("<strong>File name:</strong> " + feature.properties.object_name + "</span><br/><strong>Status:</strong> " + feature.properties.status);
+                                 }
+                              });
+                           });
+                        })();
+                     }
+
+                     if (response.data) {
+                        layer = L.geoJson(response.data, {
+                           style: function style(feature) {
+                              return {
+                                 fillOpacity: 0.1,
+                                 color: "red"
+                              };
+                           }
+                        }).addTo(map);
+                        featureInfoService.setLayer(layer);
+
+                        L.popup().setLatLng(latlng).setContent("<div class='fi-popup'>" + popupText.join("<hr/>") + "</div>").openOn(map);
+                     }
+                  });
+               });
+            });
+         }
+      };
+   }]).factory('featureInfoService', [function () {
+      var lastFeature = null;
+      return {
+         setLayer: function setLayer(layer) {
+            lastFeature = layer;
+         },
+         removeLastLayer: function removeLastLayer(map) {
+            if (lastFeature) {
+               map.removeLayer(lastFeature);
+               lastFeature = null;
+            }
+         }
+      };
+   }]);
+})(angular, L);
+"use strict";
+
+(function (angular, L) {
 	'use strict';
 
 	angular.module("common.geoprocess", []).directive("wizardGeoprocess", ['$http', '$q', '$timeout', 'geoprocessService', 'flashService', 'messageService', function ($http, $q, $timeout, geoprocessService, flashService, messageService) {
@@ -1038,159 +1191,6 @@ under the License.
 		};
 	}]).factory('headerService', ['$http', function () {}]);
 })(angular);
-"use strict";
-
-(function (angular, L) {
-   'use strict';
-
-   angular.module("common.featureinfo", []).directive("commonFeatureInfo", ['$http', '$log', '$q', '$timeout', 'featureInfoService', 'flashService', function ($http, $log, $q, $timeout, featureInfoService, flashService) {
-      var template = "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetFeatureInfo_ElevationAvailableData.fmw?" + "SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&SRS=EPSG%3A4326&BBOX=${bounds}&WIDTH=${width}&HEIGHT=${height}&" +
-      //"LAYERS=public.5dem_ProjectsIndex&" +
-      "LAYERS=public.NSW_100k_Index&" +
-      //"LAYERS=public.5dem_ProjectsIndex,public.NSW_100k_Index&&cql_Filter=;&" +
-      "STYLES=&QUERY_LAYERS=public.5dem_ProjectsIndex&INFO_FORMAT=application%2Fjson&FEATURE_COUNT=100&X=${x}&Y=${y}&LAYERS=";
-      var layers = ["public.5dem_ProjectsIndex", "public.NSW_100k_Index"];
-
-      return {
-         require: "^geoMap",
-         restrict: "AE",
-         link: function link(scope, element, attrs, ctrl) {
-            var flasher = null;
-            var paused = false;
-
-            if (typeof scope.options === "undefined") {
-               scope.options = {};
-            }
-
-            ctrl.getMap().then(function (map) {
-               map.on('popupclose', function (e) {
-                  featureInfoService.removeLastLayer(map);
-               });
-
-               map.on("draw:drawstart", function () {
-                  paused = true;
-                  $timeout(function () {
-                     paused = false;
-                  }, 60000);
-               });
-
-               map.on("draw:drawstop", function () {
-                  paused = false;
-               });
-
-               map.on("click", function (event) {
-                  var layer = null;
-                  var size = map.getSize();
-                  var point = map.latLngToContainerPoint(event.latlng, map.getZoom());
-                  var latlng = event.latlng;
-                  var data = {
-                     x: point.x,
-                     y: point.y,
-                     bounds: map.getBounds().toBBoxString(),
-                     height: size.y,
-                     width: size.x
-                  };
-                  var url = template;
-
-                  if (paused) {
-                     return;
-                  }
-
-                  flashService.remove(flasher);
-                  flasher = flashService.add("Checking available data at this point", 5000, true);
-
-                  angular.forEach(data, function (value, key) {
-                     url = url.replace("${" + key + "}", value);
-                  });
-
-                  $q.all(layers.map(function (layer) {
-                     return $http.get(url + layer);
-                  })).then(function (responses) {
-                     var group = responses.filter(function (response) {
-                        return response.data;
-                     });
-                     var response;
-                     var popupText = [];
-
-                     map.closePopup();
-                     featureInfoService.removeLastLayer(map);
-                     flashService.remove(flasher);
-
-                     if (!group.length) {
-                        response = responses[0]; // They are the same anyway
-                        flasher = flashService.add("No status information available for this point.", 4000);
-                     } else {
-                        (function () {
-                           response = {
-                              data: {
-                                 name: "public.AllIndexes",
-                                 type: "FeatureCollection",
-                                 crs: {
-                                    type: "name",
-                                    properties: {
-                                       name: "EPSG:4326"
-                                    }
-                                 },
-                                 features: []
-                              }
-                           };
-
-                           var features = response.data.features;
-
-                           group.forEach(function (response) {
-                              response.data.features.forEach(function (feature) {
-                                 features.push(feature);
-                                 if (feature.properties.maptitle) {
-                                    popupText.push("<strong>Map Title:</strong> <span title='Map number: " + feature.properties.mapnumber + "'>" + feature.properties.maptitle + "</span><br/><strong>Status:</strong> " + feature.properties.status);
-                                 } else {
-                                    /*
-                                          object_name : "middledarling2014_z55.tif",
-                                          object_url : "https://s3-ap-southeast-2.amazonaws.com/elvis.ga.gov.au/elevation/5m-dem/mdba/QG/middledarling2014_z55.tif",
-                                          object_size : "5577755073",
-                                          object_last_modified : "20161017",
-                                          area : "5560.00",
-                                          status : "Available"
-                                    */
-                                    popupText.push("<strong>File name:</strong> " + feature.properties.object_name + "</span><br/><strong>Status:</strong> " + feature.properties.status);
-                                 }
-                              });
-                           });
-                        })();
-                     }
-
-                     if (response.data) {
-                        layer = L.geoJson(response.data, {
-                           style: function style(feature) {
-                              return {
-                                 fillOpacity: 0.1,
-                                 color: "red"
-                              };
-                           }
-                        }).addTo(map);
-                        featureInfoService.setLayer(layer);
-
-                        L.popup().setLatLng(latlng).setContent("<div class='fi-popup'>" + popupText.join("<hr/>") + "</div>").openOn(map);
-                     }
-                  });
-               });
-            });
-         }
-      };
-   }]).factory('featureInfoService', [function () {
-      var lastFeature = null;
-      return {
-         setLayer: function setLayer(layer) {
-            lastFeature = layer;
-         },
-         removeLastLayer: function removeLastLayer(map) {
-            if (lastFeature) {
-               map.removeLayer(lastFeature);
-               lastFeature = null;
-            }
-         }
-      };
-   }]);
-})(angular, L);
 'use strict';
 
 (function (angular) {
@@ -1305,6 +1305,80 @@ under the License.
          }
       };
    }]);
+})(angular);
+"use strict";
+
+(function (angular) {
+	'use strict';
+
+	angular.module("common.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
+		return {
+			templateUrl: "common/panes/panes.html",
+			transclude: true,
+			replace: true,
+			scope: {
+				defaultItem: "@",
+				data: "="
+			},
+			controller: ['$scope', function ($scope) {
+				var changeSize = false;
+
+				$scope.view = $scope.defaultItem;
+
+				$scope.setView = function (what) {
+					var oldView = $scope.view;
+
+					if ($scope.view == what) {
+						if (what) {
+							changeSize = true;
+						}
+						$scope.view = "";
+					} else {
+						if (!what) {
+							changeSize = true;
+						}
+						$scope.view = what;
+					}
+
+					$rootScope.$broadcast("view.changed", $scope.view, oldView);
+
+					if (changeSize) {
+						mapService.getMap().then(function (map) {
+							map._onResize();
+						});
+					}
+				};
+				$timeout(function () {
+					$rootScope.$broadcast("view.changed", $scope.view, null);
+				}, 50);
+			}]
+		};
+	}]).directive("icsmTabs", [function () {
+		return {
+			templateUrl: "common/panes/tabs.html",
+			require: "^icsmPanes"
+		};
+	}]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
+
+	PaneCtrl.$inject = ["paneService"];
+	function PaneCtrl(paneService) {
+		var _this = this;
+
+		paneService.data().then(function (data) {
+			_this.data = data;
+		});
+	}
+
+	PaneService.$inject = [];
+	function PaneService() {
+		var data = {};
+
+		return {
+			add: function add(item) {},
+
+			remove: function remove(item) {}
+		};
+	}
 })(angular);
 'use strict';
 
@@ -1542,6 +1616,56 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 'use strict';
 
 (function (angular) {
+  'use strict';
+
+  // from http://stackoverflow.com/a/18609594
+
+  angular.module('common.recursionhelper', []).factory('RecursionHelper', ['$compile', function ($compile) {
+    return {
+      /**
+       * Manually compiles the element, fixing the recursion loop.
+       * @param element
+       * @param [link] A post-link function, or an object with function(s)
+       * registered via pre and post properties.
+       * @returns An object containing the linking functions.
+       */
+      compile: function compile(element, link) {
+        // Normalize the link parameter
+        if (angular.isFunction(link)) {
+          link = { post: link };
+        }
+
+        // Break the recursion loop by removing the contents
+        var contents = element.contents().remove();
+        var compiledContents;
+        return {
+          pre: link && link.pre ? link.pre : null,
+          /**
+           * Compiles and re-adds the contents
+           */
+          post: function post(scope, element) {
+            // Compile the contents
+            if (!compiledContents) {
+              compiledContents = $compile(contents);
+            }
+            // Re-add the compiled contents to the element
+            compiledContents(scope, function (clone) {
+              element.append(clone);
+            });
+
+            // Call the post-linking function, if any
+            if (link && link.post) {
+              link.post.apply(null, arguments);
+            }
+          }
+        };
+      }
+    };
+  }]);
+})(angular);
+'use strict';
+
+(function (angular) {
 
 	'use strict';
 
@@ -1678,80 +1802,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 	}]).factory('navigationService', [function () {
 		return {};
 	}]);
-})(angular);
-"use strict";
-
-(function (angular) {
-	'use strict';
-
-	angular.module("common.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
-		return {
-			templateUrl: "common/panes/panes.html",
-			transclude: true,
-			replace: true,
-			scope: {
-				defaultItem: "@",
-				data: "="
-			},
-			controller: ['$scope', function ($scope) {
-				var changeSize = false;
-
-				$scope.view = $scope.defaultItem;
-
-				$scope.setView = function (what) {
-					var oldView = $scope.view;
-
-					if ($scope.view == what) {
-						if (what) {
-							changeSize = true;
-						}
-						$scope.view = "";
-					} else {
-						if (!what) {
-							changeSize = true;
-						}
-						$scope.view = what;
-					}
-
-					$rootScope.$broadcast("view.changed", $scope.view, oldView);
-
-					if (changeSize) {
-						mapService.getMap().then(function (map) {
-							map._onResize();
-						});
-					}
-				};
-				$timeout(function () {
-					$rootScope.$broadcast("view.changed", $scope.view, null);
-				}, 50);
-			}]
-		};
-	}]).directive("icsmTabs", [function () {
-		return {
-			templateUrl: "common/panes/tabs.html",
-			require: "^icsmPanes"
-		};
-	}]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
-
-	PaneCtrl.$inject = ["paneService"];
-	function PaneCtrl(paneService) {
-		var _this = this;
-
-		paneService.data().then(function (data) {
-			_this.data = data;
-		});
-	}
-
-	PaneService.$inject = [];
-	function PaneService() {
-		var data = {};
-
-		return {
-			add: function add(item) {},
-
-			remove: function remove(item) {}
-		};
-	}
 })(angular);
 'use strict';
 
@@ -1966,56 +2016,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          return service;
       }];
    }
-})(angular);
-'use strict';
-
-(function (angular) {
-  'use strict';
-
-  // from http://stackoverflow.com/a/18609594
-
-  angular.module('common.recursionhelper', []).factory('RecursionHelper', ['$compile', function ($compile) {
-    return {
-      /**
-       * Manually compiles the element, fixing the recursion loop.
-       * @param element
-       * @param [link] A post-link function, or an object with function(s)
-       * registered via pre and post properties.
-       * @returns An object containing the linking functions.
-       */
-      compile: function compile(element, link) {
-        // Normalize the link parameter
-        if (angular.isFunction(link)) {
-          link = { post: link };
-        }
-
-        // Break the recursion loop by removing the contents
-        var contents = element.contents().remove();
-        var compiledContents;
-        return {
-          pre: link && link.pre ? link.pre : null,
-          /**
-           * Compiles and re-adds the contents
-           */
-          post: function post(scope, element) {
-            // Compile the contents
-            if (!compiledContents) {
-              compiledContents = $compile(contents);
-            }
-            // Re-add the compiled contents to the element
-            compiledContents(scope, function (clone) {
-              element.append(clone);
-            });
-
-            // Call the post-linking function, if any
-            if (link && link.post) {
-              link.post.apply(null, arguments);
-            }
-          }
-        };
-      }
-    };
-  }]);
 })(angular);
 'use strict';
 
@@ -2657,14 +2657,14 @@ $templateCache.put("common/header/header.html","<div class=\"container-full comm
 $templateCache.put("common/iso19115/contact.html","<ul ng-show=\"node.hierarchyLevel\">\r\n   <li>\r\n      <span class=\"iso19115-head\">Contact</span>\r\n      <iso19115-node name=\"MD_ScopeCode\" node=\"node.hierarchyLevel.MD_ScopeCode\" type=\"_codeListValue\"></iso19115-node>\r\n    </li>\r\n</ul>");
 $templateCache.put("common/iso19115/double.html","\r\n<ul ng-show=\"node\">\r\n   <li>\r\n      <span class=\"iso19115-head\">{{name | iso19115NodeName}}</span>\r\n      <iso19115-node name=\"name\" node=\"node[name]\" type=\"type\"></iso19115-node>\r\n   </li>\r\n</ul>\r\n");
 $templateCache.put("common/iso19115/metadata.html","<div class=\"iso19115\">\r\n   <ul>\r\n      <li>\r\n         <span class=\"iso19115-head\">Metadata</span>\r\n         <iso19115-node name=\"fileIdentifier\" node=\"node.fileIdentifier\" type=\"CharacterString\"></iso19115-node>\r\n         <iso19115-node name=\"language\" node=\"node.language\" type=\"LanguageCode\"></iso19115-node>\r\n         <ul ng-show=\"node.characterSet\">\r\n            <li>\r\n               <span class=\"iso19115-head\">Character Set</span>\r\n               <iso19115-node name=\"CharacterSetCode\" node=\"node.characterSet.MD_CharacterSetCode\" type=\"_codeListValue\"></iso19115-node>\r\n            </li>\r\n         </ul>\r\n\r\n         <ul ng-show=\"node.hierarchyLevel\">\r\n            <li>\r\n               <span class=\"iso19115-head\">Hierarchy Level</span>\r\n               <iso19115-node name=\"MD_ScopeCode\" node=\"node.hierarchyLevel.MD_ScopeCode\" type=\"_codeListValue\"></iso19115-node>\r\n            </li>\r\n         </ul>\r\n         <iso19115-node name=\"hierarchyLevelName\" node=\"node.hierarchyLevelName\" type=\"CharacterString\"></iso19115-node>\r\n         <iso19115-contact ng-if=\"node.contact\" node=\"node.contact\" key=\"\'contact\'\"></iso19115-contact>\r\n      </li>\r\n   </ul>\r\n</div>");
+$templateCache.put("common/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" icsm-toolbar-row map=\"root.map\" overlaytitle=\"\'Change overlay opacity\'\"></div>\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div class=\"common-legend\" common-legend map=\"data.map\"></div>\r\n    		<div icsm-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'download\'\" icsm-view></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'maps\'\" icsm-maps></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" icsm-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" icsm-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
+$templateCache.put("common/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n		<button class=\"undecorated\">Download</button>\r\n	</div>\r\n	<!-- \r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n	-->\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");
 $templateCache.put("common/metaview/dublincore.html","Dublin core");
 $templateCache.put("common/metaview/iso19115.html","<iso19115-metadata node=\"data.metadata.GetRecordByIdResponse.MD_Metadata\" key=\"\'MD_Metadata\'\"></iso19115-metadata>\r\n");
 $templateCache.put("common/metaview/iso19115node.html","<ul>\r\n   <li>\r\n      <span class=\"metaview-head\">{{key | metaviewNodeName}}</span>\r\n      <span>{{node | metaviewText}}</span>\r\n      <ng-repeat ng-if=\"isArray()\" ng-repeat=\"next in node\" node=\"next]\">\r\n         <metaview-iso19115-array ng-repeat=\"nextKey in getKeys() track by $index\" node=\"node[nextKey]\" key=\"nextKey\"></metaview-iso19115-array>\r\n      </ng-repeat>\r\n      <metaview-iso19115-node ng-if=\"!isArray()\" ng-repeat=\"nextKey in getKeys() track by $index\" node=\"node[nextKey]\" key=\"nextKey\"></metaview-iso19115-node>\r\n   </li>\r\n</ul>");
 $templateCache.put("common/metaview/item.html","<div>\r\n	<button class=\"btn btn-sm btn-outline-primary\" ng-click=\"container.selected = null\"><i class=\"fa fa-angle-double-left\"></i> Back</button>\r\n      <span style=\"font-weight: bold;padding-left:10px; font-size:130%\">{{container.selected.title}}</span>\r\n      <metaview-iso19115 data=\"container.selected\"></metaview-iso19115>\r\n</div>");
 $templateCache.put("common/metaview/metaview.html","<button type=\"button\" class=\"undecorated\" title=\"View metadata\" ng-click=\"select()\">\r\n	<i class=\"fa fa-lg fa-info metaview-info\"></i>\r\n</button>");
 $templateCache.put("common/navigation/altthemes.html","<span class=\"altthemes-container\">\r\n	<span ng-repeat=\"item in themes | altthemesEnabled\">\r\n       <a title=\"{{item.label}}\" ng-href=\"{{item.url}}\" class=\"altthemesItemCompact\">\r\n         <span class=\"altthemes-icon\" ng-class=\"item.className\"></span>\r\n       </a>\r\n    </li>\r\n</span>");
-$templateCache.put("common/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" icsm-toolbar-row map=\"root.map\" overlaytitle=\"\'Change overlay opacity\'\"></div>\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div class=\"common-legend\" common-legend map=\"data.map\"></div>\r\n    		<div icsm-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'download\'\" icsm-view></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'maps\'\" icsm-maps></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" icsm-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" icsm-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
-$templateCache.put("common/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n		<button class=\"undecorated\">Download</button>\r\n	</div>\r\n	<!-- \r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n	-->\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");
 $templateCache.put("common/search/basin.html","<div class=\"btn-group pull-left radSearch\" style=\"position:relative;width:27em;opacity:0.9\">\r\n	<div class=\"input-group\" style=\"width:100%;\">\r\n		<input type=\"text\" size=\"32\" class=\"form-control\" style=\"border-top-right-radius:4px;border-bottom-right-radius:4px;\"\r\n				ng-keyup=\"keyup($event)\" ng-focus=\"changing()\" ng-model=\"nameFilter\" placeholder=\"Find a basin of interest\">\r\n		<div class=\"input-group-btn\"></div>\r\n	</div>\r\n	<div style=\"width:26em; position:absolute;left:15px\">\r\n		<div class=\"row\" ng-repeat=\"region in basinData.basins | basinFilterList : nameFilter : 10 | orderBy : \'name\'\"\r\n				style=\"background-color:white;\">\r\n			<div class=\"col-md-12 rw-sub-list-trigger\">\r\n				<button class=\"undecorated zoomButton\" ng-click=\"zoomToLocation(region);\">{{region.name}}</button>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/search/catchment.html","<div class=\"btn-group pull-left radSearch\" style=\"position:relative;width:27em;opacity:0.9\">\r\n	<div class=\"input-group\" style=\"width:100%;\">\r\n		<input type=\"text\" size=\"32\" class=\"form-control\" style=\"border-top-right-radius:4px;border-bottom-right-radius:4px;\"\r\n				ng-keyup=\"keyup($event)\" ng-focus=\"changing()\" ng-model=\"nameFilter\" placeholder=\"Find a catchment of interest\">\r\n		<div class=\"input-group-btn\"></div>\r\n	</div>\r\n	<div style=\"width:26em; position:absolute;left:15px\">\r\n		<div class=\"row\" ng-repeat=\"region in catchmentData.catchments | catchmentFilterList : nameFilter : 10 | orderBy : \'name\'\"\r\n				style=\"background-color:white;\">\r\n			<div class=\"col-md-12 rw-sub-list-trigger\">\r\n				<button class=\"undecorated zoomButton\" ng-click=\"zoomToLocation(region);\">{{region.name}}</button>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/toolbar/toolbar.html","<div icsm-toolbar>\r\n	<div class=\"row toolBarGroup\">\r\n		<div class=\"btn-group searchBar\" ng-show=\"root.whichSearch != \'region\'\">\r\n			<div class=\"input-group\" geo-search>\r\n				<input type=\"text\" ng-autocomplete ng-model=\"values.from.description\" options=\'{country:\"au\"}\'\r\n							size=\"32\" title=\"Select a locality to pan the map to.\" class=\"form-control\" aria-label=\"...\">\r\n				<div class=\"input-group-btn\">\r\n    				<button ng-click=\"zoom(false)\" exp-ga=\"[\'send\', \'event\', \'icsm\', \'click\', \'zoom to location\']\"\r\n						class=\"btn btn-default\"\r\n						title=\"Pan and potentially zoom to location.\"><i class=\"fa fa-search\"></i></button>\r\n				</div>\r\n			</div>\r\n		</div>\r\n\r\n		<div class=\"pull-right\">\r\n			<div class=\"btn-toolbar radCore\" role=\"toolbar\"  icsm-toolbar>\r\n				<div class=\"btn-group\">\r\n					<!-- < icsm-state-toggle></icsm-state-toggle> -->\r\n				</div>\r\n			</div>\r\n\r\n			<div class=\"btn-toolbar\" style=\"margin:right:10px;display:inline-block\">\r\n				<div class=\"btn-group\" title=\"{{overlaytitle}}\">\r\n					<span class=\"btn btn-default\" common-baselayer-control max-zoom=\"16\"></span>\r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");}]);

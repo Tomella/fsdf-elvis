@@ -46,7 +46,7 @@
 			<div review-email></div>
 		</div>
 	</div>
-	<div class="row">
+	<div class="row" ng-controller="listCtrl as list">
 		<div class="col-md-12">
 			<div class="pull-right" style="padding:8px;">
 				<button type="button" class="btn btn-primary" ng-click="accept()" ng-disabled="!data.email || !list.selected.length">Start extract of datasets
