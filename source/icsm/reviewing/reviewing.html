@@ -21,7 +21,7 @@
 		   <div class="row" ng-repeat="product in products | reviewProductsSelected"  ng-class-odd="'reviewing-odd'">
 			   <div class="col-md-7">
 				   <button type="button" class="btn btn-default btn-xs" ng-click="product.removed = !product.removed">
-                  <i class="fa fa-2x" ng-class="{'fa-times-circle': !product.removed, 'fa-check-circle': product.removed}" aria-hidden="true"></i>
+                  <i class="fa fa-2x" ng-class="{'fa-times-circle': product.removed, 'fa-check-circle': !product.removed}" aria-hidden="true"></i>
                </button>
                <span style="padding-left:7px" ng-class="{'exclude': product.removed}">{{product.file_name}}</span>
 			   </div>
