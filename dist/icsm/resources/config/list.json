@@ -23,7 +23,7 @@
 
    "QLD Government": {
       "code": "qld",
-      "image": "icsm/resources/img/Qld.jpg",
+      "image": "icsm/resources/img/Qld.gif",
       "height": 42,
       "showText": false
    },
@@ -37,7 +37,7 @@
 
    "SA Government": {
       "code": "sa",
-      "image": "icsm/resources/img/logo-SA.jpg",
+      "image": "icsm/resources/img/logo-SA.png",
       "height": 42,
       "showText": false
    },
