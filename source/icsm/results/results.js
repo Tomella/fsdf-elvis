@@ -312,7 +312,7 @@
                          node.citation.CI_Citation;
                   node = node &&
                          node.title &&
-                         node.title.CharacterString
+                         node.title.CharacterString;
 
                   if(node) {
                      data.title = node.__text;
