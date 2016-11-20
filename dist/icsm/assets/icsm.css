@@ -853,23 +853,6 @@ i.fa.active {
   color: #fff;
   background-color: #777;
 }
-.downloadPane {
-  padding-left: 0px !important;
-  padding-right: 5px !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 42px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.downloadCont {
-  position: fixed;
-  right: 0;
-  bottom: 8px;
-}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -915,6 +898,23 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
+}
+.downloadPane {
+  padding-left: 0px !important;
+  padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 42px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
 }
 .selectContainer {
   width: 100%;

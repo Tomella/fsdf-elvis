@@ -257,7 +257,7 @@
         .controller('listCtrl', ListCtrl)
 
         .factory('listService', ['$http', function ($http) {
-            const METADATA_URL = "nswAbstract/";
+            const NSW_METADATA_TEMPLATE = "xml2js/https://s3-ap-southeast-2.amazonaws.com/nsw.elvis/z5${zone}/Metadata/";
             const NO_METADATA = "No metadata found for this dataset.";
 
             var service = {};
@@ -277,13 +277,7 @@
             });
 
             service.getMetadata = function(filename) {
-               return $http.get(METADATA_URL + filename).then(function (response) {
-                  var data = response.data;
-                  if(!data.title) {
-                     data.title = NO_METADATA;
-                  }
-                  return data;
-               });
+               return requestMetadata(filename);
             };
 
             service.getMappings = function () {
@@ -292,6 +286,52 @@
                 });
             };
             return service;
+
+            function requestMetadata(filename) {
+               var re = /\_5\d\_/;
+               var index = filename.search(re);
+               var zone = 6;
+               var url = NSW_METADATA_TEMPLATE;
+               if (index != -1) {
+                  zone = filename.substr(index + 2, 1);
+               }
+               url = url.replace("${zone}", zone) + filename.replace(".zip", "_Metadata.xml");
+
+               return $http.get(url).then(function (response) {
+                  var metadata = response.data.MD_Metadata;
+                  var data = {};
+
+                  var node = metadata &&
+                             metadata.identificationInfo &&
+                             metadata.identificationInfo.MD_DataIdentification;
+                  var abstractNode = node;
+
+                  node = node &&
+                         node.citation &&
+                         node.citation &&
+                         node.citation.CI_Citation;
+                  node = node &&
+                         node.title &&
+                         node.title.CharacterString
+
+                  if(node) {
+                     data.title = node.__text;
+
+                     let abstract = abstractNode &&
+                                    abstractNode.abstract &&
+                                    abstractNode.abstract.CharacterString &&
+                                    abstractNode.abstract.CharacterString.__text;
+                     data.abstract = data.abstractText = abstract;
+                  } else {
+                     data.title = NO_METADATA;
+                  }
+                  return data;
+               }, function(err) {
+                  return {
+                     title: NO_METADATA
+                  };
+               });
+            }
         }])
 
         .filter("allowedTypes", ['listService', function (listService) {

@@ -9,7 +9,6 @@ var END_ABSTRACT_SENTINEL = "<p>";
 
 var express = require("express");
 var request = require('request');
-var cheerio = require('cheerio');
 request.gzip = false;
 
 //var httpProxy = require('http-proxy');
@@ -47,7 +46,8 @@ var validHosts = [
     "localhost",
     ".ga.gov.au",
     ".motogp.com",
-    "elvis20161a-ga.fmecloud.com"
+    "elvis20161a-ga.fmecloud.com",
+    "s3-ap-southeast-2.amazonaws.com"
 ];
 var upstreamProxy = argv['upstream-proxy'];
 
@@ -106,44 +106,6 @@ app.all('/service/*', function (req, res, next) {
     }
     return req.pipe(r).pipe(res);
 });
-
-app.get('/nswAbstract/*', function (req, res, next) {
-    // look for request like http://localhost:8080/proxy/filename
-    var filename = req.params[0];
-    var re = /\_5\d\_/;
-    var index = filename.search(re);
-    var zone = 6;
-    var url = NSW_METADATA_TEMPLATE;
-    if (index != -1) {
-       zone = filename.substr(index + 2, 1);
-    }
-    url = url.replace("${zone}", zone) + filename.replace(".zip", "_Metadata.html");
-
-    request(url, function(error, response, html) {
-       if(!error) {
-          var $ = cheerio.load(html);
-          var abstract = $("#DataIdentification").html();
-          var data = {
-             title: $("#title h2").first().html(),
-             abstract: abstract
-          };
-
-          if(abstract) {
-             var start = abstract.indexOf(START_ABSTRACT_SENTINEL);
-             if(start > -1) {
-               abstract = abstract.substr(start + START_ABSTRACT_SENTINEL_LENGTH);
-               var end = abstract.indexOf(END_ABSTRACT_SENTINEL);
-               if(end > -1) {
-                  data.abstractText = abstract.substr(0, end).trim();
-               }
-            }
-          }
-
-          res.status(200).json(data);
-        }
-    });
-});
-
 
 app.get('/xml2js/*', function (req, res, next) {
     // look for request like http://localhost:8080/proxy/http://example.com/file?query=1
