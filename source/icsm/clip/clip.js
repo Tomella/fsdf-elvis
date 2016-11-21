@@ -62,7 +62,7 @@ angular.module("icsm.clip", ['geo.draw'])
 					scope.oversize = true;
 					$timeout(() => {
 						delete scope.oversize;
-					}, 4000);
+					}, 6000);
 				} else {
 					delete scope.oversize;
 				}

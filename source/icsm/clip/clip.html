@@ -13,11 +13,11 @@
 			</div>
 		</div>
 
-		<div ng-show="oversize" style="margin-top:15px">
-			<div class="alert alert-danger" role="alert">Please restrict the size of your selected area to no more than 4 square degrees.</div>
+		<div ng-show="oversize" style="margin-top:6px">
+			<div class="alert alert-danger" style="padding:2px; margin-bottom:0px" role="alert">Please restrict the size of your selected area to no more than 4 square degrees.</div>
 		</div>
 
-		<div class="row" ng-hide="!clip.xMin && clip.xMin != 0" style="padding-top:7px;">
+		<div class="row" ng-hide="(!clip.xMin && clip.xMin != 0) || oversize" style="padding-top:7px;">
 			<div class="col-md-12">
 				Selected bounds: {{clip.xMin|number : 4}}&deg; west, {{clip.yMax|number : 4}}&deg; north, {{clip.xMax|number : 4}}&deg; east, {{clip.yMin|number
 				: 4}}&deg; south
