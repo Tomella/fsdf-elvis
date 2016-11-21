@@ -19,58 +19,6 @@ under the License.
 
 'use strict';
 
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-(function (angular) {
-	'use strict';
-	/**
-  * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
-  */
-
-	angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider']).directive('commonBaselayerControl', ['$rootScope', 'mapHelper', 'mapService', function ($rootScope, mapHelper, mapService) {
-		var DEFAULTS = {
-			maxZoom: 12
-		};
-
-		return {
-			template: '<slider min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
-			scope: {
-				maxZoom: "="
-			},
-			link: function link(scope, element) {
-				if (typeof scope.maxZoom === "undefined") {
-					scope.maxZoom = DEFAULTS.maxZoom;
-				}
-				scope.slider = {
-					opacity: -1,
-					visibility: true,
-					lastOpacity: 1
-				};
-
-				// Get the initial value
-				mapHelper.getPseudoBaseLayer().then(function (layer) {
-					scope.layer = layer;
-					scope.slider.opacity = layer.options.opacity;
-				});
-
-				scope.$watch('slider.opacity', function (newValue, oldValue) {
-					if (oldValue < 0) return;
-
-					mapService.getMap().then(function (map) {
-						map.eachLayer(function (layer) {
-							if (layer.pseudoBaseLayer) {
-								layer.setOpacity(scope.slider.opacity);
-							}
-						});
-					});
-				});
-			}
-		};
-	}]);
-})(angular);
-'use strict';
-
 (function (angular) {
 
 	'use strict';
@@ -176,6 +124,92 @@ under the License.
 })(angular);
 'use strict';
 
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+(function (angular) {
+	'use strict';
+	/**
+  * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
+  */
+
+	angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider']).directive('commonBaselayerControl', ['$rootScope', 'mapHelper', 'mapService', function ($rootScope, mapHelper, mapService) {
+		var DEFAULTS = {
+			maxZoom: 12
+		};
+
+		return {
+			template: '<slider min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
+			scope: {
+				maxZoom: "="
+			},
+			link: function link(scope, element) {
+				if (typeof scope.maxZoom === "undefined") {
+					scope.maxZoom = DEFAULTS.maxZoom;
+				}
+				scope.slider = {
+					opacity: -1,
+					visibility: true,
+					lastOpacity: 1
+				};
+
+				// Get the initial value
+				mapHelper.getPseudoBaseLayer().then(function (layer) {
+					scope.layer = layer;
+					scope.slider.opacity = layer.options.opacity;
+				});
+
+				scope.$watch('slider.opacity', function (newValue, oldValue) {
+					if (oldValue < 0) return;
+
+					mapService.getMap().then(function (map) {
+						map.eachLayer(function (layer) {
+							if (layer.pseudoBaseLayer) {
+								layer.setOpacity(scope.slider.opacity);
+							}
+						});
+					});
+				});
+			}
+		};
+	}]);
+})(angular);
+"use strict";
+
+(function (angular) {
+
+   'use strict';
+
+   var versions = {
+      3: {
+         version: "3.0",
+         link: "https://creativecommons.org/licenses/by/3.0/au/"
+      },
+      4: {
+         version: "4.0",
+         link: "https://creativecommons.org/licenses/by/4.0/"
+      }
+   };
+
+   angular.module("common.cc", []).directive('commonCc', [function () {
+      return {
+         templateUrl: 'common/cc/cc.html',
+         scope: {
+            version: "=?"
+         },
+         link: function link(scope) {
+            if (!scope.version) {
+               scope.details = versions[4];
+            } else {
+               scope.details = versions[scope.version];
+            }
+            scope.template = 'common/cc/cctemplate.html';
+         }
+      };
+   }]);
+})(angular);
+'use strict';
+
 (function (angular) {
 
 	'use strict';
@@ -244,40 +278,6 @@ under the License.
 				} };
 		}
 	}]);
-})(angular);
-"use strict";
-
-(function (angular) {
-
-   'use strict';
-
-   var versions = {
-      3: {
-         version: "3.0",
-         link: "https://creativecommons.org/licenses/by/3.0/au/"
-      },
-      4: {
-         version: "4.0",
-         link: "https://creativecommons.org/licenses/by/4.0/"
-      }
-   };
-
-   angular.module("common.cc", []).directive('commonCc', [function () {
-      return {
-         templateUrl: 'common/cc/cc.html',
-         scope: {
-            version: "=?"
-         },
-         link: function link(scope) {
-            if (!scope.version) {
-               scope.details = versions[4];
-            } else {
-               scope.details = versions[scope.version];
-            }
-            scope.template = 'common/cc/cctemplate.html';
-         }
-      };
-   }]);
 })(angular);
 'use strict';
 
@@ -1539,80 +1539,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       return MetaviewService;
    }();
 })(angular);
-"use strict";
-
-(function (angular) {
-	'use strict';
-
-	angular.module("common.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
-		return {
-			templateUrl: "common/panes/panes.html",
-			transclude: true,
-			replace: true,
-			scope: {
-				defaultItem: "@",
-				data: "="
-			},
-			controller: ['$scope', function ($scope) {
-				var changeSize = false;
-
-				$scope.view = $scope.defaultItem;
-
-				$scope.setView = function (what) {
-					var oldView = $scope.view;
-
-					if ($scope.view == what) {
-						if (what) {
-							changeSize = true;
-						}
-						$scope.view = "";
-					} else {
-						if (!what) {
-							changeSize = true;
-						}
-						$scope.view = what;
-					}
-
-					$rootScope.$broadcast("view.changed", $scope.view, oldView);
-
-					if (changeSize) {
-						mapService.getMap().then(function (map) {
-							map._onResize();
-						});
-					}
-				};
-				$timeout(function () {
-					$rootScope.$broadcast("view.changed", $scope.view, null);
-				}, 50);
-			}]
-		};
-	}]).directive("icsmTabs", [function () {
-		return {
-			templateUrl: "common/panes/tabs.html",
-			require: "^icsmPanes"
-		};
-	}]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
-
-	PaneCtrl.$inject = ["paneService"];
-	function PaneCtrl(paneService) {
-		var _this = this;
-
-		paneService.data().then(function (data) {
-			_this.data = data;
-		});
-	}
-
-	PaneService.$inject = [];
-	function PaneService() {
-		var data = {};
-
-		return {
-			add: function add(item) {},
-
-			remove: function remove(item) {}
-		};
-	}
-})(angular);
 'use strict';
 
 (function (angular) {
@@ -1753,6 +1679,80 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		return {};
 	}]);
 })(angular);
+"use strict";
+
+(function (angular) {
+	'use strict';
+
+	angular.module("common.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
+		return {
+			templateUrl: "common/panes/panes.html",
+			transclude: true,
+			replace: true,
+			scope: {
+				defaultItem: "@",
+				data: "="
+			},
+			controller: ['$scope', function ($scope) {
+				var changeSize = false;
+
+				$scope.view = $scope.defaultItem;
+
+				$scope.setView = function (what) {
+					var oldView = $scope.view;
+
+					if ($scope.view == what) {
+						if (what) {
+							changeSize = true;
+						}
+						$scope.view = "";
+					} else {
+						if (!what) {
+							changeSize = true;
+						}
+						$scope.view = what;
+					}
+
+					$rootScope.$broadcast("view.changed", $scope.view, oldView);
+
+					if (changeSize) {
+						mapService.getMap().then(function (map) {
+							map._onResize();
+						});
+					}
+				};
+				$timeout(function () {
+					$rootScope.$broadcast("view.changed", $scope.view, null);
+				}, 50);
+			}]
+		};
+	}]).directive("icsmTabs", [function () {
+		return {
+			templateUrl: "common/panes/tabs.html",
+			require: "^icsmPanes"
+		};
+	}]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
+
+	PaneCtrl.$inject = ["paneService"];
+	function PaneCtrl(paneService) {
+		var _this = this;
+
+		paneService.data().then(function (data) {
+			_this.data = data;
+		});
+	}
+
+	PaneService.$inject = [];
+	function PaneService() {
+		var data = {};
+
+		return {
+			add: function add(item) {},
+
+			remove: function remove(item) {}
+		};
+	}
+})(angular);
 'use strict';
 
 (function (angular) {
@@ -1802,6 +1802,206 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       }
     };
   }]);
+})(angular);
+'use strict';
+
+(function (angular) {
+
+    angular.module('ui.bootstrap-slider', []).directive('slider', ['$parse', '$timeout', function ($parse, $timeout) {
+        return {
+            restrict: 'AE',
+            replace: true,
+            template: '<div><input class="slider-input" type="text" /></div>',
+            require: 'ngModel',
+            scope: {
+                max: "=",
+                min: "=",
+                step: "=",
+                value: "=",
+                ngModel: '=',
+                range: '=',
+                enabled: '=',
+                sliderid: '=',
+                formatter: '&',
+                onStartSlide: '&',
+                onStopSlide: '&',
+                onSlide: '&'
+            },
+            link: function link($scope, element, attrs, ngModelCtrl, $compile) {
+                var ngModelDeregisterFn, ngDisabledDeregisterFn;
+
+                initSlider();
+
+                function initSlider() {
+                    var options = {};
+
+                    function setOption(key, value, defaultValue) {
+                        options[key] = value || defaultValue;
+                    }
+
+                    function setFloatOption(key, value, defaultValue) {
+                        options[key] = value ? parseFloat(value) : defaultValue;
+                    }
+
+                    function setBooleanOption(key, value, defaultValue) {
+                        options[key] = value ? value + '' === 'true' : defaultValue;
+                    }
+
+                    function getArrayOrValue(value) {
+                        return angular.isString(value) && value.indexOf("[") === 0 ? angular.fromJson(value) : value;
+                    }
+
+                    setOption('id', $scope.sliderid);
+                    setOption('orientation', attrs.orientation, 'horizontal');
+                    setOption('selection', attrs.selection, 'before');
+                    setOption('handle', attrs.handle, 'round');
+                    setOption('tooltip', attrs.uiTooltip, 'show');
+                    setOption('tooltipseparator', attrs.tooltipseparator, ':');
+
+                    setFloatOption('min', $scope.min, 0);
+                    setFloatOption('max', $scope.max, 10);
+                    setFloatOption('step', $scope.step, 1);
+                    var strNbr = options.step + '';
+                    var decimals = strNbr.substring(strNbr.lastIndexOf('.') + 1);
+                    setFloatOption('precision', attrs.precision, decimals);
+
+                    setBooleanOption('tooltip_split', attrs.tooltipsplit, false);
+                    setBooleanOption('enabled', attrs.enabled, true);
+                    setBooleanOption('naturalarrowkeys', attrs.naturalarrowkeys, false);
+                    setBooleanOption('reversed', attrs.reversed, false);
+
+                    setBooleanOption('range', $scope.range, false);
+                    if (options.range) {
+                        if (angular.isArray($scope.value)) {
+                            options.value = $scope.value;
+                        } else if (angular.isString($scope.value)) {
+                            options.value = getArrayOrValue($scope.value);
+                            if (!angular.isArray(options.value)) {
+                                var value = parseFloat($scope.value);
+                                if (isNaN(value)) value = 5;
+
+                                if (value < $scope.min) {
+                                    value = $scope.min;
+                                    options.value = [value, options.max];
+                                } else if (value > $scope.max) {
+                                    value = $scope.max;
+                                    options.value = [options.min, value];
+                                } else {
+                                    options.value = [options.min, options.max];
+                                }
+                            }
+                        } else {
+                            options.value = [options.min, options.max]; // This is needed, because of value defined at $.fn.slider.defaults - default value 5 prevents creating range slider
+                        }
+                        $scope.ngModel = options.value; // needed, otherwise turns value into [null, ##]
+                    } else {
+                        setFloatOption('value', $scope.value, 5);
+                    }
+
+                    if ($scope.formatter) options.formatter = $scope.$eval($scope.formatter);
+
+                    var slider = $(element).find(".slider-input").eq(0);
+
+                    // check if slider jQuery plugin exists
+                    if ($.fn.slider) {
+                        // adding methods to jQuery slider plugin prototype
+                        $.fn.slider.constructor.prototype.disable = function () {
+                            this.picker.off();
+                        };
+                        $.fn.slider.constructor.prototype.enable = function () {
+                            this.picker.on();
+                        };
+
+                        // destroy previous slider to reset all options
+                        slider.slider(options);
+                        slider.slider('destroy');
+                        slider.slider(options);
+
+                        // everything that needs slider element
+                        var updateEvent = getArrayOrValue(attrs.updateevent);
+                        if (angular.isString(updateEvent)) {
+                            // if only single event name in string
+                            updateEvent = [updateEvent];
+                        } else {
+                            // default to slide event
+                            updateEvent = ['slide'];
+                        }
+                        angular.forEach(updateEvent, function (sliderEvent) {
+                            slider.on(sliderEvent, function (ev) {
+                                ngModelCtrl.$setViewValue(ev.value);
+                                $timeout(function () {
+                                    $scope.$apply();
+                                });
+                            });
+                        });
+                        slider.on('change', function (ev) {
+                            ngModelCtrl.$setViewValue(ev.value.newValue);
+                            $timeout(function () {
+                                $scope.$apply();
+                            });
+                        });
+
+                        // Event listeners
+                        var sliderEvents = {
+                            slideStart: 'onStartSlide',
+                            slide: 'onSlide',
+                            slideStop: 'onStopSlide'
+                        };
+                        angular.forEach(sliderEvents, function (sliderEventAttr, sliderEvent) {
+                            slider.on(sliderEvent, function (ev) {
+
+                                if ($scope[sliderEventAttr]) {
+                                    var invoker = $parse(attrs[sliderEventAttr]);
+                                    invoker($scope.$parent, { $event: ev, value: ev.value });
+
+                                    $timeout(function () {
+                                        $scope.$apply();
+                                    });
+                                }
+                            });
+                        });
+
+                        // deregister ngDisabled watcher to prevent memory leaks
+                        if (angular.isFunction(ngDisabledDeregisterFn)) {
+                            ngDisabledDeregisterFn();
+                            ngDisabledDeregisterFn = null;
+                        }
+                        if (angular.isDefined(attrs.ngDisabled)) {
+                            ngDisabledDeregisterFn = $scope.$watch(attrs.ngDisabled, function (value) {
+                                if (value) {
+                                    slider.slider('disable');
+                                } else {
+                                    slider.slider('enable');
+                                }
+                            });
+                        }
+                        // deregister ngModel watcher to prevent memory leaks
+                        if (angular.isFunction(ngModelDeregisterFn)) ngModelDeregisterFn();
+                        ngModelDeregisterFn = $scope.$watch('ngModel', function (value) {
+                            slider.slider('setValue', value);
+                        });
+                    }
+
+                    window.slip = slider;
+
+                    $scope.$watch("enabled", function (value) {
+                        if (value) {
+                            slider.slider('disable');
+                        } else {
+                            slider.slider('enable');
+                        }
+                    });
+                }
+
+                var watchers = ['min', 'max', 'step', 'range'];
+                angular.forEach(watchers, function (prop) {
+                    $scope.$watch(prop, function () {
+                        initSlider();
+                    });
+                });
+            }
+        };
+    }]);
 })(angular);
 'use strict';
 
@@ -2020,206 +2220,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 'use strict';
 
 (function (angular) {
-
-    angular.module('ui.bootstrap-slider', []).directive('slider', ['$parse', '$timeout', function ($parse, $timeout) {
-        return {
-            restrict: 'AE',
-            replace: true,
-            template: '<div><input class="slider-input" type="text" /></div>',
-            require: 'ngModel',
-            scope: {
-                max: "=",
-                min: "=",
-                step: "=",
-                value: "=",
-                ngModel: '=',
-                range: '=',
-                enabled: '=',
-                sliderid: '=',
-                formatter: '&',
-                onStartSlide: '&',
-                onStopSlide: '&',
-                onSlide: '&'
-            },
-            link: function link($scope, element, attrs, ngModelCtrl, $compile) {
-                var ngModelDeregisterFn, ngDisabledDeregisterFn;
-
-                initSlider();
-
-                function initSlider() {
-                    var options = {};
-
-                    function setOption(key, value, defaultValue) {
-                        options[key] = value || defaultValue;
-                    }
-
-                    function setFloatOption(key, value, defaultValue) {
-                        options[key] = value ? parseFloat(value) : defaultValue;
-                    }
-
-                    function setBooleanOption(key, value, defaultValue) {
-                        options[key] = value ? value + '' === 'true' : defaultValue;
-                    }
-
-                    function getArrayOrValue(value) {
-                        return angular.isString(value) && value.indexOf("[") === 0 ? angular.fromJson(value) : value;
-                    }
-
-                    setOption('id', $scope.sliderid);
-                    setOption('orientation', attrs.orientation, 'horizontal');
-                    setOption('selection', attrs.selection, 'before');
-                    setOption('handle', attrs.handle, 'round');
-                    setOption('tooltip', attrs.uiTooltip, 'show');
-                    setOption('tooltipseparator', attrs.tooltipseparator, ':');
-
-                    setFloatOption('min', $scope.min, 0);
-                    setFloatOption('max', $scope.max, 10);
-                    setFloatOption('step', $scope.step, 1);
-                    var strNbr = options.step + '';
-                    var decimals = strNbr.substring(strNbr.lastIndexOf('.') + 1);
-                    setFloatOption('precision', attrs.precision, decimals);
-
-                    setBooleanOption('tooltip_split', attrs.tooltipsplit, false);
-                    setBooleanOption('enabled', attrs.enabled, true);
-                    setBooleanOption('naturalarrowkeys', attrs.naturalarrowkeys, false);
-                    setBooleanOption('reversed', attrs.reversed, false);
-
-                    setBooleanOption('range', $scope.range, false);
-                    if (options.range) {
-                        if (angular.isArray($scope.value)) {
-                            options.value = $scope.value;
-                        } else if (angular.isString($scope.value)) {
-                            options.value = getArrayOrValue($scope.value);
-                            if (!angular.isArray(options.value)) {
-                                var value = parseFloat($scope.value);
-                                if (isNaN(value)) value = 5;
-
-                                if (value < $scope.min) {
-                                    value = $scope.min;
-                                    options.value = [value, options.max];
-                                } else if (value > $scope.max) {
-                                    value = $scope.max;
-                                    options.value = [options.min, value];
-                                } else {
-                                    options.value = [options.min, options.max];
-                                }
-                            }
-                        } else {
-                            options.value = [options.min, options.max]; // This is needed, because of value defined at $.fn.slider.defaults - default value 5 prevents creating range slider
-                        }
-                        $scope.ngModel = options.value; // needed, otherwise turns value into [null, ##]
-                    } else {
-                        setFloatOption('value', $scope.value, 5);
-                    }
-
-                    if ($scope.formatter) options.formatter = $scope.$eval($scope.formatter);
-
-                    var slider = $(element).find(".slider-input").eq(0);
-
-                    // check if slider jQuery plugin exists
-                    if ($.fn.slider) {
-                        // adding methods to jQuery slider plugin prototype
-                        $.fn.slider.constructor.prototype.disable = function () {
-                            this.picker.off();
-                        };
-                        $.fn.slider.constructor.prototype.enable = function () {
-                            this.picker.on();
-                        };
-
-                        // destroy previous slider to reset all options
-                        slider.slider(options);
-                        slider.slider('destroy');
-                        slider.slider(options);
-
-                        // everything that needs slider element
-                        var updateEvent = getArrayOrValue(attrs.updateevent);
-                        if (angular.isString(updateEvent)) {
-                            // if only single event name in string
-                            updateEvent = [updateEvent];
-                        } else {
-                            // default to slide event
-                            updateEvent = ['slide'];
-                        }
-                        angular.forEach(updateEvent, function (sliderEvent) {
-                            slider.on(sliderEvent, function (ev) {
-                                ngModelCtrl.$setViewValue(ev.value);
-                                $timeout(function () {
-                                    $scope.$apply();
-                                });
-                            });
-                        });
-                        slider.on('change', function (ev) {
-                            ngModelCtrl.$setViewValue(ev.value.newValue);
-                            $timeout(function () {
-                                $scope.$apply();
-                            });
-                        });
-
-                        // Event listeners
-                        var sliderEvents = {
-                            slideStart: 'onStartSlide',
-                            slide: 'onSlide',
-                            slideStop: 'onStopSlide'
-                        };
-                        angular.forEach(sliderEvents, function (sliderEventAttr, sliderEvent) {
-                            slider.on(sliderEvent, function (ev) {
-
-                                if ($scope[sliderEventAttr]) {
-                                    var invoker = $parse(attrs[sliderEventAttr]);
-                                    invoker($scope.$parent, { $event: ev, value: ev.value });
-
-                                    $timeout(function () {
-                                        $scope.$apply();
-                                    });
-                                }
-                            });
-                        });
-
-                        // deregister ngDisabled watcher to prevent memory leaks
-                        if (angular.isFunction(ngDisabledDeregisterFn)) {
-                            ngDisabledDeregisterFn();
-                            ngDisabledDeregisterFn = null;
-                        }
-                        if (angular.isDefined(attrs.ngDisabled)) {
-                            ngDisabledDeregisterFn = $scope.$watch(attrs.ngDisabled, function (value) {
-                                if (value) {
-                                    slider.slider('disable');
-                                } else {
-                                    slider.slider('enable');
-                                }
-                            });
-                        }
-                        // deregister ngModel watcher to prevent memory leaks
-                        if (angular.isFunction(ngModelDeregisterFn)) ngModelDeregisterFn();
-                        ngModelDeregisterFn = $scope.$watch('ngModel', function (value) {
-                            slider.slider('setValue', value);
-                        });
-                    }
-
-                    window.slip = slider;
-
-                    $scope.$watch("enabled", function (value) {
-                        if (value) {
-                            slider.slider('disable');
-                        } else {
-                            slider.slider('enable');
-                        }
-                    });
-                }
-
-                var watchers = ['min', 'max', 'step', 'range'];
-                angular.forEach(watchers, function (prop) {
-                    $scope.$watch(prop, function () {
-                        initSlider();
-                    });
-                });
-            }
-        };
-    }]);
-})(angular);
-'use strict';
-
-(function (angular) {
 	'use strict';
 
 	angular.module("common.storage", ['explorer.projects']).factory("storageService", ['$log', '$q', 'projectsService', function ($log, $q, projectsService) {
@@ -2431,6 +2431,48 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 	'use strict';
 
+	angular.module("common.toolbar", []).directive("icsmToolbar", [function () {
+		return {
+			controller: 'toolbarLinksCtrl'
+		};
+	}])
+
+	/**
+  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
+  */
+	.directive('icsmToolbarRow', [function () {
+		var DEFAULT_TITLE = "Satellite to Topography bias on base map.";
+
+		return {
+			scope: {
+				map: "=",
+				overlaytitle: "=?"
+			},
+			restrict: 'AE',
+			templateUrl: 'common/toolbar/toolbar.html',
+			link: function link(scope) {
+				scope.overlaytitle = scope.overlaytitle ? scope.overlaytitle : DEFAULT_TITLE;
+			}
+		};
+	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
+
+		var self = this;
+		configService.getConfig().then(function (config) {
+			self.links = config.toolbarLinks;
+		});
+
+		$scope.item = "";
+		$scope.toggleItem = function (item) {
+			$scope.item = $scope.item == item ? "" : item;
+		};
+	}]);
+})(angular);
+"use strict";
+
+(function (angular) {
+
+	'use strict';
+
 	angular.module("common.wms", []).directive("commonWms", ['$rootScope', '$timeout', 'flashService', 'wmsService', function ($rootScope, $timeout, flashService, wmsService) {
 		return {
 			scope: {
@@ -2603,52 +2645,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}
 	}]);
 })(angular);
-"use strict";
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module("common.toolbar", []).directive("icsmToolbar", [function () {
-		return {
-			controller: 'toolbarLinksCtrl'
-		};
-	}])
-
-	/**
-  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
-  */
-	.directive('icsmToolbarRow', [function () {
-		var DEFAULT_TITLE = "Satellite to Topography bias on base map.";
-
-		return {
-			scope: {
-				map: "=",
-				overlaytitle: "=?"
-			},
-			restrict: 'AE',
-			templateUrl: 'common/toolbar/toolbar.html',
-			link: function link(scope) {
-				scope.overlaytitle = scope.overlaytitle ? scope.overlaytitle : DEFAULT_TITLE;
-			}
-		};
-	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
-
-		var self = this;
-		configService.getConfig().then(function (config) {
-			self.links = config.toolbarLinks;
-		});
-
-		$scope.item = "";
-		$scope.toggleItem = function (item) {
-			$scope.item = $scope.item == item ? "" : item;
-		};
-	}]);
-})(angular);
 angular.module("common.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("common/bbox/bbox.html","<button type=\"button\" class=\"undecorated\" ng-click=\"toggle()\" tooltip-placement=\"right\" tooltip=\"Show data extent on the map.\">\r\n	<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-eye orange\':data.hasBbox,\'fa-eye-slash\':!data.hasBbox}\"></i>\r\n</button>");
-$templateCache.put("common/clip/clip.html","<div class=\"well well-sm\">\r\n<div class=\"container-fluid\">\r\n	<div class=\"row\">\r\n		<div class=\"col-md-12\">\r\n			<button style=\"margin-top:0px;\" ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" class=\"btn btn-primary btn-xs\">Draw</button>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-3\"> </div>\r\n		<div class=\"col-md-8\">\r\n			<strong>Y Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-6\">\r\n			<strong>X Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMin|number : 4}} min)</span></span>\r\n		</div>\r\n		<div class=\"col-md-6\">\r\n			<strong>X Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-offset-3 col-md-8\">\r\n			<strong>Y Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMin|number : 4}} min)</span></span>\r\n		</div>\r\n	</div>\r\n</div>\r\n</div>");
 $templateCache.put("common/cc/cc.html","<button type=\"button\" class=\"undecorated\" title=\"View CCBy {{details.version}} licence details\"\r\n      popover-trigger=\"outsideClick\"\r\n      uib-popover-template=\"template\" popover-placement=\"bottom\" popover-append-to-body=\"true\">\r\n	<i ng-class=\"{active:data.isWmsShowing}\" class=\"fa fa-lg fa-gavel\"></i>\r\n</button>");
 $templateCache.put("common/cc/cctemplate.html","<div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-12\">\r\n         <a target=\"_blank\" ng-href=\"{{details.link}}\">Creative Commons Attribution {{details.version}} </a>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-2\">\r\n         <span class=\"fa-stack\" aria-hidden=\"true\">\r\n         <i class=\"fa fa-check-circle-o fa-stack-2x\" aria-hidden=\"true\"></i>\r\n      </span>\r\n      </div>\r\n      <div class=\"col-md-10\">\r\n         You may use this work for commercial purposes.\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-2\">\r\n         <span class=\"fa-stack\" aria-hidden=\"true\">\r\n         <i class=\"fa fa-circle-o fa-stack-2x\"></i>\r\n         <i class=\"fa fa-female fa-stack-1x\"></i>\r\n      </span>\r\n      </div>\r\n      <div class=\"col-md-10\">\r\n         You must attribute the creator in your own works.\r\n      </div>\r\n   </div>\r\n</div>");
+$templateCache.put("common/clip/clip.html","<div class=\"well well-sm\">\r\n<div class=\"container-fluid\">\r\n	<div class=\"row\">\r\n		<div class=\"col-md-12\">\r\n			<button style=\"margin-top:0px;\" ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" class=\"btn btn-primary btn-xs\">Draw</button>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-3\"> </div>\r\n		<div class=\"col-md-8\">\r\n			<strong>Y Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-6\">\r\n			<strong>X Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMin|number : 4}} min)</span></span>\r\n		</div>\r\n		<div class=\"col-md-6\">\r\n			<strong>X Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-offset-3 col-md-8\">\r\n			<strong>Y Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMin|number : 4}} min)</span></span>\r\n		</div>\r\n	</div>\r\n</div>\r\n</div>");
 $templateCache.put("common/download/download.html","<exp-modal ng-controller=\"DownloadCtrl as dl\" icon-class=\"fa-download\" is-open=\"dl.data.item.download\" title=\"Download data\" on-close=\"dl.remove()\" is-modal=\"true\">\r\n	<div style=\"padding:5px;\">\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><common-wms data=\"dl.data.item\"></common-wms><common-tile data=\"dl.data.item\"></common-tile>{{dl.data.item.title}}</h4>\r\n				{{dl.data.item.abstract}}\r\n   			</div>\r\n		</div>\r\n		<nedf-geoprocess data=\"dl.data.item\"></nedf-geoprocess>\r\n	</div>\r\n</exp-modal>");
 $templateCache.put("common/download/popup.html","<exp-modal icon-class=\"fa-download\"  is-open=\"data.item.download\" title=\"Download wizard\" on-close=\"dl.remove()\">\r\n	<div class=\"container-fluid downloadInner\" >\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><common-wms data=\"dl.data.item\"></common-wms>\r\n					<a href=\"http://www.ga.gov.au/metadata-gateway/metadata/record/{{dl.data.item.sysId}}\" target=\"_blank\"><strong class=\"ng-binding\">{{dl.data.item.title}}</strong></a>\r\n				</h4>\r\n   			</div>\r\n		</div>\r\n		<wizard-geoprocess data=\"dl.data.item\"></wizard-geoprocess>\r\n	</div>\r\n</exp-modal>");
 $templateCache.put("common/extent/extent.html","<div class=\"row\" style=\"border-top: 1px solid gray; padding-top:5px\">\r\n	<div class=\"col-md-5\">\r\n		<div class=\"form-inline\">\r\n			<label>\r\n				<input id=\"extentEnable\" type=\"checkbox\" ng-model=\"parameters.fromMap\" ng-click=\"change()\"></input> \r\n				Restrict area to map\r\n			</label>\r\n		</div>\r\n	</div>\r\n	 \r\n	<div class=\"col-md-7\" ng-show=\"parameters.fromMap\">\r\n		<div class=\"container-fluid\">\r\n			<div class=\"row\">\r\n				<div class=\"col-md-offset-3 col-md-8\">\r\n					<strong>Y Max:</strong> \r\n					<span>{{parameters.yMax | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n			<div class=\"row\">\r\n				<div class=\"col-md-6\">\r\n					<strong>X Min:</strong>\r\n					<span>{{parameters.xMin | number : 4}}</span> \r\n				</div>\r\n				<div class=\"col-md-6\">\r\n					<strong>X Max:</strong>\r\n					<span>{{parameters.xMax | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n			<div class=\"row\">\r\n				<div class=\"col-md-offset-3 col-md-8\">\r\n					<strong>Y Min:</strong>\r\n					<span>{{parameters.yMin | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
@@ -2662,9 +2662,9 @@ $templateCache.put("common/metaview/iso19115.html","<iso19115-metadata node=\"da
 $templateCache.put("common/metaview/iso19115node.html","<ul>\r\n   <li>\r\n      <span class=\"metaview-head\">{{key | metaviewNodeName}}</span>\r\n      <span>{{node | metaviewText}}</span>\r\n      <ng-repeat ng-if=\"isArray()\" ng-repeat=\"next in node\" node=\"next]\">\r\n         <metaview-iso19115-array ng-repeat=\"nextKey in getKeys() track by $index\" node=\"node[nextKey]\" key=\"nextKey\"></metaview-iso19115-array>\r\n      </ng-repeat>\r\n      <metaview-iso19115-node ng-if=\"!isArray()\" ng-repeat=\"nextKey in getKeys() track by $index\" node=\"node[nextKey]\" key=\"nextKey\"></metaview-iso19115-node>\r\n   </li>\r\n</ul>");
 $templateCache.put("common/metaview/item.html","<div>\r\n	<button class=\"btn btn-sm btn-outline-primary\" ng-click=\"container.selected = null\"><i class=\"fa fa-angle-double-left\"></i> Back</button>\r\n      <span style=\"font-weight: bold;padding-left:10px; font-size:130%\">{{container.selected.title}}</span>\r\n      <metaview-iso19115 data=\"container.selected\"></metaview-iso19115>\r\n</div>");
 $templateCache.put("common/metaview/metaview.html","<button type=\"button\" class=\"undecorated\" title=\"View metadata\" ng-click=\"select()\">\r\n	<i class=\"fa fa-lg fa-info metaview-info\"></i>\r\n</button>");
+$templateCache.put("common/navigation/altthemes.html","<span class=\"altthemes-container\">\r\n	<span ng-repeat=\"item in themes | altthemesEnabled\">\r\n       <a title=\"{{item.label}}\" ng-href=\"{{item.url}}\" class=\"altthemesItemCompact\">\r\n         <span class=\"altthemes-icon\" ng-class=\"item.className\"></span>\r\n       </a>\r\n    </li>\r\n</span>");
 $templateCache.put("common/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" icsm-toolbar-row map=\"root.map\" overlaytitle=\"\'Change overlay opacity\'\"></div>\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div class=\"common-legend\" common-legend map=\"data.map\"></div>\r\n    		<div icsm-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'download\'\" icsm-view></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'maps\'\" icsm-maps></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" icsm-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" icsm-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n		<button class=\"undecorated\">Download</button>\r\n	</div>\r\n	<!-- \r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n	-->\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");
-$templateCache.put("common/navigation/altthemes.html","<span class=\"altthemes-container\">\r\n	<span ng-repeat=\"item in themes | altthemesEnabled\">\r\n       <a title=\"{{item.label}}\" ng-href=\"{{item.url}}\" class=\"altthemesItemCompact\">\r\n         <span class=\"altthemes-icon\" ng-class=\"item.className\"></span>\r\n       </a>\r\n    </li>\r\n</span>");
 $templateCache.put("common/search/basin.html","<div class=\"btn-group pull-left radSearch\" style=\"position:relative;width:27em;opacity:0.9\">\r\n	<div class=\"input-group\" style=\"width:100%;\">\r\n		<input type=\"text\" size=\"32\" class=\"form-control\" style=\"border-top-right-radius:4px;border-bottom-right-radius:4px;\"\r\n				ng-keyup=\"keyup($event)\" ng-focus=\"changing()\" ng-model=\"nameFilter\" placeholder=\"Find a basin of interest\">\r\n		<div class=\"input-group-btn\"></div>\r\n	</div>\r\n	<div style=\"width:26em; position:absolute;left:15px\">\r\n		<div class=\"row\" ng-repeat=\"region in basinData.basins | basinFilterList : nameFilter : 10 | orderBy : \'name\'\"\r\n				style=\"background-color:white;\">\r\n			<div class=\"col-md-12 rw-sub-list-trigger\">\r\n				<button class=\"undecorated zoomButton\" ng-click=\"zoomToLocation(region);\">{{region.name}}</button>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/search/catchment.html","<div class=\"btn-group pull-left radSearch\" style=\"position:relative;width:27em;opacity:0.9\">\r\n	<div class=\"input-group\" style=\"width:100%;\">\r\n		<input type=\"text\" size=\"32\" class=\"form-control\" style=\"border-top-right-radius:4px;border-bottom-right-radius:4px;\"\r\n				ng-keyup=\"keyup($event)\" ng-focus=\"changing()\" ng-model=\"nameFilter\" placeholder=\"Find a catchment of interest\">\r\n		<div class=\"input-group-btn\"></div>\r\n	</div>\r\n	<div style=\"width:26em; position:absolute;left:15px\">\r\n		<div class=\"row\" ng-repeat=\"region in catchmentData.catchments | catchmentFilterList : nameFilter : 10 | orderBy : \'name\'\"\r\n				style=\"background-color:white;\">\r\n			<div class=\"col-md-12 rw-sub-list-trigger\">\r\n				<button class=\"undecorated zoomButton\" ng-click=\"zoomToLocation(region);\">{{region.name}}</button>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/toolbar/toolbar.html","<div icsm-toolbar>\r\n	<div class=\"row toolBarGroup\">\r\n		<div class=\"btn-group searchBar\" ng-show=\"root.whichSearch != \'region\'\">\r\n			<div class=\"input-group\" geo-search>\r\n				<input type=\"text\" ng-autocomplete ng-model=\"values.from.description\" options=\'{country:\"au\"}\'\r\n							size=\"32\" title=\"Select a locality to pan the map to.\" class=\"form-control\" aria-label=\"...\">\r\n				<div class=\"input-group-btn\">\r\n    				<button ng-click=\"zoom(false)\" exp-ga=\"[\'send\', \'event\', \'icsm\', \'click\', \'zoom to location\']\"\r\n						class=\"btn btn-default\"\r\n						title=\"Pan and potentially zoom to location.\"><i class=\"fa fa-search\"></i></button>\r\n				</div>\r\n			</div>\r\n		</div>\r\n\r\n		<div class=\"pull-right\">\r\n			<div class=\"btn-toolbar radCore\" role=\"toolbar\"  icsm-toolbar>\r\n				<div class=\"btn-group\">\r\n					<!-- < icsm-state-toggle></icsm-state-toggle> -->\r\n				</div>\r\n			</div>\r\n\r\n			<div class=\"btn-toolbar\" style=\"margin:right:10px;display:inline-block\">\r\n				<div class=\"btn-group\" title=\"{{overlaytitle}}\">\r\n					<span class=\"btn btn-default\" common-baselayer-control max-zoom=\"16\"></span>\r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");}]);
