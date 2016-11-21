@@ -8,23 +8,23 @@
          <h4 style="display:inline-block">Found {{products.length}} datasets</h4>
       </div>
       <div class="col-md-7">
-         <div class="input-group input-group-sm">
-            <span class="input-group-addon" id="names1">Filter:</span>
-            <input type="text" ng-model="filters.filter" class="form-control" ng-change="update()" placeholder="Filter names" aria-describedby="names1">
-         </div>
+            <icsm-search-continue></icsm-search-continue>
       </div>
    </div>
-   <div class="panel panel-default">
+   <div class="panel panel-default" style="margin-bottom: 5px; margin-top: 5px;">
       <div class="panel-body" style="float:clear">
-         <span style="padding:10px; float:left">
+         <span class="filter-text" style="float:left;width:50%" >
+            <div class="input-group input-group-sm">
+               <span class="input-group-addon" id="names1">Filter:</span>
+               <input type="text" ng-model="filters.filter" class="form-control" ng-change="update()" placeholder="Filter names" aria-describedby="names1">
+            </div>
+         </span>
+         <span class="filter-type" style="padding:10px; float:right">
 				<span class="listTypeLabel">Filter by type:</span>
-         <span ng-repeat="type in filters.types" class="listType">
+            <span ng-repeat="type in filters.types" class="listType">
                <input type="checkbox" ng-model="type.selected" ng-change="update()"/>
                <span uib-tooltip="{{type.description}}">{{type.label}}</span>
-         </span>
-         </span>
-         <span style="float:right">
-            <icsm-search-continue></icsm-search-continue>
+            </span>
          </span>
       </div>
    </div>
