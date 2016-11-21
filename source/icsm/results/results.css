@@ -78,3 +78,11 @@
       float: clear;
    }
 }
+
+.results-list {
+    position: absolute;
+    overflow-y: auto;
+    top: 104px;
+    overflow-x: hidden;
+    bottom: 0;
+}

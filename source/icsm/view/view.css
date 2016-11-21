@@ -5,9 +5,8 @@
    left:0;
    right:0;
    top:0;
-   bottom:42px;
-   overflow-y:auto;
-   overflow-x: hidden;
+   bottom:10px;
+   overflow: hidden;
 }
 
 .downloadCont {

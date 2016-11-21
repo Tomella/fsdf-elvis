@@ -1,3 +1,4 @@
+
 .wizardPopup {
   position: fixed;
   top: 20px;
@@ -125,6 +126,55 @@
 .iso19115-head {
   font-weight: bold;
 }
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
+}
+.mvt,
+.mvt ul,
+.mvt li {
+  position: relative;
+}
+
+.mvt ul {
+  list-style: none;
+  padding-left: 32px;
+}
+
+.mvt li::before,
+.mvt li::after {
+  content: "";
+  position: absolute;
+  left: -12px;
+}
+
+.mvt li::before {
+  border-top: 1px solid #000;
+  top: 9px;
+  width: 8px;
+  height: 0;
+}
+
+.mvt li::after {
+  border-left: 1px solid #000;
+  height: 100%;
+  width: 0px;
+  top: 2px;
+}
+
+.mvt ul > li:last-child::after {
+  height: 8px;
+}
+
+.metaview-head {
+  font-weight: bold;
+}
+
+.metaview-info {
+  padding-left: 3px;
+  padding-right: 3px;
+}
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
   display: inline-block;
@@ -236,55 +286,6 @@
 .altthemesdropdown .altthemescurrent {
   color: #fff;
   background-color: #777;
-}
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
-}
-.mvt,
-.mvt ul,
-.mvt li {
-  position: relative;
-}
-
-.mvt ul {
-  list-style: none;
-  padding-left: 32px;
-}
-
-.mvt li::before,
-.mvt li::after {
-  content: "";
-  position: absolute;
-  left: -12px;
-}
-
-.mvt li::before {
-  border-top: 1px solid #000;
-  top: 9px;
-  width: 8px;
-  height: 0;
-}
-
-.mvt li::after {
-  border-left: 1px solid #000;
-  height: 100%;
-  width: 0px;
-  top: 2px;
-}
-
-.mvt ul > li:last-child::after {
-  height: 8px;
-}
-
-.metaview-head {
-  font-weight: bold;
-}
-
-.metaview-info {
-  padding-left: 3px;
-  padding-right: 3px;
 }
 .icsmTabs {
   position: absolute;
@@ -765,6 +766,14 @@ img.elvis-logo {
     float: clear;
   }
 }
+
+.results-list {
+  position: absolute;
+  overflow-y: auto;
+  top: 104px;
+  overflow-x: hidden;
+  bottom: 0;
+}
 .reviewing-odd {
   background-color: #eeeeee;
 }
@@ -927,15 +936,29 @@ div.leaflet-control-scale-line {
   left: 0;
   right: 0;
   top: 0;
-  bottom: 42px;
-  overflow-y: auto;
-  overflow-x: hidden;
+  bottom: 10px;
+  overflow: hidden;
 }
 
 .downloadCont {
   position: fixed;
   right: 0;
   bottom: 8px;
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
 }
 .radCore {
   margin-right: 3px;
@@ -982,21 +1005,6 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
-}
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
 }
 .vector-tooltip {
   min-width: 25em;

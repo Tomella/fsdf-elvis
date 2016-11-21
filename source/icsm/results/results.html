@@ -2,13 +2,10 @@
    <div class="alert alert-warning" role="alert"><strong>Select an area</strong> to find datasets within.</div>
 </div>
 
-<div ng-show="list.length">
+<div ng-show="list.length" class="results-list">
    <div class="row">
-      <div class="col-md-5" uib-tooltip="Number of intersecting or very near datasets to your area of interest.">
+      <div class="col-md-12" uib-tooltip="Number of intersecting or very near datasets to your area of interest.">
          <h4 style="display:inline-block">Found {{products.length}} datasets</h4>
-      </div>
-      <div class="col-md-7">
-            <icsm-search-continue></icsm-search-continue>
       </div>
    </div>
    <div class="panel panel-default" style="margin-bottom: 5px; margin-top: 5px;">
