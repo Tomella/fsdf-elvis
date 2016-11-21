@@ -51,7 +51,7 @@
                         <icsm-abstract item="item" ng-if="item.source == 'NSW Government'"></icsm-abstract>
                         <common-cc version="mappings[item.source].ccLicence"></common-cc>
                         <span class="listItem" item="item" icsm-abstract-link></span>
-                        <span style="float:right;padding-top:3px">({{item.file_size | fileSize}})</span>
+                        <span ng-show="item.file_size" style="float:right;padding-top:3px">({{item.file_size | fileSize}})</span>
                      </div>
                      <div ng-if="item.source == 'NSW Government'" ng-show="item.showAbstract" class="well">
                         <span ng-show="!item.metadata">
