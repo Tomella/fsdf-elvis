@@ -50,10 +50,10 @@
                            if (run) {
                               reviewService.startExtract().then(response => {
                                  messageService[response.status](response.message);
+                                 reviewService.removeRemoved();
+                                 scope.data.reviewing = false;
                               });
                            }
-                           reviewService.removeRemoved();
-                           scope.data.reviewing = false;
                         }, function () {
                            $log.info('Cancelled');
                         });
