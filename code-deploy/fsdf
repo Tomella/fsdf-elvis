@@ -3,7 +3,8 @@
 # Note runlevel 2345, 86 is the Start order and 85 is the Stop order
 #
 # chkconfig: 2345 86 85
-# description: Description of the Service
+# description: The FSDF app server. The server doesn't do much as most of the
+# content is served from the root of the Apache web server.
 #
 # Below is the source function library, leave it be
 . /etc/init.d/functions
