@@ -19,13 +19,20 @@ class BaseStrategy {
    }
 
    static resolvedPromise(data) {
-      return new Promise(
-         function(resolve, reject) {
-            window.setTimeout(function() {
-               resolve(data);
-            }, 1);
+      // Create a very poor man's promise for IE11 or anybody really. It'll work anywhere.
+      var response = {
+         then: function(fn) {
+            this.fn = fn;
          }
-      );
+      };
+
+      setTimeout(function() {
+         if(response.fn) {
+            response.fn(data);
+         }
+      }, 1);
+
+      return response;
    }
 
    static extractData(wrapper) {
