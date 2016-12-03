@@ -173,6 +173,8 @@
                  item: "="
               },
               link: function(scope) {
+                 scope.show = listService.hasMetadata(scope.item);
+
                  scope.toggle = function() {
                     scope.item.showAbstract = !scope.item.showAbstract;
                     if(scope.item.showAbstract) {
@@ -183,7 +185,7 @@
                  function load() {
                     if(!scope.fetched) {
                        scope.fetched = true;
-                       listService.getMetadata(scope.item.file_name).then(data => {
+                       listService.getMetadata(scope.item).then(data => {
                           scope.item.metadata = data;
                        });
                     }
@@ -220,7 +222,7 @@
                  function load() {
                     if(!scope.fetched) {
                        scope.fetched = true;
-                       listService.getMetadata(scope.item.file_name).then(data => {
+                       listService.getMetadata(scope.item).then(data => {
                           scope.item.metadata = data;
                        });
                     }
@@ -231,24 +233,15 @@
 
         // All this does is set up the data on mouse hover. The UI can do whatever it wants with the data when it arrives
         .directive('icsmAbstractLink', ['$timeout', 'listService', function($timeout, listService) {
-           const NSW_METADATA_TEMPLATE = "https://s3-ap-southeast-2.amazonaws.com/nsw.elvis/z5${zone}/Metadata/";
 
            return {
               restrict: 'AE',
-              template: "<a target='_blank' ng-if='item.source == \"NSW Government\"' ng-href='{{url}}'>{{item.file_name}}</a><span ng-if='item.source != \"NSW Government\"' ng-bind='item.file_name'></span>",
+              template: "<a target='_blank' ng-if='url' ng-href='{{url}}'>{{item.file_name}}</a><span ng-if='!url' ng-bind='item.file_name'></span>",
               scope: {
                  item: "="
               },
               link: function(scope, element) {
-                  var filename = scope.item.file_name;
-                  var re = /\_5\d\_/;
-                  var index = filename.search(re);
-                  var zone = 6;
-                  var url = NSW_METADATA_TEMPLATE;
-                  if (index != -1) {
-                     zone = filename.substr(index + 2, 1);
-                  }
-                  scope.url = url.replace("${zone}", zone) + filename.replace(".zip", "_Metadata.html");
+                  scope.url = listService.getLink(scope.item);
               }
            };
         }])
@@ -257,11 +250,10 @@
         .controller('listCtrl', ListCtrl)
 
         .factory('listService', ['$http', function ($http) {
-            const NSW_METADATA_TEMPLATE = "xml2js/https://s3-ap-southeast-2.amazonaws.com/nsw.elvis/z5${zone}/Metadata/";
-            const NO_METADATA = "No metadata found for this dataset.";
-
             var service = {};
             var expansions = {};
+
+            var strategies = new Strategies($http);
 
             service.data = {
                 filter: "",
@@ -276,8 +268,17 @@
                 });
             });
 
-            service.getMetadata = function(filename) {
-               return requestMetadata(filename);
+            service.getMetadata = function(item) {
+               return strategies.strategy(item.source).requestMetadata(item);
+            };
+
+
+            service.hasMetadata = function(item) {
+               return strategies.strategy(item.source).hasMetadata(item);
+            };
+
+            service.getLink = function(item) {
+               return strategies.strategy(item.source).constructLink(item);
             };
 
             service.getMappings = function () {
@@ -286,52 +287,6 @@
                 });
             };
             return service;
-
-            function requestMetadata(filename) {
-               var re = /\_5\d\_/;
-               var index = filename.search(re);
-               var zone = 6;
-               var url = NSW_METADATA_TEMPLATE;
-               if (index != -1) {
-                  zone = filename.substr(index + 2, 1);
-               }
-               url = url.replace("${zone}", zone) + filename.replace(".zip", "_Metadata.xml");
-
-               return $http.get(url).then(function (response) {
-                  var metadata = response.data.MD_Metadata;
-                  var data = {};
-
-                  var node = metadata &&
-                             metadata.identificationInfo &&
-                             metadata.identificationInfo.MD_DataIdentification;
-                  var abstractNode = node;
-
-                  node = node &&
-                         node.citation &&
-                         node.citation &&
-                         node.citation.CI_Citation;
-                  node = node &&
-                         node.title &&
-                         node.title.CharacterString;
-
-                  if(node) {
-                     data.title = node.__text;
-
-                     let abstract = abstractNode &&
-                                    abstractNode.abstract &&
-                                    abstractNode.abstract.CharacterString &&
-                                    abstractNode.abstract.CharacterString.__text;
-                     data.abstract = data.abstractText = abstract;
-                  } else {
-                     data.title = NO_METADATA;
-                  }
-                  return data;
-               }, function(err) {
-                  return {
-                     title: NO_METADATA
-                  };
-               });
-            }
         }])
 
         .filter("allowedTypes", ['listService', function (listService) {
