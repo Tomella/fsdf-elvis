@@ -209,3 +209,7 @@ input.ng-valid.ng-touched {
 .elevationFixedBottom {
    border: 1px solid gray;
 }
+
+body {
+   overflow-y: hidden;
+}
