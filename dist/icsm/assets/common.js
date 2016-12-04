@@ -2217,6 +2217,57 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         };
     }]);
 })(angular);
+'use strict';
+
+(function (angular) {
+	'use strict';
+
+	angular.module("common.storage", ['explorer.projects']).factory("storageService", ['$log', '$q', 'projectsService', function ($log, $q, projectsService) {
+		return {
+			setGlobalItem: function setGlobalItem(key, value) {
+				this._setItem("_system", key, value);
+			},
+
+			setItem: function setItem(key, value) {
+				projectsService.getCurrentProject().then(function (project) {
+					this._setItem(project, key, value);
+				}.bind(this));
+			},
+
+			_setItem: function _setItem(project, key, value) {
+				$log.debug("Fetching state for key locally" + key);
+				localStorage.setItem("mars.anon." + project + "." + key, JSON.stringify(value));
+			},
+
+			getGlobalItem: function getGlobalItem(key) {
+				return this._getItem("_system", key);
+			},
+
+			getItem: function getItem(key) {
+				var deferred = $q.defer();
+				projectsService.getCurrentProject().then(function (project) {
+					this._getItem(project, key).then(function (response) {
+						deferred.resolve(response);
+					});
+				}.bind(this));
+				return deferred.promise;
+			},
+
+			_getItem: function _getItem(project, key) {
+				$log.debug("Fetching state locally for key " + key);
+				var item = localStorage.getItem("mars.anon." + project + "." + key);
+				if (item) {
+					try {
+						item = JSON.parse(item);
+					} catch (e) {
+						// Do nothing as it will be a string
+					}
+				}
+				return $q.when(item);
+			}
+		};
+	}]);
+})(angular);
 "use strict";
 
 (function (angular) {
@@ -2374,54 +2425,45 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       }
    }]);
 })(angular);
-'use strict';
+"use strict";
 
 (function (angular) {
+
 	'use strict';
 
-	angular.module("common.storage", ['explorer.projects']).factory("storageService", ['$log', '$q', 'projectsService', function ($log, $q, projectsService) {
+	angular.module("common.toolbar", []).directive("icsmToolbar", [function () {
 		return {
-			setGlobalItem: function setGlobalItem(key, value) {
-				this._setItem("_system", key, value);
-			},
+			controller: 'toolbarLinksCtrl'
+		};
+	}])
 
-			setItem: function setItem(key, value) {
-				projectsService.getCurrentProject().then(function (project) {
-					this._setItem(project, key, value);
-				}.bind(this));
-			},
+	/**
+  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
+  */
+	.directive('icsmToolbarRow', [function () {
+		var DEFAULT_TITLE = "Satellite to Topography bias on base map.";
 
-			_setItem: function _setItem(project, key, value) {
-				$log.debug("Fetching state for key locally" + key);
-				localStorage.setItem("mars.anon." + project + "." + key, JSON.stringify(value));
+		return {
+			scope: {
+				map: "=",
+				overlaytitle: "=?"
 			},
-
-			getGlobalItem: function getGlobalItem(key) {
-				return this._getItem("_system", key);
-			},
-
-			getItem: function getItem(key) {
-				var deferred = $q.defer();
-				projectsService.getCurrentProject().then(function (project) {
-					this._getItem(project, key).then(function (response) {
-						deferred.resolve(response);
-					});
-				}.bind(this));
-				return deferred.promise;
-			},
-
-			_getItem: function _getItem(project, key) {
-				$log.debug("Fetching state locally for key " + key);
-				var item = localStorage.getItem("mars.anon." + project + "." + key);
-				if (item) {
-					try {
-						item = JSON.parse(item);
-					} catch (e) {
-						// Do nothing as it will be a string
-					}
-				}
-				return $q.when(item);
+			restrict: 'AE',
+			templateUrl: 'common/toolbar/toolbar.html',
+			link: function link(scope) {
+				scope.overlaytitle = scope.overlaytitle ? scope.overlaytitle : DEFAULT_TITLE;
 			}
+		};
+	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
+
+		var self = this;
+		configService.getConfig().then(function (config) {
+			self.links = config.toolbarLinks;
+		});
+
+		$scope.item = "";
+		$scope.toggleItem = function (item) {
+			$scope.item = $scope.item == item ? "" : item;
 		};
 	}]);
 })(angular);
@@ -2601,48 +2643,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				return null;
 			};
 		}
-	}]);
-})(angular);
-"use strict";
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module("common.toolbar", []).directive("icsmToolbar", [function () {
-		return {
-			controller: 'toolbarLinksCtrl'
-		};
-	}])
-
-	/**
-  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
-  */
-	.directive('icsmToolbarRow', [function () {
-		var DEFAULT_TITLE = "Satellite to Topography bias on base map.";
-
-		return {
-			scope: {
-				map: "=",
-				overlaytitle: "=?"
-			},
-			restrict: 'AE',
-			templateUrl: 'common/toolbar/toolbar.html',
-			link: function link(scope) {
-				scope.overlaytitle = scope.overlaytitle ? scope.overlaytitle : DEFAULT_TITLE;
-			}
-		};
-	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
-
-		var self = this;
-		configService.getConfig().then(function (config) {
-			self.links = config.toolbarLinks;
-		});
-
-		$scope.item = "";
-		$scope.toggleItem = function (item) {
-			$scope.item = $scope.item == item ? "" : item;
-		};
 	}]);
 })(angular);
 angular.module("common.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("common/bbox/bbox.html","<button type=\"button\" class=\"undecorated\" ng-click=\"toggle()\" tooltip-placement=\"right\" tooltip=\"Show data extent on the map.\">\r\n	<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-eye orange\':data.hasBbox,\'fa-eye-slash\':!data.hasBbox}\"></i>\r\n</button>");

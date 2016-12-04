@@ -86,7 +86,7 @@ class GaStrategy extends BaseStrategy {
    }
 
    constructLink(item) {
-      var uuid = item.file_url.match(this.UUID_REG_EX);
+      var uuid = item.metadata_id;
       return uuid ? this.GA_METADATA_TEMPLATE.replace("${uuid}", uuid) : null;
    }
 
@@ -95,8 +95,8 @@ class GaStrategy extends BaseStrategy {
    }
 
    requestMetadata(item) {
-      var uuid = item.file_url.match(this.UUID_REG_EX);
-      var url = uuid ? ("xml2js/" + this.GA_METADATA_TEMPLATE.replace("${uuid}", uuid[0]) + "/xml") : null;
+      var uuid = item.metadata_id;
+      var url = uuid ? ("xml2js/" + this.GA_METADATA_TEMPLATE.replace("${uuid}", uuid) + "/xml") : null;
       if(url) {
          return this.http.get(url).then(response => {
             return BaseStrategy.extractData(response.data.GetRecordByIdResponse);
