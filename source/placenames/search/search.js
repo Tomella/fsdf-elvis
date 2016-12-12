@@ -7,6 +7,26 @@
 
    angular.module("placenames.search", [])
 
+      .directive('placenamesClear', ['placenamesSearchService', function (placenamesSearchService) {
+         return {
+            link: function(scope, element) {
+
+               placenamesSearchService.onMapUpdate(listening);
+
+               function listening() {
+                  console.log("listened..")
+                  if(element.is(":focus")) {
+                     console.log("Focused")
+                     var e = $.Event("keydown");
+                     e.which = 27; // # Some key code value
+                     element.trigger(e);
+                  }
+               }
+               console.log("ERR")
+            }
+         };
+      }])
+
       .directive('placenamesOptions', ['placenamesSearchService', function (placenamesSearchService) {
          return {
             link: function (scope) {
@@ -25,7 +45,7 @@
          };
       }])
 
-      .directive("placenamesSearch", ['placenamesSearchService', function (placenamesSearchService) {
+      .directive("placenamesSearch", ['$timeout', 'placenamesSearchService', function ($timeout, placenamesSearchService) {
          return {
             templateUrl: 'placenames/search/search.html',
             restrict: 'AE',
@@ -62,7 +82,7 @@
                   placenamesSearchService.filtered();
                };
 
-               scope.loadDocs = function (facet) {
+               scope.loadDocs = function () {
                   return placenamesSearchService.filtered().then(fetched => {
                      return fetched.response.docs;
                   });
@@ -135,11 +155,20 @@
          searched: false, // Search results
          featureCodes: []
       };
+      var mapListeners =[];
 
       var results;
       var marker;
 
       var service = {
+         onMapUpdate(listener) {
+            mapListeners.push(listener);
+         },
+
+         offMapUpdate(listener) {
+            delete mapListeners[listener];
+         },
+
          get data() {
             return data;
          },
@@ -214,6 +243,9 @@
                timeout = $timeout(function () {
                   service.filtered();
                }, 200);
+               mapListeners.forEach(listener => {
+                  listener();
+               });
             }
          });
       });
