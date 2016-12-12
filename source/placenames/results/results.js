@@ -49,7 +49,13 @@
             return this.hide().then(map => {
                var location = what.location.split(" ").reverse().map(str => +str);
                // split lng/lat string seperated by space, reverse to lat/lng, cooerce to numbers
-               marker = L.marker(location).addTo(map);
+               marker = L.popup()
+                     .setLatLng(location)
+                     .setContent(what.name + "<br/>Lat/Lng: " +
+                           location[0] + "&deg;" + +
+                           location[1] + "&deg;")
+                     .openOn(map);
+
                return {
                   location,
                   map,
