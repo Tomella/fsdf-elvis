@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="en-us" id="ng-app" ng-app="IcsmApp">
+<html lang="en-us" id="ng-app" ng-app="PlacenamesApp">
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-	<title>ELVIS - Foundation Spatial Data</title>
+	<title>Place Names - Foundation Spatial Data</title>
     <meta charset="utf-8">
 	<link rel="icon" type="image/png" href="icsm/resources/img/SiteFavIcon.png" />
 
@@ -53,71 +53,68 @@ ga('send', 'pageview');
 <p>
 <img src="icsm/resources/css/images/geoscience_inline_padded_small.png" style="float:left;padding-right:10px;" />
 <br/>
-<strong>ELVIS - Foundation Spatial Data - browser requirements.</strong><br/>
+<strong>Place Names - browser requirements.</strong><br/>
 Unfortunately this application requires a browser made more recently than what you are using. We will not be providing a lower spec
 version of this application. The latest Firefox, Chrome plus Microsoft Internet Explorer 9 and higher including Edge browsers have been tested to work as of mid-2015.
 </div>
 <![endif]-->
 
 <!-- BEGIN: Sticky Header -->
-<div elvis-header class="navbar navbar-default navbar-fixed-top"
-			heading="'ELVIS - Foundation Spatial Data'"
-			headingtitle="'ELVIS - Foundation Spatial Data'"
-			breadcrumbs="[{name:'ELVIS', title: 'Reload ELVIS - Foundation Spatial Data', url: '.'}]"
-			helptitle="'Get help about ELVIS - Foundation Spatial Data'"
-			helpalttext="'Get help about ELVIS - Foundation Spatial Data'">
+<div placenames-header class="navbar navbar-default navbar-fixed-top"
+			heading="'Place Names - Foundation Spatial Data'"
+			headingtitle="'Place Names - Foundation Spatial Data'"
+			breadcrumbs="[{name:'Place Names', title: 'Reload Place Names - Foundation Spatial Data', url: '.'}]"
+			helptitle="'Get help about Place Names - Foundation Spatial Data'"
+			helpalttext="'Get help about Place Names - Foundation Spatial Data'">
 </div>
 <!-- END: Sticky Header -->
 
 
 <!-- Messages go here. They are fixed to the tab bar. -->
 <div explorer-messages class="marsMessages noPrint"></div>
-
+<placenames-panes data="root.data" default-item="search">
 <!-- BEGIN: Page Content -->
+<mars-pan-to></mars-pan-to>
 
-<icsm-panes data="root.data" default-item="download"></icsm-panes>
-
-<div path-elevation-plot class="noPrint elevationFixedBottom"></div>
-
-<icsm-mapevents icsm-bounds></icsm-mapevents>
 
 <div explorer-flash class="noPrint"></div>
-<div icsm-review open="data.reviewing"></div>
-<div icsm-splash class="noPrint"></div>
 <!-- END: Page Content -->
-<iframe id="launcher" style="height:0;display:none"></iframe>
+
 <!-- BEGIN: Sticky Footer -->
 <div page-footer style="z-index:5; " class="noPrint"></div>
 <!-- END: Sticky Footer -->
 
+
 	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCXzhreLhP8a0z4TZNGOHUbH1Pacz3ghPE&v=3.24&language=en&libraries=places"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <!--[if IE 9 ]>    <script src="assets/placeholder/placeholders.jquery.min.js"></script> <![endif]-->
 
-	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
-	<script src="//cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
-	<script src="//cdn.jsdelivr.net/leaflet.esri/1.0.0/esri-leaflet.js"></script>
-	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
-  	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-animate.min.js"></script>
-  	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-route.min.js"></script>
-  	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-sanitize.min.js"></script>
-  	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-aria.min.js"></script>
-  	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-messages.min.js"></script>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
-   <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/1.3.3/ui-bootstrap-tpls.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
+	<script src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
+	<script src="https://cdn.jsdelivr.net/leaflet.esri/1.0.0/esri-leaflet.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+  	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-animate.min.js"></script>
+  	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-route.min.js"></script>
+  	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-sanitize.min.js"></script>
+  	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-aria.min.js"></script>
+  	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-messages.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/1.3.3/ui-bootstrap-tpls.min.js"></script>
 
    <script src="icsm/bower_components/ngAutocomplete/src/ngAutocomplete.js"></script>
 	<script src="icsm/bower_components/seiyria-bootstrap-slider/dist/bootstrap-slider.min.js"></script>
-   <script src="icsm/bower_components/leaflet-draw/dist/leaflet.draw-src.js"></script>
+   <script src="icsm/bower_components/leaflet-draw/dist/leaflet.draw.js"></script>
+   <script src="icsm/bower_components/leaflet-solr-heatmap/dist/heatmap.js"></script>
    <script src="icsm/bower_components/ga-explorer-map-components/dist/vendor/leaflet-locationfilter/locationfilter.js"></script>
    <script src="icsm/bower_components/ga-explorer-map-components/dist/vendor/leaflet-plotter/leaflet-plotter.js"></script>
    <script src="icsm/bower_components/ga-explorer-map-components/dist/vendor/leaflet-measurecontrol/leaflet.measurecontrol.js"></script>
    <script src="icsm/bower_components/ga-explorer-map-components/dist/ga-explorer-map.js"></script>
 	<script src="icsm/bower_components/explorer-ui-components/dist/ga-explorer-ui.js"></script>
    <script src="icsm/bower_components/ang-accordion/js/ang-accordion.js"></script>
+   <script src="icsm/bower_components/x2js/xml2json.min.js"></script>
 
 	<!-- These are the "ICSM" specific includes of modules -->
 	<script src="icsm/assets/common.js?v=VERSION_NO"></script>
-	<script src="icsm/assets/icsm.js?v=VERSION_NO"></script>
+	<script src="icsm/assets/placenames.js?v=VERSION_NO"></script>
 </body>
 </html>

@@ -160,7 +160,7 @@
 
                      let result = child;
                      children.forEach(kid => {
-                        if(kid != "#text") {
+                        if(kid !== "#text") {
                            result = result[kid];
                         }
                      });
@@ -177,11 +177,11 @@
 
       .filter('metaviewNodeName', [function () {
          return function (nodeName) {
-            if (parseInt(nodeName) + "" == "" + nodeName) {
+            if (parseInt(nodeName) + "" === "" + nodeName) {
                console.log("Its a num");
                return "";
             }
-            if (nodeName.toUpperCase() == nodeName) {
+            if (nodeName.toUpperCase() === nodeName) {
                return nodeName;
             }
             var parts = nodeName.split("_");

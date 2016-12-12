@@ -1,0 +1,18 @@
+.placenames-features {
+   max-block-size: 300px;
+   overflow-y:auto;
+   overflow-x: hidden;
+}
+
+.pn-search-container {
+   height: 97%;
+}
+
+.tooltip-inner {
+   max-width: 350px;
+}
+
+.pnPill {
+    color: #fff;
+    margin:4px;
+}

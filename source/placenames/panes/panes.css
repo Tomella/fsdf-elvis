@@ -1,0 +1,7 @@
+.pnTabContentItem {
+   padding-right: 3px;
+   background: #FFF;
+   height: 100%;
+   overflow-y: auto;
+   overflow-x: hidden;
+}

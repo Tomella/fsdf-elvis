@@ -167,6 +167,24 @@ app.get('/xml2js/*', function (req, res, next) {
     });
 });
 
+app.get('/select', function (req, res, next) {
+    var solrSelect = "http://localhost:8983/solr/placenames";
+
+    // encoding : null means "body" passed to the callback will be raw bytes
+    console.log(req.url);
+    request.get(solrSelect + req.url, function (error, response, body) {
+        var code = 500;
+
+        if (response) {
+            code = response.statusCode;
+            res.header(filterHeaders(req, response.headers));
+        }
+
+        res.status(code).send(body);
+    });
+});
+
+
 app.get('/proxy/*', function (req, res, next) {
     // look for request like http://localhost:8080/proxy/http://example.com/file?query=1
     var remoteUrl = getRemoteUrlFromParam(req);
