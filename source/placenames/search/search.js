@@ -20,6 +20,7 @@
                      var e = $.Event("keydown");
                      e.which = 27; // # Some key code value
                      element.trigger(e);
+                     element.blur();
                   }
                }
                console.log("ERR")
