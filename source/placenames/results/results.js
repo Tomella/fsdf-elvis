@@ -37,11 +37,10 @@
          showPan(what) {
             return this.show(what).then(details => {
                var map = details.map;
-               if(map.getZoom() < ZOOM_IN) {
-                  map.setZoom(ZOOM_IN);
-               }
-
                map.panTo(details.location, {animate: true});
+               if(map.getZoom() < ZOOM_IN) {
+                  map.setZoom(ZOOM_IN, {animate: true});
+               }
                return details;
             });
          },
