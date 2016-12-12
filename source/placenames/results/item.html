@@ -5,7 +5,7 @@
                 tooltip-append-to-body="true" title="Zoom to location and mark." tooltip-placement="left" uib-tooltip="Zoom to location and mark">
             <i class="fa fa-lg fa-flag-o"></i>
          </button>
-         <span>{{vm.feature.attributes.Name}}</span>
+         <span><a ng-href="{{vm.item | pnGoogleLink}}" target="_google" title="View in Google maps">{{vm.item.name}}</a></span>
          <span class="pull-right">Record ID: {{vm.feature.attributes.Record_ID}}</span>
       </div>
    </div>

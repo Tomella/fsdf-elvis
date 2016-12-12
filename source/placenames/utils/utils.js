@@ -28,6 +28,18 @@
          };
       }])
 
+      .filter("pnGoogleLink", function() {
+         var template = "https://www.google.com.au/maps/place/${name}/@${lat},${lng},14z";
+         return function(what) {
+            var location = what.location.split(" ");
+
+            return template
+               .replace("${name}", what.name)
+               .replace("${lng}", location[0])
+               .replace("${lat}", location[1])
+         }
+      })
+
       .factory('placenamesUtilsService', ['configService', function (configService) {
 
          var service = {};
