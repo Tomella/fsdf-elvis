@@ -38,7 +38,7 @@
             </uib-accordion-heading>
             <div ng-repeat="facet in state.classifications | pnUnselectedFacets" class="row">
                <div class="col-md-12 ellipsis">
-                  <input type="checkbox" ng-model="facet.selected" ng-change="select(facet)" />
+                  <input type="checkbox" ng-model="facet.selected" ng-change="update(facet)" />
                   <span tooltip-append-to-body="true" tooltip-placement="top-left" uib-tooltip="{{facet.name}}">
                            <a target="_blank" href="http://www.google.com/search?q={{facet.name | pnClean}}">{{facet.name}}</a>
                         </span>
