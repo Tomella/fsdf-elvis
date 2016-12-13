@@ -17,6 +17,7 @@ angular.module("PlacenamesApp", [
       'common.baselayer.control',
       'common.navigation',
       'common.proxy',
+      'common.scroll',
 		'common.storage',
       'common.templates',
 

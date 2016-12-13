@@ -30,7 +30,8 @@
     "ngAutocomplete": "^1.0.0",
     "ang-accordion": "*",
     "x2js": "x2js#^1.2.0",
-    "leaflet-draw": "^0.3.2"
+    "leaflet-draw": "^0.3.2",
+    "ngInfiniteScroll": "1.0.0"
   },
   "resolutions": {
     "angular": "~1.4.12",

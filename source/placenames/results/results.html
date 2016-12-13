@@ -10,7 +10,7 @@
       </div>
    </nav>
 
-   <div class="pn-results">
+   <div class="pn-results" common-scroll-load>
       <placenames-results-item ng-if="ctrl.data.persist.item" item="ctrl.data.persist.item"></placenames-results-item>
       <div class="pn-results-list" ng-if="!ctrl.data.persist.item" ng-repeat="doc in ctrl.data.persist.data.response.docs">
          <placenames-results-item item="doc"></placenames-results-item>

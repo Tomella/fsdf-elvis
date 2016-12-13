@@ -29,7 +29,7 @@
                    "format": "image/png",
                    "transparent": true,
                    "switch": "topography",
-                   "opacity": 0.7
+                   "opacity": 1
                 }
             ],
             "addLayerControl":false,
@@ -46,7 +46,8 @@
                 {
                   "field": "location",
                   "blur": 2,
-                  "colors": ["3f3fff", "ff0000"]
+                  "colors": ["3f3fff", "ff0000"],
+                  "attribution": "Copyright of the Gazetteer data resides with the relevant State, Territory and Commonwealth Government agencies."
                }
             ],
             "addLayerControl":false,

@@ -23,7 +23,7 @@ under the License.
 
 	'use strict';
 
-	angular.module("PlacenamesApp", ['placenames.header', 'placenames.panes', "placenames.results", "placenames.templates", "placenames.search", 'placenames.toolbar', "placenames.utils", 'geo.map', 'common.altthemes', 'common.baselayer.control', 'common.navigation', 'common.proxy', 'common.storage', 'common.templates', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer'])
+	angular.module("PlacenamesApp", ['placenames.header', 'placenames.panes', "placenames.results", "placenames.templates", "placenames.search", 'placenames.toolbar', "placenames.utils", 'geo.map', 'common.altthemes', 'common.baselayer.control', 'common.navigation', 'common.proxy', 'common.scroll', 'common.storage', 'common.templates', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer'])
 
 	// Set up all the service providers here.
 	.config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider) {
@@ -63,57 +63,6 @@ under the License.
 			}
 		});
 	}
-})(angular);
-'use strict';
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module('placenames.header', []).controller('headerController', ['$scope', '$q', '$timeout', function ($scope, $q, $timeout) {
-
-		var modifyConfigSource = function modifyConfigSource(headerConfig) {
-			return headerConfig;
-		};
-		$scope.$on('headerUpdated', function (event, args) {
-			$scope.headerConfig = modifyConfigSource(args);
-		});
-	}]).directive('placenamesHeader', [function () {
-		var defaults = {
-			heading: "Place Names",
-			headingtitle: "Place Names",
-			helpurl: "help.html",
-			helptitle: "Get help about Place Names",
-			helpalttext: "Get help about Place Names",
-			skiptocontenttitle: "Skip to content",
-			skiptocontent: "Skip to content",
-			quicklinksurl: "/search/api/quickLinks/json?lang=en-US"
-		};
-		return {
-			transclude: true,
-			restrict: 'EA',
-			templateUrl: "placenames/header/header.html",
-			scope: {
-				breadcrumbs: "=",
-				heading: "=",
-				headingtitle: "=",
-				helpurl: "=",
-				helptitle: "=",
-				helpalttext: "=",
-				skiptocontenttitle: "=",
-				skiptocontent: "=",
-				quicklinksurl: "="
-			},
-			link: function link(scope, element, attrs) {
-				var data = angular.copy(defaults);
-				angular.forEach(defaults, function (value, key) {
-					if (!(key in scope)) {
-						scope[key] = value;
-					}
-				});
-			}
-		};
-	}]).factory('headerService', ['$http', function () {}]);
 })(angular);
 "use strict";
 
@@ -194,144 +143,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			require: "^placenamesPanes"
 		};
 	}]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
-})(angular);
-"use strict";
-
-(function (angular) {
-
-   'use strict';
-
-   angular.module("placenames.results.item", []).directive("placenamesResultsItem", ['placenamesResultsService', function (placenamesResultsService) {
-      return {
-         templateUrl: "placenames/results/item.html",
-         bindToController: {
-            item: "="
-         },
-         controller: function controller() {
-            var _this = this;
-
-            this.showPan = function (feature) {
-               placenamesResultsService.showPan(feature);
-            };
-            placenamesResultsService.load(this.item.id).then(function (data) {
-               _this.feature = data.features[0];
-            });
-         },
-         controllerAs: "vm"
-      };
-   }]).factory('placenamesItemService', ['mapService', function (mapService) {
-
-      var service = {};
-
-      return service;
-   }]);
-})(angular);
-'use strict';
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-(function (angular) {
-
-   'use strict';
-
-   angular.module("placenames.results", ['placenames.results.item']).directive("placenamesResults", ['placenamesResultsService', function (placenamesResultsService) {
-      return {
-         templateUrl: 'placenames/results/results.html',
-         bindToController: {
-            data: "="
-         },
-         controller: function controller() {
-            this.clear = function (data) {
-               this.data.persist.item = null;
-               this.data.searched = false;
-            };
-         },
-         controllerAs: "ctrl",
-         link: function link(scope) {
-            scope.$destroy = function () {
-               placenamesResultsService.hide();
-            };
-            placenamesResultsService.moreDocs(scope.ctrl.data.persist);
-         }
-      };
-   }]).factory("placenamesResultsService", ResultsService);
-
-   ResultsService.$inject = ['proxy', '$rootScope', '$timeout', 'configService', 'mapService', 'placenamesSearchService'];
-   function ResultsService(proxy, $rootScope, $timeout, configService, mapService, placenamesSearchService) {
-      var ZOOM_IN = 7;
-      var marker;
-
-      var service = {
-         showPan: function showPan(what) {
-            return this.show(what).then(function (details) {
-               var map = details.map;
-               map.panTo(details.location, { animate: true });
-               if (map.getZoom() < ZOOM_IN) {
-                  map.setZoom(ZOOM_IN, { animate: true });
-               }
-               return details;
-            });
-         },
-         show: function show(what) {
-            return this.hide().then(function (map) {
-               var location = what.location.split(" ").reverse().map(function (str) {
-                  return +str;
-               });
-               // split lng/lat string seperated by space, reverse to lat/lng, cooerce to numbers
-               marker = L.popup().setLatLng(location).setContent(what.name + "<br/>Lat/Lng: " + location[0] + "&deg;" + +location[1] + "&deg;").openOn(map);
-
-               return {
-                  location: location,
-                  map: map,
-                  marker: marker
-               };
-            });
-         },
-         hide: function hide(what) {
-            return mapService.getMap().then(function (map) {
-               if (marker) {
-                  map.removeLayer(marker);
-               }
-               return map;
-            });
-         },
-
-
-         get config() {
-            return configService.getConfig().then(function (config) {
-               return config.results;
-            });
-         },
-
-         load: function load(id) {
-            return this.config.then(function (_ref) {
-               var esriTemplate = _ref.esriTemplate;
-
-               return proxy.get(esriTemplate.replace("${id}", id)).then(function (response) {
-                  return response;
-               });
-            });
-         },
-         moreDocs: function moreDocs(persist) {
-            var response = persist.data.response;
-            var start = response.docs.length;
-            if (start >= response.numFound) {
-               return;
-            }
-
-            var params = persist.params;
-            params.start = start;
-
-            placenamesSearchService.request(params).then(function (data) {
-               var _response$docs;
-
-               (_response$docs = response.docs).push.apply(_response$docs, _toConsumableArray(data.response.docs));
-            });
-         }
-      };
-
-      return service;
-   }
 })(angular);
 'use strict';
 
@@ -677,6 +488,195 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 (function (angular) {
 
+   'use strict';
+
+   angular.module("placenames.results.item", []).directive("placenamesResultsItem", ['placenamesResultsService', function (placenamesResultsService) {
+      return {
+         templateUrl: "placenames/results/item.html",
+         bindToController: {
+            item: "="
+         },
+         controller: function controller() {
+            var _this = this;
+
+            this.showPan = function (feature) {
+               placenamesResultsService.showPan(feature);
+            };
+            placenamesResultsService.load(this.item.id).then(function (data) {
+               _this.feature = data.features[0];
+            });
+         },
+         controllerAs: "vm"
+      };
+   }]).factory('placenamesItemService', ['mapService', function (mapService) {
+
+      var service = {};
+
+      return service;
+   }]);
+})(angular);
+'use strict';
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+(function (angular) {
+
+   'use strict';
+
+   angular.module("placenames.results", ['placenames.results.item']).directive("placenamesResults", ['placenamesResultsService', function (placenamesResultsService) {
+      return {
+         templateUrl: 'placenames/results/results.html',
+         bindToController: {
+            data: "="
+         },
+         controller: function controller() {
+            this.clear = function (data) {
+               this.data.persist.item = null;
+               this.data.searched = false;
+            };
+         },
+         controllerAs: "ctrl",
+         link: function link(scope) {
+            scope.$destroy = function () {
+               placenamesResultsService.hide();
+            };
+            placenamesResultsService.moreDocs(scope.ctrl.data.persist);
+         }
+      };
+   }]).factory("placenamesResultsService", ResultsService);
+
+   ResultsService.$inject = ['proxy', '$rootScope', '$timeout', 'configService', 'mapService', 'placenamesSearchService'];
+   function ResultsService(proxy, $rootScope, $timeout, configService, mapService, placenamesSearchService) {
+      var ZOOM_IN = 7;
+      var marker;
+
+      var service = {
+         showPan: function showPan(what) {
+            return this.show(what).then(function (details) {
+               var map = details.map;
+               map.panTo(details.location, { animate: true });
+               if (map.getZoom() < ZOOM_IN) {
+                  map.setZoom(ZOOM_IN, { animate: true });
+               }
+               return details;
+            });
+         },
+         show: function show(what) {
+            return this.hide().then(function (map) {
+               var location = what.location.split(" ").reverse().map(function (str) {
+                  return +str;
+               });
+               // split lng/lat string seperated by space, reverse to lat/lng, cooerce to numbers
+               marker = L.popup().setLatLng(location).setContent(what.name + "<br/>Lat/Lng: " + location[0] + "&deg;" + location[1] + "&deg;").openOn(map);
+
+               return {
+                  location: location,
+                  map: map,
+                  marker: marker
+               };
+            });
+         },
+         hide: function hide(what) {
+            return mapService.getMap().then(function (map) {
+               if (marker) {
+                  map.removeLayer(marker);
+               }
+               return map;
+            });
+         },
+
+
+         get config() {
+            return configService.getConfig().then(function (config) {
+               return config.results;
+            });
+         },
+
+         load: function load(id) {
+            return this.config.then(function (_ref) {
+               var esriTemplate = _ref.esriTemplate;
+
+               return proxy.get(esriTemplate.replace("${id}", id)).then(function (response) {
+                  return response;
+               });
+            });
+         },
+         moreDocs: function moreDocs(persist) {
+            var response = persist.data.response;
+            var start = response.docs.length;
+            if (start >= response.numFound) {
+               return;
+            }
+
+            var params = persist.params;
+            params.start = start;
+
+            placenamesSearchService.request(params).then(function (data) {
+               var _response$docs;
+
+               (_response$docs = response.docs).push.apply(_response$docs, _toConsumableArray(data.response.docs));
+            });
+         }
+      };
+
+      return service;
+   }
+})(angular);
+'use strict';
+
+(function (angular) {
+
+	'use strict';
+
+	angular.module('placenames.header', []).controller('headerController', ['$scope', '$q', '$timeout', function ($scope, $q, $timeout) {
+
+		var modifyConfigSource = function modifyConfigSource(headerConfig) {
+			return headerConfig;
+		};
+		$scope.$on('headerUpdated', function (event, args) {
+			$scope.headerConfig = modifyConfigSource(args);
+		});
+	}]).directive('placenamesHeader', [function () {
+		var defaults = {
+			heading: "Place Names",
+			headingtitle: "Place Names",
+			helpurl: "help.html",
+			helptitle: "Get help about Place Names",
+			helpalttext: "Get help about Place Names",
+			skiptocontenttitle: "Skip to content",
+			skiptocontent: "Skip to content",
+			quicklinksurl: "/search/api/quickLinks/json?lang=en-US"
+		};
+		return {
+			transclude: true,
+			restrict: 'EA',
+			templateUrl: "placenames/header/header.html",
+			scope: {
+				breadcrumbs: "=",
+				heading: "=",
+				headingtitle: "=",
+				helpurl: "=",
+				helptitle: "=",
+				helpalttext: "=",
+				skiptocontenttitle: "=",
+				skiptocontent: "=",
+				quicklinksurl: "="
+			},
+			link: function link(scope, element, attrs) {
+				var data = angular.copy(defaults);
+				angular.forEach(defaults, function (value, key) {
+					if (!(key in scope)) {
+						scope[key] = value;
+					}
+				});
+			}
+		};
+	}]).factory('headerService', ['$http', function () {}]);
+})(angular);
+"use strict";
+
+(function (angular) {
+
 	'use strict';
 
 	angular.module("placenames.toolbar", []).directive("placenamesToolbar", [function () {
@@ -755,11 +755,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return service;
    }]);
 })(angular);
-angular.module("placenames.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("placenames/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-header\">\r\n\r\n        <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".ga-header-collapse\">\r\n            <span class=\"sr-only\">Toggle navigation</span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n        </button>\r\n\r\n        <a href=\"http://www.ga.gov.au\" class=\"hidden-xs header-logo\" style=\"padding-right: 0\">\r\n            <img src=\"icsm/resources/img/icsm-logo-sml.gif\" alt=\"ICSM - ANZLIC Committee on Surveying &amp; Mapping\" class=\"elvis-logo\"></img>\r\n        </a>\r\n        <a href=\"/\" class=\"appTitle visible-xs\"><h1 style=\"font-size:120%\">{{heading}}</h1></a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n        	<li common-navigation ng-show=\"username\" role=\"menuitem\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");
-$templateCache.put("placenames/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" placenames-toolbar-row map=\"root.map\" ></div>\r\n			<div class=\"panesMapContainer target\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div placenames-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"pnTabContentItem\" ng-show=\"view == \'search\'\" ><placenames-search></placenames-search></div>\r\n		</div>\r\n	</div>\r\n</div>");
+angular.module("placenames.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("placenames/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" placenames-toolbar-row map=\"root.map\" ></div>\r\n			<div class=\"panesMapContainer target\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div placenames-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"pnTabContentItem\" ng-show=\"view == \'search\'\" ><placenames-search></placenames-search></div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("placenames/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n</div>\r\n");
-$templateCache.put("placenames/results/item.html","<div>\r\n<div class=\"container-fluid\">\r\n   <div class=\"row\">\r\n      <div class=\"col-md-12 pn-header\" >\r\n         <button type=\"button\" class=\"undecorated\" ng-click=\"vm.showPan(vm.item)\"\r\n                tooltip-append-to-body=\"true\" title=\"Zoom to location and mark.\" tooltip-placement=\"left\" uib-tooltip=\"Zoom to location and mark\">\r\n            <i class=\"fa fa-lg fa-flag-o\"></i>\r\n         </button>\r\n         <span><a ng-href=\"{{vm.item | pnGoogleLink}}\" target=\"_google\"\r\n            title=\"View in Google maps. While the location will always be correct, Google will do a best guess at matching the Gazetteer name to its data.\">{{vm.item.name}}</a></span>\r\n         <span class=\"pull-right\">Record ID: {{vm.item.recordId}}</span>\r\n      </div>\r\n   </div>\r\n</div>\r\n<div ng-if=\"!vm.feature\" style=\"padding:20px 10px 130px;\"><i class=\"fa-spinner fa-spin fa fa-lf\"></i>Loading full data&hellip;</div>\r\n<div class=\"container-fluid\" ng-if=\"vm.feature\">\r\n   <div class=\"row\" ng-if=\"vm.feature.attributes.Variant_Name\">\r\n      <div class=\"col-md-4\">Variant Name</div>\r\n      <div class=\"col-md-8\">{{vm.feature.attributes.Variant_Name | pnSplitBar}}</div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">State</div>\r\n      <div class=\"col-md-8\">{{vm.feature.attributes.State}}</div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">Feature Type</div>\r\n      <div class=\"col-md-8\">{{vm.feature.attributes.Feature_code | pnFeature}}</div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">Classification</div>\r\n      <div class=\"col-md-8\">{{vm.feature.attributes.Classification}}</div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">CGDN</div>\r\n      <div class=\"col-md-8\">{{vm.feature.attributes.CGDN}}</div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">Concise Gazetteer</div>\r\n      <div class=\"col-md-8\">{{vm.feature.attributes.Concise_gaz}}</div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">1:100K Map Index</div>\r\n      <div class=\"col-md-8\"><span class=\"pn-numeric\">{{vm.feature.attributes.Map_100K}}</span></div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">Authority</div>\r\n      <div class=\"col-md-8\">{{vm.feature.attributes.Authority_ID}}</div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">Status Description</div>\r\n      <div class=\"col-md-8\">{{vm.feature.attributes.Status_desc}}</div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">Latitude</div>\r\n      <div class=\"col-md-4\">\r\n         <span class=\"pn-numeric\">\r\n            {{vm.feature.attributes.Lat_degrees}}&deg;\r\n            {{vm.feature.attributes.Lat_minutes}}&prime;\r\n            {{vm.feature.attributes.Lat_seconds}}&Prime;\r\n         </span>\r\n      </div>\r\n      <div class=\"col-md-4\">\r\n         <span class=\"pn-numeric\">\r\n            {{vm.feature.attributes.Latitude}}&deg;\r\n         </span>\r\n      </div>\r\n   </div>\r\n\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">Longitude</div>\r\n      <div class=\"col-md-4\"><span class=\"pn-numeric\">\r\n         {{vm.feature.attributes.Long_degrees}}&deg;\r\n         {{vm.feature.attributes.Long_minutes}}&prime;\r\n         {{vm.feature.attributes.Long_seconds}}&Prime;\r\n         </span>\r\n      </div>\r\n      <div class=\"col-md-4\">\r\n         <span class=\"pn-numeric\">\r\n         {{vm.feature.attributes.Longitude}}&deg;</span></div>\r\n   </div>\r\n</div>");
-$templateCache.put("placenames/results/results.html","<div class=\"pn-container\">\r\n   <nav class=\"navbar navbar-default\" style=\"min-height:25px\">\r\n      <div class=\"container-fluid\">\r\n         <div class=\"navbar-header\">\r\n            <div class=\"navbar-brand\">\r\n               <a href=\"#\" ng-click=\"ctrl.clear()\"><i class=\"fa fa-angle-double-left\" aria-hidden=\"true\"></i></a> Matched {{ctrl.data.persist.data.response.numFound | number}}\r\n               features, fetched {{ctrl.data.persist.data.response.docs.length | number}}\r\n            </div>\r\n         </div>\r\n      </div>\r\n   </nav>\r\n\r\n   <div class=\"pn-results\">\r\n      <placenames-results-item ng-if=\"ctrl.data.persist.item\" item=\"ctrl.data.persist.item\"></placenames-results-item>\r\n      <div class=\"pn-results-list\" ng-if=\"!ctrl.data.persist.item\" ng-repeat=\"doc in ctrl.data.persist.data.response.docs\">\r\n         <placenames-results-item item=\"doc\"></placenames-results-item>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("placenames/search/search.html","<div class=\"pn-search-container\">\r\n   <div ng-if=\"state.searched\" placenames-results data=\"state\"></div>\r\n   <div style=\"float:clear\" ng-show=\"!state.searched\">\r\n      <h4 style=\"font-size:12\">Search by map location, partial name match or feature type</h4>\r\n      <div class=\"search-text\">\r\n         <div class=\"input-group input-group-sm\">\r\n            <span class=\"input-group-addon\" id=\"names1\">Filter:</span>\r\n\r\n            <input type=\"text\" ng-model=\"state.filter\" placeholder=\"Match by feature name...\" ng-model-options=\"{ debounce: 300}\"\r\n                  typeahead-on-select=\"select($item, $model, $label)\" typeahead-template-url=\"placenames/search/typeahead.html\"\r\n                  class=\"form-control\" typeahead-min-length=\"0\" uib-typeahead=\"doc as doc.name for doc in loadDocs(state.filter)\"\r\n                  typeahead-loading=\"loadingLocations\" typeahead-no-results=\"noResults\" placenames-clear>\r\n\r\n            <span class=\"input-group-btn\">\r\n            <button class=\"btn btn-primary\" type=\"button\" ng-click=\"search()\" ng-disabled=\"!state.persist.data\">Search</button>\r\n         </span>\r\n         </div>\r\n      </div>\r\n      <div>\r\n         <div ng-show=\"!(state.classifications | pnSomeSelected)\" style=\"text-align:right\"><strong>Found {{state.filtered.response.numFound | number}} features in map view.</strong></div>\r\n         <div ng-show=\"state.classifications | pnSomeSelected\">\r\n            <strong style=\"float:right\">Found {{state.filtered.response.numFound | number}} features</strong>\r\n            <span class=\"btn btn-primary btn-xs pnPill\" ng-repeat=\"type in state.classifications | pnSelectedFacets\" tooltip-append-to-body=\"true\"\r\n               tooltip-placement=\"left\" uib-tooltip=\"{{type.name}}\">\r\n            <span style=\"max-width:100px;display:inline-block;\" class=\"ellipsis\">{{type.name}}</span>\r\n            <span style=\"max-width:100px;display:inline-block;\" class=\"ellipsis\">\r\n               ({{state.filtered.facetCounts[type.code].count?state.filtered.facetCounts[type.code].count:0}})\r\n               <a ng-click=\"deselect(type)\" href=\"javascript:void(0)\"><i class=\"fa fa-close fa-xs\" style=\"color: white\"></i></a>\r\n            </span>\r\n            </span>\r\n         </div>\r\n      </div>\r\n      <uib-accordion close-others=\"oneAtATime\">\r\n         <div uib-accordion-group class=\"panel-default\" is-open=\"status.open\">\r\n            <uib-accordion-heading>\r\n               Filter by feature type...\r\n               <i class=\"pull-right glyphicon\" ng-class=\"{\'glyphicon-chevron-down\': status.open, \'glyphicon-chevron-right\': !status.open}\"></i>\r\n            </uib-accordion-heading>\r\n            <div ng-repeat=\"facet in state.classifications | pnUnselectedFacets\" class=\"row\">\r\n               <div class=\"col-md-12 ellipsis\">\r\n                  <input type=\"checkbox\" ng-model=\"facet.selected\" ng-change=\"update(facet)\" />\r\n                  <span tooltip-append-to-body=\"true\" tooltip-placement=\"top-left\" uib-tooltip=\"{{facet.name}}\">\r\n                           <a target=\"_blank\" href=\"http://www.google.com/search?q={{facet.name | pnClean}}\">{{facet.name}}</a>\r\n                        </span>\r\n               </div>\r\n            </div>\r\n         </div>\r\n      </uib-accordion>\r\n   </div>\r\n</div>");
 $templateCache.put("placenames/search/typeahead.html","<a placenames-options ng-mouseenter=\"enter()\" ng-mouseleave=\"leave()\"  tooltip-append-to-body=\"true\"\r\n               tooltip-placement=\"left\" uib-tooltip-html=\"match.model | pnTooltip\">\r\n   <span ng-bind-html=\"match.model.name | uibTypeaheadHighlight:query\"></span>\r\n   (<span ng-bind-html=\"match.model.recordId\"></span>)\r\n</a>");
+$templateCache.put("placenames/results/item.html","<div>\r\n<div class=\"container-fluid\">\r\n   <div class=\"row\">\r\n      <div class=\"col-md-12 pn-header\" >\r\n         <button type=\"button\" class=\"undecorated\" ng-click=\"vm.showPan(vm.item)\"\r\n                tooltip-append-to-body=\"true\" title=\"Zoom to location and mark.\" tooltip-placement=\"left\" uib-tooltip=\"Zoom to location and mark\">\r\n            <i class=\"fa fa-lg fa-flag-o\"></i>\r\n         </button>\r\n         <span><a ng-href=\"{{vm.item | pnGoogleLink}}\" target=\"_google\"\r\n            title=\"View in Google maps. While the location will always be correct, Google will do a best guess at matching the Gazetteer name to its data.\">{{vm.item.name}}</a></span>\r\n         <span class=\"pull-right\">Record ID: {{vm.item.recordId}}</span>\r\n      </div>\r\n   </div>\r\n</div>\r\n<div ng-if=\"!vm.feature\" style=\"padding:20px 10px 130px;\"><i class=\"fa-spinner fa-spin fa fa-lf\"></i>Loading full data&hellip;</div>\r\n<div class=\"container-fluid\" ng-if=\"vm.feature\">\r\n   <div class=\"row\" ng-if=\"vm.feature.attributes.Variant_Name\">\r\n      <div class=\"col-md-4\">Variant Name</div>\r\n      <div class=\"col-md-8\">{{vm.feature.attributes.Variant_Name | pnSplitBar}}</div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">State</div>\r\n      <div class=\"col-md-8\">{{vm.feature.attributes.State}}</div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">Feature Type</div>\r\n      <div class=\"col-md-8\">{{vm.feature.attributes.Feature_code | pnFeature}}</div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">Classification</div>\r\n      <div class=\"col-md-8\">{{vm.feature.attributes.Classification}}</div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">CGDN</div>\r\n      <div class=\"col-md-8\">{{vm.feature.attributes.CGDN}}</div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">Concise Gazetteer</div>\r\n      <div class=\"col-md-8\">{{vm.feature.attributes.Concise_gaz}}</div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">1:100K Map Index</div>\r\n      <div class=\"col-md-8\"><span class=\"pn-numeric\">{{vm.feature.attributes.Map_100K}}</span></div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">Authority</div>\r\n      <div class=\"col-md-8\">{{vm.feature.attributes.Authority_ID}}</div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">Status Description</div>\r\n      <div class=\"col-md-8\">{{vm.feature.attributes.Status_desc}}</div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">Latitude</div>\r\n      <div class=\"col-md-4\">\r\n         <span class=\"pn-numeric\">\r\n            {{vm.feature.attributes.Lat_degrees}}&deg;\r\n            {{vm.feature.attributes.Lat_minutes}}&prime;\r\n            {{vm.feature.attributes.Lat_seconds}}&Prime;\r\n         </span>\r\n      </div>\r\n      <div class=\"col-md-4\">\r\n         <span class=\"pn-numeric\">\r\n            {{vm.feature.attributes.Latitude}}&deg;\r\n         </span>\r\n      </div>\r\n   </div>\r\n\r\n   <div class=\"row\">\r\n      <div class=\"col-md-4\">Longitude</div>\r\n      <div class=\"col-md-4\"><span class=\"pn-numeric\">\r\n         {{vm.feature.attributes.Long_degrees}}&deg;\r\n         {{vm.feature.attributes.Long_minutes}}&prime;\r\n         {{vm.feature.attributes.Long_seconds}}&Prime;\r\n         </span>\r\n      </div>\r\n      <div class=\"col-md-4\">\r\n         <span class=\"pn-numeric\">\r\n         {{vm.feature.attributes.Longitude}}&deg;</span></div>\r\n   </div>\r\n</div>");
+$templateCache.put("placenames/results/results.html","<div class=\"pn-container\">\r\n   <nav class=\"navbar navbar-default\" style=\"min-height:25px\">\r\n      <div class=\"container-fluid\">\r\n         <div class=\"navbar-header\">\r\n            <div class=\"navbar-brand\">\r\n               <a href=\"#\" ng-click=\"ctrl.clear()\"><i class=\"fa fa-angle-double-left\" aria-hidden=\"true\"></i></a> Matched {{ctrl.data.persist.data.response.numFound | number}}\r\n               features, fetched {{ctrl.data.persist.data.response.docs.length | number}}\r\n            </div>\r\n         </div>\r\n      </div>\r\n   </nav>\r\n\r\n   <div class=\"pn-results\" common-scroll-load>\r\n      <placenames-results-item ng-if=\"ctrl.data.persist.item\" item=\"ctrl.data.persist.item\"></placenames-results-item>\r\n      <div class=\"pn-results-list\" ng-if=\"!ctrl.data.persist.item\" ng-repeat=\"doc in ctrl.data.persist.data.response.docs\">\r\n         <placenames-results-item item=\"doc\"></placenames-results-item>\r\n      </div>\r\n   </div>\r\n</div>");
+$templateCache.put("placenames/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-header\">\r\n\r\n        <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".ga-header-collapse\">\r\n            <span class=\"sr-only\">Toggle navigation</span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n        </button>\r\n\r\n        <a href=\"http://www.ga.gov.au\" class=\"hidden-xs header-logo\" style=\"padding-right: 0\">\r\n            <img src=\"icsm/resources/img/icsm-logo-sml.gif\" alt=\"ICSM - ANZLIC Committee on Surveying &amp; Mapping\" class=\"elvis-logo\"></img>\r\n        </a>\r\n        <a href=\"/\" class=\"appTitle visible-xs\"><h1 style=\"font-size:120%\">{{heading}}</h1></a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n        	<li common-navigation ng-show=\"username\" role=\"menuitem\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");
 $templateCache.put("placenames/toolbar/toolbar.html","<div placenames-toolbar>\r\n	<div class=\"row toolBarGroup\">\r\n\r\n		<div class=\"pull-right\">\r\n			<div class=\"btn-toolbar radCore\" role=\"toolbar\"  placenames-toolbar>\r\n				<div class=\"btn-group\">\r\n					<!-- < icsm-state-toggle></icsm-state-toggle> -->\r\n				</div>\r\n			</div>\r\n\r\n			<div class=\"btn-toolbar\" style=\"margin:right:10px;display:inline-block\">\r\n\r\n				<div class=\"btn-group\" title=\"Place names data density transparency\">\r\n					<span class=\"btn btn-default\" common-baselayer-control max-zoom=\"16\"></span>\r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");}]);
