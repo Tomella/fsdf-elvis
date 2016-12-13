@@ -202,7 +202,13 @@
          show(what) {
             this.hide().then(map => {
                // split lng/lat string seperated by space, reverse to lat/lng, cooerce to numbers
-               marker = L.marker(what.location.split(" ").reverse().map(str => +str)).addTo(map);
+               var location = what.location.split(" ").reverse().map(str => +str);
+               marker = L.popup()
+                     .setLatLng(location)
+                     .setContent(what.name + "<br/>Lat/Lng: " +
+                           location[0] + "&deg;" +
+                           location[1] + "&deg;")
+                     .openOn(map);;
             });
          },
 
