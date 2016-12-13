@@ -10,20 +10,15 @@
       .directive('placenamesClear', ['placenamesSearchService', function (placenamesSearchService) {
          return {
             link: function(scope, element) {
-
                placenamesSearchService.onMapUpdate(listening);
-
                function listening() {
-                  console.log("listened..")
                   if(element.is(":focus")) {
-                     console.log("Focused")
                      var e = $.Event("keydown");
                      e.which = 27; // # Some key code value
                      element.trigger(e);
                      element.blur();
                   }
                }
-               console.log("ERR")
             }
          };
       }])
@@ -55,7 +50,7 @@
 
                scope.$watch("state.searched", function(newVal, oldVal) {
                   if(!newVal && oldVal) {
-                     scope.state.filter = "";
+                     placenamesSearchService.filtered();
                   }
                });
 
