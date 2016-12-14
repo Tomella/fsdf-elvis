@@ -15,7 +15,7 @@ angular.module("water.select", ['water.select.service'])
 	return {
 		templateUrl : "water/select/select.html",
 		link: function(scope, element, attrs) {
-			console.log("Hello select!");
+			//console.log("Hello select!");
 		}
 	};
 }])
@@ -24,7 +24,7 @@ angular.module("water.select", ['water.select.service'])
 	return {
 		templateUrl : "water/select/doc.html",
 		link: function(scope, element, attrs) {
-			console.log("What's up doc!");
+			//console.log("What's up doc!");
 		}
 	};
 }])
@@ -37,7 +37,7 @@ angular.module("water.select", ['water.select.service'])
 			group: "="
 		},
 		link: function(scope, element, attrs) {
-			console.log("What's up doc!");
+			//console.log("What's up doc!");
 		}
 	};
 }])

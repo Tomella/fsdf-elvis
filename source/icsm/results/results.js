@@ -88,12 +88,10 @@
          			  scope.show = function(data) {
                        var bbox = toNumberArray(data.bbox);
                        $rootScope.$broadcast('icsm.bbox.draw', bbox);
- 				           console.log("show", bbox);
  			           };
 
  			           scope.hide = function(data) {
                        $rootScope.$broadcast('icsm.bbox.draw', null);
- 				           console.log("hide");
  			           };
 
                     $rootScope.$on('site.selection', function (event, data) {
@@ -127,12 +125,10 @@
                     scope.show = function (data) {
                         var bbox = toNumberArray(data.bbox);
                         $rootScope.$broadcast('icsm.bbox.draw', bbox);
-                        console.log("show", bbox);
                     };
 
                     scope.hide = function (data) {
                         $rootScope.$broadcast('icsm.bbox.draw', null);
-                        console.log("hide");
                     };
 
                     function decorateCounts(list, types) {
@@ -300,7 +296,6 @@
                         response[key] = item;
                     }
                 });
-                console.log(response);
                 return response;
             };
         }])

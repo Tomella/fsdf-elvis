@@ -4,7 +4,7 @@
 
 (function(angular) {
 
-'use strict';	
+'use strict';
 
 angular.module("icsm.select", ['icsm.select.service'])
 
@@ -15,7 +15,7 @@ angular.module("icsm.select", ['icsm.select.service'])
 	return {
 		templateUrl : "icsm/select/select.html",
 		link: function(scope, element, attrs) {
-			console.log("Hello select!");
+			//console.log("Hello select!");
 		}
 	};
 }])
@@ -24,7 +24,7 @@ angular.module("icsm.select", ['icsm.select.service'])
 	return {
 		templateUrl : "icsm/select/doc.html",
 		link: function(scope, element, attrs) {
-			console.log("What's up doc!");
+			//console.log("What's up doc!");
 		}
 	};
 }])
@@ -37,7 +37,7 @@ angular.module("icsm.select", ['icsm.select.service'])
 			group: "="
 		},
 		link: function(scope, element, attrs) {
-			console.log("What's up doc!");
+			//console.log("What's up doc!");
 		}
 	};
 }])
@@ -84,7 +84,7 @@ angular.module("icsm.select", ['icsm.select.service'])
 SelectCriteriaCtrl.$inject = ["selectService"];
 function SelectCriteriaCtrl(selectService) {
 	this.criteria = selectService.getSelectCriteria();
-	
+
 	this.refresh = function() {
 		selectService.refresh();
 	};
@@ -93,17 +93,17 @@ function SelectCriteriaCtrl(selectService) {
 SelectCtrl.$inject = ['$rootScope', 'configService', 'flashService', 'selectService'];
 function SelectCtrl($rootScope, configService, flashService, selectService) {
 	var flasher, self = this;
-	
+
 	$rootScope.$on("select.results.received", function(event, data) {
 		//console.log("Received response")
 		flashService.remove(flasher);
 		self.data = data;
 	});
-	
+
 	configService.getConfig("facets").then(function(config) {
 		this.hasKeywords = config && config.keywordMapped && config.keywordMapped.length > 0;
 	}.bind(this));
-	
+
 	this.select = function() {
 		flashService.remove(flasher);
 		flasher = flashService.add("Selecting", 3000, true);
@@ -113,11 +113,11 @@ function SelectCtrl($rootScope, configService, flashService, selectService) {
 	this.toggle = function(result) {
 		selectService.toggle(result);
 	};
-	
+
 	this.toggleAll = function() {
 		selectService.toggleAll(this.data.response.docs);
 	};
-	
+
 	this.showWithin = function() {
 		selectService.showWithin(this.data.response.docs);
 	};
@@ -139,17 +139,17 @@ function SelectCtrl($rootScope, configService, flashService, selectService) {
 			return dataset.showLayer;
 		});
 	};
-	
+
 	this.hideAll = function() {
 		selectService.hideAll(this.data.response.docs);
 	};
-	
+
 	this.hilight = function(doc) {
 		if(doc.layer) {
 			selectService.hilight(doc.layer);
 		}
 	};
-	
+
 	this.lolight = function(doc) {
 		if(doc.layer) {
 			selectService.lolight(doc.layer);

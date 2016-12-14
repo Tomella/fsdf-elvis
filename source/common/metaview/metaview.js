@@ -125,7 +125,6 @@
                array: "="
             },
             compile: function (element) {
-               console.log(element);
                // Use the compile function from the RecursionHelper,
                // And return the linking function(s) which it returns
                return RecursionHelper.compile(element, link);

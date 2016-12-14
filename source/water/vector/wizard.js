@@ -32,7 +32,7 @@
 				controller: "VectorDownloadCtrl",
 				templateUrl: "water/vector/popup.html",
 				link: function () {
-					console.log("What the download...");
+					//console.log("What the download...");
 				}
 			};
 		}])

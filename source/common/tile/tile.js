@@ -73,11 +73,8 @@
                   }
 
                   if (subscription.count === 1 && data.isTilesShowing) {
-                     console.log("Reshow tile layer");
                      this._showLayer(subscription.layer);
                   }
-
-                  console.log("We have " + subscription.count + " subscribers");
                },
 
                unsubscribe: function (data) {
@@ -88,8 +85,7 @@
                      subscription.count--;
 
                      if (!subscription.count) {
-                        // We want to clean up here. We don't say we aren't showing, we
-                        console.log("Removing layer, deferred");
+                        // We want to clean up here. We don't say we aren't showing,
                         if (data.isTilesShowing) {
                            this._hideLayer(subscription.layer);
                         }

@@ -72,7 +72,7 @@
             restrict: "AE",
             link: function (scope, element) {
                scope.data = reviewService.data;
-               console.log("data" + scope.data);
+               //console.log("data" + scope.data);
             }
          };
       }])

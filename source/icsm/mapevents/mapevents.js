@@ -89,7 +89,7 @@ angular.module("icsm.mapevents", ['geo.map'])
             }
 
             var point;
-            if (typeof data.properties.SAMPLE_LONGITUDE != "undefined") {
+            if (typeof data.properties.SAMPLE_LONGITUDE !== "undefined") {
                point = {
                   type: "Point",
                   coordinates: [
@@ -114,9 +114,7 @@ angular.module("icsm.mapevents", ['geo.map'])
       }
 
       function makePoly(data, zoomTo) {
-         console.log("pre getting map to make poly");
          mapService.getMap().then(function (map) {
-            console.log("getting map to make poly");
             if (poly) {
                map.removeLayer(poly);
             }
@@ -147,9 +145,7 @@ angular.module("icsm.mapevents", ['geo.map'])
       }
 
       function makeBounds(data, zoomTo) {
-         console.log("pre getting map to make bounds");
          mapService.getMap().then(function (map) {
-            console.log("getting map to make poly");
             if (bounds) {
                map.removeLayer(bounds);
             }

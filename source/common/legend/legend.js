@@ -13,7 +13,6 @@ angular.module('common.legend', [])
       restrict: "AE",
       link: function(scope) {
          if(scope.map) {
-            console.log(map);
          }
       }
    };

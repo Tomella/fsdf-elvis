@@ -24,7 +24,7 @@
 									break;
 								default:
 									flashService.remove(flasher);
-									flasher = flashService.add(message.text, message.duration ? message.duration : 8000, message.type == "wait");
+									flasher = flashService.add(message.text, message.duration ? message.duration : 8000, message.type === "wait");
 							}
 						});
 					}
@@ -40,7 +40,6 @@
 						$rootScope.$on('icsm.clip.drawn', function (event, clip) {
 							send('Area drawn. Checking for data...');
 							checkSize(clip).then(function (message) {
-								console.log(message);
 								if (message.code === "success") {
 									$rootScope.$broadcast('icsm.bounds.draw', [
 										clip.xMin,

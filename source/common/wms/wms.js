@@ -23,7 +23,7 @@ angular.module("common.wms", [])
 			});
 
 			$rootScope.$on('hide.wms', function(event, id) {
-				if(scope.data && id == scope.data.sysId && scope.data.isWmsShowing) {
+				if(scope.data && id === scope.data.sysId && scope.data.isWmsShowing) {
 					scope.toggle();
 				}
 			});
@@ -73,12 +73,9 @@ angular.module("common.wms", [])
 				};
 			}
 
-			if(subscription.count == 1 && data.isWmsShowing) {
-				console.log("Reshow WMS layer");
+			if(subscription.count === 1 && data.isWmsShowing) {
 				this._showLayer(subscription.layer);
 			}
-
-			console.log("We have " + subscription.count + " subscribers");
 		},
 
 		unsubscribe : function(data) {
@@ -90,7 +87,6 @@ angular.module("common.wms", [])
 
 				if(!subscription.count) {
 					// We want to clean up here. We don't say we aren't showing, we
-					console.log("Removing layer, deferred");
 					if(data.isWmsShowing) {
 						this._hideLayer(subscription.layer);
 					}
