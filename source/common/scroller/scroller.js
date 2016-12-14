@@ -3,29 +3,25 @@
 
    angular.module("common.scroll", [])
 
-      .directive("commonScrollLoad", ['$timeout', function ($timeout) {
+      .directive("commonScroller", ['$timeout', function ($timeout) {
          return {
             scope: {
                more: "&",
-               allFetched: "="
+               buffer: "=?"
             },
             link: function (scope, element, attrs) {
                var fetching;
-               element.on("scroll", function (event) {
-                  var target = element[0],
-                     dim = target.getBoundingClientRect(),
-                     totalHeight = dim.height,
-                     scrollHeight = element.scrollTop(),
-                     scrollWindow = element.height(),
-                     scrollBottom;
-                  if (fetching) return;
+               if(!scope.buffer) scope.buffer = 100;
 
-                  fetching = true;
-                  $timeout(bouncer, 250);
+               element.on("scroll", function (event) {
+                  var target = event.currentTarget;
+                  $timeout.cancel( fetching );
+                  fetching = $timeout(bouncer, 120);
 
                   function bouncer() {
-                     fetching = false;
-                     console.log("bouncer1");
+                     if(scope.more && (target.scrollHeight - target.scrollTop <= target.clientHeight + scope.buffer)) {
+                        scope.more();
+                     }
                   }
                });
             }

@@ -646,53 +646,6 @@ img.elvis-logo {
 .icsm-logo.last {
   padding-right: 10px;
 }
-.reviewing-odd {
-  background-color: #eeeeee;
-}
-
-.row.reviewing-divider {
-  border-top: 1px solid lightgray;
-  padding-top: 5px;
-  margin-top: 5px;
-}
-
-.reviewing-datasets {
-  max-height: 450px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-@media (max-height: 750px) {
-  .reviewing-datasets {
-    max-height: 350px;
-  }
-}
-
-@media (max-height: 650px) {
-  .reviewing-datasets {
-    max-height: 250px;
-  }
-}
-
-.exclude {
-  color: #777777;
-  text-decoration: line-through;
-}
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
 .continue-container {
   padding: 4px;
 }
@@ -831,6 +784,53 @@ i.fa.active {
   left: 0;
   right: 0;
 }
+.reviewing-odd {
+  background-color: #eeeeee;
+}
+
+.row.reviewing-divider {
+  border-top: 1px solid lightgray;
+  padding-top: 5px;
+  margin-top: 5px;
+}
+
+.reviewing-datasets {
+  max-height: 450px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-height: 750px) {
+  .reviewing-datasets {
+    max-height: 350px;
+  }
+}
+
+@media (max-height: 650px) {
+  .reviewing-datasets {
+    max-height: 250px;
+  }
+}
+
+.exclude {
+  color: #777777;
+  text-decoration: line-through;
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
+}
 .icsm-icon {
   background: url("icsm/img/global-sprites.svg") no-repeat;
   display: inline-block;
@@ -893,22 +893,6 @@ i.fa.active {
   color: #fff;
   background-color: #777;
 }
-.downloadPane {
-  padding-left: 0px !important;
-  padding-right: 5px !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 10px;
-  overflow: hidden;
-}
-
-.downloadCont {
-  position: fixed;
-  right: 0;
-  bottom: 8px;
-}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -955,6 +939,29 @@ div.leaflet-control-scale-line {
     display: none;
   }
 }
+.downloadPane {
+  padding-left: 0px !important;
+  padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 10px;
+  overflow: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
+}
+.pnTabContentItem {
+  padding-right: 3px;
+  background: #FFF;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 .pn-container {
   position: absolute;
   top: 10px;
@@ -985,19 +992,12 @@ div.leaflet-control-scale-line {
 
 .pn-results-list {
   border-bottom: 1px solid lightgray;
-  padding-bottom: 10px;
+  padding-bottom: 4px;
 }
 
 .pn-results-list:last-child {
   border-bottom: 0;
   padding-bottom: 0;
-}
-.pnTabContentItem {
-  padding-right: 3px;
-  background: #FFF;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 .placenames-features {
   max-block-size: 300px;
@@ -1016,69 +1016,6 @@ div.leaflet-control-scale-line {
 .pnPill {
   color: #fff;
   margin: 4px;
-}
-.start-content-container {
-  position: fixed;
-  top: 95px;
-  bottom: 6px;
-  overflow-y: auto;
-  left: 0;
-  right: 0;
-}
-
-@media (min-width: 1200px) {
-  .start-content-container .panel {
-    margin-left: 150px;
-    margin-right: 150px;
-  }
-}
-
-.select-icon {
-  background: url("../resources/img/sprites.svg") no-repeat;
-  display: inline-block;
-  width: 75px;
-  height: 120px;
-  margin: 0 auto 0 auto;
-}
-
-.select-pin {
-  background-position: 0px;
-}
-
-.select-map {
-  background-position: -75px;
-}
-
-.select-crosshair {
-  background-position: -150px;
-}
-
-.select-sign {
-  background-position: -225px;
-}
-
-.select-parcel {
-  background-position: -300px;
-}
-
-.select-satellite {
-  background-position: -375px;
-}
-
-.select-ship {
-  background-position: -450px;
-}
-
-.select-water {
-  background-position: -525px;
-}
-
-.select-shore {
-  background-position: -600px;
-}
-
-.select-land {
-  background-position: -675px;
 }
 .selectContainer {
   width: 100%;
@@ -1154,4 +1091,67 @@ div.leaflet-control-scale-line {
 
 .vector-add:disabled {
   color: gray;
+}
+.start-content-container {
+  position: fixed;
+  top: 95px;
+  bottom: 6px;
+  overflow-y: auto;
+  left: 0;
+  right: 0;
+}
+
+@media (min-width: 1200px) {
+  .start-content-container .panel {
+    margin-left: 150px;
+    margin-right: 150px;
+  }
+}
+
+.select-icon {
+  background: url("../resources/img/sprites.svg") no-repeat;
+  display: inline-block;
+  width: 75px;
+  height: 120px;
+  margin: 0 auto 0 auto;
+}
+
+.select-pin {
+  background-position: 0px;
+}
+
+.select-map {
+  background-position: -75px;
+}
+
+.select-crosshair {
+  background-position: -150px;
+}
+
+.select-sign {
+  background-position: -225px;
+}
+
+.select-parcel {
+  background-position: -300px;
+}
+
+.select-satellite {
+  background-position: -375px;
+}
+
+.select-ship {
+  background-position: -450px;
+}
+
+.select-water {
+  background-position: -525px;
+}
+
+.select-shore {
+  background-position: -600px;
+}
+
+.select-land {
+  background-position: -675px;
 }

@@ -3,14 +3,17 @@
       <div class="container-fluid">
          <div class="navbar-header">
             <div class="navbar-brand">
-               <a href="#" ng-click="ctrl.clear()"><i class="fa fa-angle-double-left" aria-hidden="true"></i></a> Matched {{ctrl.data.persist.data.response.numFound | number}}
-               features, fetched {{ctrl.data.persist.data.response.docs.length | number}}
+               <a href="#" ng-click="ctrl.clear()"><i class="fa fa-angle-double-left" aria-hidden="true"></i></a>
+               Matched {{ctrl.data.persist.data.response.numFound | number}} features
+               <span ng-if="!ctrl.data.persist.item">, nearest {{ctrl.data.persist.data.response.docs.length | number}} features
+                  <a href"javascript:void()" ng-click="ctrl.download()" uib-tooltip="Download listed features in ESRI JSON format" tooltip-placement="bottom"><i class="fa fa-download"></i></a>
+               </span>
             </div>
          </div>
       </div>
    </nav>
 
-   <div class="pn-results" common-scroll-load>
+   <div class="pn-results" common-scroller more="ctrl.more()" >
       <placenames-results-item ng-if="ctrl.data.persist.item" item="ctrl.data.persist.item"></placenames-results-item>
       <div class="pn-results-list" ng-if="!ctrl.data.persist.item" ng-repeat="doc in ctrl.data.persist.data.response.docs">
          <placenames-results-item item="doc"></placenames-results-item>

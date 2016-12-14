@@ -208,7 +208,7 @@
                      .setContent(what.name + "<br/>Lat/Lng: " +
                            location[0] + "&deg;" +
                            location[1] + "&deg;")
-                     .openOn(map);;
+                     .openOn(map);
             });
          },
 

@@ -4,16 +4,24 @@
 
    angular.module("placenames.results.item", [])
 
-      .directive("placenamesResultsItem", ['placenamesResultsService', function (placenamesResultsService) {
+      .directive("placenamesResultsItem", ['placenamesItemService', 'placenamesResultsService',
+            function (placenamesItemService, placenamesResultsService) {
+
+
          return {
             templateUrl: "placenames/results/item.html",
             bindToController: {
                item: "="
             },
             controller: function () {
-               this.showPan = function(feature) {
+               this.showPan = function (feature) {
                   placenamesResultsService.showPan(feature);
                };
+
+               this.download = function (type) {
+                  placenamesItemService[type](this);
+               };
+
                placenamesResultsService.load(this.item.id).then(data => {
                   this.feature = data.features[0];
                });
@@ -22,11 +30,22 @@
          };
       }])
 
-      .factory('placenamesItemService', ['mapService', function (mapService) {
+      .factory('placenamesItemService', ['$http', 'configService', function ($http, configService) {
+         var service = {
+            esri(vm) {
+               var blob = new Blob([JSON.stringify(vm.feature, null, 3)], { type: "application/json;charset=utf-8" });
+               saveAs(blob, "gazetteer-esri-feature-" + vm.item.recordId + ".json");
+            },
 
-         var service = {};
-
-
+            wfs(vm) {
+               configService.getConfig("results").then(({wfsTemplate}) => {
+                  $http.get(wfsTemplate.replace("${id}", vm.item.id)).then(response => {
+                     var blob = new Blob([response.data], { type: "application/json;charset=utf-8" });
+                     saveAs(blob, "gazetteer-wfs-feature-" + vm.item.recordId + ".xml");
+                  });
+               });
+            }
+         };
          return service;
       }]);
 

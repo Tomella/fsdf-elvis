@@ -5,9 +5,9 @@
    angular.module("placenames.utils", [])
 
       .filter("pnSplitBar", function () {
-         return function (val) {
+         return function (val = "") {
             var buffer = "";
-            (val ? val : "").split("|").forEach((name, index, variants) => {
+            val.split("|").forEach((name, index, variants) => {
                buffer += (index && index < variants.length - 1 ? "," : "") + " ";
                if (index && index === variants.length - 1) {
                   buffer += "or ";
@@ -31,19 +31,18 @@
       .filter("pnGoogleLink", function() {
          var template = "https://www.google.com.au/maps/place/${name}/@${lat},${lng},14z";
          return function(what) {
-            var location = what.location.split(" ");
+            if(!what) return "";
+            let location = what.location.split(" ");
 
             return template
                .replace("${name}", what.name)
                .replace("${lng}", location[0])
-               .replace("${lat}", location[1])
-         }
+               .replace("${lat}", location[1]);
+         };
       })
 
       .factory('placenamesUtilsService', ['configService', function (configService) {
-
          var service = {};
-
 
          return service;
       }]);

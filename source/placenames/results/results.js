@@ -15,6 +15,14 @@
                   this.data.persist.item = null;
                   this.data.searched = false;
                };
+
+               this.more = function() {
+                  placenamesResultsService.moreDocs(this.data.persist);
+               };
+
+               this.download = function() {
+                  placenamesResultsService.download(this.data.persist.data.response.docs.map(doc => doc.id));
+               };
             },
             controllerAs: "ctrl",
             link: function (scope) {
@@ -28,8 +36,8 @@
 
       .factory("placenamesResultsService", ResultsService);
 
-   ResultsService.$inject = ['proxy', '$rootScope', '$timeout', 'configService', 'mapService', 'placenamesSearchService'];
-   function ResultsService(proxy, $rootScope, $timeout, configService, mapService, placenamesSearchService) {
+   ResultsService.$inject = ['proxy', '$http', '$rootScope', '$timeout', 'configService', 'mapService', 'placenamesSearchService'];
+   function ResultsService(proxy, $http, $rootScope, $timeout, configService, mapService, placenamesSearchService) {
       const ZOOM_IN = 7;
       var marker;
 
@@ -61,6 +69,15 @@
                   map,
                   marker
                };
+            });
+         },
+
+         download(ids) {
+            this.config.then(config => {
+               $http.get("proxy/" + config.esriTemplate.replace("${id}", ids.join(","))).then(response => {
+                  var blob = new Blob([JSON.stringify(response.data, null, 3)], { type: "application/json;charset=utf-8" });
+                  saveAs(blob, "gazetteer-esri-features-" + Date.now() + ".json");
+               });
             });
          },
 

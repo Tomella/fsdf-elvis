@@ -200,6 +200,7 @@
       "YD": "Yard"
    },
    "results": {
-      "esriTemplate": "http://services.ga.gov.au/site_1/rest/services/Australian_Gazetteer//MapServer/0/query?f=json&outFields=*&where=&returnGeometry=true&spatialRel=esriSpatialRelIntersects&objectIds=${id}"
+      "esriTemplate": "http://services.ga.gov.au/site_1/rest/services/Australian_Gazetteer/MapServer/0/query?f=json&outFields=*&where=&returnGeometry=true&spatialRel=esriSpatialRelIntersects&objectIds=${id}",
+      "wfsTemplate": "http://services.ga.gov.au/site_1/services/Australian_Gazetteer/MapServer/WFSServer?request=getfeature&typename=Gazetteer_of_Australia&maxCount=&Filter=%3Cogc:Filter%3E%3Cogc:PropertyIsEqualTo%3E%3Cogc:PropertyName%3EOBJECTID%3C/ogc:PropertyName%3E%3Cogc:Literal%3E${id}%3C/ogc:Literal%3E%3C/ogc:PropertyIsEqualTo%3E%3C/ogc:Filter%3E"
    }
 }
