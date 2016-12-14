@@ -20,12 +20,12 @@
       },
       {
          "code": "sign",
+         "enabled": true,
          "label": "Place Names",
-         "title": "Ccultural and physical features and their associated spatial identifiers, location and extent.",
+         "title": "Cultural and physical features and their associated spatial identifiers, location and extent.",
          "description": "Place Names are the names of cultural and physical features and their associated spatial identifiers, location and extent. Place Names constitute the most commonly used spatial references and can be approved, unapproved, commonly used or historical.",
          "className": "altthemes-sign",
-         "url": "comingSoon.html",
-         "urlPending": "placeNames.html"
+         "url": "placenames.html"
       },
       {
          "code": "parcel",
