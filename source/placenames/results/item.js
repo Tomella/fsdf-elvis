@@ -7,13 +7,13 @@
       .directive("placenamesResultsItem", ['placenamesItemService', 'placenamesResultsService',
             function (placenamesItemService, placenamesResultsService) {
 
-
          return {
             templateUrl: "placenames/results/item.html",
             bindToController: {
                item: "="
             },
             controller: function () {
+               console.log("Creating an item scope")
                this.showPan = function (feature) {
                   placenamesResultsService.showPan(feature);
                };

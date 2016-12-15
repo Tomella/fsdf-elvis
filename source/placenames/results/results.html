@@ -1,4 +1,4 @@
-<div class="pn-container">
+<div class="pn-container" ng-if="ctrl.data.searched">
    <nav class="navbar navbar-default" style="min-height:25px">
       <div class="container-fluid">
          <div class="navbar-header">
@@ -13,7 +13,7 @@
       </div>
    </nav>
 
-   <div class="pn-results" common-scroller more="ctrl.more()" >
+   <div class="pn-results" common-scroller more="ctrl.more()" ng-if="ctrl.data.searched">
       <placenames-results-item ng-if="ctrl.data.persist.item" item="ctrl.data.persist.item"></placenames-results-item>
       <div class="pn-results-list" ng-if="!ctrl.data.persist.item" ng-repeat="doc in ctrl.data.persist.data.response.docs">
          <placenames-results-item item="doc"></placenames-results-item>

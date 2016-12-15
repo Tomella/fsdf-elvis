@@ -74,7 +74,7 @@
 
          download(ids) {
             this.config.then(config => {
-               $http.get("proxy/" + config.esriTemplate.replace("${id}", ids.join(","))).then(response => {
+               proxy.get(config.esriTemplate.replace("${id}", ids.join(","))).then(response => {
                   var blob = new Blob([JSON.stringify(response.data, null, 3)], { type: "application/json;charset=utf-8" });
                   saveAs(blob, "gazetteer-esri-features-" + Date.now() + ".json");
                });
@@ -98,7 +98,7 @@
 
          load(id) {
             return this.config.then(({esriTemplate}) => {
-               return proxy.get(esriTemplate.replace("${id}", id)).then(response => {
+               return proxy.get(esriTemplate.replace("${id}", id), {cache: true}).then(response => {
                   return response;
                });
             });
