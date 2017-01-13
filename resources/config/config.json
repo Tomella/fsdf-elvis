@@ -213,7 +213,6 @@
 	"processing": {
       "method": "POST",
       "postProcessingUrl": "https://elvis20161a-ga.fmecloud.com/fmejobsubmitter/fsdf_elvis_prod/ZipDownloadablesPOST.fmw?opt_showresult=false&opt_servicemode=async&opt_responseformat=json",
-	   "processingUrl": "https://elvis20161a-ga.fmecloud.com/fmejobsubmitter/fsdf_elvis_test/ZipDownloadables.fmw?SELECTION_JSON={json}&XMIN={minx}&XMAX={maxx}&YMIN={miny}&YMAX={maxy}&EMAIL_ADDRESS={email}&opt_showresult=false&opt_servicemode=async",
 	   "intersectsUrl": "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/fsdf_elvis_prod/ReturnDownloadables.fmw?ymin={miny}&ymax={maxy}&xmin={minx}&xmax={maxx}"
 	}
 }

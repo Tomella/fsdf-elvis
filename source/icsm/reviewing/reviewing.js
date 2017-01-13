@@ -98,56 +98,35 @@
                this.setEmail(data.email);
 
                return configService.getConfig("processing").then(function(config) {
-                  if(config.method === 'POST') {
-                     let postData = convertFlatToStructured(listService.products.filter(product => product.selected && !product.removed));
-                     postData.parameters = {
-                        xmin: clip.xMin,
-                        xmax: clip.xMax,
-                        ymin: clip.yMin,
-                        ymax: clip.yMax,
-                        email: data.email
-                     };
+                  let postData = convertFlatToStructured(listService.products.filter(product => product.selected && !product.removed));
+                  postData.parameters = {
+                     xmin: clip.xMin,
+                     xmax: clip.xMax,
+                     ymin: clip.yMin,
+                     ymax: clip.yMax,
+                     email: data.email
+                  };
 
-                     listService.products.forEach(product => {
-                        product.selected = product.removed = false;
-                     });
+                  listService.products.forEach(product => {
+                     product.selected = product.removed = false;
+                  });
 
-                     return $http({
-                        method: 'POST',
-                        url: config.postProcessingUrl,
-                        data: postData,
-                        headers: { "Content-Type": "application/json" }
-                     }).then(function(response) {
-                        return {
-                           status: "success",
-                           message: "Your job has been submitted. An email will be sent on job completion."
-                        };
-                     }, function(d) {
-                        return {
-                           status: "error",
-                           message: "Sorry but the service failed to respond. Try again later."
-                        };
-                     });
-                  } else {
-                     let getData = {
-                        json: JSON.stringify(convertFlatToStructured(listService.products.filter(product => product.selected && !product.removed))),
-                        maxx: clip.xMax,
-                        maxy: clip.yMax,
-                        minx: clip.xMin,
-                        miny: clip.yMin,
-                        email: data.email
-                     };
-                     $("#launcher")[0].src = transformTemplate(config.processingUrl, getData);
-
-                     listService.products.forEach(product => {
-                        product.selected = product.removed = false;
-                     });
-
+                  return $http({
+                     method: 'POST',
+                     url: config.postProcessingUrl,
+                     data: postData,
+                     headers: { "Content-Type": "application/json" }
+                  }).then(function(response) {
                      return {
                         status: "success",
                         message: "Your job has been submitted. An email will be sent on job completion."
                      };
-                  }
+                  }, function(d) {
+                     return {
+                        status: "error",
+                        message: "Sorry but the service failed to respond. Try again later."
+                     };
+                  });
                });
             },
 
