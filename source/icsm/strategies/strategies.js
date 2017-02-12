@@ -166,6 +166,7 @@ class QldStrategy extends BaseStrategy {
    constructor(http) {
       super(http);
       this.QLD_METADATA_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/rest/document?id={3BD8145A-4ECA-4E0B-A78A-B2C4B9320DFF}&f=xml";
+      this.QLD_HTML_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/custom/detail.page?fid={3BD8145A-4ECA-4E0B-A78A-B2C4B9320DFF}";
    }
 
    constructLink(item) {
@@ -173,7 +174,7 @@ class QldStrategy extends BaseStrategy {
       var re = /\_5\d\_/;
       var index = filename.search(re);
       var zone = 6;
-      var url = this.QLD_METADATA_TEMPLATE;
+      var url = this.QLD_HTML_TEMPLATE;
       if (index !== -1) {
          zone = filename.substr(index + 2, 1);
       }
