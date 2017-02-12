@@ -53,7 +53,6 @@ under the License.
             value = value + ".html";
          }
          document.getElementById("launcher").src = config.baseUrl + value;
-         console.log("Value = " + value);
       };
    });
 })(angular);

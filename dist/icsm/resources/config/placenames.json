@@ -69,8 +69,53 @@
       "outside": "topography",
       "inside": "nswTopo"
    },
-
-   "classifications": {
+   "authorities": {
+      "AAD": {
+         "jurisdiction": "Australian Government",
+         "name": "Australian Antarctic Division"
+      },
+      "AHO": {
+         "jurisdiction": "Australian Government",
+         "name": "Australian Hydrographic Service"
+      },
+      "GA": {
+         "jurisdiction": "Australian Government",
+         "name": "Geoscience Australia"
+      },
+      "ACT": {
+         "jurisdiction": "Australian Capital Territory",
+         "name": "ACT Planning and Land Authority"
+      },
+      "NSW": {
+         "jurisdiction": "New South Wales",
+         "name": "Geographical Names Board"
+      },
+      "NT": {
+         "jurisdiction": "Northern Territory",
+         "name": "Department of Planning and Infrastructure"
+      },
+      "QLD": {
+         "jurisdiction": "Queensland",
+         "name": "Department of Natural Resources and Water"
+      },
+      "SA": {
+         "jurisdiction": "South Australia",
+         "name": "Department for Transport, Energy and Infrastructure Land Services Group"
+      },
+      "TAS": {
+         "jurisdiction": "Tasmania",
+         "name": "Department of Primary Industries and Water"
+      },
+      "VIC": {
+         "jurisdiction": "Victoria",
+         "name": "Department of Sustainability and Environment"
+      },
+      "WA": {
+         "jurisdiction": "Western Australia",
+         "name": "Landgate"
+      }
+   },
+   "featureCodes": {
       "AF": "Aerodrome, Airfield, Airport, Landing ground, Airstrip",
       "ANCH": "Anchorage",
       "ARCH": "Archipelago",
@@ -199,6 +244,8 @@
       "WTRH": "Waterhole, Lagoon, Hole, Pool, Billabong, Oxbow, Washpool",
       "YD": "Yard"
    },
+   "facetsQuery": "select?facet=true&facet.field=classification&facet.field=authority&facet.field=featureCode&facet.field=authority&q=*:*&rows=1&wt=json",
+   "featureTypesTable": "http://services.ga.gov.au/site_1/rest/services/Australian_Gazetteer/MapServer/1/query?where=1%3D1&outFields=Feat_code%2CFeature_desc&f=pjson",
    "results": {
       "esriTemplate": "http://services.ga.gov.au/site_1/rest/services/Australian_Gazetteer/MapServer/0/query?f=json&outFields=*&where=&returnGeometry=true&spatialRel=esriSpatialRelIntersects&objectIds=${id}",
       "wfsTemplate": "http://services.ga.gov.au/site_1/services/Australian_Gazetteer/MapServer/WFSServer?request=getfeature&typename=Gazetteer_of_Australia&maxCount=&Filter=%3Cogc:Filter%3E%3Cogc:PropertyIsEqualTo%3E%3Cogc:PropertyName%3EOBJECTID%3C/ogc:PropertyName%3E%3Cogc:Literal%3E${id}%3C/ogc:Literal%3E%3C/ogc:PropertyIsEqualTo%3E%3C/ogc:Filter%3E"

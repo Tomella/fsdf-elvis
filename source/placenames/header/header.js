@@ -15,7 +15,7 @@
 			});
 		}])
 
-		.directive('placenamesHeader', [function () {
+		.directive('pnHeader', [function () {
 			var defaults = {
 				heading: "Place Names",
 				headingtitle: "Place Names",

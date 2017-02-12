@@ -165,6 +165,43 @@ class NtStrategy extends BaseStrategy {
 class QldStrategy extends BaseStrategy {
    constructor(http) {
       super(http);
+      this.QLD_METADATA_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/rest/document?id={3BD8145A-4ECA-4E0B-A78A-B2C4B9320DFF}&f=xml";
+   }
+
+   constructLink(item) {
+      var filename = item.file_name;
+      var re = /\_5\d\_/;
+      var index = filename.search(re);
+      var zone = 6;
+      var url = this.QLD_METADATA_TEMPLATE;
+      if (index !== -1) {
+         zone = filename.substr(index + 2, 1);
+      }
+      return url.replace("${zone}", zone);
+   }
+
+   hasMetadata(item) {
+      return true;
+   }
+
+   requestMetadata(item) {
+      var filename = item.file_name;
+      var re = /\_5\d\_/;
+      var index = filename.search(re);
+      var zone = 6;
+      var url = this.QLD_METADATA_TEMPLATE;
+      if (index !== -1) {
+         zone = filename.substr(index + 2, 1);
+      }
+      url = "xml2js/" + url.replace("${zone}", zone);
+
+      return this.http.get(url).then(response => {
+         return BaseStrategy.extractData(response.data);
+      }, err => {
+         return {
+            title: super.NO_METADATA
+         };
+      });
    }
 }
 
@@ -201,7 +238,7 @@ class Strategies {
          "VIC Government": unknown, // new VicStrategy(http),
          "SA Government": unknown, // new SaStrategy(http),
          "WA Government": unknown, // new WaStrategy(http),
-         "QLD Government": unknown, // new QldStrategy(http),
+         "QLD Government": new QldStrategy(http),
          "ACT Government": unknown, // new ActStrategy(http),
          "NT Government": unknown, // new NtStrategy(http),
          "TAS Government": unknown, // new TasStrategy(http),

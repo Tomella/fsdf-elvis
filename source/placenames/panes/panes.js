@@ -30,7 +30,7 @@ function PaneService() {
 
 angular.module("placenames.panes", [])
 
-.directive("placenamesPanes", ['$rootScope', '$timeout', 'mapService', function($rootScope, $timeout, mapService) {
+.directive("pnPanes", ['$rootScope', '$timeout', 'mapService', function($rootScope, $timeout, mapService) {
 	return {
 		templateUrl : "placenames/panes/panes.html",
 		transclude : true,
@@ -73,10 +73,10 @@ angular.module("placenames.panes", [])
 	};
 }])
 
-.directive("placenamesTabs", [function() {
+.directive("pnTabs", [function() {
 	return {
 		templateUrl : "placenames/panes/tabs.html",
-		require : "^placenamesPanes"
+		require : "^pnPanes"
 	};
 }])
 

@@ -3,6 +3,7 @@
 'use strict';
 
 angular.module("PlacenamesApp", [
+      'placenames.classifications',
       'placenames.header',
       'placenames.panes',
       "placenames.results",

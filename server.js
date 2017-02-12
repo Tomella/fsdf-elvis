@@ -44,6 +44,7 @@ var dontProxyHeaderRegex = /^(?:Host|Proxy-Connection|Accept-Encoding|Connection
 // There should only ever be a couple. We do a contains on the requested host.
 var validHosts = [
     "localhost",
+    "qldspatial.information.qld.gov.au",
     ".ga.gov.au",
     ".motogp.com",
     "elvis20161a-ga.fmecloud.com",
@@ -171,7 +172,6 @@ app.get('/select', function (req, res, next) {
     var solrSelect = "http://localhost:8983/solr/placenames";
 
     // encoding : null means "body" passed to the callback will be raw bytes
-    console.log(req.url);
     request.get(solrSelect + req.url, function (error, response, body) {
         var code = 500;
 
@@ -187,6 +187,7 @@ app.get('/select', function (req, res, next) {
 
 app.get('/proxy/*', function (req, res, next) {
     // look for request like http://localhost:8080/proxy/http://example.com/file?query=1
+
     var remoteUrl = getRemoteUrlFromParam(req);
     if (!remoteUrl) {
         // look for request like http://localhost:8080/proxy/?http%3A%2F%2Fexample.com%2Ffile%3Fquery%3D1

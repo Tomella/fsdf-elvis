@@ -4,8 +4,8 @@
 
    angular.module("placenames.results.item", [])
 
-      .directive("placenamesResultsItem", ['placenamesItemService', 'placenamesResultsService',
-            function (placenamesItemService, placenamesResultsService) {
+      .directive("pnResultsItem", ['pnItemService', 'pnResultsService',
+            function (pnItemService, pnResultsService) {
 
          return {
             templateUrl: "placenames/results/item.html",
@@ -13,16 +13,16 @@
                item: "="
             },
             controller: function () {
-               console.log("Creating an item scope")
+               console.log("Creating an item scope");
                this.showPan = function (feature) {
-                  placenamesResultsService.showPan(feature);
+                  pnResultsService.showPan(feature);
                };
 
                this.download = function (type) {
-                  placenamesItemService[type](this);
+                  pnItemService[type](this);
                };
 
-               placenamesResultsService.load(this.item.id).then(data => {
+               pnResultsService.load(this.item.id).then(data => {
                   this.feature = data.features[0];
                });
             },
@@ -30,7 +30,7 @@
          };
       }])
 
-      .factory('placenamesItemService', ['$http', 'configService', function ($http, configService) {
+      .factory('pnItemService', ['$http', 'configService', function ($http, configService) {
          var service = {
             esri(vm) {
                var blob = new Blob([JSON.stringify(vm.feature, null, 3)], { type: "application/json;charset=utf-8" });

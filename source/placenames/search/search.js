@@ -5,12 +5,12 @@
 (function (angular) {
    'use strict';
 
-   angular.module("placenames.search", [])
+   angular.module("placenames.search", ['placenames.facets', 'placenames.featuretypes', 'placenames.authorities'])
 
-      .directive('placenamesClear', ['placenamesSearchService', function (placenamesSearchService) {
+      .directive('pnClear', ['pnSearchService', function (pnSearchService) {
          return {
             link: function(scope, element) {
-               placenamesSearchService.onMapUpdate(listening);
+               pnSearchService.onMapUpdate(listening);
                function listening() {
                   if(element.is(":focus")) {
                      var e = $.Event("keydown");
@@ -23,50 +23,51 @@
          };
       }])
 
-      .directive('placenamesOptions', ['placenamesSearchService', function (placenamesSearchService) {
+      .directive('pnOptions', ['pnSearchService', function (pnSearchService) {
          return {
             link: function (scope) {
                scope.leave = function () {
-                  placenamesSearchService.hide();
+                  pnSearchService.hide();
                };
 
                scope.enter = function () {
-                  placenamesSearchService.show(scope.match.model);
+                  pnSearchService.show(scope.match.model);
                };
 
                scope.$destroy = function () {
-                  placenamesSearchService.hide();
+                  pnSearchService.hide();
                };
             }
          };
       }])
 
-      .directive("placenamesSearch", ['$timeout', 'placenamesSearchService', function ($timeout, placenamesSearchService) {
+      .directive("pnSearch", ['$timeout', 'pnFacetsService', 'pnSearchService', function ($timeout, pnFacetsService, pnSearchService) {
          return {
             templateUrl: 'placenames/search/search.html',
             restrict: 'AE',
             link: function (scope) {
-               scope.state = placenamesSearchService.data;
+               scope.state = pnSearchService.data;
+               scope.status = {classOpen:false};
 
                scope.$watch("state.searched", function(newVal, oldVal) {
                   if(!newVal && oldVal) {
-                     placenamesSearchService.filtered();
+                     pnSearchService.filtered();
                   }
                });
 
-               placenamesSearchService.filtered();
+               pnSearchService.filtered();
                scope.update = function () {
-                  placenamesSearchService.filtered();
+                  pnSearchService.filtered();
                };
 
                scope.loadOnEmpty = function () {
                   if (!scope.state.filter) {
-                     placenamesSearchService.filtered();
+                     pnSearchService.filtered();
                   }
                };
 
                scope.search = function search(item) {
-                  placenamesSearchService.search(item);
+                  pnSearchService.search(item);
                };
 
                scope.select = function (item) {
@@ -75,14 +76,41 @@
 
                scope.deselect = function (facet) {
                   facet.selected = false;
-                  placenamesSearchService.filtered();
+                  pnSearchService.filtered();
                };
 
                scope.loadDocs = function () {
-                  return placenamesSearchService.filtered().then(fetched => {
+                  return pnSearchService.filtered().then(fetched => {
                      return fetched.response.docs;
                   });
                };
+
+               scope.$watch("status.classOpen", function(load) {
+                  if(load && !scope.classifications) {
+                     scope.classifications = true;
+                     pnFacetsService.getClassifications().then(classifications => {
+                        scope.state.classifications = classifications;
+                     });
+                  }
+               });
+
+               scope.$watch("status.open", function(load) {
+                  if(load && !scope.featureCodes) {
+                     scope.featureCodes = true;
+                     pnFacetsService.getFeatureCodes().then(featureCodes => {
+                        scope.state.featureCodes = featureCodes;
+                     });
+                  }
+               });
+
+               scope.$watch("status.authOpen", function(load) {
+                  if(load && !scope.authorities) {
+                     scope.authorities = true;
+                     pnFacetsService.getAuthorities().then(authorities => {
+                        scope.state.authorities = authorities;
+                     });
+                  }
+               });
             }
          };
       }])
@@ -101,17 +129,13 @@
 
       .filter('pnUnselectedFacets', [function () {
          return function (facets) {
-            return !facets ? [] : Object.keys(facets).filter(key => !facets[key].selected).map(key => facets[key]);
+            return !facets ? [] : facets.filter(facet => !facet.selected);
          };
       }])
 
       .filter('pnSelectedFacets', [function () {
          return function (facets) {
-            return !facets ? [] : Object.keys(facets).filter(key => facets[key].selected).map(key => {
-               var facet = facets[key];
-               facet.code = key;
-               return facet;
-            });
+            return !facets ? [] : facets.filter(facet => facet.selected);
          };
       }])
 
@@ -143,13 +167,15 @@
          };
       }])
 
-      .factory('placenamesSearchService', SearchService);
+      .factory('pnSearchService', SearchService);
 
    SearchService.$inject = ['$http', '$rootScope', '$timeout', 'configService', 'mapService'];
    function SearchService($http, $rootScope, $timeout, configService, mapService) {
       var data = {
-         searched: false, // Search results
-         featureCodes: []
+         searched: null, // Search results
+         featureCodes: [],
+         classifications: [],
+         authorities: []
       };
       var mapListeners =[];
 
@@ -195,7 +221,7 @@
          },
 
          searched() {
-            data.searched = true;
+            data.searched = data.persist;
             this.hide();
          },
 
@@ -221,16 +247,6 @@
             });
          }
       };
-
-      configService.getConfig("classifications").then(config => {
-         data.classifications = {};
-
-         Object.keys(config).forEach(key => {
-            data.classifications[key] = {
-               name: config[key]
-            };
-         });
-      });
 
       mapService.getMap().then(map => {
          var timeout;
@@ -263,8 +279,9 @@
 
       function createParams() {
          return mapService.getMap().then(map => {
-            var types = data.classifications;
-            var features = Object.keys(types).filter(key => types[key].selected);
+            var types = data.featureCodes;
+            var features = types.filter(type => type.selected);
+            var classes = data.classifications.filter(item => item.selected);
             var params = baseParameters();
             var filterIsObject = typeof data.filter === "object";
             var q = filterIsObject ? data.filter.name : data.filter;
@@ -272,15 +289,23 @@
             params.fq = getBounds(map);
             params.sort = getSort(map);
             params.q = q ? '"' + q.toLowerCase() + '"' : "*:*";
-            if (features.length) {
-               if (features.length === 1) {
-                  params.q += " AND featureCode:" + features[0];
-               } else {
-                  params.q += " AND (featureCode:(" +
-                     features.map(code => "featureCode:" + code).join(" ") +
-                     "))";
-               }
+
+            var qs = [];
+            features.forEach(feature => {
+                qs.push("featureCode:" + feature.code);
+            });
+            classes.forEach(clazz => {
+               qs.push('classification:"' + clazz.name + '"');
+            });
+
+            data.authorities.filter(auth => auth.selected).forEach(auth => {
+               qs.push('authority:' + auth.code);
+            });
+
+            if(qs.length) {
+               params.q += ' AND (' + qs.join(" ") + ')';
             }
+
             return params;
          });
       }
@@ -289,18 +314,7 @@
          return request(params).then(data => {
             var code;
             data.facetCounts = {};
-            // Transform the facets into something useful
-            data.facet_counts.facet_fields.featureCode.forEach((value, index) => {
-               if (index % 2 === 0) {
-                  code = value;
-               } else {
-                  data.facetCounts[code] = {
-                     count: value,
-                     code
-                  };
-               }
-            });
-            decorateFeatureNames(data.facetCounts);
+            $rootScope.$broadcast("pn.facets.changed", data.facet_counts.facet_fields);
             return data;
          });
       }
@@ -313,12 +327,6 @@
             cache: true
          }).then(response => {
             return response.data;
-         });
-      }
-
-      function decorateFeatureNames(features) {
-         Object.keys(features).forEach(key => {
-            features[key].parent = data.classifications[key];
          });
       }
 
@@ -345,7 +353,7 @@
       function baseParameters() {
          return {
             facet: true,
-            "facet.field": "featureCode",
+            "facet.field": ["featureCode", "classification", "authority"],
             rows: 15,
             wt: "json"
          };

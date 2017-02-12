@@ -5,7 +5,7 @@
 
 angular.module("placenames.toolbar", [])
 
-.directive("placenamesToolbar", [function() {
+.directive("pnToolbar", [function() {
 	return {
 		controller: 'toolbarLinksCtrl'
 	};
@@ -15,7 +15,7 @@ angular.module("placenames.toolbar", [])
 /**
  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
  */
-.directive('placenamesToolbarRow', [function() {
+.directive('pnToolbarRow', [function() {
 	var DEFAULT_TITLE  = "Satellite to Topography bias on base map.";
 
 	return {
@@ -40,7 +40,7 @@ angular.module("placenames.toolbar", [])
 
 	$scope.item = "";
 	$scope.toggleItem = function(item) {
-		$scope.item = ($scope.item == item) ? "" : item;
+		$scope.item = ($scope.item === item) ? "" : item;
 	};
 
 }]);

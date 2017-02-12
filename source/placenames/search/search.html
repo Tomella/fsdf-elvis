@@ -1,5 +1,5 @@
 <div class="pn-search-container">
-   <div ng-if="state.searched" placenames-results data="state"></div>
+   <pn-results ng-if="state.searched" data="state"></pn-results>
    <div style="float:clear" ng-show="!state.searched">
       <h4 style="font-size:12">Search by map location, partial name match or feature type</h4>
       <div class="search-text">
@@ -9,41 +9,45 @@
             <input type="text" ng-model="state.filter" placeholder="Match by feature name..." ng-model-options="{ debounce: 300}"
                   typeahead-on-select="select($item, $model, $label)" typeahead-template-url="placenames/search/typeahead.html"
                   class="form-control" typeahead-min-length="0" uib-typeahead="doc as doc.name for doc in loadDocs(state.filter)"
-                  typeahead-loading="loadingLocations" typeahead-no-results="noResults" placenames-clear>
+                  typeahead-loading="loadingLocations" typeahead-no-results="noResults" pn-clear>
 
             <span class="input-group-btn">
-            <button class="btn btn-primary" type="button" ng-click="search()" ng-disabled="!state.persist.data">Search</button>
+            <button class="btn btn-primary" type="button" ng-click="search()" ng-disabled="!state.persist.data || !state.filtered.response.numFound">Search</button>
          </span>
          </div>
       </div>
-      <div>
-         <div ng-show="!(state.classifications | pnSomeSelected)" style="text-align:right"><strong>Found {{state.filtered.response.numFound | number}} features in map view.</strong></div>
-         <div ng-show="state.classifications | pnSomeSelected">
+      <div class="clearfix">
+         <div>
             <strong style="float:right">Found {{state.filtered.response.numFound | number}} features</strong>
-            <span class="btn btn-primary btn-xs pnPill" ng-repeat="type in state.classifications | pnSelectedFacets" tooltip-append-to-body="true"
-               tooltip-placement="left" uib-tooltip="{{type.name}}">
-            <span style="max-width:100px;display:inline-block;" class="ellipsis">{{type.name}}</span>
-            <span style="max-width:100px;display:inline-block;" class="ellipsis">
-               ({{state.filtered.facetCounts[type.code].count?state.filtered.facetCounts[type.code].count:0}})
-               <a ng-click="deselect(type)" href="javascript:void(0)"><i class="fa fa-close fa-xs" style="color: white"></i></a>
-            </span>
-            </span>
+            <pn-featuretypes-pills ng-if="state.featureCodes.length" features="state.featureCodes" update="update()"></pn-featuretypes-pills>
+            <pn-classifications-pills ng-if="state.classifications.length" classifications="state.classifications" update="update()"></pn-classifications-pills>
+            <pn-authorities-pills ng-if="state.authorities.length" authorities="state.authorities" update="update()"></pn-authorities-pills>
          </div>
       </div>
       <uib-accordion close-others="oneAtATime">
          <div uib-accordion-group class="panel-default" is-open="status.open">
             <uib-accordion-heading>
+               <span class="pn-featuretypes-swathe"></span>
                Filter by feature type...
                <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
             </uib-accordion-heading>
-            <div ng-repeat="facet in state.classifications | pnUnselectedFacets" class="row">
-               <div class="col-md-12 ellipsis">
-                  <input type="checkbox" ng-model="facet.selected" ng-change="update(facet)" />
-                  <span tooltip-append-to-body="true" tooltip-placement="top-left" uib-tooltip="{{facet.name}}">
-                           <a target="_blank" href="http://www.google.com/search?q={{facet.name | pnClean}}">{{facet.name}}</a>
-                        </span>
-               </div>
-            </div>
+            <pn-featuretypes ng-if="status.open" types="state.featureCodes" update="update()"></pn-featuretypes>
+         </div>
+         <div uib-accordion-group class="panel-default" is-open="status.classOpen">
+            <uib-accordion-heading>
+               <span class="pn-classifications-swathe"></span>
+               Filter by classification...
+               <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.classOpen, 'glyphicon-chevron-right': !status.classOpen}"></i>
+            </uib-accordion-heading>
+            <pn-classifications classifications="state.classifications" update="update()" ng-if="status.classOpen"></pn-classifications>
+         </div>
+         <div uib-accordion-group class="panel-default" is-open="status.authOpen">
+            <uib-accordion-heading>
+               <span class="pn-authorities-swathe"></span>
+               Filter by authority...
+               <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.authOpen, 'glyphicon-chevron-right': !status.authOpen}"></i>
+            </uib-accordion-heading>
+            <pn-authorities authorities="state.authorities" update="update()" ng-if="status.authOpen"></pn-authorities>
          </div>
       </uib-accordion>
    </div>

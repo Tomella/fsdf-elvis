@@ -20,8 +20,8 @@
 
       .filter('pnFeature', ['configService', function (configService) {
          var features;
-         configService.getConfig("classifications").then(classifications => {
-            features = classifications;
+         configService.getConfig("featureCodes").then(featureCodes => {
+            features = featureCodes;
          });
          return function (str) {
             return features? features[str]: str;
@@ -41,7 +41,7 @@
          };
       })
 
-      .factory('placenamesUtilsService', ['configService', function (configService) {
+      .factory('pnUtilsService', ['configService', function (configService) {
          var service = {};
 
          return service;
