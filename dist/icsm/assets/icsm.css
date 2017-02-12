@@ -125,11 +125,6 @@
 .iso19115-head {
   font-weight: bold;
 }
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
-}
 .mvt,
 .mvt ul,
 .mvt li {
@@ -285,6 +280,11 @@
 .altthemesdropdown .altthemescurrent {
   color: #fff;
   background-color: #777;
+}
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
 }
 .icsmTabs {
   position: absolute;
@@ -783,21 +783,6 @@ img.elvis-logo {
   left: 0;
   right: 0;
 }
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
 .reviewing-odd {
   background-color: #eeeeee;
 }
@@ -829,6 +814,21 @@ i.fa.active {
 .exclude {
   color: #777777;
   text-decoration: line-through;
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
 }
 .icsm-icon {
   background: url("icsm/img/global-sprites.svg") no-repeat;
@@ -892,6 +892,22 @@ i.fa.active {
   color: #fff;
   background-color: #777;
 }
+.downloadPane {
+  padding-left: 0px !important;
+  padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 10px;
+  overflow: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
+}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -937,22 +953,6 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
-}
-.downloadPane {
-  padding-left: 0px !important;
-  padding-right: 5px !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 10px;
-  overflow: hidden;
-}
-
-.downloadCont {
-  position: fixed;
-  right: 0;
-  bottom: 8px;
 }
 .selectContainer {
   width: 100%;

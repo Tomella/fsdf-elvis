@@ -165,8 +165,8 @@ class NtStrategy extends BaseStrategy {
 class QldStrategy extends BaseStrategy {
    constructor(http) {
       super(http);
-      this.QLD_METADATA_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/rest/document?id={3BD8145A-4ECA-4E0B-A78A-B2C4B9320DFF}&f=xml";
-      this.QLD_HTML_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/custom/detail.page?fid={3BD8145A-4ECA-4E0B-A78A-B2C4B9320DFF}";
+      this.QLD_METADATA_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/rest/document?id={EB442CAB-D714-40D8-82C2-A01CA4661324}&f=xml";
+      this.QLD_HTML_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/custom/detail.page?fid={EB442CAB-D714-40D8-82C2-A01CA4661324}";
    }
 
    constructLink(item) {
