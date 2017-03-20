@@ -86,7 +86,7 @@
             "parameters":[
                 "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetPNG_ElevationAvailableData.fmw",
                 {
-                   "layers" : "public.5dem_ProjectsIndex",
+                   "layers" : "public.5dem_ProjectsIndex,public.QLD_Tile_Index_56",
                    "format" : "image/png",
                    "transparent" : true,
                    "opacity" : 0.7

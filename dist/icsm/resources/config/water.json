@@ -78,7 +78,7 @@
       }
    },
    "layersTab" : {
-   		"group" : "ELVIS - Foundation Spatial Data Map Layers",
+   		"group" : "Elevation",
    		"title" : "Layers",
    		"layers" : [
    			{

@@ -49,6 +49,7 @@
 		'geo.measure',
 
 		'icsm.bounds',
+      'icsm.contributors',
 		'icsm.clip',
 		'icsm.glossary',
 		'icsm.help',

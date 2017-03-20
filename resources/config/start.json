@@ -45,7 +45,7 @@
          },
          {
          	"description" : "placeholder for layers above the topography",
-         	"name" : "ELVIS - Foundation Spatial Data Map Layers",
+         	"name" : "Elevation",
          	"type" : "LayerGroup",
          	"layers": []
          },
@@ -73,7 +73,7 @@
       }
    },
    "layersTab" : {
-   		"group" : "ELVIS - Foundation Spatial Data Map Layers",
+   		"group" : "Elevation",
    		"title" : "Layers",
    		"layers" : [
    			{
