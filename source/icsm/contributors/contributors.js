@@ -21,7 +21,7 @@
                scope.out = () => {
                   timer = $interval(() => {
                      scope.contributors.ingroup = false;
-                  }, 1500);
+                  }, 1000);
                };
 
                scope.unstick = () => {
@@ -55,7 +55,7 @@
                scope.out = () => {
                   timer = $interval(() => {
                      scope.contributors.show = false;
-                  }, 1000);
+                  }, 700);
                };
             }
          };
