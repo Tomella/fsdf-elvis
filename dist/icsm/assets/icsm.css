@@ -1,12 +1,3 @@
-.leaflet-popup {
-  position: absolute;
-  text-align: center;
-}
-
-.fi-popup hr {
-  margin-top: 3px;
-  margin-bottom: 3px;
-}
 .wizardPopup {
   position: fixed;
   top: 20px;
@@ -57,6 +48,15 @@
     max-height: 350px;
   }
 }
+.leaflet-popup {
+  position: absolute;
+  text-align: center;
+}
+
+.fi-popup hr {
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
 .nav-icons {
   margin-top: 7px !important;
 }
@@ -86,11 +86,6 @@
 
 .common-header {
   background-color: white;
-}
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
 }
 .iso19115,
 .iso19115 ul,
@@ -131,91 +126,54 @@
 .iso19115-head {
   font-weight: bold;
 }
-.icsmTabs {
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
+}
+.mvt,
+.mvt ul,
+.mvt li {
+  position: relative;
+}
+
+.mvt ul {
+  list-style: none;
+  padding-left: 32px;
+}
+
+.mvt li::before,
+.mvt li::after {
+  content: "";
   position: absolute;
-  top: 60px;
-  right: 30px;
-  z-index: 1;
+  left: -12px;
 }
 
-.icsmTabsOpen {
-  right: 30px;
+.mvt li::before {
+  border-top: 1px solid #000;
+  top: 9px;
+  width: 8px;
+  height: 0;
 }
 
-.panesMapContainer {
-  z-index: 0;
-  width: 100%;
+.mvt li::after {
+  border-left: 1px solid #000;
   height: 100%;
+  width: 0px;
+  top: 2px;
 }
 
-.icsmPanesRow {
-  height: 100%;
-  margin-right: 0;
+.mvt ul > li:last-child::after {
+  height: 8px;
 }
 
-.icsmPanesCol {
-  height: 100%;
+.metaview-head {
+  font-weight: bold;
 }
 
-.icsmPanesColRight {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-}
-
-.paneTabsMain {
-  position: absolute;
-  top: 0px;
-  bottom: 0px;
-  padding-top: 8px;
-  right: 0px;
-  background: #FFF;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -o-user-select: none;
-  user-select: none;
-}
-
-.panesTabsContainer {
-  position: absolute;
-  width: 9999px;
-  z-index: inherit;
-  /* keeps ie happy for mousemove events */
-  background: rgba(255, 255, 255, 0);
-}
-
-.paneRotateTabs {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 100%;
-  -webkit-transform: rotate(-90deg);
-  -moz-transform: rotate(-90deg);
-  -o-transform: rotate(-90deg);
-  -ms-transform: rotate(-90deg);
-  -sand-transform: rotate(90deg);
-  transform-origin: bottom right;
-  -webkit-transform-origin: bottom right;
-  -ms-transform-origin: bottom right;
-  display: block;
-}
-
-.paneTabItem {
-  float: right;
-  padding: 5px 15px 0px 15px;
-  border: 1px solid #999;
-  background: #FFF;
-  cursor: pointer;
-  height: 30px;
-}
-
-.panesTabContentItem {
-  background: #FFF;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
+.metaview-info {
+  padding-left: 3px;
+  padding-right: 3px;
 }
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
@@ -329,49 +287,91 @@
   color: #fff;
   background-color: #777;
 }
-.mvt,
-.mvt ul,
-.mvt li {
-  position: relative;
-}
-
-.mvt ul {
-  list-style: none;
-  padding-left: 32px;
-}
-
-.mvt li::before,
-.mvt li::after {
-  content: "";
+.icsmTabs {
   position: absolute;
-  left: -12px;
+  top: 60px;
+  right: 30px;
+  z-index: 1;
 }
 
-.mvt li::before {
-  border-top: 1px solid #000;
-  top: 9px;
-  width: 8px;
-  height: 0;
+.icsmTabsOpen {
+  right: 30px;
 }
 
-.mvt li::after {
-  border-left: 1px solid #000;
+.panesMapContainer {
+  z-index: 0;
+  width: 100%;
   height: 100%;
-  width: 0px;
-  top: 2px;
 }
 
-.mvt ul > li:last-child::after {
-  height: 8px;
+.icsmPanesRow {
+  height: 100%;
+  margin-right: 0;
 }
 
-.metaview-head {
-  font-weight: bold;
+.icsmPanesCol {
+  height: 100%;
 }
 
-.metaview-info {
-  padding-left: 3px;
-  padding-right: 3px;
+.icsmPanesColRight {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.paneTabsMain {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  padding-top: 8px;
+  right: 0px;
+  background: #FFF;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+.panesTabsContainer {
+  position: absolute;
+  width: 9999px;
+  z-index: inherit;
+  /* keeps ie happy for mousemove events */
+  background: rgba(255, 255, 255, 0);
+}
+
+.paneRotateTabs {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 100%;
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  -sand-transform: rotate(90deg);
+  transform-origin: bottom right;
+  -webkit-transform-origin: bottom right;
+  -ms-transform-origin: bottom right;
+  display: block;
+}
+
+.paneTabItem {
+  float: right;
+  padding: 5px 15px 0px 15px;
+  border: 1px solid #999;
+  background: #FFF;
+  cursor: pointer;
+  height: 30px;
+}
+
+.panesTabContentItem {
+  background: #FFF;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .radCore {
   margin-right: 3px;
@@ -640,18 +640,16 @@ body {
   overflow-y: hidden;
 }
 .contributors {
-  border: 1px solid gray;
-  border-radius: 3px;
   margin: 2px;
   padding: 4px;
   padding-left: 12px;
   position: fixed;
-  top: 81px;
-  left: 0px;
-  right: 0px;
+  top: 80px;
+  right: 1px;
   opacity: 0.95;
   z-index: 6;
   background-color: white;
+  white-space: nowrap;
   -webkit-transition: height 1s;
   /* Safari */
   transition: height 1s;
@@ -671,12 +669,9 @@ body {
   display: none;
 }
 
-.anchored {
-  position: absolute;
-  bottom: 4px;
-}
-
 .contributors.transitioned-down {
+  border: 1px solid gray;
+  border-radius: 3px;
   height: 85px;
 }
 
@@ -694,12 +689,32 @@ body {
   padding: 0;
   border-radius: 0;
 }
+
+.contributors-unstick {
+  vertical-align: top;
+  font-weight: bold;
+}
+
+.contributors-link {
+  font-weight: bold;
+}
+
+.elevation-and-depth {
+  padding-left: 12px;
+  padding-right: 12px;
+}
 img.elvis-logo {
   height: 75px;
 }
 
 .icsm-logo.last {
   padding-right: 10px;
+}
+
+.contributorsLink {
+  position: absolute;
+  right: 7px;
+  bottom: 15px;
 }
 .continue-container {
   padding: 4px;
@@ -948,52 +963,6 @@ i.fa.active {
   color: #fff;
   background-color: #777;
 }
-.radCore {
-  margin-right: 3px;
-  display: inline-block;
-}
-
-.searchBar {
-  width: 27em;
-  opacity: 0.9;
-}
-
-@media only screen and (max-width:1100px) {
-  .searchBar {
-    width: 23em;
-  }
-}
-
-@media only screen and (max-width:1025px) {
-  .searchBar {
-    width: 20em;
-  }
-}
-
-@media only screen and (max-width:645px) {
-  .searchBar {
-    display: none;
-  }
-}
-
-@media only screen and (max-width:965px) {
-  .radCore,
-  .hideWhenSmall,
-  .steps-indicator,
-  .secondToolbarInfo {
-    display: none;
-  }
-}
-
-div.leaflet-control-scale-line {
-  text-align: center;
-}
-
-@media only screen and (max-width:965px) {
-  div.leaflet-control-scale-line {
-    display: none;
-  }
-}
 .downloadPane {
   padding-left: 0px !important;
   padding-right: 5px !important;
@@ -1070,6 +1039,52 @@ div.leaflet-control-scale-line {
 
 i.fa.active {
   color: red;
+}
+.radCore {
+  margin-right: 3px;
+  display: inline-block;
+}
+
+.searchBar {
+  width: 27em;
+  opacity: 0.9;
+}
+
+@media only screen and (max-width:1100px) {
+  .searchBar {
+    width: 23em;
+  }
+}
+
+@media only screen and (max-width:1025px) {
+  .searchBar {
+    width: 20em;
+  }
+}
+
+@media only screen and (max-width:645px) {
+  .searchBar {
+    display: none;
+  }
+}
+
+@media only screen and (max-width:965px) {
+  .radCore,
+  .hideWhenSmall,
+  .steps-indicator,
+  .secondToolbarInfo {
+    display: none;
+  }
+}
+
+div.leaflet-control-scale-line {
+  text-align: center;
+}
+
+@media only screen and (max-width:965px) {
+  div.leaflet-control-scale-line {
+    display: none;
+  }
 }
 .vector-tooltip {
   min-width: 25em;
@@ -1185,6 +1200,24 @@ i.fa.active {
   overflow-y: auto;
   overflow-x: hidden;
 }
+.pn-features {
+  max-block-size: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.pn-search-container {
+  height: 97%;
+}
+
+.tooltip-inner {
+  max-width: 350px;
+}
+
+.pn-pill {
+  color: #fff;
+  margin: 4px;
+}
 .pn-container {
   overflow-y: auto;
   position: absolute;
@@ -1223,22 +1256,4 @@ i.fa.active {
 .pn-results-list:last-child {
   border-bottom: 0;
   padding-bottom: 0;
-}
-.pn-features {
-  max-block-size: 300px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.pn-search-container {
-  height: 97%;
-}
-
-.tooltip-inner {
-  max-width: 350px;
-}
-
-.pn-pill {
-  color: #fff;
-  margin: 4px;
 }

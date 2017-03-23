@@ -1,10 +1,10 @@
-<div class="contributors" ng-mouseenter="over()" ng-mouseleave="out()" ng-class="(contributors.show || contributors.ingroup || contributors.stick) ? 'transitioned-down' : 'transitioned-up'">
-   <div class="anchored">
-      <a ng-repeat="contributor in contributors.orgs | activeContributors" ng-href="{{contributor.href}}" >
-         <img src="{{contributor.image}}" alt="{{contributor.title}}" class="elvis-logo"></img>
+<span class="contributors" ng-mouseenter="over()" ng-mouseleave="out()"
+      ng-class="(contributors.show || contributors.ingroup || contributors.stick) ? 'transitioned-down' : 'transitioned-up'">
+   <div>
+      <a ng-repeat="contributor in contributors.orgs | activeContributors"
+            ng-href="{{contributor.href}}" name="contributors{{$index}}" title="{{contributor.title}}" >
+         <img ng-src="{{contributor.image}}" alt="{{contributor.title}}" class="elvis-logo" ng-class="contributor.class"></img>
       </a>
-   </div>
-   <span style="float: right">
       <button class="undecorated contributors-unstick" ng-click="unstick()">X</button>
-   </span>
-</div>
+   </div>
+</span>

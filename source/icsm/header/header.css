@@ -5,3 +5,9 @@ img.elvis-logo  {
 .icsm-logo.last {
    padding-right: 10px;
 }
+
+.contributorsLink {
+   position: absolute;
+   right: 7px;
+   bottom: 15px;
+}

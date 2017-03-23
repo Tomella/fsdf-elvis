@@ -8,7 +8,7 @@
             templateUrl: "icsm/contributors/contributors.html",
             scope: {
             },
-            link: function (scope) {
+            link: function (scope, element) {
                let timer;
 
                scope.contributors = contributorsService.getState();
@@ -26,6 +26,7 @@
 
                scope.unstick = () => {
                   scope.contributors.ingroup = scope.contributors.show = scope.contributors.stick = false;
+                  element.find("a").blur();
                };
             }
          };

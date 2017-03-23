@@ -97,5 +97,28 @@
       "image": "icsm/resources/img/icsm-logo-sml.gif",
       "height": 42,
       "showText": false
+   },
+
+   {
+      "name": "FSDF",
+      "title": "FSDF",
+      "href": "http://fsdf.org.au/",
+      "enabled": false,
+      "code": "fsdf",
+      "image": "icsm/resources/img/FSDFimagev4.0.png",
+      "height": 42,
+      "showText": false
+   },
+
+   {
+      "name": "Elevation &amp; Depth",
+      "title": "Elevation &amp; Depth",
+      "href": "http://fsdf.org.au/LINK/fsdf-theme/2427",
+      "enabled": false,
+      "class": "elevation-and-depth",
+      "code": "elevation",
+      "image": "icsm/resources/img/ElevationAndDepth.png",
+      "height": 42,
+      "showText": false
    }
 ]
