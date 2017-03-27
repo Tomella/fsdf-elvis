@@ -9,7 +9,7 @@
    z-index: 6;
    background-color:white;
    white-space: nowrap;
-
+   text-align: center;
    -webkit-transition: height 1s; /* Safari */
    transition: height 1s;
 }
@@ -30,7 +30,6 @@
 .contributors.transitioned-down {
    border: 1px solid gray;
    border-radius: 3px;
-   height: 85px;
 }
 
 .transitioned-up {
