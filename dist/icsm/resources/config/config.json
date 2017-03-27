@@ -5,15 +5,15 @@
    "map":{
    	  "name" : "main",
       "options":{
-      	 "maxBounds" : [[-48, 106],[-6, 159]],
-         "center":[-28, 140],
+      	 "maxBounds" : [[-48, 106],[-6, 154]],
+         "center":[-28, 125],
          "minZoom":4,
          "zoom":4
       },
       "position":{
          "bounds":[
-            [-44, 117],
-            [-12, 146]
+            [-44, 90],
+            [-12, 139]
          ],
          "minZoom":13
       },
