@@ -10,15 +10,15 @@ class LinePusher {
       this.lineBuffer = [];
    }
 
-   async start(targetFn) {
+   start(targetFn) {
       // Prime the first read
-      let result = await this.read();
+      let result = this.read();
 
       while (result) {
          let lineResult = this.next();
          switch (lineResult.state) {
             case "more":
-               result = await this.read();
+               result = this.read();
                break;
             case "line":
                targetFn(lineResult.line);
@@ -31,7 +31,7 @@ class LinePusher {
       }
    }
 
-   async read() {
+   read() {
       this.pageNo++;
       this.index = 0;
       let self = this;

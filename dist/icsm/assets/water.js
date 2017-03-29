@@ -23,18 +23,7 @@ under the License.
 
 	'use strict';
 
-	angular.module("WaterApp", ['common.altthemes', 'common.baselayer.control', 'common.basin', 'common.bbox', 'common.catchment', 'common.cc', 'common.clip', 'common.download', 'common.extent', 'common.header', 'common.iso19115', 'common.metaview', 'common.navigation', 'common.recursionhelper', 'common.storage', 'common.templates', 'common.tile', 'common.wms', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.projects', 'explorer.tabs', 'explorer.version',
-
-	// Wire in external search providers
-	'exp.search.geosearch', 'exp.search.searches', 'exp.search.lastsearch', 'exp.search.templates', 'exp.search.map.service', 'exp.ui.templates', 'explorer.map.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer', 'geo.draw',
-	// 'geo.elevation',
-	//'icsm.elevation',
-	//'geo.extent',
-	//'geo.geosearch',
-	'geo.map', 'geo.maphelper', 'geo.measure', 'water.panes', 'water.templates', 'water.toolbar', 'water.select', 'water.vector', 'water.vector.download', 'water.vector.geoprocess'])
-
-	// Set up all the service providers here.
-	.config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', 'lastSearchServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider, lastSearchServiceProvider) {
+	angular.module("WaterApp", ['common.altthemes', 'common.baselayer.control', 'common.basin', 'common.bbox', 'common.catchment', 'common.cc', 'common.clip', 'common.download', 'common.extent', 'common.header', 'common.iso19115', 'common.metaview', 'common.navigation', 'common.recursionhelper', 'common.storage', 'common.templates', 'common.tile', 'common.wms', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.search.geosearch', 'exp.search.searches', 'exp.search.lastsearch', 'exp.search.templates', 'exp.search.map.service', 'exp.ui.templates', 'explorer.map.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer', 'geo.draw', 'geo.map', 'geo.maphelper', 'geo.measure', 'water.panes', 'water.templates', 'water.toolbar', 'water.select', 'water.vector', 'water.vector.download', 'water.vector.geoprocess']).config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', 'lastSearchServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider, lastSearchServiceProvider) {
 		lastSearchServiceProvider.noListen();
 		configServiceProvider.location("icsm/resources/config/water.json");
 		configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
@@ -106,7 +95,7 @@ under the License.
 		});
 		configService.getConfig().then(function (data) {
 			self.data = data;
-			// If its got WebGL its got everything we need.
+
 			try {
 				var canvas = document.createElement('canvas');
 				data.modern = !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
@@ -117,10 +106,6 @@ under the License.
 	}
 })(angular);
 "use strict";
-
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
 
 (function (angular) {
 	'use strict';
@@ -193,10 +178,6 @@ under the License.
 })(angular);
 "use strict";
 
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
 (function (angular) {
 
 	'use strict';
@@ -240,7 +221,6 @@ under the License.
 			},
 
 			getLayerGroup: function getLayerGroup() {
-				// Prime the layer group
 				if (!selectLayerGroup) {
 					selectLayerGroup = mapService.getGroup(LAYER_GROUP_KEY);
 				}
@@ -260,7 +240,6 @@ under the License.
 			more: function more() {},
 
 			_executeQuery: function _executeQuery() {
-				// Give them the lot as they will want the criteria as well
 				$http.get(baseUrl, { cache: true }).then(function (response) {
 					service.getLayerGroup();
 
@@ -304,7 +283,6 @@ under the License.
 					}
 					bounds = [[+parts[1], +parts[0]], [+parts[3], +parts[2]]];
 
-					// create a black rectangle
 					layer = L.rectangle(bounds, {
 						fill: false,
 						color: "#000000",
@@ -327,7 +305,7 @@ under the License.
 				} else {
 					dataset.layer = null;
 					dataset.showLayer = false;
-					// Do we add the services to it?
+
 					dataset.services = servicesFactory(dataset.dcUris);
 					dataset.bounds = getBounds(dataset.bbox);
 				}
@@ -362,10 +340,8 @@ under the License.
 					} else {
 						coords = box.split(" ");
 						if (coords.length == 4 && within(+coords[0], +coords[1], +coords[2], +coords[3])) {
-							// show
 							service.createLayer(dataset);
 						} else {
-							// hide
 							service.removeLayer(dataset);
 						}
 					}
@@ -506,7 +482,6 @@ under the License.
 			this.handlers = [];
 
 			this.isWcs = function () {
-				// console.log("Checking results:" + (this.protocol == protocols.WCS));
 				return this.protocol == protocols.WCS;
 			};
 
@@ -532,7 +507,6 @@ under the License.
 
 			this.remove = function () {
 				this.handlers.forEach(function (callback) {
-					// They should all have a remove but you never know.
 					if (this.callback.remove) {
 						callback.remove(this);
 					}
@@ -557,10 +531,6 @@ under the License.
 })(angular);
 'use strict';
 
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
 (function (angular) {
 
 	'use strict';
@@ -568,16 +538,12 @@ under the License.
 	angular.module("water.select", ['water.select.service']).controller("SelectCtrl", SelectCtrl).controller("SelectCriteriaCtrl", SelectCriteriaCtrl).directive("waterSelect", [function () {
 		return {
 			templateUrl: "water/select/select.html",
-			link: function link(scope, element, attrs) {
-				//console.log("Hello select!");
-			}
+			link: function link(scope, element, attrs) {}
 		};
 	}]).directive("selectDoc", [function () {
 		return {
 			templateUrl: "water/select/doc.html",
-			link: function link(scope, element, attrs) {
-				//console.log("What's up doc!");
-			}
+			link: function link(scope, element, attrs) {}
 		};
 	}]).directive("selectGroup", [function () {
 		return {
@@ -585,16 +551,9 @@ under the License.
 			scope: {
 				group: "="
 			},
-			link: function link(scope, element, attrs) {
-				//console.log("What's up doc!");
-			}
+			link: function link(scope, element, attrs) {}
 		};
-	}])
-
-	/**
-  * Format the publication date
-  */
-	.filter("pubDate", function () {
+	}]).filter("pubDate", function () {
 		return function (string) {
 			var date;
 			if (string) {
@@ -603,24 +562,14 @@ under the License.
 			}
 			return "-";
 		};
-	})
-
-	/**
-  * Format the array of authors
-  */
-	.filter("authors", function () {
+	}).filter("authors", function () {
 		return function (auth) {
 			if (auth) {
 				return auth.join(", ");
 			}
 			return "-";
 		};
-	})
-
-	/**
-  * If the text is larger than a certain size truncate it and add some dots to the end.
-  */
-	.filter("truncate", function () {
+	}).filter("truncate", function () {
 		return function (text, length) {
 			if (text && text.length > length - 3) {
 				return text.substr(0, length - 3) + "...";
@@ -644,7 +593,6 @@ under the License.
 		    self = this;
 
 		$rootScope.$on("select.results.received", function (event, data) {
-			//console.log("Received response")
 			flashService.remove(flasher);
 			self.data = data;
 		});
@@ -708,10 +656,6 @@ under the License.
 })(angular);
 "use strict";
 
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
 (function (angular) {
 
 	'use strict';
@@ -720,12 +664,7 @@ under the License.
 		return {
 			controller: 'toolbarLinksCtrl'
 		};
-	}])
-
-	/**
-  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
-  */
-	.directive('icsmToolbarRow', [function () {
+	}]).directive('icsmToolbarRow', [function () {
 		return {
 			scope: {
 				map: "="
@@ -786,8 +725,7 @@ under the License.
 					if (scope.data && scope.data.processing && scope.data.processing.clip && scope.data.processing.clip.xMax !== null) {
 						clipMessage = flashService.add("Validating selected area...", 3000);
 
-						// Make really sure that all our stop points set this appropriately. We don't want the button locked out for ever.
-						scope.checkingOrFailed = !!url; // We only apply this to records that have a URL to check intersection against.
+						scope.checkingOrFailed = !!url;
 						clipTimeout = $timeout(function () {
 							checkSize().then(function (result) {
 								try {
@@ -796,7 +734,6 @@ under the License.
 										scope.checkingOrFailed = false;
 									}
 								} catch (e) {
-									// Very paranoid about setting it to block.
 									scope.checkingOrFailed = false;
 								}
 							});
@@ -839,7 +776,7 @@ under the License.
 				scope.drawn = function () {
 					vectorGeoprocessService.removeClip();
 					forceNumbers(scope.data.processing.clip);
-					//flashService.remove(clipMessage);
+
 					if (constrainBounds(scope.data.processing.clip, scope.data.bounds)) {
 						clipMessage = flashService.add("Redrawn to fit within data extent", 5000);
 					}
@@ -856,10 +793,6 @@ under the License.
 						return { code: "incomplete" };
 					}
 
-					//if(this.data.queryLayer) {
-					//	vectorGeoprocessService.queryLayer(scope.data.queryLayer, scope.data.processing.clip).then(function(response) {
-					//	});
-					//} else
 					if (validClip(scope.data.processing.clip)) {
 						return { code: "success" };
 					}
@@ -877,13 +810,13 @@ under the License.
 
 				scope.allDataSet = function () {
 					var proc = scope.data && scope.data.processing ? scope.data.processing : null;
-					// For it to be OK we need.
+
 					return proc && scope.email && validClip(proc.clip) && proc.outCoordSys && proc.outFormat;
 				};
 
 				scope.validSansEmail = function () {
 					var proc = scope.data && scope.data.processing ? scope.data.processing : null;
-					// For it to be OK we need.
+
 					return proc && validClip(proc.clip) && proc.outCoordSys && proc.outFormat;
 				};
 
@@ -914,7 +847,6 @@ under the License.
 				}
 
 				function overSizeLimit(clip) {
-					// Shouldn't need abs but it doesn't hurt.
 					var size = Math.abs((clip.xMax - clip.xMin) * (clip.yMax - clip.yMin));
 
 					return scope.data.restrictSize && size > scope.data.restrictSize;
@@ -923,7 +855,7 @@ under the License.
 				function constrainBounds(c, p) {
 					var flag = false,
 					    ret = false;
-					// Have we read the parameters yet?
+
 
 					if (!p || empty(c.xMax) || empty(c.xMin) || empty(c.yMax) || empty(c.yMin)) {
 						return false;
@@ -953,7 +885,6 @@ under the License.
 						c.xMin = c.xMax;
 					}
 
-					// Now for the Y's
 					flag = +c.yMax < +p.yMin;
 					ret = ret || flag;
 					if (flag) {
@@ -992,7 +923,6 @@ under the License.
 					clip.yMin = clip.yMin === null ? null : +clip.yMin;
 				}
 
-				// The input validator takes care of order and min/max constraints. We just check valid existance.
 				function validClip(clip) {
 					return clip && angular.isNumber(clip.xMax) && angular.isNumber(clip.xMin) && angular.isNumber(clip.yMax) && angular.isNumber(clip.yMin) && !overSizeLimit(clip) && !underSizeLimit(clip);
 				}
@@ -1000,18 +930,15 @@ under the License.
 		};
 	}]).factory("vectorGeoprocessService", VectorGeoprocessService).filter("sysIntersect", function () {
 		return function (collection, extent) {
-			// The extent may have missing numbers so we don't restrict at that point.
 			if (!extent || !angular.isNumber(extent.xMin) || !angular.isNumber(extent.xMax) || !angular.isNumber(extent.yMin) || !angular.isNumber(extent.yMax)) {
 				return collection;
 			}
 
 			return collection.filter(function (item) {
-
-				// We know these have valid numbers if it exists
 				if (!item.extent) {
 					return true;
 				}
-				// We have a restriction
+
 				return item.extent.xMin <= extent.xMin && item.extent.xMax >= extent.xMax && item.extent.yMin <= extent.yMin && item.extent.yMax >= extent.yMax;
 			});
 		};
@@ -1020,8 +947,7 @@ under the License.
 	VectorGeoprocessService.$invoke = ['$http', '$q', '$timeout', 'configService', 'downloadService', 'ga', 'mapService', 'storageService', 'vectorService'];
 	function VectorGeoprocessService($http, $q, $timeout, configService, downloadService, ga, mapService, storageService, vectorService) {
 		var DEFAULT_DATASET = "dems1sv1_0",
-		    // TODO: We have to get this from the metadata somehow.
-		geoprocessingTemplates,
+		    geoprocessingTemplates,
 		    clipLayer = null,
 		    map;
 
@@ -1045,9 +971,7 @@ under the License.
 					url: query.url
 				});
 
-				var bounds = L.latLngBounds([clip.yMin, clip.xMin], // top left
-				[clip.yMax, clip.xMax] // bottom right
-				);
+				var bounds = L.latLngBounds([clip.yMin, clip.xMin], [clip.yMax, clip.xMax]);
 
 				layer.query().intersects(bounds).ids(function (error, ids) {
 					if (error) {
@@ -1095,8 +1019,7 @@ under the License.
 
 			initiateJob: function initiateJob(data, email) {
 				var dataset = DEFAULT_DATASET,
-				    // TODO Replace with real dataset file name from metadata.
-				win,
+				    win,
 				    workingString = getUrl(data),
 				    processing = data.processing,
 				    log = {
@@ -1136,8 +1059,6 @@ under the License.
 					workingString = workingString.replace("{" + key + "}", item);
 				});
 
-				//console.log(workingString);
-
 				$("#launcher")[0].src = workingString;
 
 				downloadService.setEmail(email);
@@ -1152,10 +1073,6 @@ under the License.
 	}
 })(angular, L);
 'use strict';
-
-/*!
- * Copyright 2016 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
 
 (function (angular) {
 
@@ -1250,9 +1167,7 @@ under the License.
 			restrict: "AE",
 			controller: "VectorDownloadCtrl",
 			templateUrl: "water/vector/popup.html",
-			link: function link() {
-				//console.log("What the download...");
-			}
+			link: function link() {}
 		};
 	}]).directive("commonVectorDownload", ['vectorDownloadService', function (vectorDownloadService) {
 		return {

@@ -92,6 +92,8 @@ gulp.task('dashboardScripts', function() {
 function prepareScripts(name) {
    return gulp.src(directories.source + '/' + name + '/**/*.js')
       .pipe(babel({
+            compact: true,
+            comments:	false,
             presets: ['es2015'],
             plugins: ["syntax-async-generators"]
       }))
@@ -108,8 +110,10 @@ gulp.task('squash', ['squashCommon','squashIcsm', 'squashWater', 'squashStart', 
 gulp.task('squashCommon', function() {
 	return gulp.src(directories.assets + '/common.js')
       .pipe(babel({
+            compact: true,
+            comments:	false,
             presets: ['es2015'],
-             plugins: ["syntax-async-generators"]
+            plugins: ["syntax-async-generators"]
       }))
 		.pipe(uglify())
       .pipe(header(fs.readFileSync(directories.source + '/licence.txt', 'utf8')))

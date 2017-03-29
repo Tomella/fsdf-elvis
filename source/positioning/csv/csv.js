@@ -1,22 +1,18 @@
 {
 
    class CsvService {
-      constructor(configService) {
+      constructor($q, configService) {
+         this.$q = $q;
          configService.getConfig().then(config => {
-            this.options = Object.assign(
-               {
-                  blockSize: 1024 * 8 // Really big bit
-               },
-               config
-            );
+            this.blockSize = config.blockSize ? config.blockSize : 1024 * 8;
          });
       }
 
       getColumns(file) {
-         let blob = file.slice(0, this.options.blockSize);
+         let blob = file.slice(0, this.blockSize);
          let reader = new FileReader();
          reader.readAsText(blob);
-         return new Promise((resolve, reject) => {
+         return this.$q((resolve, reject) => {
             reader.onloadend = (evt) => {
                console.log(evt.target["readyState"] + "\n\n" + evt.target["result"]);
 
@@ -34,7 +30,7 @@
          });
       }
    }
-   CsvService.$invoke = ["configService"];
+   CsvService.$invoke = ["$q", "configService"];
 
    angular.module("positioning.csv", [])
 

@@ -17,73 +17,6 @@ specific language governing permissions and limitations
 under the License.
 */
 
-"use strict";
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-{
-   var CsvService = function () {
-      function CsvService(configService) {
-         var _this = this;
-
-         _classCallCheck(this, CsvService);
-
-         configService.getConfig().then(function (config) {
-            _this.options = Object.assign({
-               blockSize: 1024 * 8 // Really big bit
-            }, config);
-         });
-      }
-
-      _createClass(CsvService, [{
-         key: "getColumns",
-         value: function getColumns(file) {
-            var blob = file.slice(0, this.options.blockSize);
-            var reader = new FileReader();
-            reader.readAsText(blob);
-            return new Promise(function (resolve, reject) {
-               reader.onloadend = function (evt) {
-                  console.log(evt.target["readyState"] + "\n\n" + evt.target["result"]);
-
-                  if (evt.target["readyState"] === FileReader.prototype.DONE) {
-                     // DONE == 2
-                     var buffer = evt.target["result"];
-                     if (buffer.length) {
-                        // We don't read the whole file, just the start.
-                        var lines = buffer.substr(0, buffer.lastIndexOf("\n"));
-                        resolve(CSVToArray(lines));
-                     } else {
-                        reject(buffer);
-                     }
-                  }
-               };
-            });
-         }
-      }]);
-
-      return CsvService;
-   }();
-
-   CsvService.$invoke = ["configService"];
-
-   angular.module("positioning.csv", []).directive("csvFile", ["csvService", function (csvService) {
-      return {
-         templateUrl: "positioning/csv/csv.html",
-         scope: {
-            state: "=",
-            settings: "="
-         },
-         link: function link(scope) {
-            csvService.getColumns(scope.state.file).then(function (csv) {
-               console.log;
-               scope.columns = csv[0];
-            });
-         }
-      };
-   }]).service("csvService", CsvService);
-}
 'use strict';
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -102,10 +35,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
    RootCtrl.$invoke = ['configService'];
 
-   angular.module("PositioningApp", ['common.altthemes', 'common.navigation', 'common.storage', 'common.templates', 'common.toolbar', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'positioning.download', 'positioning.file', 'positioning.filedrop', 'positioning.header', 'positioning.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'page.footer'])
-
-   // Set up all the service providers here.
-   .config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider) {
+   angular.module("PositioningApp", ['common.altthemes', 'common.navigation', 'common.storage', 'common.templates', 'common.toolbar', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'positioning.download', 'positioning.file', 'positioning.filedrop', 'positioning.header', 'positioning.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'page.footer']).config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider) {
       configServiceProvider.location("icsm/resources/config/positioning.json");
       configServiceProvider.dynamicLocation("icsm/resources/config/positioning.json?t=");
       versionServiceProvider.url("icsm/assets/package.json");
@@ -131,6 +61,70 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          return (bytes / Math.pow(1024, Math.floor(number))).toFixed(precision) + ' ' + units[number];
       };
    });
+}
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+{
+   var CsvService = function () {
+      function CsvService($q, configService) {
+         var _this = this;
+
+         _classCallCheck(this, CsvService);
+
+         this.$q = $q;
+         configService.getConfig().then(function (config) {
+            _this.blockSize = config.blockSize ? config.blockSize : 1024 * 8;
+         });
+      }
+
+      _createClass(CsvService, [{
+         key: "getColumns",
+         value: function getColumns(file) {
+            var blob = file.slice(0, this.blockSize);
+            var reader = new FileReader();
+            reader.readAsText(blob);
+            return this.$q(function (resolve, reject) {
+               reader.onloadend = function (evt) {
+                  console.log(evt.target["readyState"] + "\n\n" + evt.target["result"]);
+
+                  if (evt.target["readyState"] === FileReader.prototype.DONE) {
+                     var buffer = evt.target["result"];
+                     if (buffer.length) {
+                        var lines = buffer.substr(0, buffer.lastIndexOf("\n"));
+                        resolve(CSVToArray(lines));
+                     } else {
+                        reject(buffer);
+                     }
+                  }
+               };
+            });
+         }
+      }]);
+
+      return CsvService;
+   }();
+
+   CsvService.$invoke = ["$q", "configService"];
+
+   angular.module("positioning.csv", []).directive("csvFile", ["csvService", function (csvService) {
+      return {
+         templateUrl: "positioning/csv/csv.html",
+         scope: {
+            state: "=",
+            settings: "="
+         },
+         link: function link(scope) {
+            csvService.getColumns(scope.state.file).then(function (csv) {
+               console.log;
+               scope.columns = csv[0];
+            });
+         }
+      };
+   }]).service("csvService", CsvService);
 }
 "use strict";
 
@@ -162,7 +156,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                edDownloadService.setEmail(processing.email);
 
-               // Assemble data
                edDownloadService.submit(scope.item.processing.template, {
                   id: scope.item.primaryId,
                   yMin: processing.clip.yMin,
@@ -183,13 +176,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 'use strict';
 
 {
-   angular.module('positioning.download', [])
-   /**
-    *
-    * Override the original mars user.
-    *
-    */
-   .directive('posDownload', [function () {
+   angular.module('positioning.download', []).directive('posDownload', [function () {
       return {
          restrict: 'AE',
          templateUrl: 'positioning/download/download.html',
@@ -215,18 +202,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 "use strict";
 
 {
-   angular.module("positioning.format", []).directive("inputFormat", function () {
-      return {
-         scope: {
-            list: "="
-         },
-         templateUrl: "positioning/formats/formats.html"
-      };
-   });
-}
-"use strict";
-
-{
    angular.module("positioning.filedrop", []).directive("fileDrop", [function (scope) {
       return {
          templateUrl: "positioning/filedrop/filedrop.html",
@@ -248,6 +223,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          }
       };
    }]);
+}
+"use strict";
+
+{
+   angular.module("positioning.format", []).directive("inputFormat", function () {
+      return {
+         scope: {
+            list: "="
+         },
+         templateUrl: "positioning/formats/formats.html"
+      };
+   });
 }
 'use strict';
 
@@ -301,67 +288,30 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 "use strict";
 
 function CSVToArray(strData, strDelimiter) {
-   // Check to see if the delimiter is defined. If not,
-   // then default to comma.
    strDelimiter = strDelimiter || ",";
 
-   // Create a regular expression to parse the CSV values.
-   var objPattern = new RegExp(
-   // Delimiters.
-   "(\\" + strDelimiter + "|\\r?\\n|\\r|^)" +
+   var objPattern = new RegExp("(\\" + strDelimiter + "|\\r?\\n|\\r|^)" + "(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" + "([^\"\\" + strDelimiter + "\\r\\n]*))", "gi");
 
-   // Quoted fields.
-   "(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
-
-   // Standard fields.
-   "([^\"\\" + strDelimiter + "\\r\\n]*))", "gi");
-
-   // Create an array to hold our data. Give the array
-   // a default empty first row.
    var arrData = [[]];
 
-   // Create an array to hold our individual pattern
-   // matching groups.
    var arrMatches = null;
 
-   // Keep looping over the regular expression matches
-   // until we can no longer find a match.
    while (arrMatches = objPattern.exec(strData)) {
-
-      // Get the delimiter that was found.
       var strMatchedDelimiter = arrMatches[1];
 
-      // Check to see if the given delimiter has a length
-      // (is not the start of string) and if it matches
-      // field delimiter. If id does not, then we know
-      // that this delimiter is a row delimiter.
       if (strMatchedDelimiter.length && strMatchedDelimiter != strDelimiter) {
-
-         // Since we have reached a new row of data,
-         // add an empty row to our data array.
          arrData.push([]);
       }
 
-      // Now that we have our delimiter out of the way,
-      // let's check to see which kind of value we
-      // captured (quoted or unquoted).
       if (arrMatches[2]) {
-
-         // We found a quoted value. When we capture
-         // this value, unescape any double quotes.
          var strMatchedValue = arrMatches[2].replace(new RegExp("\"\"", "g"), "\"");
       } else {
-
-         // We found a non-quoted value.
          var strMatchedValue = arrMatches[3];
       }
 
-      // Now that we have our value string, let's add
-      // it to the data array.
       arrData[arrData.length - 1].push(strMatchedValue);
    }
 
-   // Return the parsed data.
    return arrData;
 }
 "use strict";
@@ -433,15 +383,14 @@ var LinePusher = function () {
 
    _createClass(LinePusher, [{
       key: "start",
-      value: async function start(targetFn) {
-         // Prime the first read
-         var result = await this.read();
+      value: function start(targetFn) {
+         var result = this.read();
 
          while (result) {
             var lineResult = this.next();
             switch (lineResult.state) {
                case "more":
-                  result = await this.read();
+                  result = this.read();
                   break;
                case "line":
                   targetFn(lineResult.line);
@@ -455,7 +404,7 @@ var LinePusher = function () {
       }
    }, {
       key: "read",
-      value: async function read() {
+      value: function read() {
          var _this = this;
 
          this.pageNo++;
@@ -474,7 +423,6 @@ var LinePusher = function () {
 
             self.reader.onloadend = function (evt) {
                if (evt.target["readyState"] === FileReader.prototype.DONE) {
-                  // DONE == 2
                   console.log("Reading page " + self.pageNo);
                   self.buffer = evt.target["result"];
                   resolve(_this.hasMore());
@@ -518,6 +466,6 @@ angular.module("positioning.templates", []).run(["$templateCache", function($tem
 $templateCache.put("positioning/dialog/dialog.html","<div class=\"upload-dialog\">\r\n   <p style=\"font-weight: bold\" class=\"bg-info\" ng-if=\"!state.file\">Select and drop file for reprojection</p>\r\n   <div ng-if=\"state.file\">\r\n      <div>\r\n         <h4>File selected {{state.file.name}} ({{state.file.size | bytes}}).</h4>\r\n      </div>\r\n   </div>\r\n   <div style=\"text-align:right\" ng-if=\"state.file.size > settings.maxFileSize\">\r\n      The size of the file to be uploaded must not exceed {{settings.maxFileSize | bytes}}. Please select a smaller file.\r\n      <button type=\"button\" class=\"btn btn-primary\" ng-click=\"cancel()\">OK</button>\r\n   </div>\r\n   <div ng-show=\"state.file && state.file.size < settings.maxFileSize\">\r\n      <div ng-if=\"state.extension == \'csv\'\">\r\n         <csv-file state=\"state\" settings=\"settings\" />\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("positioning/dialog/submit.html","<div style=\"padding-bottom:2px\">\r\n   <div class=\"row\">\r\n      <div class=\"col-md-6\" style=\"padding-top:7px\">\r\n         <div class=\"progress\">\r\n            <div class=\"progress-bar\" role=\"progressbar\" aria-valuenow=\"{{processing.percentComplete}}\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: {{processing.percentComplete}}%;\">\r\n                <span class=\"sr-only\">60% Complete</span>\r\n            </div>\r\n         </div>\r\n      </div>\r\n      <div class=\"col-md-4\" style=\"padding-top:7px\">\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Select a valid coordinate system.\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-crosshairs fa-2x\" ng-class=\"{\'ed-valid\': processing.validProjection, \'ed-invalid\': !processing.validProjection }\"></i>\r\n         </span>\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Select a latitude and longitude columns.\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-arrows fa-2x\" ng-class=\"{\'ed-valid\': processing.validFields, \'ed-invalid\': !processing.validFields}\"></i>\r\n         </span>\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Select a valid download format.\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-files-o fa-2x\" ng-class=\"{\'ed-valid\': processing.validFormat, \'ed-invalid\': !processing.validFormat}\"></i>\r\n         </span>\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Provide an email address.\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-envelope fa-2x\" ng-class=\"{\'ed-valid\': processing.validEmail, \'ed-invalid\': !processing.validEmail}\"></i>\r\n         </span>\r\n      </div>\r\n      <div class=\"col-md-2\">\r\n         <button type=\"button\" class=\"btn btn-primary\" ng-click=\"cancel()\">Cancel</button>\r\n         <button type=\"button\" ng-disabled=\"!state.ready\" class=\"btn btn-primary\">Submit</button>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("positioning/file/file.html","<div class=\"container-fluid file-container\" ng-controller=\"RootCtrl as root\">\r\n   <div class=\"row\">\r\n      <div class=\"col-md-7\" style=\"border-right: 2px solid lightgray\">\r\n         <h3>Paragraph 1</h3>\r\n         Lorem ipsum dolor sit amet Consectetur adipiscing elit Integer molestie lorem at massa Facilisis in pretium nisl aliquet\r\n         Nulla volutpat aliquam velit Phasellus iaculis neque Purus sodales ultricies Vestibulum laoreet porttitor sem Ac\r\n         tristique libero volutpat at Faucibus porta lacus fringilla vel Aenean sit amet erat nunc Eget porttitor lorem\r\n\r\n         <file-drop state=\"root.state\" />\r\n\r\n         <h3>Paragraph 2</h3>\r\n         Lorem ipsum dolor sit amet Consectetur adipiscing elit Integer molestie lorem at massa Facilisis in pretium nisl aliquet\r\n         Nulla volutpat aliquam velit Phasellus iaculis neque Purus sodales ultricies Vestibulum laoreet porttitor sem Ac\r\n         tristique libero volutpat at Faucibus porta lacus fringilla vel Aenean sit amet erat nunc Eget porttitor lorem\r\n         <br/>\r\n         <br/>\r\n         <input-format list=\"root.data.fileUploadFormats\" />\r\n      </div>\r\n      <div class=\"col-md-5\" >\r\n         <upload-dialog state=\"root.state\" settings=\"root.data\"/>\r\n      </div>\r\n   </div>\r\n</div>");
-$templateCache.put("positioning/formats/formats.html","<div class=\"panel panel-default\">\r\n  <div class=\"panel-heading\"><h3 class=\"panel-title\">Allowed input file types</h3></div>\r\n  <div class=\"panel-body\">\r\n    <span class=\"label label-info input-format-pill\" ng-repeat=\"item in list\" title=\"{{item.description}} Extensions: {{item.extensions.join(\', \')}}\">\r\n       <a ng-href=\"{{item.url}}\" target=\"_blank\">{{item.name}}</a>\r\n    </span>\r\n  </div>\r\n</div>");
 $templateCache.put("positioning/filedrop/filedrop.html","<div id=\"fileDrop\" title=\"Drop a file you would like to reproject to GDA2020\">\r\n   <br/> Drop <br/> File <br/> Here\r\n</div>");
+$templateCache.put("positioning/formats/formats.html","<div class=\"panel panel-default\">\r\n  <div class=\"panel-heading\"><h3 class=\"panel-title\">Allowed input file types</h3></div>\r\n  <div class=\"panel-body\">\r\n    <span class=\"label label-info input-format-pill\" ng-repeat=\"item in list\" title=\"{{item.description}} Extensions: {{item.extensions.join(\', \')}}\">\r\n       <a ng-href=\"{{item.url}}\" target=\"_blank\">{{item.name}}</a>\r\n    </span>\r\n  </div>\r\n</div>");
 $templateCache.put("positioning/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-header\">\r\n\r\n        <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".ga-header-collapse\">\r\n            <span class=\"sr-only\">Toggle navigation</span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n        </button>\r\n        <a href=\"/\" class=\"appTitle visible-xs\">\r\n            <h1 style=\"font-size:120%\">{{heading}}</h1>\r\n        </a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n        	<li common-navigation ng-show=\"username\" role=\"menuitem\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");}]);

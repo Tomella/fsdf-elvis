@@ -1,4 +1,3 @@
-
 .wizardPopup {
   position: fixed;
   top: 20px;
@@ -132,6 +131,50 @@
   bottom: 45px;
   left: 12px;
 }
+.mvt,
+.mvt ul,
+.mvt li {
+  position: relative;
+}
+
+.mvt ul {
+  list-style: none;
+  padding-left: 32px;
+}
+
+.mvt li::before,
+.mvt li::after {
+  content: "";
+  position: absolute;
+  left: -12px;
+}
+
+.mvt li::before {
+  border-top: 1px solid #000;
+  top: 9px;
+  width: 8px;
+  height: 0;
+}
+
+.mvt li::after {
+  border-left: 1px solid #000;
+  height: 100%;
+  width: 0px;
+  top: 2px;
+}
+
+.mvt ul > li:last-child::after {
+  height: 8px;
+}
+
+.metaview-head {
+  font-weight: bold;
+}
+
+.metaview-info {
+  padding-left: 3px;
+  padding-right: 3px;
+}
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
   display: inline-block;
@@ -243,50 +286,6 @@
 .altthemesdropdown .altthemescurrent {
   color: #fff;
   background-color: #777;
-}
-.mvt,
-.mvt ul,
-.mvt li {
-  position: relative;
-}
-
-.mvt ul {
-  list-style: none;
-  padding-left: 32px;
-}
-
-.mvt li::before,
-.mvt li::after {
-  content: "";
-  position: absolute;
-  left: -12px;
-}
-
-.mvt li::before {
-  border-top: 1px solid #000;
-  top: 9px;
-  width: 8px;
-  height: 0;
-}
-
-.mvt li::after {
-  border-left: 1px solid #000;
-  height: 100%;
-  width: 0px;
-  top: 2px;
-}
-
-.mvt ul > li:last-child::after {
-  height: 8px;
-}
-
-.metaview-head {
-  font-weight: bold;
-}
-
-.metaview-info {
-  padding-left: 3px;
-  padding-right: 3px;
 }
 .icsmTabs {
   position: absolute;
@@ -717,38 +716,6 @@ img.elvis-logo {
   right: 7px;
   bottom: 15px;
 }
-.reviewing-odd {
-  background-color: #eeeeee;
-}
-
-.row.reviewing-divider {
-  border-top: 1px solid lightgray;
-  padding-top: 5px;
-  margin-top: 5px;
-}
-
-.reviewing-datasets {
-  max-height: 450px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-@media (max-height: 750px) {
-  .reviewing-datasets {
-    max-height: 350px;
-  }
-}
-
-@media (max-height: 650px) {
-  .reviewing-datasets {
-    max-height: 250px;
-  }
-}
-
-.exclude {
-  color: #777777;
-  text-decoration: line-through;
-}
 .continue-container {
   padding: 4px;
 }
@@ -886,6 +853,38 @@ img.elvis-logo {
   bottom: 0;
   left: 0;
   right: 0;
+}
+.reviewing-odd {
+  background-color: #eeeeee;
+}
+
+.row.reviewing-divider {
+  border-top: 1px solid lightgray;
+  padding-top: 5px;
+  margin-top: 5px;
+}
+
+.reviewing-datasets {
+  max-height: 450px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-height: 750px) {
+  .reviewing-datasets {
+    max-height: 350px;
+  }
+}
+
+@media (max-height: 650px) {
+  .reviewing-datasets {
+    max-height: 250px;
+  }
+}
+
+.exclude {
+  color: #777777;
+  text-decoration: line-through;
 }
 .selectContainer {
   width: 100%;
@@ -1026,98 +1025,80 @@ div.leaflet-control-scale-line {
   right: 0;
   bottom: 8px;
 }
-.pn-classifications-pills span.btn-primary {
-  background-color: green;
+.selectContainer {
+  width: 100%;
 }
 
-.pn-classifications-swathe {
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
+}
+.radCore {
+  margin-right: 3px;
   display: inline-block;
-  background-color: green;
-  width: 14px;
-  height: 14px;
-  border: solid 1px black;
-}
-.pn-authorities-pills span.btn-primary {
-  background-color: red;
 }
 
-.pn-authorities-swathe {
-  display: inline-block;
-  background-color: red;
-  width: 14px;
-  height: 14px;
-  border: solid 1px black;
-}
-.pn-featuretypes-swathe {
-  display: inline-block;
-  background-color: #337ab7;
-  width: 14px;
-  height: 14px;
-  border: solid 1px black;
-}
-.pn-tab-content-item {
-  padding-right: 3px;
-  background: #FFF;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-.pn-container {
-  overflow-y: auto;
-  position: absolute;
-  top: 10px;
-  bottom: 0px;
-  left: 0px;
-  right: 7px;
-  margin-bottom: 0;
+.searchBar {
+  width: 27em;
+  opacity: 0.9;
 }
 
-.pn-results {
-  position: absolute;
-  top: 55px;
-  bottom: 1px;
-  left: 0px;
-  right: 0px;
-  overflow-x: hidden;
-  overflow-y: auto;
+@media only screen and (max-width:1100px) {
+  .searchBar {
+    width: 23em;
+  }
 }
 
-.pn-numeric {
-  text-align: right;
-  padding-right: 20px;
+@media only screen and (max-width:1025px) {
+  .searchBar {
+    width: 20em;
+  }
 }
 
-.pn-header {
-  font-weight: bold;
-  border-bottom: 1px solid lightgray;
+@media only screen and (max-width:645px) {
+  .searchBar {
+    display: none;
+  }
 }
 
-.pn-results-list {
-  border-bottom: 1px solid lightgray;
-  padding-bottom: 4px;
+@media only screen and (max-width:965px) {
+  .radCore,
+  .hideWhenSmall,
+  .steps-indicator,
+  .secondToolbarInfo {
+    display: none;
+  }
 }
 
-.pn-results-list:last-child {
-  border-bottom: 0;
-  padding-bottom: 0;
-}
-.pn-features {
-  max-block-size: 300px;
-  overflow-y: auto;
-  overflow-x: hidden;
+div.leaflet-control-scale-line {
+  text-align: center;
 }
 
-.pn-search-container {
-  height: 97%;
+@media only screen and (max-width:965px) {
+  div.leaflet-control-scale-line {
+    display: none;
+  }
+}
+.vector-tooltip {
+  min-width: 25em;
 }
 
-.tooltip-inner {
-  max-width: 350px;
+.vector-checkbox {
+  width: 18px;
+  height: 18px;
+  vertical-align: bottom;
+  margin-right: 7px !important;
 }
 
-.pn-pill {
-  color: #fff;
-  margin: 4px;
+.vector-add:disabled {
+  color: gray;
 }
 .start-content-container {
   position: fixed;
@@ -1211,11 +1192,6 @@ div.leaflet-control-scale-line {
 .file-container {
   margin-top: 0;
 }
-.input-format-pill {
-  font-size: 110%;
-  padding: 4px;
-  margin: 5px;
-}
 #fileDrop {
   font-weight: bold;
   font-size: 200%;
@@ -1230,6 +1206,11 @@ div.leaflet-control-scale-line {
   padding-left: 5px;
   padding-right: 5px;
   margin: auto;
+}
+.input-format-pill {
+  font-size: 110%;
+  padding: 4px;
+  margin: 5px;
 }
 .nav-icons {
   margin-top: 7px !important;
@@ -1261,78 +1242,97 @@ div.leaflet-control-scale-line {
 .common-header {
   background-color: white;
 }
-.radCore {
-  margin-right: 3px;
+
+.pn-classifications-pills span.btn-primary {
+  background-color: green;
+}
+
+.pn-classifications-swathe {
   display: inline-block;
+  background-color: green;
+  width: 14px;
+  height: 14px;
+  border: solid 1px black;
+}
+.pn-authorities-pills span.btn-primary {
+  background-color: red;
 }
 
-.searchBar {
-  width: 27em;
-  opacity: 0.9;
+.pn-authorities-swathe {
+  display: inline-block;
+  background-color: red;
+  width: 14px;
+  height: 14px;
+  border: solid 1px black;
+}
+.pn-featuretypes-swathe {
+  display: inline-block;
+  background-color: #337ab7;
+  width: 14px;
+  height: 14px;
+  border: solid 1px black;
+}
+.pn-tab-content-item {
+  padding-right: 3px;
+  background: #FFF;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.pn-container {
+  overflow-y: auto;
+  position: absolute;
+  top: 10px;
+  bottom: 0px;
+  left: 0px;
+  right: 7px;
+  margin-bottom: 0;
 }
 
-@media only screen and (max-width:1100px) {
-  .searchBar {
-    width: 23em;
-  }
+.pn-results {
+  position: absolute;
+  top: 55px;
+  bottom: 1px;
+  left: 0px;
+  right: 0px;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
-@media only screen and (max-width:1025px) {
-  .searchBar {
-    width: 20em;
-  }
+.pn-numeric {
+  text-align: right;
+  padding-right: 20px;
 }
 
-@media only screen and (max-width:645px) {
-  .searchBar {
-    display: none;
-  }
+.pn-header {
+  font-weight: bold;
+  border-bottom: 1px solid lightgray;
 }
 
-@media only screen and (max-width:965px) {
-  .radCore,
-  .hideWhenSmall,
-  .steps-indicator,
-  .secondToolbarInfo {
-    display: none;
-  }
+.pn-results-list {
+  border-bottom: 1px solid lightgray;
+  padding-bottom: 4px;
 }
 
-div.leaflet-control-scale-line {
-  text-align: center;
+.pn-results-list:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.pn-features {
+  max-block-size: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-@media only screen and (max-width:965px) {
-  div.leaflet-control-scale-line {
-    display: none;
-  }
-}
-.selectContainer {
-  width: 100%;
+.pn-search-container {
+  height: 97%;
 }
 
-.selectAbstractTooltip {
-  /* width:450px; */
+.tooltip-inner {
+  max-width: 350px;
 }
 
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
-.vector-tooltip {
-  min-width: 25em;
-}
-
-.vector-checkbox {
-  width: 18px;
-  height: 18px;
-  vertical-align: bottom;
-  margin-right: 7px !important;
-}
-
-.vector-add:disabled {
-  color: gray;
+.pn-pill {
+  color: #fff;
+  margin: 4px;
 }
