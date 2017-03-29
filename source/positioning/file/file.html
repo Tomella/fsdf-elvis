@@ -1,0 +1,23 @@
+<div class="container-fluid file-container" ng-controller="RootCtrl as root">
+   <div class="row">
+      <div class="col-md-7" style="border-right: 2px solid lightgray">
+         <h3>Paragraph 1</h3>
+         Lorem ipsum dolor sit amet Consectetur adipiscing elit Integer molestie lorem at massa Facilisis in pretium nisl aliquet
+         Nulla volutpat aliquam velit Phasellus iaculis neque Purus sodales ultricies Vestibulum laoreet porttitor sem Ac
+         tristique libero volutpat at Faucibus porta lacus fringilla vel Aenean sit amet erat nunc Eget porttitor lorem
+
+         <file-drop state="root.state" />
+
+         <h3>Paragraph 2</h3>
+         Lorem ipsum dolor sit amet Consectetur adipiscing elit Integer molestie lorem at massa Facilisis in pretium nisl aliquet
+         Nulla volutpat aliquam velit Phasellus iaculis neque Purus sodales ultricies Vestibulum laoreet porttitor sem Ac
+         tristique libero volutpat at Faucibus porta lacus fringilla vel Aenean sit amet erat nunc Eget porttitor lorem
+         <br/>
+         <br/>
+         <input-format list="root.data.fileUploadFormats" />
+      </div>
+      <div class="col-md-5" >
+         <upload-dialog state="root.state" settings="root.data"/>
+      </div>
+   </div>
+</div>

@@ -1,0 +1,8 @@
+<div class="panel panel-default">
+  <div class="panel-heading"><h3 class="panel-title">Allowed input file types</h3></div>
+  <div class="panel-body">
+    <span class="label label-info input-format-pill" ng-repeat="item in list" title="{{item.description}} Extensions: {{item.extensions.join(', ')}}">
+       <a ng-href="{{item.url}}" target="_blank">{{item.name}}</a>
+    </span>
+  </div>
+</div>

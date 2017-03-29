@@ -1,9 +1,9 @@
 .contributors {
    margin: 2px;
-   padding: 4px;
-   padding-left:12px;
+   padding: 10px;
+   padding-left:8px;
    position: fixed;
-   top: 80px;
+   top: 70px;
    right: 1px;
    opacity: 0.95;
    z-index: 6;

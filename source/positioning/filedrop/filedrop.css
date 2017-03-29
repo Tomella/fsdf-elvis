@@ -1,0 +1,16 @@
+
+#fileDrop {
+   font-weight: bold;
+   font-size: 200%;
+   line-height: 2;
+   height: 285px;
+   width: 350px;
+   z-index: 1;
+   background-color: #eeeeee;
+   text-align: center;
+   border: 1px dashed gray;
+   padding:15px;
+   padding-left:5px;
+   padding-right:5px;
+   margin: auto;
+}

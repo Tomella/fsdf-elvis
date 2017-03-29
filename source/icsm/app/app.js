@@ -1,6 +1,22 @@
-(function (angular) {
-
-	'use strict';
+{
+	class RootCtrl {
+      constructor($http, configService, mapService) {
+		   mapService.getMap().then(map => {
+			   this.map = map;
+		   });
+		   configService.getConfig().then(data => {
+			   this.data = data;
+			   // If its got WebGL its got everything we need.
+			   try {
+				   let canvas = document.createElement('canvas');
+				   data.modern = !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+			   } catch (e) {
+				   data.modern = false;
+			   }
+		   });
+	   }
+   }
+	RootCtrl.$invoke = ['$http', 'configService', 'mapService'];
 
 	angular.module("IcsmApp", [
 		'common.altthemes',
@@ -91,24 +107,4 @@
 		}])
 
 		.controller("RootCtrl", RootCtrl);
-
-	RootCtrl.$invoke = ['$http', 'configService', 'mapService'];
-	function RootCtrl($http, configService, mapService) {
-		var self = this;
-		mapService.getMap().then(function (map) {
-			self.map = map;
-		});
-		configService.getConfig().then(function (data) {
-			self.data = data;
-			// If its got WebGL its got everything we need.
-			try {
-				var canvas = document.createElement('canvas');
-				data.modern = !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
-			} catch (e) {
-				data.modern = false;
-			}
-		});
-	}
-
-
-})(angular);
+}

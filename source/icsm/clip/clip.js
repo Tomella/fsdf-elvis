@@ -2,9 +2,7 @@
  * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
  */
 
-(function(angular) {
-
-'use strict';
+{
 
 angular.module("icsm.clip", ['geo.draw'])
 
@@ -25,7 +23,7 @@ angular.module("icsm.clip", ['geo.draw'])
 			drawn : "&"
 		},
 		link : function(scope, element) {
-         var timer;
+         let timer;
 
          scope.clip = {
             xMax: null,
@@ -75,8 +73,8 @@ angular.module("icsm.clip", ['geo.draw'])
 			};
 
 			function drawComplete(data) {
-				var c = scope.clip;
-				var response;
+				let c = scope.clip;
+				let response;
 
 				c.xMax = +data.clip.xMax;
 				c.xMin = +data.clip.xMin;
@@ -90,7 +88,7 @@ angular.module("icsm.clip", ['geo.draw'])
 
 
 .factory("clipService", ['$q', '$rootScope', 'drawService', function($q, $rootScope, drawService) {
-	var service = {
+	let service = {
 		initiateDraw : function() {
 			this.data = null;
 			return drawService.drawRectangle().then(drawComplete);
@@ -116,4 +114,4 @@ angular.module("icsm.clip", ['geo.draw'])
 	}
 }]);
 
-})(angular);
+}

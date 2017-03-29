@@ -1,0 +1,114 @@
+<div class="panel panel-default">
+  <div class="panel-heading">Just a few questions about your CSV file</div>
+  <div class="panel-body">
+
+		<div class="row">
+			<div class="col-md-3">
+				<label for="geoprocessOutCoordSys">
+					Coordinate System
+				</label>
+			</div>
+			<div class="col-md-9">
+				<select id="geoprocessOutCoordSys" style="width:95%" ng-model="state.outCoordSys"
+                  ng-options="opt.value for opt in settings.processing.inCoordSys"></select>
+			</div>
+		</div>
+
+      <hr />
+
+      <div class="row">
+			<div class="col-md-3 csv-label">
+				Lat/lng fields are in
+			</div>
+			<div class="col-md-9">
+				<label for="csvDegrees">
+               Decimal degrees (2 cols)
+				</label>
+            <input name="csvDegrees" type="radio" value="deg" ng-model="dmsType" />
+            or
+				<label for="csvDms">
+               Degrees/minutes/seconds (6 cols)
+				</label>
+            <input name="csvDms" type="radio" value="dms" ng-model="dmsType" />
+			</div>
+      </div>
+
+      <div class="row" ng-if="dmsType == 'deg'">
+			<div class="col-md-3 csv-label">
+				Columns (decimal degrees)
+			</div>
+			<div class="col-md-9">
+				<label for="csvSelectLatDecDegrees" style="width:9em">
+               Latitude
+				</label>
+            <select id="csvSelectLatDecDegrees" ng-model="state.latDecDegreesCol"
+                  ng-options="o as o for o in columns"></select>
+            <br/>
+				<label for="csvSelectLngDecDegrees" style="width:9em">
+               Longitude
+				</label>
+            <select id="csvSelectLngDecDegrees" ng-model="state.lngDecDegreesCol"
+                  ng-options="o as o for o in columns"></select>
+			</div>
+      </div>
+
+
+      <div class="row" ng-if="dmsType == 'dms'">
+			<div class="col-md-3 csv-label">
+				Columns
+			</div>
+			<div class="col-md-9 csv-fix-label">
+				<label for="csvSelectLatDegrees">
+               Latitude Degrees
+				</label>
+            <select id="csvSelectLatDegrees" ng-model="state.latDegreesCol"
+                  ng-options="o as o for o in columns"></select>
+            <br/>
+				<label for="csvSelectLatMinutes">
+               Minutes
+				</label>
+            <select id="csvSelectLatMinutes" ng-model="state.latMinutesCol"
+                  ng-options="o as o for o in columns"></select>
+            <br/>
+				<label for="csvSelectLatSeconds">
+               Seconds
+				</label>
+            <select id="csvSelectLatSeconds" ng-model="state.latSecondsCol"
+                  ng-options="o as o for o in columns"></select>
+            <hr/>
+   			<label for="csvSelectLngDegrees">
+               Longitude Degrees
+				</label>
+            <select id="csvSelectLngDegrees" ng-model="state.lngDegreesCol"
+                  ng-options="o as o for o in columns"></select>
+            <br/>
+				<label for="csvSelectLngMinutes">
+               Minutes
+				</label>
+            <select id="csvSelectLngMinutes" ng-model="state.lngMinutesCol"
+                  ng-options="o as o for o in columns"></select>
+            <br/>
+				<label for="csvSelectLngSeconds">
+               Seconds
+				</label>
+            <select id="csvSelectLngSeconds" ng-model="state.lngSecondsCol"
+                  ng-options="o as o for o in columns"></select>
+
+			</div>
+      </div>
+
+      <hr />
+
+		<div class="row">
+  			<div class="col-md-3">
+				<label for="geoprocessOutputFormat">
+					Output Format
+				</label>
+			</div>
+			<div class="col-md-9">
+				<select id="geoprocessOutputFormat" style="width:95%" ng-model="state.outFormat"
+                  ng-options="opt.value for opt in settings.processing.outFormat"></select>
+			</div>
+		</div>
+  </div>
+</div>

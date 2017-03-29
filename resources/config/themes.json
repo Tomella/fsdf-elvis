@@ -78,6 +78,15 @@
          "className": "altthemes-land",
          "url": "comingSoon.html",
          "urlPending": "landCover.html"
+      },
+      {
+         "code": "position",
+         "label": "Positioning",
+         "enabled": true,
+         "title": "Positioning.",
+         "description": "Positioning.",
+         "className": "altthemes-crosshair",
+         "url": "positioning.html"
       }
    ]
 }

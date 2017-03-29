@@ -1,16 +1,12 @@
 /*!
  * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
  */
-
-(function (angular) {
-
-	'use strict';
-
+{
 	angular.module("icsm.bounds", [])
 
 		.directive('icsmBounds', ['flashService', 'messageService', 'boundsService',
 			function (flashService, messageService, boundsService) {
-				var flasher;
+				let flasher;
 				return {
 					restrict: 'AE',
 					link: function () {
@@ -33,7 +29,7 @@
 
 		.factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService', 'flashService',
 			function ($http, $q, $rootScope, $timeout, configService, flashService) {
-				var clipTimeout, notify;
+				let clipTimeout, notify;
 				return {
 					init: function () {
 						notify = $q.defer();
@@ -76,8 +72,8 @@
 				}
 
 				function checkSize(clip) {
-					var deferred = $q.defer();
-					var result = drawn(clip);
+					let deferred = $q.defer();
+					let result = drawn(clip);
 					if (result && result.code) {
 						switch (result.code) {
 							case "oversize":
@@ -105,13 +101,13 @@
 				}
 
 				function underSizeLimit(clip) {
-					var size = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
+					let size = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
 					return size < 0.00000000001 || clip.xMax < clip.xMin;
 				}
 
 				function overSizeLimit(clip) {
 					// Shouldn't need abs but it doesn't hurt.
-					var size = Math.abs((clip.xMax - clip.xMin) * (clip.yMax - clip.yMin));
+					let size = Math.abs((clip.xMax - clip.xMin) * (clip.yMax - clip.yMin));
 					return size > 4;
 				}
 
@@ -157,10 +153,10 @@
 
 				function getList(clip) {
 					configService.getConfig("processing").then(function (conf) {
-						var url = conf.intersectsUrl;
+						let url = conf.intersectsUrl;
 						if (url) {
 							// Order matches the $watch signature so be careful
-							var urlWithParms = url
+							let urlWithParms = url
 								.replace("{maxx}", clip.xMax)
 								.replace("{minx}", clip.xMin)
 								.replace("{maxy}", clip.yMax)
@@ -169,7 +165,7 @@
 							send("Checking there is data in your selected area...", "wait", 180000);
 							$http.get(urlWithParms).then(function (response) {
 								if (response.data && response.data.available_data) {
-									var message = "There is no data held in your selected area. Please try another area.";
+									let message = "There is no data held in your selected area. Please try another area.";
 									send("", "clear");
 									if (response.data.available_data) {
 										response.data.available_data.forEach(function (group) {
@@ -190,4 +186,4 @@
 				}
 			}]);
 
-})(angular);
+}

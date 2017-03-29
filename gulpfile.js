@@ -4,7 +4,7 @@ var gulp = require('gulp');
 // Include Our Plugins
 var fs            = require('fs');
 var header        = require('gulp-header');
-var jshint        = require('gulp-jshint');
+var eslint        = require('gulp-eslint');
 var babel         = require('gulp-babel');
 var sass          = require('gulp-sass');
 var concat        = require('gulp-concat');
@@ -28,8 +28,9 @@ var directories = {
 // Lint Task
 gulp.task('lint', function() {
     return gulp.src(directories.source + '/**/*.js')
-        .pipe(jshint({esversion: 6}))
-        .pipe(jshint.reporter('default'));
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(eslint.failAfterError());
 });
 
 gulp.task('resources', function () {
@@ -43,7 +44,7 @@ gulp.task('views', function () {
 });
 
 //Concatenate & Minify JS
-gulp.task('scripts', ["commonScripts", "dashboardScripts", "icsmScripts", "waterScripts", 'imageryScripts', 'startScripts', 'ltScripts']);
+gulp.task('scripts', ["commonScripts", "dashboardScripts", "icsmScripts", "waterScripts", 'imageryScripts', 'startScripts', 'ltScripts', 'positioningScripts']);
 
 //Concatenate & Minify JS
 gulp.task('commonScripts', function() {
@@ -53,6 +54,10 @@ gulp.task('commonScripts', function() {
 //Concatenate & Minify JS
 gulp.task('placenamesScripts', function() {
    return prepareScripts('placenames');
+});
+
+gulp.task('positioningScripts', function() {
+   return prepareScripts('positioning');
 });
 
 gulp.task('icsmScripts', function() {
@@ -87,7 +92,8 @@ gulp.task('dashboardScripts', function() {
 function prepareScripts(name) {
    return gulp.src(directories.source + '/' + name + '/**/*.js')
       .pipe(babel({
-            presets: ['es2015']
+            presets: ['es2015'],
+            plugins: ["syntax-async-generators"]
       }))
 	   .pipe(addStream.obj(prepareNamedTemplates(name)))
       .pipe(concat(name + '.js'))
@@ -97,13 +103,21 @@ function prepareScripts(name) {
 
 
 //Concatenate & Minify JS
-gulp.task('squash', ['squashCommon','squashIcsm', 'squashWater', 'squashStart', 'squashImagery']);
+gulp.task('squash', ['squashCommon','squashIcsm', 'squashWater', 'squashStart', 'squashImagery', 'squashPositioning']);
 
 gulp.task('squashCommon', function() {
 	return gulp.src(directories.assets + '/common.js')
+      .pipe(babel({
+            presets: ['es2015'],
+             plugins: ["syntax-async-generators"]
+      }))
 		.pipe(uglify())
       .pipe(header(fs.readFileSync(directories.source + '/licence.txt', 'utf8')))
 		.pipe(gulp.dest(directories.assets + "/min"));
+});
+
+gulp.task('squashPositioning', function() {
+	return squashJs('icsm');
 });
 
 gulp.task('squashIcsm', function() {
@@ -147,6 +161,7 @@ gulp.task('watch', function() {
     gulp.watch(directories.source + '/water/**/*(*.js|*.html)', ['waterScripts']);
     gulp.watch(directories.source + '/start/**/*(*.js|*.html)', ['startScripts']);
     gulp.watch(directories.source + '/imagery/**/*(*.js|*.html)', ['imageryScripts']);
+    gulp.watch(directories.source + '/positioning/**/*(*.js|*.html)', ['positioningScripts']);
     gulp.watch(directories.source + '/lt/**/*(*.js|*.html)', ['ltScripts']);
     gulp.watch(directories.source + '/**/*.css', ['concatCss']);
     gulp.watch(directories.assets + '/common.js', ['squashCommon']);

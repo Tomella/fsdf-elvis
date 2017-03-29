@@ -1,0 +1,53 @@
+{
+   angular.module("positioning.dialog", [])
+
+      .directive("uploadDialog", [
+         function () {
+            return {
+               scope: {
+                  state: "=",
+                  settings: "="
+               },
+               templateUrl: "positioning/dialog/dialog.html",
+               link: function (scope) {
+                  scope.cancel = () => {
+                     scope.state.file = null;
+                     scope.state.ready = false;
+                  }
+               }
+            };
+         }
+      ])
+
+      .directive("uploadSubmit", ['configService', 'edDownloadService', 'messageService', function (configService, edDownloadService, messageService) {
+         return {
+            templateUrl: "download/downloader/submit.html",
+            scope: {
+               item: "=",
+               processing: "="
+            },
+            link: function (scope, element, attrs) {
+               scope.submit = function () {
+                  let processing = scope.processing;
+
+                  edDownloadService.setEmail(processing.email);
+
+                  // Assemble data
+                  edDownloadService.submit(scope.item.processing.template,
+                     {
+                        id: scope.item.primaryId,
+                        yMin: processing.clip.yMin,
+                        yMax: processing.clip.yMax,
+                        xMin: processing.clip.xMin,
+                        xMax: processing.clip.xMax,
+                        outFormat: processing.outFormat.code,
+                        outCoordSys: processing.outCoordSys.code,
+                        filename: processing.filename ? processing.filename : "",
+                        email: processing.email
+                     });
+                  messageService.success("Submitted your job. An email will be delivered on completion.");
+               };
+            }
+         };
+      }]);
+}

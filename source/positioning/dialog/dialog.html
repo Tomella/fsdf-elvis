@@ -1,0 +1,17 @@
+<div class="upload-dialog">
+   <p style="font-weight: bold" class="bg-info" ng-if="!state.file">Select and drop file for reprojection</p>
+   <div ng-if="state.file">
+      <div>
+         <h4>File selected {{state.file.name}} ({{state.file.size | bytes}}).</h4>
+      </div>
+   </div>
+   <div style="text-align:right" ng-if="state.file.size > settings.maxFileSize">
+      The size of the file to be uploaded must not exceed {{settings.maxFileSize | bytes}}. Please select a smaller file.
+      <button type="button" class="btn btn-primary" ng-click="cancel()">OK</button>
+   </div>
+   <div ng-show="state.file && state.file.size < settings.maxFileSize">
+      <div ng-if="state.extension == 'csv'">
+         <csv-file state="state" settings="settings" />
+      </div>
+   </div>
+</div>
