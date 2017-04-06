@@ -16,6 +16,7 @@
                         ext = ext ? ext.toLowerCase() : "";
                         scope.state.file = file
                         scope.state.extension = ext;
+                        scope.state.outputName = name.substr(0, name.lastIndexOf("."))
                      }
                   });
                })

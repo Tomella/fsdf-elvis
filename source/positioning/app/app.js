@@ -1,10 +1,9 @@
 {
-
    class RootCtrl {
       constructor(configService) {
          configService.getConfig().then((data) => {
             this.data = data;
-            this.state = {};
+            this.state = new State();
          });
       }
    }
@@ -29,6 +28,7 @@
       'explorer.legend',
       'explorer.message',
       'explorer.modal',
+		'explorer.persist',
       'explorer.projects',
       'explorer.tabs',
       'explorer.version',
@@ -46,12 +46,13 @@
    ])
 
       // Set up all the service providers here.
-      .config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider',
-         function (configServiceProvider, projectsServiceProvider, versionServiceProvider) {
+      .config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', 'persistServiceProvider',
+         function (configServiceProvider, projectsServiceProvider, versionServiceProvider, persistServiceProvider) {
             configServiceProvider.location("icsm/resources/config/positioning.json");
             configServiceProvider.dynamicLocation("icsm/resources/config/positioning.json?t=");
             versionServiceProvider.url("icsm/assets/package.json");
             projectsServiceProvider.setProject("icsm");
+				persistServiceProvider.handler("local");
          }])
 
       .factory("userService", [function () {
@@ -60,7 +61,9 @@
             hasAcceptedTerms: noop,
             setAcceptedTerms: noop,
             getUsername: function () {
-               return "anon";
+               return {
+                  then: (fn) => fn("anon")
+               }
             }
          };
          function noop() { return true; }

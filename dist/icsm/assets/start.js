@@ -20,28 +20,13 @@ under the License.
 'use strict';
 
 (function (angular) {
-  'use strict';
-
-  angular.module('start.navigation', []).directive('startNavigation', ['altthemesService', function (altthemesService) {
-    return {
-      restrict: 'AE',
-      templateUrl: 'start/navigation/navigation.html',
-      link: function link(scope) {
-        altthemesService.getThemes().then(function (themes) {
-          scope.themes = themes;
-        });
-        scope.username = "Anonymous";
-      }
-    };
-  }]);
-})(angular);
-'use strict';
-
-(function (angular) {
 
 	'use strict';
 
-	angular.module("StartApp", ['common.altthemes', 'common.header', 'common.navigation', 'common.storage', 'common.templates', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'start.navigation', 'start.templates', 'ui.bootstrap', 'ngRoute', 'ngSanitize', 'page.footer']).config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider) {
+	angular.module("StartApp", ['common.altthemes', 'common.header', 'common.navigation', 'common.storage', 'common.templates', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'start.navigation', 'start.templates', 'ui.bootstrap', 'ngRoute', 'ngSanitize', 'page.footer'])
+
+	// Set up all the service providers here.
+	.config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider) {
 		configServiceProvider.location("icsm/resources/config/start.json");
 		configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
 		versionServiceProvider.url("icsm/assets/package.json");
@@ -66,7 +51,7 @@ under the License.
 
 		configService.getConfig().then(function (data) {
 			_this.data = data;
-
+			// If its got WebGL its got everything we need.
 			try {
 				var canvas = document.createElement('canvas');
 				data.modern = !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
@@ -75,5 +60,29 @@ under the License.
 			}
 		});
 	}
+})(angular);
+'use strict';
+
+(function (angular) {
+  'use strict';
+
+  angular.module('start.navigation', [])
+  /**
+   *
+   * Override the original mars user.
+   *
+   */
+  .directive('startNavigation', ['altthemesService', function (altthemesService) {
+    return {
+      restrict: 'AE',
+      templateUrl: 'start/navigation/navigation.html',
+      link: function link(scope) {
+        altthemesService.getThemes().then(function (themes) {
+          scope.themes = themes;
+        });
+        scope.username = "Anonymous";
+      }
+    };
+  }]);
 })(angular);
 angular.module("start.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("start/navigation/navigation.html","<div class=\"container-fluid start-content-container\">\r\n   <div class=\"panel panel-default\" ng-repeat=\"item in themes\">\r\n      <div class=\"panel-body\">\r\n         <div class=\"row\">\r\n            <div class=\"col-md-2\">\r\n               <button ng-attr-title=\"{{item.title}}\"><span class=\"select-icon select-{{item.code}}\"></span></button>\r\n            </div>\r\n            <div class=\"col-md-8\">\r\n               <h3>{{item.label}}</h3>\r\n               {{item.description}}\r\n            </div>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");}]);

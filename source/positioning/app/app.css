@@ -6,3 +6,18 @@
    bottom: 8px;
    overflow-y: auto;
 }
+
+.point-at-box {
+    transform: rotate(-35deg);
+}
+
+@media screen and (max-width: 990px) {
+   .point-at-box {
+      transform: rotate(135deg);
+   }
+}
+
+span.mandatory {
+  content:"*";
+  color:red;
+}

@@ -1,0 +1,32 @@
+<div class="row">
+      <div class="col-md-4" style="padding-top:7px">
+         <div class="progress">
+            <div class="progress-bar" role="progressbar" aria-valuenow="{{state.percentage}}"
+                     aria-valuemin="0" aria-valuemax="100" style="width: {{state.percentage}}%;">
+                <span class="sr-only"></span>
+            </div>
+         </div>
+      </div>
+      <div class="col-md-5" style="padding-top:7px">
+         <span style="padding-right:10px" uib-tooltip="Add information about your file." tooltip-placement="left">
+            <i class="fa fa-file-text-o fa-lg" ng-class="{'ed-valid': state.validFileInfo, 'ed-invalid': !state.validFileInfo}"></i>
+         </span>
+         <span style="padding-right:10px" uib-tooltip="Select a valid download format." tooltip-placement="left">
+            <i class="fa fa-files-o fa-lg" ng-class="{'ed-valid': state.validOutFormat, 'ed-invalid': !state.validOutFormat}"></i>
+         </span>
+         <span style="padding-right:10px" uib-tooltip="Provide a file name for your reprojected data." tooltip-placement="left">
+            <span class="fa-stack" ng-class="{'ed-valid': state.validFilename, 'ed-invalid': !state.validFilename}">
+               <i class="fa fa-file-o fa-lg fa-stack-1x"></i>
+               <i class="fa fa-terminal fa-stack-1x" style="font-size:80%"></i>
+            </span>
+         </span>
+         <span style="padding-right:10px" uib-tooltip="Provide an email address." tooltip-placement="left">
+            <i class="fa fa-envelope fa-lg" ng-class="{'ed-valid': state.validEmail, 'ed-invalid': !state.validEmail}"></i>
+         </span>
+      </div>
+      <div class="col-md-3">
+         <button type="button" class="btn btn-primary" ng-click="cancel()">Cancel</button>
+         <button class="btn btn-primary pull-right" ng-disabled="!state.validForm" ng-click="submit()" disabled="disabled">Submit</button>
+      </div>
+
+   </div>

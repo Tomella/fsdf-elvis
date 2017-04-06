@@ -14,7 +14,7 @@
          reader.readAsText(blob);
          return this.$q((resolve, reject) => {
             reader.onloadend = (evt) => {
-               console.log(evt.target["readyState"] + "\n\n" + evt.target["result"]);
+               // console.log(evt.target["readyState"] + "\n\n" + evt.target["result"]);
 
                if (evt.target["readyState"] === FileReader.prototype.DONE) { // DONE == 2
                   let buffer = evt.target["result"];
@@ -43,7 +43,6 @@
             },
             link: function(scope) {
                csvService.getColumns(scope.state.file).then(csv => {
-                  console.log
                   scope.columns = csv[0];
                });
             }

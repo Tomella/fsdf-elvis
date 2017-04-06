@@ -32,7 +32,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		});
 		configService.getConfig().then(function (data) {
 			_this.data = data;
-
+			// If its got WebGL its got everything we need.
 			try {
 				var canvas = document.createElement('canvas');
 				data.modern = !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
@@ -44,7 +44,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 	RootCtrl.$invoke = ['$http', 'configService', 'mapService'];
 
-	angular.module("IcsmApp", ['common.altthemes', 'common.baselayer.control', 'common.cc', 'common.featureinfo', 'common.header', 'common.legend', 'common.navigation', 'common.storage', 'common.templates', 'common.toolbar', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.persist', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'explorer.map.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer', 'geo.draw', 'geo.elevation', 'geo.geosearch', 'geo.map', 'geo.maphelper', 'geo.measure', 'icsm.bounds', 'icsm.contributors', 'icsm.clip', 'icsm.glossary', 'icsm.help', 'icsm.panes', 'elvis.header', 'elvis.results', 'elvis.reviewing', 'icsm.mapevents', 'icsm.select', 'icsm.splash', 'icsm.state', 'icsm.layerswitch', 'icsm.templates', 'icsm.view']).config(['configServiceProvider', 'projectsServiceProvider', 'persistServiceProvider', 'versionServiceProvider', function (configServiceProvider, projectsServiceProvider, persistServiceProvider, versionServiceProvider) {
+	angular.module("IcsmApp", ['common.altthemes', 'common.baselayer.control', 'common.cc', 'common.featureinfo', 'common.header', 'common.legend', 'common.navigation',
+	//'common.panes',
+	'common.storage', 'common.templates', 'common.toolbar', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.persist', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'explorer.map.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer',
+
+	//'geo.baselayer.control',
+	'geo.draw', 'geo.elevation', 'geo.geosearch', 'geo.map', 'geo.maphelper', 'geo.measure', 'icsm.bounds', 'icsm.contributors', 'icsm.clip', 'icsm.glossary', 'icsm.help', 'icsm.panes',
+	// Alternate list
+	'elvis.header', 'elvis.results', 'elvis.reviewing', 'icsm.mapevents', 'icsm.select', 'icsm.splash', 'icsm.state', 'icsm.layerswitch', 'icsm.templates', 'icsm.view'])
+
+	// Set up all the service providers here.
+	.config(['configServiceProvider', 'projectsServiceProvider', 'persistServiceProvider', 'versionServiceProvider', function (configServiceProvider, projectsServiceProvider, persistServiceProvider, versionServiceProvider) {
 		configServiceProvider.location("icsm/resources/config/config.json");
 		configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
 		versionServiceProvider.url("icsm/assets/package.json");
@@ -66,6 +76,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 }
 'use strict';
 
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
 {
 	angular.module("icsm.bounds", []).directive('icsmBounds', ['flashService', 'messageService', 'boundsService', function (flashService, messageService, boundsService) {
 		var flasher = void 0;
@@ -158,6 +171,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}
 
 		function overSizeLimit(clip) {
+			// Shouldn't need abs but it doesn't hurt.
 			var size = Math.abs((clip.xMax - clip.xMin) * (clip.yMax - clip.yMin));
 			return size > 4;
 		}
@@ -170,6 +184,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}
 
 		function drawn(clip) {
+			//geoprocessService.removeClip();
 			forceNumbers(clip);
 
 			if (overSizeLimit(clip)) {
@@ -190,6 +205,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			return { code: "invalid" };
 		}
 
+		// The input validator takes care of order and min/max constraints. We just check valid existance.
 		function validClip(clip) {
 			return clip && angular.isNumber(clip.xMax) && angular.isNumber(clip.xMin) && angular.isNumber(clip.yMax) && angular.isNumber(clip.yMin) && !overSizeLimit(clip) && !underSizeLimit(clip);
 		}
@@ -198,6 +214,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			configService.getConfig("processing").then(function (conf) {
 				var url = conf.intersectsUrl;
 				if (url) {
+					// Order matches the $watch signature so be careful
 					var urlWithParms = url.replace("{maxx}", clip.xMax).replace("{minx}", clip.xMin).replace("{maxy}", clip.yMax).replace("{miny}", clip.yMin);
 
 					send("Checking there is data in your selected area...", "wait", 180000);
@@ -216,6 +233,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 							$rootScope.$broadcast('site.selection', response.data);
 						}
 					}, function (err) {
+						// If it falls over we don't want to crash.
 						send("The service that provides the list of datasets is currently unavailable. " + "Please try again later.", "error");
 					});
 				}
@@ -224,6 +242,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 	}]);
 }
 'use strict';
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
 
 {
 
@@ -417,6 +439,44 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       };
    }
 })(angular);
+"use strict";
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function (angular) {
+
+	'use strict';
+
+	angular.module("icsm.glossary", []).directive("icsmGlossary", [function () {
+		return {
+			templateUrl: "icsm/glossary/glossary.html"
+		};
+	}]).controller("GlossaryCtrl", GlossaryCtrl).factory("glossaryService", GlossaryService);
+
+	GlossaryCtrl.$inject = ['$log', 'glossaryService'];
+	function GlossaryCtrl($log, glossaryService) {
+		var self = this;
+		$log.info("GlossaryCtrl");
+		glossaryService.getTerms().then(function (terms) {
+			self.terms = terms;
+		});
+	}
+
+	GlossaryService.$inject = ['$http'];
+	function GlossaryService($http) {
+		var TERMS_SERVICE = "icsm/resources/config/glossary.json";
+
+		return {
+			getTerms: function getTerms() {
+				return $http.get(TERMS_SERVICE, { cache: true }).then(function (response) {
+					return response.data;
+				});
+			}
+		};
+	}
+})(angular);
 'use strict';
 
 (function (angular) {
@@ -471,32 +531,49 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 })(angular);
 "use strict";
 
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
 (function (angular) {
 
 	'use strict';
 
-	angular.module("icsm.glossary", []).directive("icsmGlossary", [function () {
+	angular.module("icsm.help", []).directive("icsmHelp", [function () {
 		return {
-			templateUrl: "icsm/glossary/glossary.html"
+			templateUrl: "icsm/help/help.html"
 		};
-	}]).controller("GlossaryCtrl", GlossaryCtrl).factory("glossaryService", GlossaryService);
+	}]).directive("icsmFaqs", [function () {
+		return {
+			restrict: "AE",
+			templateUrl: "icsm/help/faqs.html",
+			scope: {
+				faqs: "="
+			},
+			link: function link(scope) {
+				scope.focus = function (key) {
+					$("#faqs_" + key).focus();
+				};
+			}
+		};
+	}]).controller("HelpCtrl", HelpCtrl).factory("helpService", HelpService);
 
-	GlossaryCtrl.$inject = ['$log', 'glossaryService'];
-	function GlossaryCtrl($log, glossaryService) {
+	HelpCtrl.$inject = ['$log', 'helpService'];
+	function HelpCtrl($log, helpService) {
 		var self = this;
-		$log.info("GlossaryCtrl");
-		glossaryService.getTerms().then(function (terms) {
-			self.terms = terms;
+		$log.info("HelpCtrl");
+		helpService.getFaqs().then(function (faqs) {
+			self.faqs = faqs;
 		});
 	}
 
-	GlossaryService.$inject = ['$http'];
-	function GlossaryService($http) {
-		var TERMS_SERVICE = "icsm/resources/config/glossary.json";
+	HelpService.$inject = ['$http'];
+	function HelpService($http) {
+		var FAQS_SERVICE = "icsm/resources/config/faqs.json";
 
 		return {
-			getTerms: function getTerms() {
-				return $http.get(TERMS_SERVICE, { cache: true }).then(function (response) {
+			getFaqs: function getFaqs() {
+				return $http.get(FAQS_SERVICE, { cache: true }).then(function (response) {
 					return response.data;
 				});
 			}
@@ -504,6 +581,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 	}
 })(angular);
 'use strict';
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
 
 (function (angular, L) {
 
@@ -531,7 +612,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                      function checkExtent(event) {
                         var bounds = map.getBounds();
-                        if (insidePolygon({ lng: bounds.getWest(), lat: bounds.getSouth() }, latlngs) && insidePolygon({ lng: bounds.getWest(), lat: bounds.getNorth() }, latlngs) && insidePolygon({ lng: bounds.getEast(), lat: bounds.getSouth() }, latlngs) && insidePolygon({ lng: bounds.getEast(), lat: bounds.getNorth() }, latlngs)) {
+                        if (insidePolygon({ lng: bounds.getWest(), lat: bounds.getSouth() }, latlngs) && // ll
+                        insidePolygon({ lng: bounds.getWest(), lat: bounds.getNorth() }, latlngs) && // ul
+                        insidePolygon({ lng: bounds.getEast(), lat: bounds.getSouth() }, latlngs) && // lr
+                        insidePolygon({ lng: bounds.getEast(), lat: bounds.getNorth() }, latlngs) // ur
+                        ) {
                               inSpace();
                            } else {
                            outOfSpace();
@@ -589,53 +674,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       return inside;
    }
 })(angular, L);
-"use strict";
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module("icsm.help", []).directive("icsmHelp", [function () {
-		return {
-			templateUrl: "icsm/help/help.html"
-		};
-	}]).directive("icsmFaqs", [function () {
-		return {
-			restrict: "AE",
-			templateUrl: "icsm/help/faqs.html",
-			scope: {
-				faqs: "="
-			},
-			link: function link(scope) {
-				scope.focus = function (key) {
-					$("#faqs_" + key).focus();
-				};
-			}
-		};
-	}]).controller("HelpCtrl", HelpCtrl).factory("helpService", HelpService);
-
-	HelpCtrl.$inject = ['$log', 'helpService'];
-	function HelpCtrl($log, helpService) {
-		var self = this;
-		$log.info("HelpCtrl");
-		helpService.getFaqs().then(function (faqs) {
-			self.faqs = faqs;
-		});
-	}
-
-	HelpService.$inject = ['$http'];
-	function HelpService($http) {
-		var FAQS_SERVICE = "icsm/resources/config/faqs.json";
-
-		return {
-			getFaqs: function getFaqs() {
-				return $http.get(FAQS_SERVICE, { cache: true }).then(function (response) {
-					return response.data;
-				});
-			}
-		};
-	}
-})(angular);
 'use strict';
 
 (function (mapevents) {
@@ -652,6 +690,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       var marker, poly, bounds;
       var config = configService.getConfig("mapConfig");
       $rootScope.$on('icsm.bounds.draw', function showBbox(event, bbox) {
+         // 149.090045383719,-35.4,149.4,-35.3
          if (!bbox) {
             makeBounds(null);
             return;
@@ -662,6 +701,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
              ymax = bbox[3],
              ymin = bbox[1];
 
+         // It's a bbox.
          makeBounds({
             type: "Feature",
             geometry: {
@@ -673,6 +713,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       });
 
       $rootScope.$on('icsm.bbox.draw', function showBbox(event, bbox) {
+         // 149.090045383719,-35.4,149.4,-35.3
          if (!bbox) {
             makePoly(null);
             return;
@@ -683,6 +724,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
              ymax = bbox[3],
              ymin = bbox[1];
 
+         // It's a bbox.
          makePoly({
             type: "Feature",
             geometry: {
@@ -693,11 +735,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          }, false);
       });
       $rootScope.$on('icsm.poly.draw', function showBbox(event, geojson) {
+         // It's a GeoJSON Polygon geometry and it has a single ring.
          makePoly(geojson, true);
       });
 
       if (config.listenForMarkerEvent) {
          $rootScope.$on(config.listenForMarkerEvent, function showBbox(event, geojson) {
+            // It's a GeoJSON Polygon geometry and it has a single ring.
             makeMarker(geojson);
          });
       }
@@ -817,24 +861,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 })();
 "use strict";
 
-(function (angular) {
-	'use strict';
-
-	angular.module("icsm.plot", []).directive("icsmPlot", ['$log', function ($log) {
-		return {
-			restrict: "AE",
-			scope: {
-				line: "="
-			},
-			link: function link(scope, element, attrs, ctrl) {
-				scope.$watch("line", function (newValue, oldValue) {
-					$log.info(newValue);
-				});
-			}
-		};
-	}]);
-})(angular);
-"use strict";
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
 
 (function (angular) {
 	'use strict';
@@ -907,7 +936,34 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		};
 	}
 })(angular);
+"use strict";
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
+(function (angular) {
+	'use strict';
+
+	angular.module("icsm.plot", []).directive("icsmPlot", ['$log', function ($log) {
+		return {
+			restrict: "AE",
+			scope: {
+				line: "="
+			},
+			link: function link(scope, element, attrs, ctrl) {
+				scope.$watch("line", function (newValue, oldValue) {
+					$log.info(newValue);
+				});
+			}
+		};
+	}]);
+})(angular);
 'use strict';
+
+/*!
+ * Copyright 2016 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
 
 (function (angular) {
 
@@ -941,6 +997,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    });
 })(angular);
 'use strict';
+
+/*!
+ * Copyright 2016 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
 
 (function (angular) {
     'use strict';
@@ -992,11 +1052,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     }) && !scope.filters.types.every(function (type) {
                         return type.selected;
                     });
-
+                    // Set up the default
                     scope.products.forEach(function (product) {
                         product.matched = !filterExists;
                     });
 
+                    // Do the types first
                     if (typesExists) {
                         scope.products.forEach(function (product) {
                             product.matched = false;
@@ -1012,6 +1073,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         });
                     }
 
+                    // Now do the filters
                     if (filterExists) {
                         var upperFilter = scope.filters.filter.toUpperCase();
                         var products = scope.products;
@@ -1074,6 +1136,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 };
 
                 function decorateCounts(list, types) {
+                    // reset
                     var checks = [];
                     angular.forEach(types, function (type) {
                         type.count = 0;
@@ -1127,8 +1190,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
             }
         };
-    }]).directive('icsmAbstractHover', ['$timeout', 'listService', function ($timeout, listService) {
-        var TIME_DELAY = 250;
+    }])
+
+    // All this does is set up the data on mouse hover. The UI can do whatever it wants with the data when it arrives
+    .directive('icsmAbstractHover', ['$timeout', 'listService', function ($timeout, listService) {
+        var TIME_DELAY = 250; // ms
         return {
             restrict: 'AE',
             scope: {
@@ -1161,7 +1227,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
             }
         };
-    }]).directive('icsmAbstractLink', ['$timeout', 'listService', function ($timeout, listService) {
+    }])
+
+    // All this does is set up the data on mouse hover. The UI can do whatever it wants with the data when it arrives
+    .directive('icsmAbstractLink', ['$timeout', 'listService', function ($timeout, listService) {
 
         return {
             restrict: 'AE',
@@ -1394,6 +1463,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 })(angular);
 'use strict';
 
+/*!
+ * Copyright 2016 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
 (function (angular) {
 
    'use strict';
@@ -1455,6 +1528,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          restrict: "AE",
          link: function link(scope, element) {
             scope.data = reviewService.data;
+            //console.log("data" + scope.data);
          }
       };
    }]).filter('reviewProductsSelected', function () {
@@ -1539,7 +1613,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    }
 
    function convertFlatToStructured(flat) {
-      var fields = ["file_url", "file_name", "file_size", "bbox"];
+      var fields = ["file_url", "file_name", "file_size", "bbox"]; // ["index_poly_name", "file_name", "file_url", "file_size", "file_last_modified", "bbox"]
       var response = {
          available_data: []
       };
@@ -1582,7 +1656,133 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       return response;
    }
 })(angular);
+'use strict';
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+(function (angular) {
+
+	'use strict';
+
+	angular.module("icsm.splash", []).directive('icsmSplash', ['$rootScope', '$uibModal', '$log', 'splashService', function ($rootScope, $uibModal, $log, splashService) {
+		return {
+			controller: ['$scope', 'splashService', function ($scope, splashService) {
+				$scope.acceptedTerms = true;
+
+				splashService.getReleaseNotes().then(function (messages) {
+					$scope.releaseMessages = messages;
+					$scope.acceptedTerms = splashService.hasViewedSplash();
+				});
+			}],
+			link: function link(scope, element) {
+				var modalInstance;
+
+				scope.$watch("acceptedTerms", function (value) {
+					if (value === false) {
+						modalInstance = $uibModal.open({
+							templateUrl: 'icsm/splash/splash.html',
+							size: "lg",
+							backdrop: "static",
+							keyboard: false,
+							controller: ['$scope', '$uibModalInstance', 'acceptedTerms', 'messages', function ($scope, $uibModalInstance, acceptedTerms, messages) {
+								$scope.acceptedTerms = acceptedTerms;
+								$scope.messages = messages;
+								$scope.accept = function () {
+									$uibModalInstance.close(true);
+								};
+							}],
+							resolve: {
+								acceptedTerms: function acceptedTerms() {
+									return scope.acceptedTerms;
+								},
+								messages: function messages() {
+									return scope.releaseMessages;
+								}
+							}
+						});
+						modalInstance.result.then(function (acceptedTerms) {
+							$log.info("Accepted terms");
+							scope.acceptedTerms = acceptedTerms;
+							splashService.setHasViewedSplash(acceptedTerms);
+						}, function () {
+							$log.info('Modal dismissed at: ' + new Date());
+						});
+					}
+				});
+
+				$rootScope.$on("logoutRequest", function () {
+					userService.setAcceptedTerms(false);
+				});
+			}
+		};
+	}]).factory("splashService", ['$http', function ($http) {
+		var VIEWED_SPLASH_KEY = "icsm.accepted.terms",
+		    releaseNotesUrl = "icsm/resources/service/releaseNotes";
+
+		return {
+			getReleaseNotes: function getReleaseNotes() {
+				return $http({
+					method: "GET",
+					url: releaseNotesUrl + "?t=" + Date.now()
+				}).then(function (result) {
+					return result.data;
+				});
+			},
+			hasViewedSplash: hasViewedSplash,
+			setHasViewedSplash: setHasViewedSplash
+		};
+
+		function setHasViewedSplash(value) {
+			if (value) {
+				sessionStorage.setItem(VIEWED_SPLASH_KEY, true);
+			} else {
+				sessionStorage.removeItem(VIEWED_SPLASH_KEY);
+			}
+		}
+
+		function hasViewedSplash() {
+			return !!sessionStorage.getItem(VIEWED_SPLASH_KEY);
+		}
+	}]).filter("priorityColor", [function () {
+		var map = {
+			IMPORTANT: "red",
+			HIGH: "blue",
+			MEDIUM: "orange",
+			LOW: "gray"
+		};
+
+		return function (priority) {
+			if (priority in map) {
+				return map[priority];
+			}
+			return "black";
+		};
+	}]).filter("wordLowerCamel", function () {
+		return function (priority) {
+			return priority.charAt(0) + priority.substr(1).toLowerCase();
+		};
+	}).filter("sortNotes", [function () {
+		return function (messages) {
+			if (!messages) {
+				return;
+			}
+			var response = messages.slice(0).sort(function (prev, next) {
+				if (prev.priority == next.priority) {
+					return prev.lastUpdate == next.lastUpdate ? 0 : next.lastUpdate - prev.lastUpdate;
+				} else {
+					return prev.priority == "IMPORTANT" ? -11 : 1;
+				}
+			});
+			return response;
+		};
+	}]);
+})(angular);
 "use strict";
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
 
 (function (angular) {
 
@@ -1627,6 +1827,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			},
 
 			getLayerGroup: function getLayerGroup() {
+				// Prime the layer group
 				if (!selectLayerGroup) {
 					selectLayerGroup = mapService.getGroup(LAYER_GROUP_KEY);
 				}
@@ -1646,6 +1847,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			more: function more() {},
 
 			_executeQuery: function _executeQuery() {
+				// Give them the lot as they will want the criteria as well
 				$http.get(baseUrl, { cache: true }).then(function (response) {
 					service.getLayerGroup();
 
@@ -1689,6 +1891,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					}
 					bounds = [[+parts[1], +parts[0]], [+parts[3], +parts[2]]];
 
+					// create a black rectangle
 					layer = L.rectangle(bounds, {
 						fill: false,
 						color: "#000000",
@@ -1711,7 +1914,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				} else {
 					dataset.layer = null;
 					dataset.showLayer = false;
-
+					// Do we add the services to it?
 					dataset.services = servicesFactory(dataset.dcUris);
 					dataset.bounds = getBounds(dataset.bbox);
 				}
@@ -1746,8 +1949,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					} else {
 						coords = box.split(" ");
 						if (coords.length == 4 && within(+coords[0], +coords[1], +coords[2], +coords[3])) {
+							// show
 							service.createLayer(dataset);
 						} else {
+							// hide
 							service.removeLayer(dataset);
 						}
 					}
@@ -1888,6 +2093,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			this.handlers = [];
 
 			this.isWcs = function () {
+				// console.log("Checking results:" + (this.protocol == protocols.WCS));
 				return this.protocol == protocols.WCS;
 			};
 
@@ -1913,6 +2119,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 			this.remove = function () {
 				this.handlers.forEach(function (callback) {
+					// They should all have a remove but you never know.
 					if (this.callback.remove) {
 						callback.remove(this);
 					}
@@ -1937,6 +2144,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 })(angular);
 'use strict';
 
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
 (function (angular) {
 
 	'use strict';
@@ -1944,12 +2155,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 	angular.module("icsm.select", ['icsm.select.service']).controller("SelectCtrl", SelectCtrl).controller("SelectCriteriaCtrl", SelectCriteriaCtrl).directive("icsmSelect", [function () {
 		return {
 			templateUrl: "icsm/select/select.html",
-			link: function link(scope, element, attrs) {}
+			link: function link(scope, element, attrs) {
+				//console.log("Hello select!");
+			}
 		};
 	}]).directive("selectDoc", [function () {
 		return {
 			templateUrl: "icsm/select/doc.html",
-			link: function link(scope, element, attrs) {}
+			link: function link(scope, element, attrs) {
+				//console.log("What's up doc!");
+			}
 		};
 	}]).directive("selectGroup", [function () {
 		return {
@@ -1957,9 +2172,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			scope: {
 				group: "="
 			},
-			link: function link(scope, element, attrs) {}
+			link: function link(scope, element, attrs) {
+				//console.log("What's up doc!");
+			}
 		};
-	}]).filter("pubDate", function () {
+	}])
+
+	/**
+  * Format the publication date
+  */
+	.filter("pubDate", function () {
 		return function (string) {
 			var date;
 			if (string) {
@@ -1968,14 +2190,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			}
 			return "-";
 		};
-	}).filter("authors", function () {
+	})
+
+	/**
+  * Format the array of authors
+  */
+	.filter("authors", function () {
 		return function (auth) {
 			if (auth) {
 				return auth.join(", ");
 			}
 			return "-";
 		};
-	}).filter("truncate", function () {
+	})
+
+	/**
+  * If the text is larger than a certain size truncate it and add some dots to the end.
+  */
+	.filter("truncate", function () {
 		return function (text, length) {
 			if (text && text.length > length - 3) {
 				return text.substr(0, length - 3) + "...";
@@ -1999,6 +2231,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		    self = this;
 
 		$rootScope.$on("select.results.received", function (event, data) {
+			//console.log("Received response")
 			flashService.remove(flasher);
 			self.data = data;
 		});
@@ -2062,124 +2295,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 })(angular);
 'use strict';
 
-(function (angular) {
-
-	'use strict';
-
-	angular.module("icsm.splash", []).directive('icsmSplash', ['$rootScope', '$uibModal', '$log', 'splashService', function ($rootScope, $uibModal, $log, splashService) {
-		return {
-			controller: ['$scope', 'splashService', function ($scope, splashService) {
-				$scope.acceptedTerms = true;
-
-				splashService.getReleaseNotes().then(function (messages) {
-					$scope.releaseMessages = messages;
-					$scope.acceptedTerms = splashService.hasViewedSplash();
-				});
-			}],
-			link: function link(scope, element) {
-				var modalInstance;
-
-				scope.$watch("acceptedTerms", function (value) {
-					if (value === false) {
-						modalInstance = $uibModal.open({
-							templateUrl: 'icsm/splash/splash.html',
-							size: "lg",
-							backdrop: "static",
-							keyboard: false,
-							controller: ['$scope', '$uibModalInstance', 'acceptedTerms', 'messages', function ($scope, $uibModalInstance, acceptedTerms, messages) {
-								$scope.acceptedTerms = acceptedTerms;
-								$scope.messages = messages;
-								$scope.accept = function () {
-									$uibModalInstance.close(true);
-								};
-							}],
-							resolve: {
-								acceptedTerms: function acceptedTerms() {
-									return scope.acceptedTerms;
-								},
-								messages: function messages() {
-									return scope.releaseMessages;
-								}
-							}
-						});
-						modalInstance.result.then(function (acceptedTerms) {
-							$log.info("Accepted terms");
-							scope.acceptedTerms = acceptedTerms;
-							splashService.setHasViewedSplash(acceptedTerms);
-						}, function () {
-							$log.info('Modal dismissed at: ' + new Date());
-						});
-					}
-				});
-
-				$rootScope.$on("logoutRequest", function () {
-					userService.setAcceptedTerms(false);
-				});
-			}
-		};
-	}]).factory("splashService", ['$http', function ($http) {
-		var VIEWED_SPLASH_KEY = "icsm.accepted.terms",
-		    releaseNotesUrl = "icsm/resources/service/releaseNotes";
-
-		return {
-			getReleaseNotes: function getReleaseNotes() {
-				return $http({
-					method: "GET",
-					url: releaseNotesUrl + "?t=" + Date.now()
-				}).then(function (result) {
-					return result.data;
-				});
-			},
-			hasViewedSplash: hasViewedSplash,
-			setHasViewedSplash: setHasViewedSplash
-		};
-
-		function setHasViewedSplash(value) {
-			if (value) {
-				sessionStorage.setItem(VIEWED_SPLASH_KEY, true);
-			} else {
-				sessionStorage.removeItem(VIEWED_SPLASH_KEY);
-			}
-		}
-
-		function hasViewedSplash() {
-			return !!sessionStorage.getItem(VIEWED_SPLASH_KEY);
-		}
-	}]).filter("priorityColor", [function () {
-		var map = {
-			IMPORTANT: "red",
-			HIGH: "blue",
-			MEDIUM: "orange",
-			LOW: "gray"
-		};
-
-		return function (priority) {
-			if (priority in map) {
-				return map[priority];
-			}
-			return "black";
-		};
-	}]).filter("wordLowerCamel", function () {
-		return function (priority) {
-			return priority.charAt(0) + priority.substr(1).toLowerCase();
-		};
-	}).filter("sortNotes", [function () {
-		return function (messages) {
-			if (!messages) {
-				return;
-			}
-			var response = messages.slice(0).sort(function (prev, next) {
-				if (prev.priority == next.priority) {
-					return prev.lastUpdate == next.lastUpdate ? 0 : next.lastUpdate - prev.lastUpdate;
-				} else {
-					return prev.priority == "IMPORTANT" ? -11 : 1;
-				}
-			});
-			return response;
-		};
-	}]);
-})(angular);
-'use strict';
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
 
 (function (angular) {
 
@@ -2207,7 +2325,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 	'use strict';
 
-	angular.module('icsm.themes', []).directive('icsmThemes', ['themesService', function (themesService) {
+	angular.module('icsm.themes', [])
+
+	/**
+ 	 *
+ 	 * Override the original mars user.
+ 	 *
+  	 */
+	.directive('icsmThemes', ['themesService', function (themesService) {
 		return {
 			restrict: 'AE',
 			templateUrl: 'icsm/themes/themes.html',
@@ -2231,7 +2356,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 	}]).filter('themesFilter', function () {
 		return function (features, theme) {
 			var response = [];
-
+			// Give 'em all if they haven't set a theme.
 			if (!theme) {
 				return features;
 			}
@@ -2265,7 +2390,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			configService.getConfig('themes').then(function (themes) {
 				self.themes = themes;
 				self.theme = themes[value];
-
+				// Decorate the key
 				angular.forEach(themes, function (theme, key) {
 					theme.key = key;
 				});
@@ -2337,6 +2462,7 @@ var BaseStrategy = function () {
    }], [{
       key: "resolvedPromise",
       value: function resolvedPromise(data) {
+         // Create a very poor man's promise for IE11 or anybody really. It'll work anywhere.
          var response = {
             then: function then(fn) {
                this.fn = fn;
@@ -2637,13 +2763,13 @@ var Strategies = function () {
 
       this.strategies = {
          "NSW Government": new NswStrategy(http),
-         "VIC Government": unknown,
-         "SA Government": unknown,
-         "WA Government": unknown,
+         "VIC Government": unknown, // new VicStrategy(http),
+         "SA Government": unknown, // new SaStrategy(http),
+         "WA Government": unknown, // new WaStrategy(http),
          "QLD Government": new QldStrategy(http),
-         "ACT Government": unknown,
-         "NT Government": unknown,
-         "TAS Government": unknown,
+         "ACT Government": unknown, // new ActStrategy(http),
+         "NT Government": unknown, // new NtStrategy(http),
+         "TAS Government": unknown, // new TasStrategy(http),
          "Geoscience Australia": new GaStrategy(http)
       };
    }
@@ -2660,6 +2786,10 @@ var Strategies = function () {
 }();
 "use strict";
 
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+
 (function (angular) {
 
 	'use strict';
@@ -2668,7 +2798,12 @@ var Strategies = function () {
 		return {
 			controller: 'toolbarLinksCtrl'
 		};
-	}]).directive('icsmToolbarRow', [function () {
+	}])
+
+	/**
+  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
+  */
+	.directive('icsmToolbarRow', [function () {
 		return {
 			scope: {
 				map: "="
@@ -2694,6 +2829,10 @@ var Strategies = function () {
 	}]);
 })(angular);
 "use strict";
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
 
 (function (angular, $) {
 	'use strict';
@@ -2816,8 +2955,8 @@ $templateCache.put("icsm/clip/clip.html","<div class=\"well well-sm\" style=\"ma
 $templateCache.put("icsm/clip/infobbox.html","<div class=\"\">\r\n	<strong style=\"font-size:120%\">Select an area of interest.</strong>\r\n   By hitting the \"Select an area...\" button an area on the map can be selected with the mouse by clicking a\r\n   corner and while holding the left mouse button\r\n	down drag diagonally across the map to the opposite corner.\r\n	<br/>\r\n	Clicking the \"Select an area...\" button again allows replacing a previous area selection. <br/>\r\n	<strong>Notes:</strong>\r\n   <ul>\r\n      <li>The data does not cover all of Australia.</li>\r\n      <li>Restrict a search area to below four square degrees. eg 2x2 or 1x4</li>\r\n   </ul>\r\n	<p style=\"padding-top:5px\"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n		You can zoom in and out using the mouse wheel or the \"+\" and \"-\" map control on the top left of the map. If you\r\n		don\'t like the position of your drawn area, hit the \"Draw\" button and draw a new bounding box.\r\n	</p>\r\n</div>");
 $templateCache.put("icsm/contributors/contributors.html","<span class=\"contributors\" ng-mouseenter=\"over()\" ng-mouseleave=\"out()\"\r\n      ng-class=\"(contributors.show || contributors.ingroup || contributors.stick) ? \'transitioned-down\' : \'transitioned-up\'\">\r\n   <button class=\"undecorated contributors-unstick\" ng-click=\"unstick()\" style=\"float:right\">X</button>\r\n   <div ng-repeat=\"contributor in contributors.orgs | activeContributors\" style=\"text-align:cnter\">\r\n      <a ng-href=\"{{contributor.href}}\" name=\"contributors{{$index}}\" title=\"{{contributor.title}}\" target=\"_blank\">\r\n         <img ng-src=\"{{contributor.image}}\" alt=\"{{contributor.title}}\" class=\"elvis-logo\" ng-class=\"contributor.class\"></img>\r\n      </a>\r\n   </div>\r\n</span>");
 $templateCache.put("icsm/contributors/show.html","<a ng-mouseenter=\"over()\" ng-mouseleave=\"out()\" class=\"contributors-link\" title=\"Click to lock/unlock contributors list.\"\r\n      ng-click=\"toggleStick()\" href=\"#contributors0\">Contributors</a>");
-$templateCache.put("icsm/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n        	<li role=\"menuitem\" style=\"padding-right:10px;position: relative;top: -3px;\">\r\n              <span class=\"altthemes-container\">\r\n	               <span>\r\n                     <a title=\"Location INformation Knowledge platform (LINK)\" href=\"http://fsdf.org.au/\" target=\"_blank\">\r\n                        <img alt=\"FSDF\" src=\"icsm/resources/img/FSDFimagev4.0.png\" style=\"height: 66px\">\r\n                     </a>\r\n                  </span>\r\n               </span>\r\n           </li>\r\n        	<li common-navigation ng-show=\"username\" role=\"menuitem\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n<div class=\"contributorsLink\" style=\"position: absolute; right:7px; bottom:15px\">\r\n      <icsm-contributors-link></icsm-contributors-link>\r\n</div>\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");
 $templateCache.put("icsm/glossary/glossary.html","<div ng-controller=\"GlossaryCtrl as glossary\">\r\n   <div style=\"position:relative;padding:5px;padding-left:10px;\">\r\n      <div class=\"panel\" style=\"padding:5px;\">\r\n         <p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n	         <strong>Glossary</strong>\r\n         </p>\r\n\r\n         <div class=\"panel-body\">\r\n            <table class=\"table table-striped\">\r\n               <thead>\r\n                  <tr>\r\n                     <th>Term</th>\r\n                     <th>Definition</th>\r\n                  </tr>\r\n               </thead>\r\n               <tbody>\r\n                  <tr ng-repeat=\"term in glossary.terms\">\r\n                     <td>{{term.term}}</td>\r\n                     <td>{{term.definition}}</td>\r\n                  </tr>\r\n               </tbody>\r\n            </table>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
+$templateCache.put("icsm/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n        	<li role=\"menuitem\" style=\"padding-right:10px;position: relative;top: -3px;\">\r\n              <span class=\"altthemes-container\">\r\n	               <span>\r\n                     <a title=\"Location INformation Knowledge platform (LINK)\" href=\"http://fsdf.org.au/\" target=\"_blank\">\r\n                        <img alt=\"FSDF\" src=\"icsm/resources/img/FSDFimagev4.0.png\" style=\"height: 66px\">\r\n                     </a>\r\n                  </span>\r\n               </span>\r\n           </li>\r\n        	<li common-navigation ng-show=\"username\" role=\"menuitem\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n<div class=\"contributorsLink\" style=\"position: absolute; right:7px; bottom:15px\">\r\n      <icsm-contributors-link></icsm-contributors-link>\r\n</div>\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");
 $templateCache.put("icsm/help/faqs.html","<p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n   <strong>FAQS</strong>\r\n</p>\r\n\r\n<h5 ng-repeat=\"faq in faqs\"><button type=\"button\" class=\"undecorated\" ng-click=\"focus(faq.key)\">{{faq.question}}</button></h5>\r\n<hr/>\r\n<div class=\"row\" ng-repeat=\"faq in faqs\">\r\n   <div class=\"col-md-12\">\r\n      <h5 tabindex=\"0\" id=\"faqs_{{faq.key}}\">{{faq.question}}</h5>\r\n      <span ng-bind-html=\"faq.answer\"></span>\r\n      <hr/>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/help/help.html","<p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n	<strong>Help</strong>\r\n</p>\r\n\r\n<div class=\"panel-body\" ng-controller=\"HelpCtrl as help\">\r\n	The steps to get data!\r\n	<ol>\r\n		<li>Define area of interest</li>\r\n		<li>Select datasets</li>\r\n		<li>Confirm selections</li>\r\n		<li>Enter email address</li>\r\n		<li>Start extract</li>\r\n	</ol>\r\n	An email will be sent to you on completion of the data extract with a link to your data.\r\n   <hr>\r\n	<icsm-faqs faqs=\"help.faqs\" ></icsm-faqs>\r\n</div>");
 $templateCache.put("icsm/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" icsm-toolbar-row map=\"root.map\"></div>\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			    <common-feature-info></common-feature-info>\r\n			    <icsm-layerswitch></icsm-layerswitch>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div class=\"common-legend\" common-legend map=\"data.map\"></div>\r\n    		<div icsm-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'download\'\" icsm-view></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'maps\'\" icsm-maps></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" icsm-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" icsm-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
@@ -2828,10 +2967,10 @@ $templateCache.put("icsm/results/continue.html","<div class=\"continue-container
 $templateCache.put("icsm/results/orgheading.html","<h5>\r\n	<button class=\"undecorated\" ng-click=\"expansions[org.source] = !expansions[org.source]\"\r\n      uib-tooltip=\"Click to collapse/expand this group\" tooltip-append-to-body=\"true\"\r\n		aria-expanded=\"true\" aria-controls=\"collapse{{mappings[org.source].code}}\">\r\n      <img ng-src=\"{{mappings[org.source].image}}\" ng-attr-style=\"height:{{mappings[org.source].height}}px\"></img>\r\n      <strong>{{org.source}}</strong> (Showing {{org.downloadables | countMatchedDownloadables}} of {{org.downloadables	| countDownloadables}})\r\n   </button>\r\n	<span class=\"listTopExpander\">\r\n      <button class=\"undecorated\" ng-show=\"orgHasSelections()\" ng-click=\"deselectAll()\">\r\n         [Deselect all]\r\n      </button>\r\n      <button class=\"undecorated\" ng-click=\"expansions[org.source] = !expansions[org.source]\">\r\n         [{{expansions[org.source]?\"collapse\":\"expand\"}}]\r\n      </button>\r\n   </span>\r\n</h5>");
 $templateCache.put("icsm/results/results.html","<div ng-show=\"!list || !list.length\">\r\n   <div class=\"alert alert-warning\" role=\"alert\"><strong>Select an area</strong> to find datasets within.</div>\r\n</div>\r\n\r\n<div ng-show=\"list.length\" class=\"results-list\">\r\n   <div class=\"row\">\r\n      <div class=\"col-md-12\" uib-tooltip=\"Number of intersecting or very near datasets to your area of interest.\">\r\n         <h4 style=\"display:inline-block\">Found {{products.length}} datasets</h4>\r\n      </div>\r\n   </div>\r\n   <div class=\"panel panel-default\" style=\"margin-bottom: 5px; margin-top: 5px;\">\r\n      <div class=\"panel-body\" style=\"float:clear\">\r\n         <span class=\"filter-text\" style=\"float:left;width:50%\" >\r\n            <div class=\"input-group input-group-sm\">\r\n               <span class=\"input-group-addon\" id=\"names1\">Filter:</span>\r\n               <input type=\"text\" ng-model=\"filters.filter\" class=\"form-control\" ng-change=\"update()\" placeholder=\"Filter names\" aria-describedby=\"names1\">\r\n            </div>\r\n         </span>\r\n         <span class=\"filter-type\" style=\"padding:10px; float:right\">\r\n				<span class=\"listTypeLabel\">Filter by type:</span>\r\n            <span ng-repeat=\"type in filters.types\" class=\"listType\">\r\n               <input type=\"checkbox\" ng-model=\"type.selected\" ng-change=\"update()\"/>\r\n               <span uib-tooltip=\"{{type.description}}\">{{type.label}}</span>\r\n            </span>\r\n         </span>\r\n      </div>\r\n   </div>\r\n\r\n   <div ng-repeat=\"available in list\" class=\"well\" style=\"padding-left:4px;padding-right:4px\" ng-show=\"list.someMatches(available)\"\r\n      ng-controller=\"listCtrl as list\">\r\n      <icsm-org-heading org=\"available\" expansions=\"expansions\" mappings=\"mappings\" products=\"products\"></icsm-org-heading>\r\n      <div uib-collapse=\"!expansions[available.source]\">\r\n         <div class=\"listRow\" ng-class-odd=\"\'listEven\'\" ng-repeat=\"(typeKey, types) in available.downloadables | allowedTypes\">\r\n            <h5><strong>{{typeKey}}</strong></h5>\r\n            <div ng-repeat=\"(key, items) in types\">\r\n               <div>\r\n                  <h5>\r\n                     <button ng-click=\"list.checkChildren(items)\" style=\"width:7em\" class=\"btn btn-xs btn-default\">\r\n                        <span ng-show=\"!list.childrenChecked(items)\">Select all</span>\r\n                        <span ng-show=\"list.childrenChecked(items)\">Deselect all</span>\r\n                     </button>\r\n                     <strong uib-tooltip=\"{{filter.types[key].description}}\">{{key}}</strong>\r\n                  </h5>\r\n                  <div ng-repeat=\"item in items | matchedItems\" icsm-abstract-hover item=\"item\" >\r\n                     <div tooltip-append-to-body=\"true\" uib-tooltip-template=\"\'icsm/results/abstracttooltip.html\'\" tooltip-popup-delay=\"400\"\r\n                              data-ng-mouseenter=\"show(item)\" data-ng-mouseleave=\"hide(item)\">\r\n                        <input type=\"checkbox\" ng-model=\"item.selected\" />\r\n                        <icsm-abstract item=\"item\"></icsm-abstract>\r\n                        <common-cc version=\"mappings[item.source].ccLicence\"></common-cc>\r\n                        <span class=\"listItem\" item=\"item\" icsm-abstract-link></span>\r\n                        <span ng-show=\"item.file_size\" style=\"float:right;padding-top:3px\">({{item.file_size | fileSize}})</span>\r\n                     </div>\r\n                     <div ng-show=\"item.showAbstract\" class=\"well\">\r\n                        <span ng-show=\"!item.metadata\">\r\n                           <i class=\"fa fa-spinner fa-spin fa-lg fa-fw\"></i>\r\n                           <span>Loading metadata...</span>\r\n                        </span>\r\n                        <div ng-show=\"item.metadata.abstract\">\r\n                           <strong>{{item.metadata.title}}</strong> -\r\n                           <span class=\"icsm-abstract-body\" ng-bind-html=\"item.metadata.abstractText\"></span >\r\n                        </div>\r\n                        <div ng-show=\"!item.metadata.abstract\">\r\n                           <i class=\"fa fa-lg fa-exclamation-triangle\" style=\"color:orange\"></i>\r\n                           There is no abstract available for this dataset.\r\n                        </div>\r\n                     </div>\r\n						</div>\r\n					</div>\r\n				</div>\r\n				<div style=\"text-align:right\"><button class=\"undecorated\" ng-click=\"expansions[available.source] = false\">[collapse]</button></div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/reviewing/reviewing.html","<div class=\"modal-header\">\r\n	<h3 class=\"modal-title splash\">Review datasets, provide email and continue</h3>\r\n</div>\r\n<div class=\"modal-body\" id=\"accept\" ng-form exp-enter=\"accept()\" icsm-splash-modal style=\"width: 100%; margin-left: auto; margin-right: auto;\">\r\n	<div class=\"row bg-warning\" ng-show=\"noneSelected(products)\">\r\n		<div class=\"col-md-10 center-block\" style=\"padding:5px; text-align:center\">\r\n			<strong>All datasets have been removed.</strong>\r\n		</div>\r\n		<div class=\"col-md-2\">\r\n			<button type=\"button\" style=\"float:right\" class=\"btn btn-primary\" ng-click=\"cancel()\">Close</button>\r\n		</div>\r\n	</div>\r\n	<div ng-hide=\"noneSelected(products)\" ng-controller=\"listCtrl as list\" >\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12\">\r\n				<h4>{{list.selected.length}} Selected Datasets   <span ng-show=\"list.selectedSize\">(Approx: {{list.selectedSize | fileSize}})</span></h4>\r\n				Review and delete unwanted datasets.\r\n			</div>\r\n		</div>\r\n      <div class=\"reviewing-datasets\">\r\n		   <div class=\"row\" ng-repeat=\"product in products | reviewProductsSelected\"  ng-class-odd=\"\'reviewing-odd\'\">\r\n			   <div class=\"col-md-7\">\r\n				   <button type=\"button\" class=\"btn btn-default btn-xs\" ng-click=\"product.removed = !product.removed\">\r\n                  <i class=\"fa fa-2x\" ng-class=\"{\'fa-times-circle\': product.removed, \'fa-check-circle\': !product.removed}\" aria-hidden=\"true\"></i>\r\n               </button>\r\n               <span style=\"padding-left:7px\" ng-class=\"{\'exclude\': product.removed}\">{{product.file_name}}</span>\r\n			   </div>\r\n			   <div class=\"col-md-4\" style=\"padding:6px\">\r\n				   ({{product.source}}\r\n				   <i class=\"fa fa-arrow-right\" aria-hidden=\"true\"></i> {{product.type}}\r\n				   <i class=\"fa fa-arrow-right\" aria-hidden=\"true\"></i> {{product.group}})\r\n			   </div>\r\n			   <div class=\"col-md-1\" style=\"padding:6px\">\r\n			   	{{product.file_size | fileSize}}\r\n			   </div>\r\n		   </div>\r\n      </div>\r\n	</div>\r\n   <div class=\"row reviewing-divider\">\r\n		<div class=\"col-md-12\">\r\n			<p>\r\n				<strong>Email notification</strong> The extract of data can take some time. By providing an email address we will be\r\n				able to notify you when the job is complete. The email will provide a link to the extracted data which will be packaged\r\n				up as a single compressed file.\r\n			</p>\r\n			<div review-email></div>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\" ng-controller=\"listCtrl as list\">\r\n		<div class=\"col-md-12\">\r\n			<div class=\"pull-right\" style=\"padding:8px;\">\r\n				<button type=\"button\" class=\"btn btn-primary\" ng-click=\"accept()\" ng-disabled=\"!data.email || !list.selected.length\">Start extract of datasets\r\n\r\n              </button>\r\n				<button type=\"button\" class=\"btn btn-primary\" ng-click=\"cancel()\">Cancel</button>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
+$templateCache.put("icsm/splash/splash.html","<div class=\"modal-header\">\r\n   <h3 class=\"modal-title splash\">Elevation - Foundation Spatial Data</h3>\r\n</div>\r\n<div class=\"modal-body\" id=\"accept\" ng-form exp-enter=\"accept()\" icsm-splash-modal style=\"width: 100%; margin-left: auto; margin-right: auto;\">\r\n	<div>\r\n		<p>\r\n			Here you can download point cloud and elevation datasets sourced from jurisdictions.\r\n		</p>\r\n		<p>\r\n			<a href=\"http://www.ga.gov.au/topographic-mapping/digital-elevation-data.html\" target=\"_blank\">Find out more on our Elevation page.</a>\r\n		</p>\r\n		<p>\r\n			Data can be downloaded at <strong>no charge</strong> and there is no limit to how many (please check the file size before you download your files).\r\n		</p>\r\n		<p>\r\n			<a href=\"http://opentopo.sdsc.edu/gridsphere/gridsphere?cid=contributeframeportlet&gs_action=listTools\" target=\"_blank\">Click here for Free GIS Tools.</a>\r\n		</p>\r\n      <h5>How to use</h5>\r\n      <p>\r\n         <ul>\r\n            <li>Pan and zoom the map to your area of interest,</li>\r\n            <li>Click on the \"Select an area...\" button to enable drawing,</li>\r\n            <li>Click on the map, holding the button down,</li>\r\n            <li>Drag to a diagonal corner (not too big, there is a limit of roughly 2 square degrees or 200 square km))</li>\r\n            <li>On release we will check for data within or very near your area of interest</li>\r\n            <li>If the list is large you can filter:\r\n               <ul>\r\n                  <li>Partial text match by typing in the filter field and/or</li>\r\n                  <li>You can restrict the display to either elevation (DEM) or point cloud file types</li>\r\n               </ul>\r\n            </li>\r\n            <li>Check against any file you would like to download. To reiterate, these files can be huge so take note of the file size before downloading</li>\r\n            <li>Review your selected datasets and submit.</li>\r\n            <li>An email will be sent to you with a link to all your data, zipped into a single file.</li>\r\n            <li>These files can be huge so take note of the file size before submitting or downloading</li>\r\n         </ul>\r\n      </p>\r\n      <h5>Hints</h5>\r\n      <p>\r\n         <ul>\r\n            <li>Hovering over many items will give you further information about the purpose of the item</li>\r\n            <li>Drawing a polyline allows you to measure distance along the polyline.</li>\r\n            <li>On completion on drawing a line the elevation along that line is plotted.</li>\r\n            <li>While the tool to draw your area of interest is enabled it is easiest to pan the map using the arrow keys.</li>\r\n            <li>There are many areas where there is no data though the coverage is improving all the time.</li\r\n         </ul>\r\n      </p>\r\n	</div>\r\n   <div style=\"padding:30px; padding-top:0; padding-bottom:40px; width:100%\">\r\n		<div class=\"pull-right\">\r\n		  	<button type=\"button\" class=\"btn btn-primary\" ng-model=\"seenSplash\" ng-focus=\"\" ng-click=\"accept()\">Continue</button>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/select/doc.html","<div ng-class-odd=\"\'odd\'\" ng-class-even=\"\'even\'\" ng-mouseleave=\"select.lolight(doc)\" ng-mouseenter=\"select.hilight(doc)\">\r\n	<span ng-class=\"{ellipsis:!expanded}\" tooltip-enable=\"!expanded\" style=\"width:100%;display:inline-block;\" \r\n			tooltip-class=\"selectAbstractTooltip\" tooltip=\"{{doc.abstract | truncate : 250}}\" tooltip-placement=\"bottom\">\r\n		<button type=\"button\" class=\"undecorated\" ng-click=\"expanded = !expanded\" title=\"Click to see more about this dataset\">\r\n			<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-caret-down\':expanded,\'fa-caret-right\':(!expanded)}\"></i>\r\n		</button>\r\n		<download-add item=\"doc\" group=\"group\"></download-add>\r\n		<icsm-wms data=\"doc\"></icsm-wms>\r\n		<icsm-bbox data=\"doc\" ng-if=\"doc.showExtent\"></icsm-bbox>\r\n		<a href=\"http://www.ga.gov.au/metadata-gateway/metadata/record/{{doc.sysId}}\" target=\"_blank\" ><strong>{{doc.title}}</strong></a>\r\n	</span>\r\n	<span ng-class=\"{ellipsis:!expanded}\" style=\"width:100%;display:inline-block;padding-right:15px;\">\r\n		{{doc.abstract}}\r\n	</span>\r\n	<div ng-show=\"expanded\" style=\"padding-bottom: 5px;\">\r\n		<h5>Keywords</h5>\r\n		<div>\r\n			<span class=\"badge\" ng-repeat=\"keyword in doc.keywords track by $index\">{{keyword}}</span>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/select/group.html","<div class=\"panel panel-default\" style=\"margin-bottom:-5px;\" >\r\n	<div class=\"panel-heading\"><icsm-wms data=\"group\"></icsm-wms> <strong>{{group.title}}</strong></div>\r\n	<div class=\"panel-body\">\r\n   		<div ng-repeat=\"doc in group.docs\">\r\n   			<div select-doc doc=\"doc\" group=\"group\"></div>\r\n		</div>\r\n	</div>\r\n</div>\r\n");
 $templateCache.put("icsm/select/select.html","<div>\r\n	<div style=\"position:relative;padding:5px;padding-left:10px;\" ng-controller=\"SelectCtrl as select\" class=\"scrollPanel\">\r\n		<div class=\"panel panel-default\" style=\"margin-bottom:-5px\">\r\n  			<div class=\"panel-heading\">\r\n  				<h3 class=\"panel-title\">Available datasets</h3>\r\n  			</div>\r\n  			<div class=\"panel-body\">\r\n				<div ng-repeat=\"doc in select.data.response.docs\" style=\"padding-bottom:7px\">\r\n					<div select-doc ng-if=\"doc.type == \'dataset\'\" doc=\"doc\"></div>\r\n					<select-group ng-if=\"doc.type == \'group\'\" group=\"doc\"></select-group>\r\n				</div>\r\n  			</div>\r\n		</div>\r\n	</div>\r\n</div>");
-$templateCache.put("icsm/splash/splash.html","<div class=\"modal-header\">\r\n   <h3 class=\"modal-title splash\">Elevation - Foundation Spatial Data</h3>\r\n</div>\r\n<div class=\"modal-body\" id=\"accept\" ng-form exp-enter=\"accept()\" icsm-splash-modal style=\"width: 100%; margin-left: auto; margin-right: auto;\">\r\n	<div>\r\n		<p>\r\n			Here you can download point cloud and elevation datasets sourced from jurisdictions.\r\n		</p>\r\n		<p>\r\n			<a href=\"http://www.ga.gov.au/topographic-mapping/digital-elevation-data.html\" target=\"_blank\">Find out more on our Elevation page.</a>\r\n		</p>\r\n		<p>\r\n			Data can be downloaded at <strong>no charge</strong> and there is no limit to how many (please check the file size before you download your files).\r\n		</p>\r\n		<p>\r\n			<a href=\"http://opentopo.sdsc.edu/gridsphere/gridsphere?cid=contributeframeportlet&gs_action=listTools\" target=\"_blank\">Click here for Free GIS Tools.</a>\r\n		</p>\r\n      <h5>How to use</h5>\r\n      <p>\r\n         <ul>\r\n            <li>Pan and zoom the map to your area of interest,</li>\r\n            <li>Click on the \"Select an area...\" button to enable drawing,</li>\r\n            <li>Click on the map, holding the button down,</li>\r\n            <li>Drag to a diagonal corner (not too big, there is a limit of roughly 2 square degrees or 200 square km))</li>\r\n            <li>On release we will check for data within or very near your area of interest</li>\r\n            <li>If the list is large you can filter:\r\n               <ul>\r\n                  <li>Partial text match by typing in the filter field and/or</li>\r\n                  <li>You can restrict the display to either elevation (DEM) or point cloud file types</li>\r\n               </ul>\r\n            </li>\r\n            <li>Check against any file you would like to download. To reiterate, these files can be huge so take note of the file size before downloading</li>\r\n            <li>Review your selected datasets and submit.</li>\r\n            <li>An email will be sent to you with a link to all your data, zipped into a single file.</li>\r\n            <li>These files can be huge so take note of the file size before submitting or downloading</li>\r\n         </ul>\r\n      </p>\r\n      <h5>Hints</h5>\r\n      <p>\r\n         <ul>\r\n            <li>Hovering over many items will give you further information about the purpose of the item</li>\r\n            <li>Drawing a polyline allows you to measure distance along the polyline.</li>\r\n            <li>On completion on drawing a line the elevation along that line is plotted.</li>\r\n            <li>While the tool to draw your area of interest is enabled it is easiest to pan the map using the arrow keys.</li>\r\n            <li>There are many areas where there is no data though the coverage is improving all the time.</li\r\n         </ul>\r\n      </p>\r\n	</div>\r\n   <div style=\"padding:30px; padding-top:0; padding-bottom:40px; width:100%\">\r\n		<div class=\"pull-right\">\r\n		  	<button type=\"button\" class=\"btn btn-primary\" ng-model=\"seenSplash\" ng-focus=\"\" ng-click=\"accept()\">Continue</button>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/themes/themes.html","<div class=\"dropdown themesdropdown\">\r\n  <button class=\"btn btn-default dropdown-toggle themescurrent\" type=\"button\" id=\"dropdownMenu1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"true\">\r\n    Theme\r\n    <span class=\"caret\"></span>\r\n  </button>\r\n  <ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenu1\">\r\n    <li ng-repeat=\"item in themes\">\r\n       <a href=\"#\" title=\"{{item.title}}\" ng-href=\"{{item.url}}\" class=\"themesItemCompact\">\r\n         <span class=\"icsm-icon\" ng-class=\"item.className\"></span>\r\n         <strong style=\"vertical-align:top;font-size:110%\">{{item.label}}</strong>\r\n       </a>\r\n    </li>\r\n  </ul>\r\n</div>");
 $templateCache.put("icsm/toolbar/toolbar.html","<div icsm-toolbar>\r\n	<div class=\"row toolBarGroup\">\r\n		<div class=\"btn-group searchBar\" ng-show=\"root.whichSearch != \'region\'\">\r\n			<div class=\"input-group\" geo-search>\r\n				<input type=\"text\" ng-autocomplete ng-model=\"values.from.description\" options=\'{country:\"au\"}\'\r\n							size=\"32\" title=\"Select a locality to pan the map to.\" class=\"form-control\" aria-label=\"...\">\r\n				<div class=\"input-group-btn\">\r\n    				<button ng-click=\"zoom(false)\" exp-ga=\"[\'send\', \'event\', \'icsm\', \'click\', \'zoom to location\']\"\r\n						class=\"btn btn-default\"\r\n						title=\"Pan and potentially zoom to location.\"><i class=\"fa fa-search\"></i></button>\r\n				</div>\r\n			</div>\r\n		</div>\r\n\r\n		<div class=\"pull-right\">\r\n			<div class=\"btn-toolbar radCore\" role=\"toolbar\"  icsm-toolbar>\r\n				<div class=\"btn-group\">\r\n					<!-- < icsm-state-toggle></icsm-state-toggle> -->\r\n				</div>\r\n			</div>\r\n\r\n			<div class=\"btn-toolbar\" style=\"margin:right:10px;display:inline-block\">\r\n				<div class=\"btn-group\">\r\n					<span class=\"btn btn-default\" common-baselayer-control max-zoom=\"16\" title=\"Satellite to Topography bias on base map.\"></span>\r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/view/view.html","<div class=\"container-fluid downloadPane\" >\r\n	<icsm-clip data=\"data.item\"></icsm-clip>\r\n   <div class=\"list-container\">\r\n	   <icsm-list></icsm-list>\r\n   </div>\r\n	<div class=\"downloadCont\" icsm-search-continue></div>\r\n</div>");}]);

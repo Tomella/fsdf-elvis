@@ -92,8 +92,8 @@ gulp.task('dashboardScripts', function() {
 function prepareScripts(name) {
    return gulp.src(directories.source + '/' + name + '/**/*.js')
       .pipe(babel({
-            compact: true,
-            comments:	false,
+            compact: false,
+            comments: true,
             presets: ['es2015'],
             plugins: ["syntax-async-generators"]
       }))

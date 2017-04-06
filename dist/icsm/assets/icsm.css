@@ -131,50 +131,6 @@
   bottom: 45px;
   left: 12px;
 }
-.mvt,
-.mvt ul,
-.mvt li {
-  position: relative;
-}
-
-.mvt ul {
-  list-style: none;
-  padding-left: 32px;
-}
-
-.mvt li::before,
-.mvt li::after {
-  content: "";
-  position: absolute;
-  left: -12px;
-}
-
-.mvt li::before {
-  border-top: 1px solid #000;
-  top: 9px;
-  width: 8px;
-  height: 0;
-}
-
-.mvt li::after {
-  border-left: 1px solid #000;
-  height: 100%;
-  width: 0px;
-  top: 2px;
-}
-
-.mvt ul > li:last-child::after {
-  height: 8px;
-}
-
-.metaview-head {
-  font-weight: bold;
-}
-
-.metaview-info {
-  padding-left: 3px;
-  padding-right: 3px;
-}
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
   display: inline-block;
@@ -286,6 +242,50 @@
 .altthemesdropdown .altthemescurrent {
   color: #fff;
   background-color: #777;
+}
+.mvt,
+.mvt ul,
+.mvt li {
+  position: relative;
+}
+
+.mvt ul {
+  list-style: none;
+  padding-left: 32px;
+}
+
+.mvt li::before,
+.mvt li::after {
+  content: "";
+  position: absolute;
+  left: -12px;
+}
+
+.mvt li::before {
+  border-top: 1px solid #000;
+  top: 9px;
+  width: 8px;
+  height: 0;
+}
+
+.mvt li::after {
+  border-left: 1px solid #000;
+  height: 100%;
+  width: 0px;
+  top: 2px;
+}
+
+.mvt ul > li:last-child::after {
+  height: 8px;
+}
+
+.metaview-head {
+  font-weight: bold;
+}
+
+.metaview-info {
+  padding-left: 3px;
+  padding-right: 3px;
 }
 .icsmTabs {
   position: absolute;
@@ -1025,21 +1025,6 @@ div.leaflet-control-scale-line {
   right: 0;
   bottom: 8px;
 }
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -1085,6 +1070,21 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
 }
 .vector-tooltip {
   min-width: 25em;
@@ -1163,17 +1163,6 @@ div.leaflet-control-scale-line {
 .select-land {
   background-position: -675px;
 }
-.csv-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.csv-fix-label label {
-  width: 9em;
-  text-align: right;
-}
 .main-body {
   position: fixed;
   top: 85px;
@@ -1182,8 +1171,35 @@ div.leaflet-control-scale-line {
   bottom: 8px;
   overflow-y: auto;
 }
+
+.point-at-box {
+  transform: rotate(-35deg);
+}
+
+@media screen and (max-width: 990px) {
+  .point-at-box {
+    transform: rotate(135deg);
+  }
+}
+
+span.mandatory {
+  content: "*";
+  color: red;
+}
+.csv-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.csv-fix-label label {
+  width: 10em;
+  text-align: right;
+}
 .upload-dialog p {
   padding: 15px;
+  margin-top: 10px;
 }
 .hide {
   display: none;
@@ -1242,18 +1258,18 @@ div.leaflet-control-scale-line {
 .common-header {
   background-color: white;
 }
-
-.pn-classifications-pills span.btn-primary {
-  background-color: green;
+.ed-valid {
+  color: green;
 }
 
-.pn-classifications-swathe {
-  display: inline-block;
-  background-color: green;
-  width: 14px;
-  height: 14px;
-  border: solid 1px black;
+.ed-invalid {
+  color: red;
 }
+
+.ed-active {
+  color: red;
+}
+
 .pn-authorities-pills span.btn-primary {
   background-color: red;
 }
@@ -1261,6 +1277,17 @@ div.leaflet-control-scale-line {
 .pn-authorities-swathe {
   display: inline-block;
   background-color: red;
+  width: 14px;
+  height: 14px;
+  border: solid 1px black;
+}
+.pn-classifications-pills span.btn-primary {
+  background-color: green;
+}
+
+.pn-classifications-swathe {
+  display: inline-block;
+  background-color: green;
   width: 14px;
   height: 14px;
   border: solid 1px black;
@@ -1278,6 +1305,24 @@ div.leaflet-control-scale-line {
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+}
+.pn-features {
+  max-block-size: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.pn-search-container {
+  height: 97%;
+}
+
+.tooltip-inner {
+  max-width: 350px;
+}
+
+.pn-pill {
+  color: #fff;
+  margin: 4px;
 }
 .pn-container {
   overflow-y: auto;
@@ -1317,22 +1362,4 @@ div.leaflet-control-scale-line {
 .pn-results-list:last-child {
   border-bottom: 0;
   padding-bottom: 0;
-}
-.pn-features {
-  max-block-size: 300px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.pn-search-container {
-  height: 97%;
-}
-
-.tooltip-inner {
-  max-width: 350px;
-}
-
-.pn-pill {
-  color: #fff;
-  margin: 4px;
 }

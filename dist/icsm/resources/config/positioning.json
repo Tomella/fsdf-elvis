@@ -7,7 +7,7 @@
          "name": "CSV",
          "url": "https://en.wikipedia.org/wiki/Comma-separated_values",
          "description": "Comma seperated variables.",
-         "extensions": ["csv", "txt"]
+         "extensions": ["csv"]
       },
       {
          "name": "Shapefile",
@@ -16,6 +16,10 @@
          "extensions": ["shp"]
       }
    ],
+
+   "submit": {
+      "template": "serveMe"
+   },
 
 	"processing": {
 		"outFormat" : [

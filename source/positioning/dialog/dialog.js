@@ -1,5 +1,6 @@
 {
-   angular.module("positioning.dialog", [])
+   angular.module("positioning.dialog",
+         ["positioning.filename", "positioning.mandatory", "positioning.output", "positioning.progress", "positioning.email"])
 
       .directive("uploadDialog", [
          function () {
@@ -11,8 +12,7 @@
                templateUrl: "positioning/dialog/dialog.html",
                link: function (scope) {
                   scope.cancel = () => {
-                     scope.state.file = null;
-                     scope.state.ready = false;
+                     scope.state = new State();
                   }
                }
             };
