@@ -12,9 +12,18 @@
          let formData = new FormData();
          formData.append('file', data.file);
          formData.append("email", data.email);
-         formData.append("outFormat", data.outFormat);
+         formData.append("outFormat", data.outFormat.code);
          formData.append("outputName", data.outputName + ".zip");
-         formData.append("email", data.email);
+         formData.append("latDegreesColumn", data.latDegreesCol);
+         formData.append("lngDegreesColumn", data.lngDegreesCol);
+
+         if (data.dmsType === "dms") {
+            formData.append("latMinutesColumn", data.latMinutesCol);
+            formData.append("lngMinutesColumn", data.lngMinutesCol);
+
+            formData.append("latSecondsColumn", data.latSecondsCol);
+            formData.append("lngSecondsColumn", data.lngSecondsCol);
+         }
 
          return this.$http({
             url: this.config.template,

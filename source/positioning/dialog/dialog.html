@@ -1,8 +1,27 @@
 <div class="upload-dialog">
-   <p style="font-weight: bold" class="bg-info" ng-if="!state.file">
-      <i class="fa fa-hand-o-left point-at-box fa-2x" aria-hidden="true" style="padding-right:12px;"></i>
-      Select and drop file for reprojection
-   </p>
+   <div class="bg-info" ng-if="!state.file">
+      <div style="font-weight: bold">
+         <i class="fa fa-hand-o-left point-at-box fa-2x" aria-hidden="true" style="padding-right:12px;"></i>
+         Select and drop file(s) for reprojection
+      </div>
+      <br/>
+      <div>
+         <span style="font-weight: bold">CSV -</span>
+         Drop a single CSV file with a ".csv" extension and we will scan for columns and ask follow up questions.
+      </div>
+      </br/>
+      <div>
+         <span style="font-weight: bold">Shapefile -</span>
+         Drop  four files with the same file prefix to transform a shapefile
+         <ul>
+            <li>".shp" — shape format; the feature geometry itself.</li>
+            <li>".shx" — shape index format; a positional index of the feature geometry to allow seeking forwards and backwards quickly.</li>
+            <li>".dbf" — attribute format; columnar attributes for each shape, in dBase IV format.</li>
+            <li>".prj" — projection; describes the coordinate system and projection information used.</li>
+         </ul>
+      </div>
+   </div>
+
    <div ng-if="state.file">
       <h3>Selected {{state.file.name}} ({{state.file.size | bytes}})</h3>
    </div>

@@ -1,17 +1,18 @@
 <div class="container-fluid file-container" ng-controller="RootCtrl as root">
    <div class="row">
       <div class="col-md-6" style="border-right: 2px solid lightgray">
-         <h3>Paragraph 1</h3>
-         Lorem ipsum dolor sit amet Consectetur adipiscing elit Integer molestie lorem at massa Facilisis in pretium nisl aliquet
-         Nulla volutpat aliquam velit Phasellus iaculis neque Purus sodales ultricies Vestibulum laoreet porttitor sem Ac
-         tristique libero volutpat at Faucibus porta lacus fringilla vel Aenean sit amet erat nunc Eget porttitor lorem
-
+         <h3>Purpose</h3>
+         This Geoscience Australia FME Web Service is provided to give spatial data software users and developers a
+         system to check their datum transformations with a standard. It can be used to transform data that references
+         the Geocentric Datum of Australia 1994 (GDA94) to data referenced on the
+         Geocentric Datum of Australia 2020 (GDA2020).  It may also be used to check transformations
+         from older Australian datums; Australian Geodetic Datum 1966 (AGD66) and AGD84, to GDA94.
+         <br/><br/>
          <file-drop state="root.state" />
 
-         <h3>Paragraph 2</h3>
-         Lorem ipsum dolor sit amet Consectetur adipiscing elit Integer molestie lorem at massa Facilisis in pretium nisl aliquet
-         Nulla volutpat aliquam velit Phasellus iaculis neque Purus sodales ultricies Vestibulum laoreet porttitor sem Ac
-         tristique libero volutpat at Faucibus porta lacus fringilla vel Aenean sit amet erat nunc Eget porttitor lorem
+         <h3>Targets</h3>
+         The 7-parameter similarity transformation is currently available for GDA94 to GDA2020.
+         The NTv2 transformation grid or 7-parameter similarity transformation is available for AGD66/AGD84 to GDA94.
          <br/>
          <br/>
          <input-format list="root.data.fileUploadFormats" />
