@@ -17,6 +17,7 @@
 
 		.directive('pnHeader', [function () {
 			var defaults = {
+            current: "none",
 				heading: "Place Names",
 				headingtitle: "Place Names",
 				helpurl: "help.html",
@@ -31,6 +32,7 @@
 				restrict: 'EA',
 				templateUrl: "placenames/header/header.html",
 				scope: {
+               current: "=",
 					breadcrumbs: "=",
 					heading: "=",
 					headingtitle: "=",

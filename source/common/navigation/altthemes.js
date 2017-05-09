@@ -13,6 +13,9 @@
 			return {
 				restrict: 'AE',
 				templateUrl: 'common/navigation/altthemes.html',
+            scope: {
+               current: "="
+            },
 				link: function (scope) {
 					themesService.getThemes().then(function (themes) {
 						scope.themes = themes;
@@ -116,6 +119,17 @@
 				if (headers) {
 					return headers.filter(function (value) {
 						return !!value.enabled;
+					});
+				}
+				return headers;
+			};
+		})
+
+		.filter('altthemesMatchCurrent', function () {
+			return function (headers, current) {
+				if (headers) {
+					return headers.filter(function (value) {
+						return !!value.keys.find(key => key === current);
 					});
 				}
 				return headers;

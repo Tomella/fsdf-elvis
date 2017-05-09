@@ -2,6 +2,17 @@
    angular.module("positioning.dialog",
          ["positioning.filename", "positioning.mandatory", "positioning.output", "positioning.progress", "positioning.email"])
 
+      .directive("acceptEpsg4283", [
+         function () {
+            return {
+               scope: {
+                  state: "="
+               },
+               templateUrl: "positioning/dialog/isepsg4283.html"
+            };
+         }
+      ])
+
       .directive("uploadDialog", [
          function () {
             return {

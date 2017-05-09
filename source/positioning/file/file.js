@@ -3,7 +3,7 @@
       constructor() {}
    }
 
-   angular.module("positioning.file", ["positioning.format", "positioning.csv", "positioning.dialog"])
+   angular.module("positioning.file", ["positioning.format", "positioning.csv", "positioning.shp", "positioning.dialog"])
 
    .directive("file", function() {
       return {

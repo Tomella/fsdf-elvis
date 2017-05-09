@@ -8,22 +8,29 @@
       }
 
       post(data) {
-
          let formData = new FormData();
-         formData.append('file', data.file);
-         formData.append("email", data.email);
-         formData.append("outFormat", data.outFormat.code);
-         formData.append("outputName", data.outputName + ".zip");
-         formData.append("latDegreesColumn", data.latDegreesCol);
-         formData.append("lngDegreesColumn", data.lngDegreesCol);
+         let type = data.extension;
 
-         if (data.dmsType === "dms") {
-            formData.append("latMinutesColumn", data.latMinutesCol);
-            formData.append("lngMinutesColumn", data.lngMinutesCol);
+         formData.append('type', type);
+         if (type === "csv") {
+            formData.append('file', data.file);
+            formData.append("latDegreesColumn", data.latDegreesCol);
+            formData.append("lngDegreesColumn", data.lngDegreesCol);
 
-            formData.append("latSecondsColumn", data.latSecondsCol);
-            formData.append("lngSecondsColumn", data.lngSecondsCol);
+            if (data.dmsType === "dms") {
+               formData.append("latMinutesColumn", data.latMinutesCol);
+               formData.append("lngMinutesColumn", data.lngMinutesCol);
+
+               formData.append("latSecondsColumn", data.latSecondsCol);
+               formData.append("lngSecondsColumn", data.lngSecondsCol);
+            }
+            if (data.elevationCol) {
+               formData.append("elevationColumn", data.elevationCol);
+            }
+         } else {
+            Object.keys(data.file).forEach(key => formData.append(key, data.file[key]));
          }
+         formData.append("email", data.email);
 
          return this.$http({
             url: this.config.template,
@@ -46,19 +53,57 @@
 
    angular.module("positioning.progress", [])
 
-      .directive("progressBar", ["submitService", function (submitService) {
+      .directive("progressBarCsv", ["messageService", "submitService", function (messageService, submitService) {
          return {
             scope: {
                state: "="
             },
-            templateUrl: "positioning/progress/progress.html",
+            templateUrl: "positioning/progress/progresscsv.html",
             link: function (scope) {
                scope.submit = function () {
                   submitService.post(scope.state);
-               }
+                  messageService.success("Posted CSV file for processing. You will receive an email on completion.");
+                  scope.state = new State();
+               };
+
+               scope.cancel = function () {
+                  messageService.success("Cleared selected CSV file");
+                  scope.state = new State();
+               };
             }
          };
       }])
 
-      .service("submitService", SubmitService);
+      .directive("progressBarShapefile", ["messageService", "submitService", function (messageService, submitService) {
+         return {
+            scope: {
+               state: "="
+            },
+            templateUrl: "positioning/progress/progresshapefile.html",
+            link: function (scope) {
+               scope.submit = function () {
+                  submitService.post(scope.state);
+                  messageService.success("Posted shapefiles for processing. You will receive an email on completion.");
+                  scope.state = new State();
+               };
+
+               scope.cancel = function () {
+                  messageService.success("Cleared selected shapefiles");
+                  scope.state = new State();
+               };
+            }
+         };
+      }])
+
+      .filter("sumFiles", [function() {
+         return function(files) {
+            if(!files) {
+               return 0;
+            }
+
+            return Object.keys(files).reduce((acc, key) => acc + files[key].size, 0)
+         };
+      }])
+
+      .service("submitService", SubmitService)
 }

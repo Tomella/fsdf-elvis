@@ -1,0 +1,15 @@
+<div>
+   <div class="row">
+      <div class="col-md-6">
+         <label for="isEpsg4283">
+					The data provided is in the <a target="_blank" href="http://spatialreference.org/ref/epsg/4283/">EPSG:4283</a> projection <mandatory />
+			</label>
+      </div>
+      <div class="col-md-6" style="text-align:right">
+         <button id="isEpsg4283" type="button" title="The data must be in the EPSG:4283 projection to be transformed correctly."
+               class="btn btn-default btn-xs" ng-click="state.isEpsg4283 = !state.isEpsg4283">
+            <i class="fa" style="width:12px;height:12px;color:green" ng-class="{'fa-check':state.isEpsg4283}" aria-hidden="true"></i>
+         </button>
+      </div>
+   </div>
+</div>

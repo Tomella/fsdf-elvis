@@ -1,5 +1,4 @@
 {
-
    class CsvService {
       constructor($q, configService) {
          this.$q = $q;

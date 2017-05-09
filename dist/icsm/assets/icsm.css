@@ -1,3 +1,4 @@
+
 .wizardPopup {
   position: fixed;
   top: 20px;
@@ -639,19 +640,6 @@ input.ng-valid.ng-touched {
 body {
   overflow-y: hidden;
 }
-img.elvis-logo {
-  height: 75px;
-}
-
-.icsm-logo.last {
-  padding-right: 10px;
-}
-
-.contributorsLink {
-  position: absolute;
-  right: 7px;
-  bottom: 15px;
-}
 .contributors {
   margin: 2px;
   padding: 10px;
@@ -715,6 +703,19 @@ img.elvis-logo {
 .elevation-and-depth {
   padding-left: 12px;
   padding-right: 12px;
+}
+img.elvis-logo {
+  height: 75px;
+}
+
+.icsm-logo.last {
+  padding-right: 10px;
+}
+
+.contributorsLink {
+  position: absolute;
+  right: 7px;
+  bottom: 15px;
 }
 .continue-container {
   padding: 4px;
@@ -901,6 +902,52 @@ img.elvis-logo {
 i.fa.active {
   color: red;
 }
+.radCore {
+  margin-right: 3px;
+  display: inline-block;
+}
+
+.searchBar {
+  width: 27em;
+  opacity: 0.9;
+}
+
+@media only screen and (max-width:1100px) {
+  .searchBar {
+    width: 23em;
+  }
+}
+
+@media only screen and (max-width:1025px) {
+  .searchBar {
+    width: 20em;
+  }
+}
+
+@media only screen and (max-width:645px) {
+  .searchBar {
+    display: none;
+  }
+}
+
+@media only screen and (max-width:965px) {
+  .radCore,
+  .hideWhenSmall,
+  .steps-indicator,
+  .secondToolbarInfo {
+    display: none;
+  }
+}
+
+div.leaflet-control-scale-line {
+  text-align: center;
+}
+
+@media only screen and (max-width:965px) {
+  div.leaflet-control-scale-line {
+    display: none;
+  }
+}
 .icsm-icon {
   background: url("icsm/img/global-sprites.svg") no-repeat;
   display: inline-block;
@@ -963,52 +1010,6 @@ i.fa.active {
   color: #fff;
   background-color: #777;
 }
-.radCore {
-  margin-right: 3px;
-  display: inline-block;
-}
-
-.searchBar {
-  width: 27em;
-  opacity: 0.9;
-}
-
-@media only screen and (max-width:1100px) {
-  .searchBar {
-    width: 23em;
-  }
-}
-
-@media only screen and (max-width:1025px) {
-  .searchBar {
-    width: 20em;
-  }
-}
-
-@media only screen and (max-width:645px) {
-  .searchBar {
-    display: none;
-  }
-}
-
-@media only screen and (max-width:965px) {
-  .radCore,
-  .hideWhenSmall,
-  .steps-indicator,
-  .secondToolbarInfo {
-    display: none;
-  }
-}
-
-div.leaflet-control-scale-line {
-  text-align: center;
-}
-
-@media only screen and (max-width:965px) {
-  div.leaflet-control-scale-line {
-    display: none;
-  }
-}
 .downloadPane {
   padding-left: 0px !important;
   padding-right: 5px !important;
@@ -1025,262 +1026,6 @@ div.leaflet-control-scale-line {
   right: 0;
   bottom: 8px;
 }
-.radCore {
-  margin-right: 3px;
-  display: inline-block;
-}
-
-.searchBar {
-  width: 27em;
-  opacity: 0.9;
-}
-
-@media only screen and (max-width:1100px) {
-  .searchBar {
-    width: 23em;
-  }
-}
-
-@media only screen and (max-width:1025px) {
-  .searchBar {
-    width: 20em;
-  }
-}
-
-@media only screen and (max-width:645px) {
-  .searchBar {
-    display: none;
-  }
-}
-
-@media only screen and (max-width:965px) {
-  .radCore,
-  .hideWhenSmall,
-  .steps-indicator,
-  .secondToolbarInfo {
-    display: none;
-  }
-}
-
-div.leaflet-control-scale-line {
-  text-align: center;
-}
-
-@media only screen and (max-width:965px) {
-  div.leaflet-control-scale-line {
-    display: none;
-  }
-}
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
-.vector-tooltip {
-  min-width: 25em;
-}
-
-.vector-checkbox {
-  width: 18px;
-  height: 18px;
-  vertical-align: bottom;
-  margin-right: 7px !important;
-}
-
-.vector-add:disabled {
-  color: gray;
-}
-.main-body {
-  position: fixed;
-  top: 85px;
-  left: 0px;
-  right: 0px;
-  bottom: 8px;
-  overflow-y: auto;
-}
-
-.point-at-box {
-  transform: rotate(-35deg);
-}
-
-@media screen and (max-width: 990px) {
-  .point-at-box {
-    transform: rotate(135deg);
-  }
-}
-
-span.mandatory {
-  content: "*";
-  color: red;
-}
-.start-content-container {
-  position: fixed;
-  top: 95px;
-  bottom: 6px;
-  overflow-y: auto;
-  left: 0;
-  right: 0;
-}
-
-@media (min-width: 1200px) {
-  .start-content-container .panel {
-    margin-left: 150px;
-    margin-right: 150px;
-  }
-}
-
-.select-icon {
-  background: url("../resources/img/sprites.svg") no-repeat;
-  display: inline-block;
-  width: 75px;
-  height: 120px;
-  margin: 0 auto 0 auto;
-}
-
-.select-pin {
-  background-position: 0px;
-}
-
-.select-map {
-  background-position: -75px;
-}
-
-.select-crosshair {
-  background-position: -150px;
-}
-
-.select-sign {
-  background-position: -225px;
-}
-
-.select-parcel {
-  background-position: -300px;
-}
-
-.select-satellite {
-  background-position: -375px;
-}
-
-.select-ship {
-  background-position: -450px;
-}
-
-.select-water {
-  background-position: -525px;
-}
-
-.select-shore {
-  background-position: -600px;
-}
-
-.select-land {
-  background-position: -675px;
-}
-.csv-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.csv-fix-label label {
-  width: 10em;
-  text-align: right;
-}
-.upload-dialog p {
-  padding: 15px;
-  margin-top: 10px;
-}
-.hide {
-  display: none;
-}
-
-.file-container {
-  margin-top: 0;
-}
-#fileDrop {
-  font-weight: bold;
-  font-size: 200%;
-  line-height: 2;
-  height: 285px;
-  width: 350px;
-  z-index: 1;
-  background-color: #eeeeee;
-  text-align: center;
-  border: 1px dashed gray;
-  padding: 15px;
-  padding-left: 5px;
-  padding-right: 5px;
-  margin: auto;
-}
-.input-format-pill {
-  font-size: 110%;
-  padding: 4px;
-  margin: 5px;
-}
-.nav-icons {
-  margin-top: 7px !important;
-}
-
-@media only screen and (max-width:1200px) {
-  .nav-icons {
-    margin-top: 30px;
-  }
-}
-
-.breadcrumbsContainer {
-  margin-left: 245px;
-}
-
-.header-logo img {
-  padding-top: 3px;
-}
-
-.header-logo {
-  padding-right: 20px;
-}
-
-.applicationTitle {
-  padding-left: 20px;
-  font-size: 200%;
-}
-
-.common-header {
-  background-color: white;
-}
-.ed-valid {
-  color: green;
-}
-
-.ed-invalid {
-  color: red;
-}
-
-.ed-active {
-  color: red;
-}
-
-.pn-classifications-pills span.btn-primary {
-  background-color: green;
-}
-
-.pn-classifications-swathe {
-  display: inline-block;
-  background-color: green;
-  width: 14px;
-  height: 14px;
-  border: solid 1px black;
-}
 .pn-authorities-pills span.btn-primary {
   background-color: red;
 }
@@ -1288,6 +1033,17 @@ span.mandatory {
 .pn-authorities-swathe {
   display: inline-block;
   background-color: red;
+  width: 14px;
+  height: 14px;
+  border: solid 1px black;
+}
+.pn-classifications-pills span.btn-primary {
+  background-color: green;
+}
+
+.pn-classifications-swathe {
+  display: inline-block;
+  background-color: green;
   width: 14px;
   height: 14px;
   border: solid 1px black;
@@ -1362,4 +1118,266 @@ span.mandatory {
 .pn-pill {
   color: #fff;
   margin: 4px;
+}
+.main-body {
+  position: fixed;
+  top: 85px;
+  left: 0px;
+  right: 0px;
+  bottom: 8px;
+  overflow-y: auto;
+}
+
+.point-at-box {
+  transform: rotate(-35deg);
+}
+
+@media screen and (max-width: 990px) {
+  .point-at-box {
+    transform: rotate(135deg);
+  }
+}
+
+span.mandatory {
+  content: "*";
+  color: red;
+}
+.csv-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.csv-fix-label label {
+  width: 10em;
+  text-align: right;
+}
+.upload-dialog p {
+  padding: 15px;
+  margin-top: 10px;
+}
+
+.ud-info {
+  background-color: #d9edf7;
+  margin-top: 10px;
+  padding: 5px;
+  border-radius: 4px;
+}
+.hide {
+  display: none;
+}
+
+.file-container {
+  margin-top: 0;
+}
+#fileDrop {
+  font-weight: bold;
+  font-size: 200%;
+  line-height: 2;
+  height: 285px;
+  width: 350px;
+  z-index: 1;
+  background-color: #eeeeee;
+  text-align: center;
+  border: 1px dashed gray;
+  padding: 15px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: auto;
+}
+.input-format-pill {
+  font-size: 110%;
+  padding: 4px;
+  margin: 5px;
+}
+.nav-icons {
+  margin-top: 7px !important;
+}
+
+@media only screen and (max-width:1200px) {
+  .nav-icons {
+    margin-top: 30px;
+  }
+}
+
+.breadcrumbsContainer {
+  margin-left: 245px;
+}
+
+.header-logo img {
+  padding-top: 3px;
+}
+
+.header-logo {
+  padding-right: 20px;
+}
+
+.applicationTitle {
+  padding-left: 20px;
+  font-size: 200%;
+}
+
+.common-header {
+  background-color: white;
+}
+.ed-valid {
+  color: green;
+}
+
+.ed-invalid {
+  color: red;
+}
+
+.ed-active {
+  color: red;
+}
+.shp-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.shp-fix-label label {
+  width: 10em;
+  text-align: right;
+}
+.start-content-container {
+  position: fixed;
+  top: 95px;
+  bottom: 6px;
+  overflow-y: auto;
+  left: 0;
+  right: 0;
+}
+
+@media (min-width: 1200px) {
+  .start-content-container .panel {
+    margin-left: 150px;
+    margin-right: 150px;
+  }
+}
+
+.select-icon {
+  background: url("../resources/img/sprites.svg") no-repeat;
+  display: inline-block;
+  width: 75px;
+  height: 120px;
+  margin: 0 auto 0 auto;
+}
+
+.select-pin {
+  background-position: 0px;
+}
+
+.select-map {
+  background-position: -75px;
+}
+
+.select-crosshair {
+  background-position: -150px;
+}
+
+.select-sign {
+  background-position: -225px;
+}
+
+.select-parcel {
+  background-position: -300px;
+}
+
+.select-satellite {
+  background-position: -375px;
+}
+
+.select-ship {
+  background-position: -450px;
+}
+
+.select-water {
+  background-position: -525px;
+}
+
+.select-shore {
+  background-position: -600px;
+}
+
+.select-land {
+  background-position: -675px;
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
+}
+.radCore {
+  margin-right: 3px;
+  display: inline-block;
+}
+
+.searchBar {
+  width: 27em;
+  opacity: 0.9;
+}
+
+@media only screen and (max-width:1100px) {
+  .searchBar {
+    width: 23em;
+  }
+}
+
+@media only screen and (max-width:1025px) {
+  .searchBar {
+    width: 20em;
+  }
+}
+
+@media only screen and (max-width:645px) {
+  .searchBar {
+    display: none;
+  }
+}
+
+@media only screen and (max-width:965px) {
+  .radCore,
+  .hideWhenSmall,
+  .steps-indicator,
+  .secondToolbarInfo {
+    display: none;
+  }
+}
+
+div.leaflet-control-scale-line {
+  text-align: center;
+}
+
+@media only screen and (max-width:965px) {
+  div.leaflet-control-scale-line {
+    display: none;
+  }
+}
+.vector-tooltip {
+  min-width: 25em;
+}
+
+.vector-checkbox {
+  width: 18px;
+  height: 18px;
+  vertical-align: bottom;
+  margin-right: 7px !important;
+}
+
+.vector-add:disabled {
+  color: gray;
 }

@@ -18,6 +18,7 @@
 
 		.directive('icsmHeader', [function () {
 			var defaults = {
+            current: "none",
 				heading: "ICSM",
 				headingtitle: "ICSM",
 				helpurl: "help.html",
@@ -32,6 +33,7 @@
 				restrict: 'EA',
 				templateUrl: "common/header/header.html",
 				scope: {
+               current: "=",
 					breadcrumbs: "=",
 					heading: "=",
 					headingtitle: "=",

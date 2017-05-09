@@ -1,5 +1,5 @@
 <div class="upload-dialog">
-   <div class="bg-info" ng-if="!state.file">
+   <div class="ud-info" ng-if="!state.file">
       <div style="font-weight: bold">
          <i class="fa fa-hand-o-left point-at-box fa-2x" aria-hidden="true" style="padding-right:12px;"></i>
          Select and drop file(s) for reprojection
@@ -22,7 +22,7 @@
       </div>
    </div>
 
-   <div ng-if="state.file">
+   <div ng-if="state.file && state.extension == 'csv'">
       <h3>Selected {{state.file.name}} ({{state.file.size | bytes}})</h3>
    </div>
    <div style="text-align:right" ng-if="state.file.size > settings.maxFileSize">
@@ -30,27 +30,24 @@
       <button type="button" class="btn btn-primary" ng-click="cancel()">OK</button>
    </div>
    <hr />
-   <div ng-show="state.file && state.file.size < settings.maxFileSize">
-      <div ng-if="state.extension == 'csv'">
+   <div ng-show="state.file">
+      <div ng-if="state.extension == 'csv' && state.file.size < settings.maxFileSize">
          <csv-file state="state" settings="settings" />
       </div>
       <div ng-if="state.extension == 'shp'">
          <shp-file state="state" settings="settings" />
       </div>
+      <accept-epsg4283 state="state"></accept-epsg4283>
    </div>
-   <hr/>
    <div ng-show="state.file">
       <div>
-         <h4>Output filename of your reprojection<mandatory /></h4>
-         <filename state="state" />
-      </div>
-      <div>
          <h4>Nominate your notification email address<mandatory /></h4>
-         <email state="state" />
+         <email state="state" ng-if="state" />
       </div>
 
       <div style="padding-top: 10px">
-         <progress-bar state="state" />
+         <progress-bar-csv state="state" ng-show="state.extension == 'csv'"/>
+         <progress-bar-shapefile state="state" ng-show="state.extension == 'shp'" />
       </div>
    </div>
 </div>

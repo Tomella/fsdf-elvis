@@ -1,5 +1,5 @@
 <div>
-  <h4>Just a few questions about your CSV file</h4>
+  <h4>A few questions about your CSV file</h4>
   <div>
 		<div class="row">
 			<div class="col-md-3">
@@ -7,7 +7,7 @@
 					Coordinate System<mandatory />
 				</label>
 			</div>
-			<div class="col-md-9">
+			<div class="col-md-9" style="text-align: right">
 				<select id="geoprocessOutCoordSys" style="width:95%" ng-model="state.outCoordSys"
                   ng-options="opt.value for opt in settings.processing.inCoordSys"></select>
 			</div>
@@ -17,7 +17,7 @@
 			<div class="col-md-3 csv-label">
 				Lat/lng fields are in<mandatory />
 			</div>
-			<div class="col-md-9">
+			<div class="col-md-9" style="text-align: right">
 				<label for="csvDegrees">
                Decimal degrees (2 cols)
 				</label>
@@ -35,65 +35,85 @@
 				Columns
 			</div>
 			<div class="col-md-9">
-				<label for="csvSelectLatDecDegrees" style="width:9em">
-               Latitude<mandatory />
-				</label>
-            <select id="csvSelectLatDecDegrees" ng-model="state.latDegreesCol"
-                  ng-options="o as o for o in columns"></select>
-            <br/>
-				<label for="csvSelectLngDecDegrees" style="width:9em">
-               Longitude<mandatory />
-				</label>
-            <select id="csvSelectLngDecDegrees" ng-model="state.lngDegreesCol"
-                  ng-options="o as o for o in columns"></select>
+            <div style="text-align: right">
+				   <label for="csvSelectLatDecDegrees" style="width:9em">
+                  Latitude<mandatory />
+				   </label>
+               <select id="csvSelectLatDecDegrees" ng-model="state.latDegreesCol"
+                     ng-options="o as o for o in columns"></select>
+            </div>
+				<div style="text-align: right">
+				   <label for="csvSelectLngDecDegrees" style="width:9em">
+                  Longitude<mandatory />
+				   </label>
+               <select id="csvSelectLngDecDegrees" ng-model="state.lngDegreesCol"
+                     ng-options="o as o for o in columns"></select>
+				</div>
 			</div>
       </div>
-
 
       <div class="row" ng-if="state.dmsType == 'dms'">
 			<div class="col-md-3 csv-label">
 				Columns
 			</div>
 			<div class="col-md-9 csv-fix-label">
-				<label for="csvSelectLatDegrees">
-               Latitude Degrees<mandatory />
-				</label>
-            <select id="csvSelectLatDegrees" ng-model="state.latDegreesCol"
-                  ng-options="o as o for o in columns"></select>
-            <br/>
-				<label for="csvSelectLatMinutes">
-               Minutes<mandatory />
-				</label>
-            <select id="csvSelectLatMinutes" ng-model="state.latMinutesCol"
-                  ng-options="o as o for o in columns"></select>
-            <br/>
-				<label for="csvSelectLatSeconds">
-               Seconds<mandatory />
-				</label>
-            <select id="csvSelectLatSeconds" ng-model="state.latSecondsCol"
-                  ng-options="o as o for o in columns"></select>
-            <br/>
-   			<label for="csvSelectLngDegrees">
-               Longitude Degrees<mandatory />
-				</label>
-            <select id="csvSelectLngDegrees" ng-model="state.lngDegreesCol"
-                  ng-options="o as o for o in columns"></select>
-            <br/>
-				<label for="csvSelectLngMinutes">
-               Minutes<mandatory />
-				</label>
-            <select id="csvSelectLngMinutes" ng-model="state.lngMinutesCol"
-                  ng-options="o as o for o in columns"></select>
-            <br/>
-				<label for="csvSelectLngSeconds">
-               Seconds<mandatory />
-				</label>
-            <select id="csvSelectLngSeconds" ng-model="state.lngSecondsCol"
-                  ng-options="o as o for o in columns"></select>
-
+            <div style="text-align: right">
+				   <label for="csvSelectLatDegrees">
+                  Latitude Degrees<mandatory />
+				   </label>
+               <select id="csvSelectLatDegrees" ng-model="state.latDegreesCol"
+                     ng-options="o as o for o in columns"></select>
+            </div>
+            <div style="text-align: right">
+				   <label for="csvSelectLatMinutes">
+                  Minutes<mandatory />
+				   </label>
+               <select id="csvSelectLatMinutes" ng-model="state.latMinutesCol"
+                     ng-options="o as o for o in columns"></select>
+            </div>
+            <div style="text-align: right">
+				   <label for="csvSelectLatSeconds">
+                  Seconds<mandatory />
+				   </label>
+               <select id="csvSelectLatSeconds" ng-model="state.latSecondsCol"
+                     ng-options="o as o for o in columns"></select>
+            </div>
+            <div style="text-align: right">
+   			   <label for="csvSelectLngDegrees">
+                  Longitude Degrees<mandatory />
+				   </label>
+               <select id="csvSelectLngDegrees" ng-model="state.lngDegreesCol"
+                     ng-options="o as o for o in columns"></select>
+            </div>
+				<div style="text-align: right">
+               <label for="csvSelectLngMinutes">
+                  Minutes<mandatory />
+				   </label>
+               <select id="csvSelectLngMinutes" ng-model="state.lngMinutesCol"
+                     ng-options="o as o for o in columns"></select>
+            </div>
+            <div style="text-align: right">
+				   <label for="csvSelectLngSeconds">
+                  Seconds<mandatory />
+				   </label>
+               <select id="csvSelectLngSeconds" ng-model="state.lngSecondsCol"
+                     ng-options="o as o for o in columns">
+               </select>
+            </div>
 			</div>
       </div>
-      <hr/>
-      <output-format state="state" />
+
+      <div class="row">
+			<div class="col-md-6">
+   			<label for="csvElevation">
+				   Elevation column (in metres and optional)
+   			</label>
+			</div>
+			<div class="col-md-6" style="text-align: right">
+            <select id="csvElevation" ng-model="state.elevationCol" ng-options="o as o for o in columns">
+               <option ng-selected="true" value=""></option>
+            </select>
+			</div>
+      </div>
   </div>
 </div>

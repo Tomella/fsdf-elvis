@@ -30,6 +30,7 @@
 				templateUrl: "positioning/header/header.html",
 				scope: {
 					breadcrumbs: "=",
+               current: "=",
 					heading: "=",
 					headingtitle: "=",
 					helpurl: "=",

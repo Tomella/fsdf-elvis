@@ -10,9 +10,15 @@ angular.module('common.navigation', [])
 .directive('commonNavigation', [function() {
 	return {
 		restrict: 'AE',
-		template: "<alt-themes></alt-themes>",
+		template: "<alt-themes current='current'></alt-themes>",
+      scope: {
+         current: "=?"
+      },
 		link: function(scope) {
 			scope.username = "Anonymous";
+         if (!scope.current) {
+            scope.current = "none";
+         }
 		}
 	};
 }])

@@ -1,0 +1,17 @@
+<div>
+  <h4>Selected Shapefiles</h4>
+  <div ng-repeat="(key, file) in state.file">
+		<div class="row" ng-if="!file">
+			<div class="col-md-12">
+            <i class="fa fa-warning" style="color:#f4c842"></i>
+            Please drag and drop a file named {{state.outputName}}.{{key}} extension to complete your set for upload.
+			</div>
+		</div>
+      <div class="row" ng-if="file">
+			<div class="col-md-12" ng-if="file">
+            <i class="fa fa-check-square" style="color:#328737"></i>
+            {{file.name}} ({{file.size | bytes}})
+			</div>
+		</div>
+  </div>
+</div>

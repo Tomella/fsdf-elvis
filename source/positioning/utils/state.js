@@ -7,9 +7,20 @@ class State {
       return this.extension === 'shp';
    }
 
+   get full() {
+      let files = this.file;
+      if (!files) {
+         return false;
+      }
+
+      let response = files.dbf && files.prj && files.shp && files.shx;
+      console.log("Response = " + response);
+      return response;
+   }
+
    get validFileInfo() {
       // It's either CSV or SHP at the moment
-      return this.isCsv ? this.validCsvFileInfo : this.validShpFileInfo;
+      return (this.isCsv ? this.validCsvFileInfo : this.validShpFileInfo) && this.validOutCoordSys;
    }
 
    get validShpFileInfo() {
@@ -20,7 +31,7 @@ class State {
       let result = this.latDegreesCol && this.lngDegreesCol;
 
       if (this.dmsType === "dms") {
-         result = result && this.latMinutesCol &&
+         result &= this.latMinutesCol &&
             this.latSecondsCol &&
             this.lngMinutesCol &&
             this.lngSecondsCol;
@@ -31,6 +42,11 @@ class State {
    get validEmail() {
       // We assume they only put in valid email addresses
       return !!this.email;
+   }
+
+   get acceptedEpsg4283() {
+      // We assume they only put in valid email addresses
+      return !!this.isEpsg4283;
    }
 
    get validFilename() {
@@ -60,14 +76,13 @@ class State {
       let count = 0;
       let parts = 2;
 
-      count += this.validFilename ? 1 : 0
       count += this.validEmail ? 1 : 0
+      count += this.acceptedEpsg4283 ? 1 : 0
 
       if (this.isCsv) {
-         parts += 4;
+         parts += 3;
 
          count += this.validOutCoordSys ? 1 : 0
-         count += this.validOutFormat ? 1 : 0
 
          count += this.latDegreesCol ? 1 : 0
          count += this.lngDegreesCol ? 1 : 0
@@ -81,8 +96,9 @@ class State {
             count += this.lngSecondsCol ? 1 : 0
          }
 
-      } else if (this.dmsType === "shp") {
-         parts = 6;
+      } else if (this.isShapefile) {
+         Object.keys(this.file).forEach(key => count += this.file[key] ? 1 : 0)
+         parts +=4;
       }
 
       return 100 * count / parts;
