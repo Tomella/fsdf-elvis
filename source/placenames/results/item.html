@@ -38,7 +38,7 @@
       <div class="col-md-4">Concise Gazetteer</div>
       <div class="col-md-8">{{vm.feature.attributes.Concise_gaz}}</div>
    </div>
-   <div class="row">
+   <div class="row" ng-if="vm.feature.attributes.Map_100K">
       <div class="col-md-4">1:100K Map Index</div>
       <div class="col-md-8"><span class="pn-numeric">{{vm.feature.attributes.Map_100K}}</span></div>
    </div>
@@ -50,7 +50,7 @@
       <div class="col-md-4">Status Description</div>
       <div class="col-md-8">{{vm.feature.attributes.Status_desc}}</div>
    </div>
-   <div class="row">
+   <div class="row" ng-if="vm.feature.attributes.Lat_minutes">
       <div class="col-md-4">Latitude</div>
       <div class="col-md-4">
          <span class="pn-numeric">
@@ -66,7 +66,16 @@
       </div>
    </div>
 
-   <div class="row">
+   <div class="row" ng-if="!vm.feature.attributes.Lat_minutes">
+      <div class="col-md-4">Latitude</div>
+      <div class="col-md-8">
+         <span class="pn-numeric">
+            {{vm.feature.attributes.Latitude}}&deg;
+         </span>
+      </div>
+   </div>
+
+   <div class="row" ng-if="vm.feature.attributes.Long_minutes">
       <div class="col-md-4">Longitude</div>
       <div class="col-md-4"><span class="pn-numeric">
          {{vm.feature.attributes.Long_degrees}}&deg;
@@ -78,10 +87,16 @@
          <span class="pn-numeric">
          {{vm.feature.attributes.Longitude}}&deg;</span></div>
    </div>
+
+   <div class="row" ng-if="!vm.feature.attributes.Long_minutes">
+      <div class="col-md-4">Longitude</div>
+      <div class="col-md-8">
+         <span class="pn-numeric">
+         {{vm.feature.attributes.Longitude}}&deg;</span></div>
+   </div>
    <div class="row" style="padding-top:5px; padding-bottom:5px; background-color:#f8f8ff;border-top:1px solid #f0f0f0">
       <div class="col-md-12">Download as:
          <span class="pull-right">
-            [<a href"javascript:void()" ng-click="vm.download('esri')">ESRI JSON Format</a>]
             [<a href"javascript:void()" ng-click="vm.download('wfs')">WFS Get Feature</a>]
          </span>
       </div>

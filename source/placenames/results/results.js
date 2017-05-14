@@ -72,6 +72,15 @@
             });
          },
 
+         downloadOld(ids) {
+            this.config.then(config => {
+               proxy.get(config.esriTemplate.replace("${id}", ids.join(","))).then(data => {
+                  var blob = new Blob([JSON.stringify(data, null, 3)], { type: "application/json;charset=utf-8" });
+                  saveAs(blob, "gazetteer-esri-features-" + Date.now() + ".json");
+               });
+            });
+         },
+
          download(ids) {
             this.config.then(config => {
                proxy.get(config.esriTemplate.replace("${id}", ids.join(","))).then(data => {
@@ -98,8 +107,8 @@
 
          load(id) {
             return this.config.then(({esriTemplate}) => {
-               return proxy.get(esriTemplate.replace("${id}", id), { cache: true }).then(response => {
-                  return response;
+               return $http.get(esriTemplate.replace("${id}", id), { cache: true }).then(response => {
+                  return response.data;
                });
             });
          },

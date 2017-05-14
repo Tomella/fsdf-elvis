@@ -247,7 +247,9 @@
    "facetsQuery": "select?facet=true&facet.field=classification&facet.field=authority&facet.field=featureCode&facet.field=authority&q=*:*&rows=1&wt=json",
    "featureTypesTable": "http://services.ga.gov.au/site_1/rest/services/Australian_Gazetteer/MapServer/1/query?where=1%3D1&outFields=Feat_code%2CFeature_desc&f=pjson",
    "results": {
-      "esriTemplate": "http://services.ga.gov.au/site_1/rest/services/Australian_Gazetteer/MapServer/0/query?f=json&outFields=*&where=&returnGeometry=true&spatialRel=esriSpatialRelIntersects&objectIds=${id}",
-      "wfsTemplate": "http://services.ga.gov.au/site_1/services/Australian_Gazetteer/MapServer/WFSServer?request=getfeature&typename=Gazetteer_of_Australia&maxCount=&Filter=%3Cogc:Filter%3E%3Cogc:PropertyIsEqualTo%3E%3Cogc:PropertyName%3EOBJECTID%3C/ogc:PropertyName%3E%3Cogc:Literal%3E${id}%3C/ogc:Literal%3E%3C/ogc:PropertyIsEqualTo%3E%3C/ogc:Filter%3E"
+      "esriOldTemplate": "http://services.ga.gov.au/site_1/rest/services/Australian_Gazetteer/MapServer/0/query?f=json&outFields=*&where=&returnGeometry=true&spatialRel=esriSpatialRelIntersects&objectIds=${id}",
+      "esriTemplate": "/gazetteer/json?id=${id}",
+      "wfsTemplate": "/gazetteer/wfs?id=${id}",
+      "wfsOldTemplate": "http://services.ga.gov.au/site_1/services/Australian_Gazetteer/MapServer/WFSServer?request=getfeature&typename=Gazetteer_of_Australia&maxCount=&Filter=%3Cogc:Filter%3E%3Cogc:PropertyIsEqualTo%3E%3Cogc:PropertyName%3EOBJECTID%3C/ogc:PropertyName%3E%3Cogc:Literal%3E${id}%3C/ogc:Literal%3E%3C/ogc:PropertyIsEqualTo%3E%3C/ogc:Filter%3E"
    }
 }

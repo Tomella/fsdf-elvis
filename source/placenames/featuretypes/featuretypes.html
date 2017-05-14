@@ -1,4 +1,4 @@
-<div ng-repeat="facet in vm.types | pnUnselectedFacets | orderBy:'name'" class="row">
+<div ng-repeat="facet in vm.types | pnHasName | pnUnselectedFacets | orderBy:'name'" class="row">
    <div class="col-md-12 ellipsis">
       <input type="checkbox" ng-model="facet.selected" ng-change="vm.update()" />
       <span tooltip-append-to-body="true" tooltip-placement="top-left" uib-tooltip="{{facet.name}}">

@@ -7,8 +7,13 @@ var START_ABSTRACT_SENTINEL = "<h3>Abstract:</h3>";
 var START_ABSTRACT_SENTINEL_LENGTH = START_ABSTRACT_SENTINEL.length;
 var END_ABSTRACT_SENTINEL = "<p>";
 
+
+var config = require("./lib/config");
 var express = require("express");
 var request = require('request');
+var mappers = require("./lib/mapper-picker");
+
+
 request.gzip = false;
 
 //var httpProxy = require('http-proxy');
@@ -168,8 +173,74 @@ app.get('/xml2js/*', function (req, res, next) {
     });
 });
 
+
+app.get('/gazetteer/json', function (req, res, next) {
+   let id = req.param("id");
+   let mapper = mappers.findById(id);
+
+   let url = mapper.createPath(id);
+
+
+    request.get({
+        url: url,
+        headers: filterHeaders(req, req.headers),
+        encoding: null
+    }, function (error, response, body) {
+        var code = 500;
+        var x2js, text, headers, decoder = new StringDecoder('utf8');
+        if(error) {
+            console.log("Err", error);
+        }
+        if (body) {
+            code = response.statusCode;
+            headers = filterHeaders(req, response.headers);
+            headers['Content-Type'] = 'application/json';
+            res.header(headers);
+            text = body.toString();
+            x2js = new X2JS();
+            res.status(code).send(mapper.transform(x2js.xml2js(text)));
+        } else {
+            console.log("No body!")
+            res.status(code).send('{"error":{"code": ' + code + '}}');
+        }
+    });
+});
+
+
+app.get('/gazetteer/wfs', function (req, res, next) {
+   let id = req.param("id");
+   let mapper = mappers.findById(id);
+
+   let url = mapper.createPath(id);
+
+
+    request.get({
+        url: url,
+        headers: filterHeaders(req, req.headers),
+        encoding: null
+    }, function (error, response, body) {
+        var code = 500;
+        var text, headers, decoder = new StringDecoder('utf8');
+        if(error) {
+            console.log("Err", error);
+        }
+        if (body) {
+            code = response.statusCode;
+            headers = filterHeaders(req, response.headers);
+            headers['Content-Type'] = 'application/xml';
+            res.header(headers);
+            text = body.toString();
+            res.status(code).send(text);
+        } else {
+            console.log("No body!")
+            res.status(code).send('{"error":{"code": ' + code + '}}');
+        }
+    });
+});
+
 app.get('/select', function (req, res, next) {
     var solrSelect = "http://localhost:8983/solr/placenames";
+    //var solrSelect = "http://192.168.0.24:8983/solr/placenames";
 
     // encoding : null means "body" passed to the callback will be raw bytes
     request.get(solrSelect + req.url, function (error, response, body) {

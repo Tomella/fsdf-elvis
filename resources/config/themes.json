@@ -18,7 +18,7 @@
          "description": "Place Names are the names of cultural and physical features and their associated spatial identifiers, location and extent. Place Names constitute the most commonly used spatial references and can be approved, unapproved, commonly used or historical.",
          "className": "altthemes-sign",
          "url": "placenames.html",
-         "keys": []
+         "keys": ["sign"]
       },
       {
          "code": "parcel",
@@ -66,7 +66,7 @@
          "description": "Elevation and Depth is the measurement of the Earthâs surface (wet or dry) above or below a vertical datum to obtain either the height of the land or a bathymetric depth. Elevation and Depth information data is collected using a range of sensors; including laser, sound navigation and ranging (sonar), radio detection and ranging (radar), optical remote sensing and survey techniques to derive spot heights, raster surfaces, contours and digital models of terrain.",
          "className": "altthemes-shore",
 		   "url": "http://fsdf.org.au/LINK/fsdf-theme/2427",
-         "keys": ["satellite", "shore", "sign"]
+         "keys": ["satellite", "shore"]
       },
       {
          "code": "land",
@@ -86,7 +86,7 @@
          "description": "Positioning.",
          "className": "altthemes-crosshair",
          "url": "positioning.html",
-         "keys": ["satellite", "position", "shore", "sign"]
+         "keys": ["satellite", "position", "shore"]
       }
    ]
 }

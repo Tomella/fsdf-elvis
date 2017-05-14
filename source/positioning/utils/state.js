@@ -20,7 +20,7 @@ class State {
 
    get validFileInfo() {
       // It's either CSV or SHP at the moment
-      return (this.isCsv ? this.validCsvFileInfo : this.validShpFileInfo) && this.validOutCoordSys;
+      return this.isCsv ? this.validCsvFileInfo : this.validShpFileInfo;
    }
 
    get validShpFileInfo() {
@@ -28,7 +28,7 @@ class State {
    }
 
    get validCsvFileInfo() {
-      let result = this.latDegreesCol && this.lngDegreesCol;
+      let result = this.latDegreesCol && this.lngDegreesCol && this.isEpsg4283;
 
       if (this.dmsType === "dms") {
          result &= this.latMinutesCol &&
@@ -59,11 +59,6 @@ class State {
       return !!this.outFormat;
    }
 
-   get validOutCoordSys() {
-      // We assume they only put in valid coord system
-      return !!this.outCoordSys;
-   }
-
    get validForm() {
       return this.percentage > 99.99; // Scared of errors.
    }
@@ -80,9 +75,7 @@ class State {
       count += this.acceptedEpsg4283 ? 1 : 0
 
       if (this.isCsv) {
-         parts += 3;
-
-         count += this.validOutCoordSys ? 1 : 0
+         parts += 2;
 
          count += this.latDegreesCol ? 1 : 0
          count += this.lngDegreesCol ? 1 : 0

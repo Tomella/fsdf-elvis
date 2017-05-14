@@ -18,25 +18,6 @@
          "minZoom":13
       },
       "layers":[
-
-         {
-            "name":"Water observations from space",
-            "type":["TileLayer", "WMS"],
-            "defaultLayer":true,
-            "isBaselayer":true,
-            "key":"catchments",
-            "parameters":[
-                "http://services.ga.gov.au/site_1/services/Surface_Hydrology_WM/MapServer/WMSServer",
-                {
-                   "layers" : "Basins,Catchments",
-                   "format" : "image/png",
-                   "transparent" : true,
-                   "opacity" : 1
-                }
-            ],
-            "addLayerControl":false,
-            "visible":true
-         },
          {
             "name":"Water observations from space",
             "pseudoBaseLayer" : true,
@@ -299,5 +280,38 @@
 			},
 			{"code":"LL-WGS84", "value" : "WGS84 Lat/Longs (EPSG:4326)"}
 		]
-	}
+	},
+   "regions": {
+      "regionsUrl": "icsm/resources/data/riverRegions.json",
+      "divisionColors": [
+         "#efaca7",
+         "#f7cb65",
+         "#def97a",
+         "#83bc60",
+         "#61cc85",
+         "#287270",
+         "#9eb7f7",
+         "#8c89f4",
+         "#b48fef",
+         "#dd83ef",
+         "#f477e4",
+         "#f989bf",
+         "#e57982"
+      ],
+      "divisionOptions": {
+         "Tanami–Timor Sea Coast" : {
+            "center": [-20, 133]
+         },
+         "North East Coast" : {
+            "center": [-23, 149]
+         },
+         "South East Coast (Victoria)" : {
+            "center": [-37.5, 144.5]
+         },
+         "Carpentaria Coast" : {
+            "center": [-18, 140]
+         }
+      }
+   }
+
 }

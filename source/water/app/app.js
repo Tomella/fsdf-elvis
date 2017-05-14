@@ -65,6 +65,7 @@
 		'geo.measure',
 
 		'water.panes',
+      "water.regions",
 		'water.templates',
 		'water.toolbar',
       'water.select',

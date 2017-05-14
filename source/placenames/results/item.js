@@ -22,7 +22,7 @@
                   pnItemService[type](this);
                };
 
-               pnResultsService.load(this.item.id).then(data => {
+               pnResultsService.load(this.item.recordId).then(data => {
                   this.feature = data.features[0];
                });
             },
@@ -39,7 +39,7 @@
 
             wfs(vm) {
                configService.getConfig("results").then(({wfsTemplate}) => {
-                  $http.get(wfsTemplate.replace("${id}", vm.item.id)).then(response => {
+                  $http.get(wfsTemplate.replace("${id}", vm.item.recordId)).then(response => {
                      var blob = new Blob([response.data], { type: "application/json;charset=utf-8" });
                      saveAs(blob, "gazetteer-wfs-feature-" + vm.item.recordId + ".xml");
                   });

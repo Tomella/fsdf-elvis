@@ -24,7 +24,8 @@
             features = featureCodes;
          });
          return function (str) {
-            return features? features[str]: str;
+            var response = features? features[str]: str;
+            return response ? response : str;
          };
       }])
 

@@ -31,6 +31,12 @@
             },
             controllerAs: "pfp"
          };
-      }]);
+      }])
+
+      .filter("pnHasName", function() {
+         return function(list) {
+            return (list ? list : []).filter(item => !!item.name);
+         }
+      });
 
 })(angular);
