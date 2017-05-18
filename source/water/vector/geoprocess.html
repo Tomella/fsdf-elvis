@@ -127,11 +127,23 @@
 		<h3>You have chosen:</h3>
 		<table class="table table-striped">
 			<tbody>
-				<tr>
+				<tr ng-if="data.processing.bboxSelected">
 					<th>Area</th>
 					<td>
 						<span style="display:inline-block; width: 10em">Lower left (lat/lng&deg;):</span> {{data.processing.clip.yMin | number : 6}}, {{data.processing.clip.xMin | number : 6}}<br/>
 						<span style="display:inline-block;width: 10em">Upper right (lat/lng&deg;):</span> {{data.processing.clip.yMax | number : 6}}, {{data.processing.clip.xMax | number : 6}}
+					</td>
+				</tr>
+				<tr ng-if="data.processing.divisionSelected">
+					<th>Division</th>
+					<td>
+						{{data.processing.division}}
+               </td>
+				</tr>
+				<tr ng-if="data.processing.regionSelected">
+					<th>River Region</th>
+					<td>
+						{{data.processing.region}}
 					</td>
 				</tr>
 				<tr>

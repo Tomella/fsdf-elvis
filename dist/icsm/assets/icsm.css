@@ -131,6 +131,50 @@
   bottom: 45px;
   left: 12px;
 }
+.mvt,
+.mvt ul,
+.mvt li {
+  position: relative;
+}
+
+.mvt ul {
+  list-style: none;
+  padding-left: 32px;
+}
+
+.mvt li::before,
+.mvt li::after {
+  content: "";
+  position: absolute;
+  left: -12px;
+}
+
+.mvt li::before {
+  border-top: 1px solid #000;
+  top: 9px;
+  width: 8px;
+  height: 0;
+}
+
+.mvt li::after {
+  border-left: 1px solid #000;
+  height: 100%;
+  width: 0px;
+  top: 2px;
+}
+
+.mvt ul > li:last-child::after {
+  height: 8px;
+}
+
+.metaview-head {
+  font-weight: bold;
+}
+
+.metaview-info {
+  padding-left: 3px;
+  padding-right: 3px;
+}
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
   display: inline-block;
@@ -329,50 +373,6 @@
   overflow-y: auto;
   overflow-x: hidden;
 }
-.mvt,
-.mvt ul,
-.mvt li {
-  position: relative;
-}
-
-.mvt ul {
-  list-style: none;
-  padding-left: 32px;
-}
-
-.mvt li::before,
-.mvt li::after {
-  content: "";
-  position: absolute;
-  left: -12px;
-}
-
-.mvt li::before {
-  border-top: 1px solid #000;
-  top: 9px;
-  width: 8px;
-  height: 0;
-}
-
-.mvt li::after {
-  border-left: 1px solid #000;
-  height: 100%;
-  width: 0px;
-  top: 2px;
-}
-
-.mvt ul > li:last-child::after {
-  height: 8px;
-}
-
-.metaview-head {
-  font-weight: bold;
-}
-
-.metaview-info {
-  padding-left: 3px;
-  padding-right: 3px;
-}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -419,13 +419,9 @@ div.leaflet-control-scale-line {
     display: none;
   }
 }
-.pn-authorities-pills span.btn-primary {
-  background-color: red;
-}
-
-.pn-authorities-swathe {
+.pn-featuretypes-swathe {
   display: inline-block;
-  background-color: red;
+  background-color: #337ab7;
   width: 14px;
   height: 14px;
   border: solid 1px black;
@@ -441,9 +437,13 @@ div.leaflet-control-scale-line {
   height: 14px;
   border: solid 1px black;
 }
-.pn-featuretypes-swathe {
+.pn-authorities-pills span.btn-primary {
+  background-color: red;
+}
+
+.pn-authorities-swathe {
   display: inline-block;
-  background-color: #337ab7;
+  background-color: red;
   width: 14px;
   height: 14px;
   border: solid 1px black;
@@ -454,24 +454,6 @@ div.leaflet-control-scale-line {
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-}
-.pn-features {
-  max-block-size: 300px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.pn-search-container {
-  height: 97%;
-}
-
-.tooltip-inner {
-  max-width: 350px;
-}
-
-.pn-pill {
-  color: #fff;
-  margin: 4px;
 }
 .pn-container {
   overflow-y: auto;
@@ -511,6 +493,24 @@ div.leaflet-control-scale-line {
 .pn-results-list:last-child {
   border-bottom: 0;
   padding-bottom: 0;
+}
+.pn-features {
+  max-block-size: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.pn-search-container {
+  height: 97%;
+}
+
+.tooltip-inner {
+  max-width: 350px;
+}
+
+.pn-pill {
+  color: #fff;
+  margin: 4px;
 }
 /* Overrides */
 
@@ -809,53 +809,6 @@ img.elvis-logo {
   right: 7px;
   bottom: 15px;
 }
-.reviewing-odd {
-  background-color: #eeeeee;
-}
-
-.row.reviewing-divider {
-  border-top: 1px solid lightgray;
-  padding-top: 5px;
-  margin-top: 5px;
-}
-
-.reviewing-datasets {
-  max-height: 450px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-@media (max-height: 750px) {
-  .reviewing-datasets {
-    max-height: 350px;
-  }
-}
-
-@media (max-height: 650px) {
-  .reviewing-datasets {
-    max-height: 250px;
-  }
-}
-
-.exclude {
-  color: #777777;
-  text-decoration: line-through;
-}
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
 .continue-container {
   padding: 4px;
 }
@@ -994,6 +947,53 @@ i.fa.active {
   left: 0;
   right: 0;
 }
+.reviewing-odd {
+  background-color: #eeeeee;
+}
+
+.row.reviewing-divider {
+  border-top: 1px solid lightgray;
+  padding-top: 5px;
+  margin-top: 5px;
+}
+
+.reviewing-datasets {
+  max-height: 450px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-height: 750px) {
+  .reviewing-datasets {
+    max-height: 350px;
+  }
+}
+
+@media (max-height: 650px) {
+  .reviewing-datasets {
+    max-height: 250px;
+  }
+}
+
+.exclude {
+  color: #777777;
+  text-decoration: line-through;
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
+}
 .icsm-icon {
   background: url("icsm/img/global-sprites.svg") no-repeat;
   display: inline-block;
@@ -1056,6 +1056,22 @@ i.fa.active {
   color: #fff;
   background-color: #777;
 }
+.downloadPane {
+  padding-left: 0px !important;
+  padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 10px;
+  overflow: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
+}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -1101,22 +1117,6 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
-}
-.downloadPane {
-  padding-left: 0px !important;
-  padding-right: 5px !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 10px;
-  overflow: hidden;
-}
-
-.downloadCont {
-  position: fixed;
-  right: 0;
-  bottom: 8px;
 }
 .regions-label {
   border: 0;
@@ -1202,29 +1202,6 @@ i.fa.active {
 .vector-add:disabled {
   color: gray;
 }
-.main-body {
-  position: fixed;
-  top: 85px;
-  left: 0px;
-  right: 0px;
-  bottom: 8px;
-  overflow-y: auto;
-}
-
-.point-at-box {
-  transform: rotate(-35deg);
-}
-
-@media screen and (max-width: 990px) {
-  .point-at-box {
-    transform: rotate(135deg);
-  }
-}
-
-span.mandatory {
-  content: "*";
-  color: red;
-}
 .start-content-container {
   position: fixed;
   top: 95px;
@@ -1288,16 +1265,28 @@ span.mandatory {
 .select-land {
   background-position: -675px;
 }
-.csv-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
+.main-body {
+  position: fixed;
+  top: 85px;
+  left: 0px;
+  right: 0px;
+  bottom: 8px;
+  overflow-y: auto;
 }
 
-.csv-fix-label label {
-  width: 10em;
-  text-align: right;
+.point-at-box {
+  transform: rotate(-35deg);
+}
+
+@media screen and (max-width: 990px) {
+  .point-at-box {
+    transform: rotate(135deg);
+  }
+}
+
+span.mandatory {
+  content: "*";
+  color: red;
 }
 .upload-dialog p {
   padding: 15px;
@@ -1309,6 +1298,17 @@ span.mandatory {
   margin-top: 10px;
   padding: 5px;
   border-radius: 4px;
+}
+.csv-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.csv-fix-label label {
+  width: 10em;
+  text-align: right;
 }
 .hide {
   display: none;
@@ -1367,17 +1367,6 @@ span.mandatory {
 .common-header {
   background-color: white;
 }
-.ed-valid {
-  color: green;
-}
-
-.ed-invalid {
-  color: red;
-}
-
-.ed-active {
-  color: red;
-}
 .shp-label {
   display: inline-block;
   max-width: 100%;
@@ -1388,4 +1377,15 @@ span.mandatory {
 .shp-fix-label label {
   width: 10em;
   text-align: right;
+}
+.ed-valid {
+  color: green;
+}
+
+.ed-invalid {
+  color: red;
+}
+
+.ed-active {
+  color: red;
 }
