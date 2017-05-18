@@ -1,11 +1,4 @@
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
-(function(angular) {
-
-'use strict';
-
+{
 angular.module("water.toolbar", [])
 
 .directive("icsmToolbar", [function() {
@@ -13,7 +6,6 @@ angular.module("water.toolbar", [])
 		controller: 'toolbarLinksCtrl'
 	};
 }])
-
 
 /**
  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
@@ -30,9 +22,8 @@ angular.module("water.toolbar", [])
 
 .controller("toolbarLinksCtrl", ["$scope", "configService", function($scope, configService) {
 
-	var self = this;
-	configService.getConfig().then(function(config) {
-		self.links = config.toolbarLinks;
+	configService.getConfig().then(config => {
+		this.links = config.toolbarLinks;
 	});
 
 	$scope.item = "";
@@ -42,4 +33,4 @@ angular.module("water.toolbar", [])
 
 }]);
 
-})(angular);
+}

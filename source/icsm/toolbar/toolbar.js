@@ -1,11 +1,4 @@
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
-(function(angular) {
-
-'use strict';
-
+{
 angular.module("icsm.toolbar", [])
 
 .directive("icsmToolbar", [function() {
@@ -35,10 +28,8 @@ angular.module("icsm.toolbar", [])
 }])
 
 .controller("toolbarLinksCtrl", ["$scope", "configService", function($scope, configService) {
-
-	var self = this;
-	configService.getConfig().then(function(config) {
-		self.links = config.toolbarLinks;
+	configService.getConfig().then(config => {
+		this.links = config.toolbarLinks;
 	});
 
 	$scope.item = "";
@@ -48,4 +39,4 @@ angular.module("icsm.toolbar", [])
 
 }]);
 
-})(angular);
+}

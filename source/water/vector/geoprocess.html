@@ -1,13 +1,25 @@
-<div class="container-fluid" style="overflow-x:hidden" ng-form>
+<div class="container-fluido" style="overflow-x:hidden" ng-form>
 	<div ng-show="stage=='bbox'">
 		<div class="row">
 			<div class="col-md-12">
-				<wizard-clip trigger="stage == 'bbox'" drawn="drawn()" clip="data.processing.clip" bounds="data.bounds"></wizard-clip>
+            <div uib-accordion>
+               <div uib-accordion-group class="panel" heading="By drawn bounding box" is-open="data.processing.bboxSelected">
+				      <wizard-clip trigger="stage == 'bbox'" drawn="drawn()" clip="data.processing.clip" bounds="data.bounds" open="data.processing.bboxSelected"></wizard-clip>
+               </div>
+               <div uib-accordion-group class="panel" heading="By division" is-open="data.processing.divisionSelected">
+                  <select-division state="data.processing" open="data.processing.divisionSelected"></select-division>
+               </div>
+               <div uib-accordion-group class="panel" heading="By river region" is-open="data.processing.regionSelected">
+                  <select-region state="data.processing" open="data.processing.regionSelected"></select-region>
+               </div>
+            </div>
 			</div>
 		</div>
 		<div class="row" style="height:55px">
  			<div class="col-md-12">
-				<button class="btn btn-primary pull-right" ng-disabled="!validClip(data) || checkingOrFailed" ng-click="stage='formats'">Next</button>
+				<button class="btn btn-primary pull-right"
+                  ng-disabled="(data.processing.bboxSelected &&  (!validClip(data) || checkingOrFailed)) || (data.processing.divisionSelected && ! data.processing.division) || (data.processing.regionSelected && ! data.processing.region)"
+                  ng-click="stage='formats'">Next</button>
 			</div>
 		</div>
 		<div class="well">

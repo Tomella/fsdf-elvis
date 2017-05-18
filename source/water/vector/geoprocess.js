@@ -1,6 +1,4 @@
-
-(function(angular, L) {
-'use strict';
+{
 
 angular.module("water.vector.geoprocess", [])
 
@@ -9,11 +7,12 @@ angular.module("water.vector.geoprocess", [])
 	return {
 		restrict :"AE",
 		templateUrl : "water/vector/geoprocess.html",
-		scope : {
-			data : "="
+		scope: {
+			data: "=",
+         open: "="
 		},
 		link : function(scope) {
-			var clipMessage, clipTimeout, referenceLayer;
+			let clipMessage, clipTimeout, referenceLayer;
 
 			vectorService.outFormats().then(function(data) {
 				scope.outFormats = data;
@@ -24,11 +23,15 @@ angular.module("water.vector.geoprocess", [])
 					vectorGeoprocessService.removeClip();
 					removeReferenceLayer();
 				}
-				if(newData && newData != oldData) {
+				if(newData && newData !== oldData) {
 					scope.stage = "bbox";
 					drawReferenceLayer();
 				}
 			});
+
+         scope.$watch("open", open => {
+            console.log("pone" + open);
+         });
 
 			scope.$watchGroup(["data.processing.clip.xMax", "data.processing.clip.xMin", "data.processing.clip.yMax", "data.processing.clip.yMin"],
 					function(newValues, oldValues, scope) {
@@ -59,7 +62,7 @@ angular.module("water.vector.geoprocess", [])
 				}
 
 				function checkSize() {
-					var deferred = $q.defer();
+					let deferred = $q.defer();
 
 					result = scope.drawn();
 					if(result && result.code) {
@@ -91,6 +94,14 @@ angular.module("water.vector.geoprocess", [])
 					return deferred.promise;
 				}
 			});
+
+         scope.selectedDivision = function() {
+            console.log("selected division")
+         };
+
+         scope.selectedRegion = function() {
+            console.log("selected region")
+         };
 
 			scope.drawn = function() {
 				vectorGeoprocessService.removeClip();
@@ -135,7 +146,11 @@ angular.module("water.vector.geoprocess", [])
 				var proc = scope.data && scope.data.processing?scope.data.processing:null;
 				// For it to be OK we need.
 				return proc && scope.email &&
-					validClip(proc.clip) &&
+					(
+                  (proc.divisionSelected && proc.division)
+                  || (proc.regionSelected && proc.region)
+                  || (proc.bboxSelected && validClip(proc.clip))
+               ) &&
 					proc.outCoordSys && proc.outFormat;
 			};
 
@@ -143,8 +158,11 @@ angular.module("water.vector.geoprocess", [])
 				var proc = scope.data && scope.data.processing?scope.data.processing:null;
 				// For it to be OK we need.
 				return proc &&
-					validClip(proc.clip) &&
-					proc.outCoordSys && proc.outFormat;
+					(
+                  (proc.divisionSelected && proc.division)
+                  || (proc.regionSelected && proc.region)
+                  || (proc.bboxSelected && validClip(proc.clip))
+               ) && proc.outCoordSys && proc.outFormat;
 			};
 
 			scope.validClip = function(data) {
@@ -379,13 +397,21 @@ function VectorGeoprocessService($http, $q, $timeout, configService, downloadSer
 		initiateJob : function(data, email) {
 			var dataset = DEFAULT_DATASET,  // TODO Replace with real dataset file name from metadata.
 				win, workingString = getUrl(data),
-				processing = data.processing,
-				log = {
+				processing = data.processing;
+
+         let clip = processing.bboxSelected ? processing.clip :{
+            yMin: null,
+            yMax: null,
+            xMax: null,
+            xMin: null
+         };
+
+			let log = {
 					bbox : {
-						yMin : processing.clip.yMin,
-						yMax : processing.clip.yMax,
-						xMin : processing.clip.xMin,
-						xMax : processing.clip.xMax,
+						yMin : clip.yMin,
+						yMax : clip.yMax,
+						xMin : clip.xMin,
+						xMax : clip.xMax,
 					},
 					geocatId : data.primaryId,
 					crs : processing.outCoordSys.code,
@@ -401,22 +427,28 @@ function VectorGeoprocessService($http, $q, $timeout, configService, downloadSer
             }
          });
 
+
 			angular.forEach({
-            geocat_number: geocatNumbers.join(" "),
+            id: geocatNumbers.join(" "),
             features_selected: featuresSelected.join(" "),
-				ymin : processing.clip.yMin,
-				ymax : processing.clip.yMax,
-				xmin : processing.clip.xMin,
-				xmax : processing.clip.xMax,
-				file_name : processing.filename?processing.filename:"",
-            file_format_vector: processing.outFormat.code,
+				filename : processing.filename?processing.filename:"",
+            outFormat: processing.outFormat.code,
             file_format_raster: "",
-            coord_sys: processing.outCoordSys.code,
-				email_address : email
+				ymin : clip.yMin,
+				ymax : clip.yMax,
+				xmin : clip.xMin,
+				xmax : clip.xMax,
+            division_name: processing.divisionSelected ? processing.division : "",
+            river_reg_name: processing.regionSelected ? processing.region : "",
+            outCoordSys: processing.outCoordSys.code,
+				email : email
 			}, function(item, key) {
 				workingString = workingString.replace("{" + key + "}", item);
 			});
 
+
+         //console.log(clip);
+         //console.log(processing);
          //console.log(workingString);
 
 			$("#launcher")[0].src = workingString;
@@ -432,4 +464,4 @@ function VectorGeoprocessService($http, $q, $timeout, configService, downloadSer
 	};
 }
 
-})(angular, L);
+}

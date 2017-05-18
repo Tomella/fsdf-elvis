@@ -1,11 +1,4 @@
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
-(function(angular) {
-
-'use strict';
-
+{
 angular.module("icsm.select.service", [])
 .factory("selectService", SelectService);
 
@@ -261,7 +254,19 @@ function servicesFactory(uris) {
 			WMS :"OGC:WMS"
 	};
 
-	return new Services(uris);
+
+	Service.prototype = {
+		getUrl : function() {
+			if(url) {
+				if(url.indexOf("?") < 0) {
+					return;
+				} else {
+					return url.substr(0, url.indexOf("?"));
+				}
+			}
+			return null;
+		}
+	};
 
 	function Services(uris) {
 		this.uris = uris;
@@ -351,19 +356,7 @@ function servicesFactory(uris) {
 			this.handlers = [];
 		};
 	}
-
-	Service.prototype = {
-		getUrl : function() {
-			if(url) {
-				if(url.indexOf("?") < 0) {
-					return;
-				} else {
-					return url.substr(0, url.indexOf("?"));
-				}
-			}
-			return null;
-		}
-	};
+	return new Services(uris);
 }
 
-})(angular);
+}

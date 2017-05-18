@@ -31,7 +31,8 @@
     "ang-accordion": "*",
     "x2js": "x2js#^1.2.0",
     "leaflet-draw": "^0.3.2",
-    "ngInfiniteScroll": "1.0.0"
+    "ngInfiniteScroll": "1.0.0",
+    "babel-polyfill": "^0.0.1"
   },
   "resolutions": {
     "angular": "~1.4.12",

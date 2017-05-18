@@ -55,7 +55,11 @@ angular.module("common.wms", [])
 		},
 
 		subscribe : function(data) {
-			var id = data.primaryId,
+         if (!data.services || !data.services.getWms) {
+            return;
+         }
+
+			let id = data.primaryId,
 				wms = data.services.getWms(),
 				subscription = subscribers[id];
 

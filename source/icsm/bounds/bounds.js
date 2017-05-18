@@ -1,6 +1,3 @@
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
 {
 	angular.module("icsm.bounds", [])
 

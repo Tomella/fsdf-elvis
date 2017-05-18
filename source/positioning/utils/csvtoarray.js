@@ -34,7 +34,7 @@ function CSVToArray(strData, strDelimiter) {
    while (arrMatches = objPattern.exec(strData)) {
 
       // Get the delimiter that was found.
-      var strMatchedDelimiter = arrMatches[1];
+      var strMatchedValue, strMatchedDelimiter = arrMatches[1];
 
       // Check to see if the given delimiter has a length
       // (is not the start of string) and if it matches
@@ -56,21 +56,16 @@ function CSVToArray(strData, strDelimiter) {
       // let's check to see which kind of value we
       // captured (quoted or unquoted).
       if (arrMatches[2]) {
-
          // We found a quoted value. When we capture
          // this value, unescape any double quotes.
-         var strMatchedValue = arrMatches[2].replace(
+         strMatchedValue = arrMatches[2].replace(
             new RegExp("\"\"", "g"),
             "\""
          );
-
       } else {
-
          // We found a non-quoted value.
-         var strMatchedValue = arrMatches[3];
-
+         strMatchedValue = arrMatches[3];
       }
-
 
       // Now that we have our value string, let's add
       // it to the data array.

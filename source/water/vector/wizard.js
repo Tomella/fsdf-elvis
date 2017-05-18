@@ -1,7 +1,4 @@
-
-(function (angular, $) {
-	'use strict';
-
+{
 	angular.module("water.vector.download", ['common.geoprocess'])
 
 		.directive("vectorPopup", ["vectorDownloadService", function (vectorDownloadService) {
@@ -80,7 +77,7 @@
 							return false;
 						}
 
-						var result = scope.group.docs.some(function (doc) {
+						let result = scope.group.docs.some(function (doc) {
 							return doc.selected;
 						});
 						return result;
@@ -110,7 +107,7 @@
 
 	VectorDownloadService.$inject = ['$http', '$q', '$rootScope', 'mapService', 'storageService'];
 	function VectorDownloadService($http, $q, $rootScope, mapService, storageService) {
-		var key = "download_email",
+		let key = "download_email",
 			downloadLayerGroup = "Download Layers",
 
 			mapState = {
@@ -137,7 +134,7 @@
 					}
 
 					function prepare() {
-						var bounds = [
+						let bounds = [
 							[data.bounds.yMin, data.bounds.xMin],
 							[data.bounds.yMax, data.bounds.xMax]
 						];
@@ -199,4 +196,4 @@
 		return service;
 	}
 
-})(angular, $);
+}

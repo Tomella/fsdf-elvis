@@ -1,7 +1,4 @@
-
-(function(angular) {
-
-'use strict';
+{
 
 angular.module("common.clip", ['geo.draw'])
 
@@ -41,7 +38,7 @@ angular.module("common.clip", ['geo.draw'])
 					c.yMin = +data.clip.yMin;
 					if(scope.drawn) {
 						response = scope.drawn();
-						if(response && response.code && response.code == "oversize") {
+						if(response && response.code && response.code === "oversize") {
 							scope.initiateDraw();
 						}
 					}
@@ -73,4 +70,4 @@ angular.module("common.clip", ['geo.draw'])
 	}
 }]);
 
-})(angular);
+}

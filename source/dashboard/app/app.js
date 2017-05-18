@@ -1,6 +1,5 @@
 (function(angular) {
 'use strict';
-
 var config = {
    tabs: [
       {
@@ -49,5 +48,4 @@ angular.module("DashboardApp", [
          document.getElementById("launcher").src = config.baseUrl + value;
       };
    });
-
 })(angular);

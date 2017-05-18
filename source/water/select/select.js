@@ -1,10 +1,4 @@
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
-(function(angular) {
-
-'use strict';
+{
 
 angular.module("water.select", ['water.select.service'])
 
@@ -92,17 +86,17 @@ function SelectCriteriaCtrl(selectService) {
 
 SelectCtrl.$inject = ['$rootScope', 'configService', 'flashService', 'selectService'];
 function SelectCtrl($rootScope, configService, flashService, selectService) {
-	var flasher, self = this;
+	let flasher;
 
-	$rootScope.$on("select.results.received", function(event, data) {
+	$rootScope.$on("select.results.received", (event, data) => {
 		//console.log("Received response")
 		flashService.remove(flasher);
-		self.data = data;
+		this.data = data;
 	});
 
-	configService.getConfig("facets").then(function(config) {
+	configService.getConfig("facets").then(config => {
 		this.hasKeywords = config && config.keywordMapped && config.keywordMapped.length > 0;
-	}.bind(this));
+	});
 
 	this.select = function() {
 		flashService.remove(flasher);
@@ -126,7 +120,7 @@ function SelectCtrl($rootScope, configService, flashService, selectService) {
 		if(!this.data || !this.data.response) {
 			return false;
 		}
-		return !this.data.response.docs.some(function(dataset) {
+		return !this.data.response.docs.some(dataset => {
 			return !dataset.showLayer;
 		});
 	};
@@ -135,7 +129,7 @@ function SelectCtrl($rootScope, configService, flashService, selectService) {
 		if(!this.data || !this.data.response) {
 			return false;
 		}
-		return this.data.response.docs.some(function(dataset) {
+		return this.data.response.docs.some(dataset => {
 			return dataset.showLayer;
 		});
 	};
@@ -157,5 +151,4 @@ function SelectCtrl($rootScope, configService, flashService, selectService) {
 	};
 }
 
-})(angular);
-
+}

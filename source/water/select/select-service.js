@@ -1,369 +1,361 @@
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
+{
 
-(function(angular) {
+   angular.module("water.select.service", [])
+      .factory("selectService", SelectService);
 
-'use strict';
+   SelectService.$inject = ['$http', '$q', '$rootScope', '$timeout', 'mapService', 'configService'];
+   function SelectService($http, $q, $rootScope, $timeout, mapService, configService) {
+      let LAYER_GROUP_KEY = "Search Layers",
+         baseUrl = "icsm/resources/config/water_select.json",
+         parameters = {
+            text: "",
+            daterange: {
+               enabled: false,
+               upper: null,
+               lower: null
+            },
+            bbox: {
+               fromMap: true,
+               intersects: true,
+               yMax: null,
+               yMin: null,
+               xMax: null,
+               xMin: null
+            },
+            defaultKeywords: [],
+            keywords: []
+         },
+         timeout,
+         cache,
+         allDocs = {},
+         busy = false,
+         layers = {},
+         selectLayerGroup,
+         normalLayerColor = "#ff7800",
+         hilightLayerColor = 'darkblue',
 
-angular.module("water.select.service", [])
-.factory("selectService", SelectService);
+         service = {
 
-SelectService.$inject = ['$http', '$q', '$rootScope', '$timeout', 'mapService', 'configService'];
-function SelectService($http, $q, $rootScope, $timeout, mapService, configService) {
-	var LAYER_GROUP_KEY = "Search Layers",
-		baseUrl = "icsm/resources/config/water_select.json",
-		parameters = {
-			text : "",
-			daterange : {
-				enabled : false,
-				upper : null,
-				lower : null
-			},
-			bbox : {
-				fromMap : true,
-				intersects : true,
-				yMax : null,
-				yMin : null,
-				xMax : null,
-				xMin : null
-			},
-			defaultKeywords : [],
-			keywords : []
-		},
-		timeout,
-		cache,
-		allDocs = {},
-		busy = false,
-		layers = {},
-		selectLayerGroup,
-		normalLayerColor = "#ff7800",
-		hilightLayerColor = 'darkblue',
+            getSelectCriteria: function () {
+               return parameters;
+            },
 
-		service = {
+            getLayerGroup: function () {
+               // Prime the layer group
+               if (!selectLayerGroup) {
+                  selectLayerGroup = mapService.getGroup(LAYER_GROUP_KEY);
+               }
+               return selectLayerGroup;
+            },
 
-		getSelectCriteria : function() {
-			return parameters;
-		},
+            setKeywords: function (keywords) {
+            },
 
-		getLayerGroup : function() {
-			// Prime the layer group
-			if(!selectLayerGroup) {
-				selectLayerGroup = mapService.getGroup(LAYER_GROUP_KEY);
-			}
-			return selectLayerGroup;
-		},
+            setFilter: function (filter) {
+            },
 
-		setKeywords : function(keywords) {
-		},
+            refresh: function () {
+            },
 
-		setFilter : function(filter) {
-		},
+            getDaterange: function () {
+               return parameters.daterange;
+            },
 
-		refresh : function() {
-		},
+            more: function () {
+            },
 
-		getDaterange : function() {
-			return parameters.daterange;
-		},
+            _executeQuery: function () {
+               // Give them the lot as they will want the criteria as well
+               $http.get(baseUrl, { cache: true }).then(response => {
+                  service.getLayerGroup();
 
-		more : function() {
-		},
+                  let data = response.data;
 
-		_executeQuery : function() {
-			// Give them the lot as they will want the criteria as well
-			$http.get(baseUrl, {cache: true}).then(function(response) {
-				service.getLayerGroup();
+                  data.response.docs.forEach(dataset => {
+                     service._decorateDataset(dataset);
+                     if (dataset.type === "group") {
+                        dataset.docs.forEach(data => {
+                           service._decorateDataset(data);
+                        });
+                     }
+                  });
 
-				var data = response.data;
+                  $rootScope.$broadcast("select.facet.counts", data);
+                  $rootScope.$broadcast("select.results.received", data);
+               });
+            },
 
-				data.response.docs.forEach(function(dataset) {
-					service._decorateDataset(dataset);
-					if(dataset.type == "group") {
-						dataset.docs.forEach(function(data) {
-							service._decorateDataset(data);
-						});
-					}
-				});
+            createLayer: function (dataset, color) {
+               let bbox = dataset.bbox,
+                  key = dataset.primaryId,
+                  parts, bounds, layer;
 
-				$rootScope.$broadcast("select.facet.counts", data);
-				$rootScope.$broadcast("select.results.received", data);
-			});
-		},
+               layer = layers[key];
+               if (!layer) {
 
-		createLayer : function(dataset, color) {
-			var bbox = dataset.bbox,
-				key = dataset.primaryId,
-				parts, bounds, layer;
+                  if (!bbox) {
+                     return null;
+                  }
 
-			layer = layers[key];
-			if(!layer) {
+                  parts = bbox.split(" ");
+                  if (parts.length !== 4) {
+                     return null;
+                  }
 
-				if(!bbox) {
-					return null;
-				}
+                  if (!color) {
+                     color = normalLayerColor;
+                  }
+                  bounds = [[+parts[1], +parts[0]], [+parts[3], +parts[2]]];
 
-				parts = bbox.split(" ");
-				if(parts.length != 4) {
-					return null;
-				}
+                  // create a black rectangle
+                  layer = L.rectangle(bounds, {
+                     fill: false,
+                     color: "#000000",
+                     width: 3,
+                     clickable: false
+                  });
 
-				if(!color) {
-					color = normalLayerColor;
-				}
-				bounds = [[+parts[1], +parts[0]], [+parts[3], +parts[2]]];
+                  layers[key] = layer;
+               }
+               this._decorateDataset(dataset);
+               selectLayerGroup.addLayer(layer);
+               return layer;
+            },
 
-				// create a black rectangle
-				layer = L.rectangle(bounds, {
-					fill:false,
-					color: "#000000",
-					width:3,
-					clickable: false
-				});
+            _decorateDataset: function (dataset) {
+               let layer = layers[dataset.primaryId];
+               if (layer) {
+                  dataset.layer = layer;
+                  dataset.showLayer = true;
+               } else {
+                  dataset.layer = null;
+                  dataset.showLayer = false;
+                  // Do we add the services to it?
+                  dataset.services = servicesFactory(dataset.dcUris);
+                  dataset.bounds = getBounds(dataset.bbox);
+               }
 
-				layers[key] = layer;
-			}
-			this._decorateDataset(dataset);
-			selectLayerGroup.addLayer(layer);
-			return layer;
-		},
+               function getBounds(bbox) {
+                  let parts;
+                  if (!bbox) {
+                     return null;
+                  } else {
+                     parts = bbox.split(/\s/g);
+                     return {
+                        xMin: +parts[0],
+                        xMax: +parts[2],
+                        yMax: +parts[3],
+                        yMin: +parts[1]
+                     };
+                  }
+               }
+            },
 
-		_decorateDataset : function(dataset) {
-			var layer = layers[dataset.primaryId];
-			if(layer) {
-				dataset.layer = layer;
-				dataset.showLayer = true;
-			} else {
-				dataset.layer = null;
-				dataset.showLayer = false;
-				// Do we add the services to it?
-				dataset.services = servicesFactory(dataset.dcUris);
-				dataset.bounds = getBounds(dataset.bbox);
-			}
+            showWithin: function (datasets) {
+               datasets.forEach(dataset => {
+                  let box = dataset.bbox,
+                     coords, xmin, ymin, xmax, ymax;
 
-			function getBounds(bbox) {
-				var parts;
-				if(!bbox) {
-					return null;
-				} else {
-					parts = bbox.split(/\s/g);
-					return {
-						xMin : +parts[0],
-						xMax : +parts[2],
-						yMax : +parts[3],
-						yMin : +parts[1]
-					};
-				}
-			}
-		},
+                  if (!box) {
+                     service.removeLayer(dataset);
+                  } else {
+                     coords = box.split(" ");
+                     if (coords.length === 4 && within(+coords[0], +coords[1], +coords[2], +coords[3])) {
+                        // show
+                        service.createLayer(dataset);
+                     } else {
+                        // hide
+                        service.removeLayer(dataset);
+                     }
+                  }
 
-		showWithin : function(datasets) {
-			datasets.forEach(function(dataset) {
-				var box = dataset.bbox,
-					coords, xmin, ymin, xmax, ymax;
+               });
 
-				if(!box) {
-					service.removeLayer(dataset);
-				} else {
-					coords = box.split(" ");
-					if(coords.length == 4 && within(+coords[0], +coords[1], +coords[2], +coords[3])) {
-						// show
-						service.createLayer(dataset);
-					} else {
-						// hide
-						service.removeLayer(dataset);
-					}
-				}
+               function within(xmin, ymin, xmax, ymax) {
+                  let bbox = parameters.bbox;
 
-			});
+                  return xmin > bbox.xMin &&
+                     xmax < bbox.xMax &&
+                     ymin > bbox.yMin &&
+                     ymax < bbox.yMax;
+               }
+            },
 
-			function within(xmin, ymin, xmax, ymax) {
-				var bbox = parameters.bbox;
+            toggle: function (dataset) {
+               if (dataset.showLayer) {
+                  this.removeLayer(dataset);
+               } else {
+                  this.createLayer(dataset);
+               }
+            },
 
-				return xmin > bbox.xMin &&
-					   xmax < bbox.xMax &&
-					   ymin > bbox.yMin &&
-					   ymax < bbox.yMax;
-			}
-		},
+            toggleAll: function (datasets) {
+               let self = this,
+                  someNotShowing = datasets.some(dataset => {
+                     return !dataset.showLayer;
+                  });
 
-		toggle : function(dataset) {
-			if(dataset.showLayer) {
-				this.removeLayer(dataset);
-			} else {
-				this.createLayer(dataset);
-			}
-		},
+               datasets.forEach(dataset => {
+                  if (someNotShowing) {
+                     if (!dataset.showLayer) {
+                        self.createLayer(dataset);
+                     }
+                  } else {
+                     if (dataset.showLayer) {
+                        self.removeLayer(dataset);
+                     }
+                  }
+               });
+               return !someNotShowing;
+            },
 
-		toggleAll : function(datasets) {
-			var self = this,
-				someNotShowing = datasets.some(function(dataset) {
-					return !dataset.showLayer;
-				});
+            hideAll: function (datasets) {
+               datasets.forEach(dataset => {
+                  if (dataset.showLayer) {
+                     service.removeLayer(dataset);
+                  }
+               });
+            },
 
-			datasets.forEach(function(dataset) {
-				if(someNotShowing) {
-					if(!dataset.showLayer) {
-						self.createLayer(dataset);
-					}
-				} else {
-					if(dataset.showLayer) {
-						self.removeLayer(dataset);
-					}
-				}
-			});
-			return !someNotShowing;
-		},
+            hilight: function (layer) {
+               layer.setStyle({ color: hilightLayerColor });
+            },
 
-		hideAll : function(datasets) {
-			datasets.forEach(function(dataset) {
-				if(dataset.showLayer) {
-					service.removeLayer(dataset);
-				}
-			});
-		},
+            lolight: function (layer) {
+               layer.setStyle({ color: normalLayerColor });
+            },
 
-		hilight : function(layer) {
-			layer.setStyle({color:hilightLayerColor});
-		},
+            removeLayer: function (dataset) {
+               let key = dataset.primaryId,
+                  layer = layers[key];
 
-		lolight : function(layer) {
-			layer.setStyle({color:normalLayerColor});
-		},
+               if (layer) {
+                  selectLayerGroup.removeLayer(layer);
+                  delete layers[key];
+               }
+               this._decorateDataset(dataset);
+            }
+         };
 
-		removeLayer : function(dataset) {
-			var key = dataset.primaryId,
-				layer = layers[key];
+      execute();
+      return service;
 
-			if(layer) {
-				selectLayerGroup.removeLayer(layer);
-				delete layers[key];
-			}
-			this._decorateDataset(dataset);
-		}
-	};
+      function execute() {
+         $timeout(function () {
+            service._executeQuery();
+         }, 100);
+      }
 
-	execute();
-	return service;
+   }
 
-	function execute() {
-		$timeout(function() {
-			service._executeQuery();
-		}, 100);
-	}
+   function servicesFactory(uris) {
+      let protocols = {
+         WCS: "OGC:WCS",
+         WFS: "OGC:WFS",
+         WMS: "OGC:WMS"
+      };
+
+      return new Services(uris);
+
+      function Services(uris) {
+         this.uris = uris;
+         this.container = {
+            wcs: null,
+            wms: null
+         };
+
+         if (uris) {
+            this.services = uris.map(uri => {
+               let service = new Service(uri);
+
+               this.container.wcs = service.isWcs() ? service : this.container.wcs;
+               this.container.wms = service.isWms() ? service : this.container.wms;
+               return service;
+            });
+         } else {
+            this.services = [];
+         }
+
+         this.hasWcs = function () {
+            return this.container.wcs !== null;
+         };
+
+         this.hasWms = function () {
+            return this.container.wms !== null;
+         };
+
+         this.getWcs = function () {
+            return this.container.wcs;
+         };
+
+         this.getWms = function () {
+            return this.container.wms;
+         };
+
+         this.remove = function () {
+            this.services.forEach(service => {
+               service.remove();
+            });
+         };
+      }
+
+      function Service(doc) {
+         let xmlDoc = $(doc);
+
+         this.protocol = xmlDoc.attr("protocol");
+         this.url = xmlDoc.text();
+         this.layerNames = xmlDoc.attr("layerNames");
+         this.name = xmlDoc.attr("name");
+         this.description = xmlDoc.attr("description");
+         this.handlers = [];
+
+
+         this.isWcs = function () {
+            // console.log("Checking results:" + (this.protocol == protocols.WCS));
+            return this.protocol === protocols.WCS;
+         };
+
+         this.isWfs = function () {
+            return this.protocol === protocols.WFS;
+         };
+
+         this.isWms = function () {
+            return this.protocol === protocols.WMS;
+         };
+
+         this.isSupported = function () {
+            return typeof protocols[this.protocol] === "undefined";
+         };
+
+         this.addHandler = function (callback) {
+            this.handlers.push(callback);
+         };
+
+         this.removeHandler = function (callback) {
+            this.handlers.push(callback);
+         };
+
+         this.remove = function () {
+            this.handlers.forEach(callback => {
+               // They should all have a remove but you never know.
+               if (callback.remove) {
+                  callback.remove(this);
+               }
+            });
+            this.handlers = [];
+         };
+
+         this.getUrl = function () {
+            if (url) {
+               if (url.indexOf("?") < 0) {
+                  return;
+               } else {
+                  return url.substr(0, url.indexOf("?"));
+               }
+            }
+            return null;
+         }
+      };
+   }
 
 }
-
-function servicesFactory(uris) {
-	var protocols = {
-			WCS :"OGC:WCS",
-			WFS :"OGC:WFS",
-			WMS :"OGC:WMS"
-	};
-
-	return new Services(uris);
-
-	function Services(uris) {
-		this.uris = uris;
-		this.container = {
-			wcs: null,
-			wms: null
-		};
-
-		if(uris) {
-			this.services = uris.map(function(uri) {
-				var service = new Service(uri);
-
-				this.container.wcs = service.isWcs()?service:this.container.wcs;
-				this.container.wms = service.isWms()?service:this.container.wms;
-				return service;
-			}.bind(this));
-		} else {
-			this.services = [];
-		}
-
-		this.hasWcs = function() {
-			return this.container.wcs !== null;
-		};
-
-		this.hasWms = function() {
-			return this.container.wms !== null;
-		};
-
-		this.getWcs = function() {
-			return this.container.wcs;
-		};
-
-		this.getWms = function() {
-			return this.container.wms;
-		};
-
-		this.remove = function() {
-			this.services.forEach(function(service) {
-				service.remove();
-			});
-		};
-	}
-
-	function Service(doc) {
-		var xmlDoc = $(doc);
-
-		this.protocol = xmlDoc.attr("protocol");
-		this.url = xmlDoc.text();
-		this.layerNames = xmlDoc.attr("layerNames");
-		this.name = xmlDoc.attr("name");
-		this.description = xmlDoc.attr("description");
-		this.handlers = [];
-
-
-		this.isWcs = function() {
-			// console.log("Checking results:" + (this.protocol == protocols.WCS));
-			return this.protocol == protocols.WCS;
-		};
-
-		this.isWfs = function() {
-			return this.protocol == protocols.WFS;
-		};
-
-		this.isWms = function() {
-			return this.protocol == protocols.WMS;
-		};
-
-		this.isSupported = function() {
-			return typeof protocols[this.protocol] == "undefined";
-		};
-
-		this.addHandler = function(callback) {
-			this.handlers.push(callback);
-		};
-
-		this.removeHandler = function(callback) {
-			this.handlers.push(callback);
-		};
-
-		this.remove = function() {
-			this.handlers.forEach(function(callback) {
-				// They should all have a remove but you never know.
-				if(this.callback.remove) {
-					callback.remove(this);
-				}
-			}.bind(this));
-			this.handlers = [];
-		};
-	}
-
-	Service.prototype = {
-		getUrl : function() {
-			if(url) {
-				if(url.indexOf("?") < 0) {
-					return;
-				} else {
-					return url.substr(0, url.indexOf("?"));
-				}
-			}
-			return null;
-		}
-	};
-}
-
-})(angular);

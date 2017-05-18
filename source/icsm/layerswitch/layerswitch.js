@@ -1,10 +1,4 @@
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
-(function (angular, L) {
-
-   'use strict';
+{
 
    angular.module("icsm.layerswitch", [])
 
@@ -60,10 +54,10 @@
                         function setLayers(settings) {
                            map.eachLayer(function (layer) {
                               if (layer.options && layer.options.switch) {
-                                 if (layer.options.switch == config.inside) {
+                                 if (layer.options.switch === config.inside) {
                                     layer._container.style.display = settings.inside ? "block" : "none";
                                  }
-                                 if (layer.options.switch == config.outside) {
+                                 if (layer.options.switch === config.outside) {
                                     layer._container.style.display = settings.outside ? "block" : "none";
                                  }
                               }
@@ -93,4 +87,4 @@
       return inside;
    }
 
-})(angular, L);
+}

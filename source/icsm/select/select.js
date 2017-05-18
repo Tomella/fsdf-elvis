@@ -1,10 +1,4 @@
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
-(function(angular) {
-
-'use strict';
+{
 
 angular.module("icsm.select", ['icsm.select.service'])
 
@@ -157,5 +151,5 @@ function SelectCtrl($rootScope, configService, flashService, selectService) {
 	};
 }
 
-})(angular);
+}
 

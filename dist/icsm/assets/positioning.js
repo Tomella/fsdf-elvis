@@ -208,21 +208,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 }
 "use strict";
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-{
-   var FileController = function FileController() {
-      _classCallCheck(this, FileController);
-   };
-
-   angular.module("positioning.file", ["positioning.format", "positioning.csv", "positioning.shp", "positioning.dialog"]).directive("file", function () {
-      return {
-         templateUrl: "positioning/file/file.html"
-      };
-   }).controller("fileController", FileController);
-}
-"use strict";
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -271,6 +256,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          }
       };
    }]).service("emailService", EmailService);
+}
+"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+{
+   var FileController = function FileController() {
+      _classCallCheck(this, FileController);
+   };
+
+   angular.module("positioning.file", ["positioning.format", "positioning.csv", "positioning.shp", "positioning.dialog"]).directive("file", function () {
+      return {
+         templateUrl: "positioning/file/file.html"
+      };
+   }).controller("fileController", FileController);
 }
 "use strict";
 
@@ -571,15 +571,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 }
 "use strict";
 
-{
-   angular.module("positioning.mandatory", []).directive("mandatory", function () {
-      return {
-         template: '<span class="mandatory" title="You must provide a value">*</span>'
-      };
-   });
-}
-"use strict";
-
 function CSVToArray(strData, strDelimiter) {
    // Check to see if the delimiter is defined. If not,
    // then default to comma.
@@ -609,7 +600,8 @@ function CSVToArray(strData, strDelimiter) {
    while (arrMatches = objPattern.exec(strData)) {
 
       // Get the delimiter that was found.
-      var strMatchedDelimiter = arrMatches[1];
+      var strMatchedValue,
+          strMatchedDelimiter = arrMatches[1];
 
       // Check to see if the given delimiter has a length
       // (is not the start of string) and if it matches
@@ -626,14 +618,12 @@ function CSVToArray(strData, strDelimiter) {
       // let's check to see which kind of value we
       // captured (quoted or unquoted).
       if (arrMatches[2]) {
-
          // We found a quoted value. When we capture
          // this value, unescape any double quotes.
-         var strMatchedValue = arrMatches[2].replace(new RegExp("\"\"", "g"), "\"");
+         strMatchedValue = arrMatches[2].replace(new RegExp("\"\"", "g"), "\"");
       } else {
-
          // We found a non-quoted value.
-         var strMatchedValue = arrMatches[3];
+         strMatchedValue = arrMatches[3];
       }
 
       // Now that we have our value string, let's add
@@ -919,6 +909,15 @@ var State = function () {
 
    return State;
 }();
+"use strict";
+
+{
+   angular.module("positioning.mandatory", []).directive("mandatory", function () {
+      return {
+         template: '<span class="mandatory" title="You must provide a value">*</span>'
+      };
+   });
+}
 angular.module("positioning.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("positioning/csv/csv.html","<div>\r\n  <h4>A few questions about your CSV file</h4>\r\n  <div>\r\n      <div class=\"row\">\r\n			<div class=\"col-md-3 csv-label\">\r\n				Lat/lng fields are in<mandatory />\r\n			</div>\r\n			<div class=\"col-md-9\" style=\"text-align: right\">\r\n				<label for=\"csvDegrees\">\r\n               Decimal degrees (2 cols)\r\n				</label>\r\n            <input name=\"csvDegrees\" type=\"radio\" value=\"deg\" ng-model=\"state.dmsType\" />\r\n            or\r\n				<label for=\"csvDms\">\r\n               Degrees/minutes/seconds (6 cols)\r\n				</label>\r\n            <input name=\"csvDms\" type=\"radio\" value=\"dms\" ng-model=\"state.dmsType\" />\r\n			</div>\r\n      </div>\r\n\r\n      <div class=\"row\" ng-if=\"state.dmsType == \'deg\'\">\r\n			<div class=\"col-md-3 csv-label\">\r\n				Columns\r\n			</div>\r\n			<div class=\"col-md-9\">\r\n            <div style=\"text-align: right\">\r\n				   <label for=\"csvSelectLatDecDegrees\" style=\"width:9em\">\r\n                  Latitude<mandatory />\r\n				   </label>\r\n               <select id=\"csvSelectLatDecDegrees\" ng-model=\"state.latDegreesCol\"\r\n                     ng-options=\"o as o for o in columns\"></select>\r\n            </div>\r\n				<div style=\"text-align: right\">\r\n				   <label for=\"csvSelectLngDecDegrees\" style=\"width:9em\">\r\n                  Longitude<mandatory />\r\n				   </label>\r\n               <select id=\"csvSelectLngDecDegrees\" ng-model=\"state.lngDegreesCol\"\r\n                     ng-options=\"o as o for o in columns\"></select>\r\n				</div>\r\n			</div>\r\n      </div>\r\n\r\n      <div class=\"row\" ng-if=\"state.dmsType == \'dms\'\">\r\n			<div class=\"col-md-3 csv-label\">\r\n				Columns\r\n			</div>\r\n			<div class=\"col-md-9 csv-fix-label\">\r\n            <div style=\"text-align: right\">\r\n				   <label for=\"csvSelectLatDegrees\">\r\n                  Latitude Degrees<mandatory />\r\n				   </label>\r\n               <select id=\"csvSelectLatDegrees\" ng-model=\"state.latDegreesCol\"\r\n                     ng-options=\"o as o for o in columns\"></select>\r\n            </div>\r\n            <div style=\"text-align: right\">\r\n				   <label for=\"csvSelectLatMinutes\">\r\n                  Minutes<mandatory />\r\n				   </label>\r\n               <select id=\"csvSelectLatMinutes\" ng-model=\"state.latMinutesCol\"\r\n                     ng-options=\"o as o for o in columns\"></select>\r\n            </div>\r\n            <div style=\"text-align: right\">\r\n				   <label for=\"csvSelectLatSeconds\">\r\n                  Seconds<mandatory />\r\n				   </label>\r\n               <select id=\"csvSelectLatSeconds\" ng-model=\"state.latSecondsCol\"\r\n                     ng-options=\"o as o for o in columns\"></select>\r\n            </div>\r\n            <div style=\"text-align: right\">\r\n   			   <label for=\"csvSelectLngDegrees\">\r\n                  Longitude Degrees<mandatory />\r\n				   </label>\r\n               <select id=\"csvSelectLngDegrees\" ng-model=\"state.lngDegreesCol\"\r\n                     ng-options=\"o as o for o in columns\"></select>\r\n            </div>\r\n				<div style=\"text-align: right\">\r\n               <label for=\"csvSelectLngMinutes\">\r\n                  Minutes<mandatory />\r\n				   </label>\r\n               <select id=\"csvSelectLngMinutes\" ng-model=\"state.lngMinutesCol\"\r\n                     ng-options=\"o as o for o in columns\"></select>\r\n            </div>\r\n            <div style=\"text-align: right\">\r\n				   <label for=\"csvSelectLngSeconds\">\r\n                  Seconds<mandatory />\r\n				   </label>\r\n               <select id=\"csvSelectLngSeconds\" ng-model=\"state.lngSecondsCol\"\r\n                     ng-options=\"o as o for o in columns\">\r\n               </select>\r\n            </div>\r\n			</div>\r\n      </div>\r\n\r\n      <div class=\"row\">\r\n			<div class=\"col-md-6\">\r\n   			<label for=\"csvElevation\">\r\n				   Elevation column (in metres and optional)\r\n   			</label>\r\n			</div>\r\n			<div class=\"col-md-6\" style=\"text-align: right\">\r\n            <select id=\"csvElevation\" ng-model=\"state.elevationCol\" ng-options=\"o as o for o in columns\">\r\n               <option ng-selected=\"true\" value=\"\"></option>\r\n            </select>\r\n			</div>\r\n      </div>\r\n  </div>\r\n</div>");
 $templateCache.put("positioning/dialog/dialog.html","<div class=\"upload-dialog\">\r\n   <div class=\"ud-info\" ng-if=\"!state.file\">\r\n      <div style=\"font-weight: bold\">\r\n         <i class=\"fa fa-hand-o-left point-at-box fa-2x\" aria-hidden=\"true\" style=\"padding-right:12px;\"></i>\r\n         Select and drop file(s) for reprojection\r\n      </div>\r\n      <br/>\r\n      <div>\r\n         <span style=\"font-weight: bold\">CSV -</span>\r\n         Drop a single CSV file with a \".csv\" extension and we will scan for columns and ask follow up questions.\r\n      </div>\r\n      </br/>\r\n      <div>\r\n         <span style=\"font-weight: bold\">Shapefile -</span>\r\n         Drop  four files with the same file prefix to transform a shapefile\r\n         <ul>\r\n            <li>\".shp\" — shape format; the feature geometry itself.</li>\r\n            <li>\".shx\" — shape index format; a positional index of the feature geometry to allow seeking forwards and backwards quickly.</li>\r\n            <li>\".dbf\" — attribute format; columnar attributes for each shape, in dBase IV format.</li>\r\n            <li>\".prj\" — projection; describes the coordinate system and projection information used.</li>\r\n         </ul>\r\n      </div>\r\n   </div>\r\n\r\n   <div ng-if=\"state.file && state.extension == \'csv\'\">\r\n      <h3>Selected {{state.file.name}} ({{state.file.size | bytes}})</h3>\r\n   </div>\r\n   <div style=\"text-align:right\" ng-if=\"state.file.size > settings.maxFileSize\">\r\n      The size of the file to be uploaded must not exceed {{settings.maxFileSize | bytes}}. Please select a smaller file.\r\n      <button type=\"button\" class=\"btn btn-primary\" ng-click=\"cancel()\">OK</button>\r\n   </div>\r\n   <hr />\r\n   <div ng-show=\"state.file\">\r\n      <div ng-if=\"state.extension == \'csv\' && state.file.size < settings.maxFileSize\">\r\n         <csv-file state=\"state\" settings=\"settings\" />\r\n      </div>\r\n      <div ng-if=\"state.extension == \'shp\'\">\r\n         <shp-file state=\"state\" settings=\"settings\" />\r\n      </div>\r\n      <accept-epsg4283 state=\"state\"></accept-epsg4283>\r\n   </div>\r\n   <div ng-show=\"state.file\">\r\n      <div>\r\n         <h4>Nominate your notification email address<mandatory /></h4>\r\n         <email state=\"state\" ng-if=\"state\" />\r\n      </div>\r\n\r\n      <div style=\"padding-top: 10px\">\r\n         <progress-bar-csv state=\"state\" ng-show=\"state.extension == \'csv\'\"/>\r\n         <progress-bar-shapefile state=\"state\" ng-show=\"state.extension == \'shp\'\" />\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("positioning/dialog/isepsg4283.html","<div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-6\">\r\n         <label for=\"isEpsg4283\">\r\n					The data provided is in the <a target=\"_blank\" href=\"http://spatialreference.org/ref/epsg/4283/\">EPSG:4283</a> projection <mandatory />\r\n			</label>\r\n      </div>\r\n      <div class=\"col-md-6\" style=\"text-align:right\">\r\n         <button id=\"isEpsg4283\" type=\"button\" title=\"The data must be in the EPSG:4283 projection to be transformed correctly.\"\r\n               class=\"btn btn-default btn-xs\" ng-click=\"state.isEpsg4283 = !state.isEpsg4283\">\r\n            <i class=\"fa\" style=\"width:12px;height:12px;color:green\" ng-class=\"{\'fa-check\':state.isEpsg4283}\" aria-hidden=\"true\"></i>\r\n         </button>\r\n      </div>\r\n   </div>\r\n</div>");

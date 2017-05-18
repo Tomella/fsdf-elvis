@@ -95,7 +95,7 @@ function prepareScripts(name) {
             compact: false,
             comments: true,
             presets: ['es2015'],
-            plugins: ["syntax-async-generators"]
+            plugins: ["syntax-async-generators", "transform-regenerator"]
       }))
 	   .pipe(addStream.obj(prepareNamedTemplates(name)))
       .pipe(concat(name + '.js'))
@@ -105,7 +105,7 @@ function prepareScripts(name) {
 
 
 //Concatenate & Minify JS
-gulp.task('squash', ['squashCommon','squashIcsm', 'squashWater', 'squashStart', 'squashImagery', 'squashPositioning']);
+gulp.task('squash', []); // ['squashCommon','squashIcsm', 'squashWater', 'squashStart', 'squashImagery', 'squashPositioning']);
 
 gulp.task('squashCommon', function() {
 	return gulp.src(directories.assets + '/common.js')
@@ -168,9 +168,9 @@ gulp.task('watch', function() {
     gulp.watch(directories.source + '/positioning/**/*(*.js|*.html)', ['positioningScripts']);
     gulp.watch(directories.source + '/lt/**/*(*.js|*.html)', ['ltScripts']);
     gulp.watch(directories.source + '/**/*.css', ['concatCss']);
-    gulp.watch(directories.assets + '/common.js', ['squashCommon']);
+    // gulp.watch(directories.assets + '/common.js', ['squashCommon']);
     gulp.watch(directories.assets + '/icsm.js', ['squashIcsm']);
-    gulp.watch(directories.assets + '/water.js', ['squashWater']);
+    // gulp.watch(directories.assets + '/water.js', ['squashWater']);
     gulp.watch(directories.assets + '/start.js', ['squashStart']);
     gulp.watch(directories.assets + '/imagery.js', ['squashImagery']);
     gulp.watch(directories.assets + '/lt.js', ['squashLt']);

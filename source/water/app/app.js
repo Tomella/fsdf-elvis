@@ -1,8 +1,7 @@
-(function (angular) {
-
-	'use strict';
+{
 
 	angular.module("WaterApp", [
+		'common.accordion',
 		'common.altthemes',
 		'common.baselayer.control',
 		'common.basin',
@@ -173,5 +172,4 @@
 		});
 	}
 
-
-})(angular);
+}

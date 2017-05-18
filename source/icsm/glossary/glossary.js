@@ -1,42 +1,35 @@
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
+{
 
-(function(angular) {
+   angular.module("icsm.glossary", [])
 
-'use strict';
+      .directive("icsmGlossary", [function () {
+         return {
+            templateUrl: "icsm/glossary/glossary.html"
+         };
+      }])
 
-angular.module("icsm.glossary", [])
+      .controller("GlossaryCtrl", GlossaryCtrl)
+      .factory("glossaryService", GlossaryService);
 
-.directive("icsmGlossary", [function() {
-	return {
-		templateUrl : "icsm/glossary/glossary.html"
-	};
-}])
+   GlossaryCtrl.$inject = ['$log', 'glossaryService'];
+   function GlossaryCtrl($log, glossaryService) {
+      $log.info("GlossaryCtrl");
+      glossaryService.getTerms().then(terms => {
+         this.terms = terms;
+      });
+   }
 
-.controller("GlossaryCtrl", GlossaryCtrl)
-.factory("glossaryService", GlossaryService);
+   GlossaryService.$inject = ['$http'];
+   function GlossaryService($http) {
+      var TERMS_SERVICE = "icsm/resources/config/glossary.json";
 
-GlossaryCtrl.$inject = ['$log', 'glossaryService'];
-function GlossaryCtrl($log, glossaryService) {
-	var self = this;
-	$log.info("GlossaryCtrl");
-	glossaryService.getTerms().then(function(terms) {
-		self.terms = terms;
-	});
+      return {
+         getTerms: function () {
+            return $http.get(TERMS_SERVICE, { cache: true }).then(function (response) {
+               return response.data;
+            });
+         }
+      };
+   }
+
 }
-
-GlossaryService.$inject = ['$http'];
-function GlossaryService($http) {
-	var TERMS_SERVICE = "icsm/resources/config/glossary.json";
-
-	return {
-		getTerms : function() {
-			return $http.get(TERMS_SERVICE, {cache : true}).then(function(response) {
-				return response.data;
-			});
-		}
-	};
-}
-
-})(angular);

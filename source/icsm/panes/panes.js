@@ -1,10 +1,4 @@
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
-(function(angular) {
-'use strict';
-
+{
 angular.module("icsm.panes", [])
 
 .directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function($rootScope, $timeout, mapService) {
@@ -81,4 +75,4 @@ function PaneService() {
 	};
 }
 
-})(angular);
+}

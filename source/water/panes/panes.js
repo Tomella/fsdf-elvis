@@ -1,84 +1,77 @@
-/*!
- * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
+{
+   angular.module("water.panes", [])
 
-(function(angular) {
-'use strict';
+      .directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
+         return {
+            templateUrl: "water/panes/panes.html",
+            transclude: true,
+            scope: {
+               defaultItem: "@",
+               data: "="
+            },
+            controller: ['$scope', function ($scope) {
+               var changeSize = false;
 
-angular.module("water.panes", [])
+               $scope.view = $scope.defaultItem;
 
-.directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function($rootScope, $timeout, mapService) {
-	return {
-		templateUrl : "water/panes/panes.html",
-		transclude : true,
-		scope : {
-			defaultItem : "@",
-			data : "="
-		},
-		controller : ['$scope', function($scope) {
-			var changeSize = false;
+               $scope.setView = function (what) {
+                  var oldView = $scope.view;
 
-			$scope.view = $scope.defaultItem;
+                  if ($scope.view === what) {
+                     if (what) {
+                        changeSize = true;
+                     }
+                     $scope.view = "";
+                  } else {
+                     if (!what) {
+                        changeSize = true;
+                     }
+                     $scope.view = what;
+                  }
 
-			$scope.setView = function(what) {
-				var oldView = $scope.view;
+                  $rootScope.$broadcast("view.changed", $scope.view, oldView);
 
-				if($scope.view == what) {
-					if(what) {
-						changeSize = true;
-					}
-					$scope.view = "";
-				} else {
-					if(!what) {
-						changeSize = true;
-					}
-					$scope.view = what;
-				}
+                  if (changeSize) {
+                     mapService.getMap().then(function (map) {
+                        map._onResize();
+                     });
+                  }
+               };
+               $timeout(function () {
+                  $rootScope.$broadcast("view.changed", $scope.view, null);
+               }, 50);
+            }]
+         };
+      }])
 
-				$rootScope.$broadcast("view.changed", $scope.view, oldView);
+      .directive("icsmTabs", [function () {
+         return {
+            templateUrl: "water/panes/tabs.html",
+            require: "^icsmPanes"
+         };
+      }])
 
-				if(changeSize) {
-					mapService.getMap().then(function(map) {
-						map._onResize();
-					});
-				}
-			};
-			$timeout(function() {
-				$rootScope.$broadcast("view.changed", $scope.view, null);
-			},50);
-		}]
-	};
-}])
+      .controller("PaneCtrl", PaneCtrl)
+      .factory("paneService", PaneService);
 
-.directive("icsmTabs", [function() {
-	return {
-		templateUrl : "water/panes/tabs.html",
-		require : "^icsmPanes"
-	};
-}])
+   PaneCtrl.$inject = ["paneService"];
+   function PaneCtrl(paneService) {
+      paneService.data().then(function (data) {
+         this.data = data;
+      }.bind(this));
+   }
 
-.controller("PaneCtrl", PaneCtrl)
-.factory("paneService", PaneService);
+   PaneService.$inject = [];
+   function PaneService() {
+      var data = {
+      };
 
-PaneCtrl.$inject = ["paneService"];
-function PaneCtrl(paneService) {
-	paneService.data().then(function(data) {
-		this.data = data;
-	}.bind(this));
+      return {
+         add: function (item) {
+         },
+
+         remove: function (item) {
+         }
+      };
+   }
 }
-
-PaneService.$inject = [];
-function PaneService() {
-	var data = {
-	};
-
-	return {
-		add : function(item) {
-		},
-
-		remove : function(item) {
-		}
-	};
-}
-
-})(angular);
