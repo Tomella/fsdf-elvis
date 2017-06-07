@@ -1,0 +1,15 @@
+<div>
+   <div class="row">
+      <div class="col-md-6">
+         <label for="csvElevation">
+				   Choose a transformation <mandatory />
+   			</label>
+      </div>
+      <div class="col-md-6" style="text-align: right">
+         <select id="transformation" ng-model="state.transformation">
+               <option ng-selected="true" value=""></option>
+               <option ng-repeat="option in transformations" value="{{option.key}}">{{option.value}}</option>
+            </select>
+      </div>
+   </div>
+</div>

@@ -69,10 +69,11 @@ class State {
       }
 
       let count = 0;
-      let parts = 2;
+      let parts = 3;
 
       count += this.validEmail ? 1 : 0
       count += this.acceptedEpsg4283 ? 1 : 0
+      count += this.transformation ? 1 : 0
 
       if (this.isCsv) {
          parts += 2;

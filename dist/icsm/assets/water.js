@@ -17,77 +17,102 @@ specific language governing permissions and limitations
 under the License.
 */
 
-"use strict";
+'use strict';
 
 {
-   var PaneCtrl = function PaneCtrl(paneService) {
-      paneService.data().then(function (data) {
-         this.data = data;
-      }.bind(this));
-   };
+	var RootCtrl = function RootCtrl($http, configService, mapService) {
+		var self = this;
+		mapService.getMap().then(function (map) {
+			self.map = map;
+		});
+		configService.getConfig().then(function (data) {
+			self.data = data;
+			// If its got WebGL its got everything we need.
+			try {
+				var canvas = document.createElement('canvas');
+				data.modern = !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+			} catch (e) {
+				data.modern = false;
+			}
+		});
+	};
 
-   var PaneService = function PaneService() {
-      var data = {};
+	angular.module("WaterApp", ['common.accordion', 'common.altthemes', 'common.baselayer.control', 'common.basin', 'common.bbox', 'common.catchment', 'common.cc', 'common.clip', 'common.download', 'common.extent', 'common.header', 'common.iso19115', 'common.metaview', 'common.navigation', 'common.recursionhelper', 'common.storage', 'common.templates', 'common.tile', 'common.wms', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.projects', 'explorer.tabs', 'explorer.version',
 
-      return {
-         add: function add(item) {},
+	// Wire in external search providers
+	'exp.search.geosearch', 'exp.search.searches', 'exp.search.lastsearch', 'exp.search.templates', 'exp.search.map.service', 'exp.ui.templates', 'explorer.map.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer', 'geo.draw',
+	// 'geo.elevation',
+	//'icsm.elevation',
+	//'geo.extent',
+	//'geo.geosearch',
+	'geo.map', 'geo.maphelper', 'geo.measure', 'water.panes', "water.regions", 'water.templates', 'water.toolbar', 'water.select', 'water.vector', 'water.vector.download', 'water.vector.geoprocess'])
 
-         remove: function remove(item) {}
-      };
-   };
+	// Set up all the service providers here.
+	.config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', 'lastSearchServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider, lastSearchServiceProvider) {
+		lastSearchServiceProvider.noListen();
+		configServiceProvider.location("icsm/resources/config/water.json");
+		configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
+		versionServiceProvider.url("icsm/assets/package.json");
+		projectsServiceProvider.setProject("icsm");
+	}]).config(['$routeProvider', function ($routeProvider) {
+		$routeProvider.when('/administrativeBoundaries', {
+			templateUrl: "admin/app/app.html",
+			controller: "adminCtrl",
+			controllerAs: "admin"
+		}).when('/positioning', {
+			templateUrl: "positioning/app/app.html",
+			controller: "positioningCtrl",
+			controllerAs: "positioning"
+		}).when('/placeNames', {
+			templateUrl: "placenames/app/app.html",
+			controller: "placeNamesCtrl",
+			controllerAs: "placeNames"
+		}).when('/landParcelAndProperty', {
+			templateUrl: "landParcelAndProperty/app/app.html",
+			controller: "landParcelAndPropertyCtrl",
+			controllerAs: "landParcelAndProperty"
+		}).when('/imagery', {
+			templateUrl: "imagery/app/app.html",
+			controller: "imageryCtrl",
+			controllerAs: "imagery"
+		}).when('/transport', {
+			templateUrl: "transport/app/app.html",
+			controller: "transportCtrl",
+			controllerAs: "transport"
+		}).when('/water', {
+			templateUrl: "water/app/app.html",
+			controller: "waterCtrl",
+			controllerAs: "water"
+		}).when('/elevationAndDepth', {
+			templateUrl: "elevationAndDepth/app/app.html",
+			controller: "elevationAndDepthCtrl",
+			controllerAs: "elevationAndDepth"
+		}).when('/landCover', {
+			templateUrl: "landCover/app/app.html",
+			controller: "landCoverCtrl",
+			controllerAs: "landCover"
+		}).when('/icsm', {
+			templateUrl: "icsm/app/app.html",
+			controller: "icsmCtrl",
+			controllerAs: "icsm"
+		}).otherwise({
+			redirectTo: "/icsm"
+		});
+	}]).factory("userService", [function () {
+		return {
+			login: noop,
+			hasAcceptedTerms: noop,
+			setAcceptedTerms: noop,
+			getUsername: function getUsername() {
+				return "anon";
+			}
+		};
+		function noop() {
+			return true;
+		}
+	}]).controller("RootCtrl", RootCtrl);
 
-   angular.module("water.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
-      return {
-         templateUrl: "water/panes/panes.html",
-         transclude: true,
-         scope: {
-            defaultItem: "@",
-            data: "="
-         },
-         controller: ['$scope', function ($scope) {
-            var changeSize = false;
-
-            $scope.view = $scope.defaultItem;
-
-            $scope.setView = function (what) {
-               var oldView = $scope.view;
-
-               if ($scope.view === what) {
-                  if (what) {
-                     changeSize = true;
-                  }
-                  $scope.view = "";
-               } else {
-                  if (!what) {
-                     changeSize = true;
-                  }
-                  $scope.view = what;
-               }
-
-               $rootScope.$broadcast("view.changed", $scope.view, oldView);
-
-               if (changeSize) {
-                  mapService.getMap().then(function (map) {
-                     map._onResize();
-                  });
-               }
-            };
-            $timeout(function () {
-               $rootScope.$broadcast("view.changed", $scope.view, null);
-            }, 50);
-         }]
-      };
-   }]).directive("icsmTabs", [function () {
-      return {
-         templateUrl: "water/panes/tabs.html",
-         require: "^icsmPanes"
-      };
-   }]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
-
-   PaneCtrl.$inject = ["paneService"];
-
-
-   PaneService.$inject = [];
+	RootCtrl.$invoke = ['$http', 'configService', 'mapService'];
 }
 "use strict";
 
@@ -232,103 +257,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          }
       };
    }]).service("waterRegionsService", WaterRegionsService);
-}
-'use strict';
-
-{
-	var RootCtrl = function RootCtrl($http, configService, mapService) {
-		var self = this;
-		mapService.getMap().then(function (map) {
-			self.map = map;
-		});
-		configService.getConfig().then(function (data) {
-			self.data = data;
-			// If its got WebGL its got everything we need.
-			try {
-				var canvas = document.createElement('canvas');
-				data.modern = !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
-			} catch (e) {
-				data.modern = false;
-			}
-		});
-	};
-
-	angular.module("WaterApp", ['common.accordion', 'common.altthemes', 'common.baselayer.control', 'common.basin', 'common.bbox', 'common.catchment', 'common.cc', 'common.clip', 'common.download', 'common.extent', 'common.header', 'common.iso19115', 'common.metaview', 'common.navigation', 'common.recursionhelper', 'common.storage', 'common.templates', 'common.tile', 'common.wms', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.projects', 'explorer.tabs', 'explorer.version',
-
-	// Wire in external search providers
-	'exp.search.geosearch', 'exp.search.searches', 'exp.search.lastsearch', 'exp.search.templates', 'exp.search.map.service', 'exp.ui.templates', 'explorer.map.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer', 'geo.draw',
-	// 'geo.elevation',
-	//'icsm.elevation',
-	//'geo.extent',
-	//'geo.geosearch',
-	'geo.map', 'geo.maphelper', 'geo.measure', 'water.panes', "water.regions", 'water.templates', 'water.toolbar', 'water.select', 'water.vector', 'water.vector.download', 'water.vector.geoprocess'])
-
-	// Set up all the service providers here.
-	.config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', 'lastSearchServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider, lastSearchServiceProvider) {
-		lastSearchServiceProvider.noListen();
-		configServiceProvider.location("icsm/resources/config/water.json");
-		configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
-		versionServiceProvider.url("icsm/assets/package.json");
-		projectsServiceProvider.setProject("icsm");
-	}]).config(['$routeProvider', function ($routeProvider) {
-		$routeProvider.when('/administrativeBoundaries', {
-			templateUrl: "admin/app/app.html",
-			controller: "adminCtrl",
-			controllerAs: "admin"
-		}).when('/positioning', {
-			templateUrl: "positioning/app/app.html",
-			controller: "positioningCtrl",
-			controllerAs: "positioning"
-		}).when('/placeNames', {
-			templateUrl: "placenames/app/app.html",
-			controller: "placeNamesCtrl",
-			controllerAs: "placeNames"
-		}).when('/landParcelAndProperty', {
-			templateUrl: "landParcelAndProperty/app/app.html",
-			controller: "landParcelAndPropertyCtrl",
-			controllerAs: "landParcelAndProperty"
-		}).when('/imagery', {
-			templateUrl: "imagery/app/app.html",
-			controller: "imageryCtrl",
-			controllerAs: "imagery"
-		}).when('/transport', {
-			templateUrl: "transport/app/app.html",
-			controller: "transportCtrl",
-			controllerAs: "transport"
-		}).when('/water', {
-			templateUrl: "water/app/app.html",
-			controller: "waterCtrl",
-			controllerAs: "water"
-		}).when('/elevationAndDepth', {
-			templateUrl: "elevationAndDepth/app/app.html",
-			controller: "elevationAndDepthCtrl",
-			controllerAs: "elevationAndDepth"
-		}).when('/landCover', {
-			templateUrl: "landCover/app/app.html",
-			controller: "landCoverCtrl",
-			controllerAs: "landCover"
-		}).when('/icsm', {
-			templateUrl: "icsm/app/app.html",
-			controller: "icsmCtrl",
-			controllerAs: "icsm"
-		}).otherwise({
-			redirectTo: "/icsm"
-		});
-	}]).factory("userService", [function () {
-		return {
-			login: noop,
-			hasAcceptedTerms: noop,
-			setAcceptedTerms: noop,
-			getUsername: function getUsername() {
-				return "anon";
-			}
-		};
-		function noop() {
-			return true;
-		}
-	}]).controller("RootCtrl", RootCtrl);
-
-	RootCtrl.$invoke = ['$http', 'configService', 'mapService'];
 }
 "use strict";
 
@@ -901,6 +829,78 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 
 	SelectCtrl.$inject = ['$rootScope', 'configService', 'flashService', 'selectService'];
+}
+"use strict";
+
+{
+   var PaneCtrl = function PaneCtrl(paneService) {
+      paneService.data().then(function (data) {
+         this.data = data;
+      }.bind(this));
+   };
+
+   var PaneService = function PaneService() {
+      var data = {};
+
+      return {
+         add: function add(item) {},
+
+         remove: function remove(item) {}
+      };
+   };
+
+   angular.module("water.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
+      return {
+         templateUrl: "water/panes/panes.html",
+         transclude: true,
+         scope: {
+            defaultItem: "@",
+            data: "="
+         },
+         controller: ['$scope', function ($scope) {
+            var changeSize = false;
+
+            $scope.view = $scope.defaultItem;
+
+            $scope.setView = function (what) {
+               var oldView = $scope.view;
+
+               if ($scope.view === what) {
+                  if (what) {
+                     changeSize = true;
+                  }
+                  $scope.view = "";
+               } else {
+                  if (!what) {
+                     changeSize = true;
+                  }
+                  $scope.view = what;
+               }
+
+               $rootScope.$broadcast("view.changed", $scope.view, oldView);
+
+               if (changeSize) {
+                  mapService.getMap().then(function (map) {
+                     map._onResize();
+                  });
+               }
+            };
+            $timeout(function () {
+               $rootScope.$broadcast("view.changed", $scope.view, null);
+            }, 50);
+         }]
+      };
+   }]).directive("icsmTabs", [function () {
+      return {
+         templateUrl: "water/panes/tabs.html",
+         require: "^icsmPanes"
+      };
+   }]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
+
+   PaneCtrl.$inject = ["paneService"];
+
+
+   PaneService.$inject = [];
 }
 "use strict";
 
@@ -1619,13 +1619,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 	VectorDownloadService.$inject = ['$http', '$q', '$rootScope', 'mapService', 'storageService'];
 }
-angular.module("water.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("water/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" icsm-toolbar-row map=\"root.map\" ></div>\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n         <water-regions></water-regions>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div icsm-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'datasets\'\" water-select></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" water-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" water-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
-$templateCache.put("water/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'datasets\'}\" ng-click=\"setView(\'datasets\')\">\r\n		<button class=\"undecorated\">Datasets</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");
-$templateCache.put("water/select/division.html","<div class=\"row\" ng-repeat=\"division in divisions\">\r\n   <div class=\"col-md-12\" ng-mouseenter=\"hilight(division)\" ng-mouseleave=\"lolight(division)\">\r\n      <label>\r\n         <input type=\"radio\" ng-model=\"state.division\" name=\"divisionsRadio\" value=\"{{division.name}}\">\r\n         {{division.name}}\r\n      </label>\r\n   </div>\r\n</div>");
+angular.module("water.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("water/select/division.html","<div class=\"row\" ng-repeat=\"division in divisions\">\r\n   <div class=\"col-md-12\" ng-mouseenter=\"hilight(division)\" ng-mouseleave=\"lolight(division)\">\r\n      <label>\r\n         <input type=\"radio\" ng-model=\"state.division\" name=\"divisionsRadio\" value=\"{{division.name}}\">\r\n         {{division.name}}\r\n      </label>\r\n   </div>\r\n</div>");
 $templateCache.put("water/select/doc.html","<div ng-class-odd=\"\'odd\'\" ng-class-even=\"\'even\'\" ng-mouseleave=\"select.lolight(doc)\" ng-mouseenter=\"select.hilight(doc)\">\r\n	<span ng-class=\"{ellipsis:!expanded}\" tooltip-enable=\"!expanded\" style=\"width:100%;display:inline-block;\"\r\n			tooltip-class=\"selectAbstractTooltip\" tooltip=\"{{doc.abstract | truncate : 250}}\" tooltip-placement=\"bottom\">\r\n		<button type=\"button\" class=\"undecorated\" ng-click=\"expanded = !expanded\" title=\"Click to see more about this dataset\">\r\n			<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-caret-down\':expanded,\'fa-caret-right\':(!expanded)}\"></i>\r\n		</button>\r\n		<download-add item=\"doc\" group=\"group\"></download-add>\r\n		<common-wms data=\"doc\"></common-wms>\r\n		<common-bbox data=\"doc\" ng-if=\"doc.showExtent\"></common-bbox>\r\n		<common-cc></common-cc>\r\n		<common-metaview url=\"\'http://www.ga.gov.au/metadata-gateway/metadata/record/\' + doc.sysId + \'/xml\'\" container=\"select\" item=\"doc\"></common-metaview>\r\n		<a href=\"http://www.ga.gov.au/metadata-gateway/metadata/record/{{doc.sysId}}\" target=\"_blank\" ><strong>{{doc.title}}</strong></a>\r\n	</span>\r\n	<span ng-class=\"{ellipsis:!expanded}\" style=\"width:100%;display:inline-block;padding-right:15px;\">\r\n		{{doc.abstract}}\r\n	</span>\r\n	<div ng-show=\"expanded\" style=\"padding-bottom: 5px;\">\r\n		<h5>Keywords</h5>\r\n		<div>\r\n			<span class=\"badge\" ng-repeat=\"keyword in doc.keywords track by $index\">{{keyword}}</span>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("water/select/group.html","<div class=\"panel panel-default\" style=\"margin-bottom:-5px;\" >\r\n	<div class=\"panel-heading\"><common-wms data=\"group\"></common-wms> <strong>{{group.title}}</strong></div>\r\n	<div class=\"panel-body\">\r\n   		<div ng-repeat=\"doc in group.docs\">\r\n   			<div select-doc doc=\"doc\" group=\"group\"></div>\r\n		</div>\r\n	</div>\r\n</div>\r\n");
 $templateCache.put("water/select/region.html","<div class=\"row\" ng-repeat=\"region in regions\">\r\n   <div class=\"col-md-12\" ng-mouseenter=\"hilight(region)\" ng-mouseleave=\"lolight(region)\">\r\n      <label>\r\n         <input type=\"radio\" ng-model=\"state.region\" name=\"regionsRadio\" value=\"{{region.name}}\">\r\n         {{region.name}}\r\n      </label>\r\n   </div>\r\n</div>");
 $templateCache.put("water/select/select.html","<div ng-controller=\"SelectCtrl as select\">\r\n	<div style=\"position:relative;padding:5px;padding-left:10px;\" class=\"scrollPanel\" ng-if=\"!select.selected\">\r\n		<div class=\"panel panel-default\" style=\"margin-bottom:-5px\">\r\n  			<div class=\"panel-heading\">\r\n  				<h3 class=\"panel-title\">Available datasets</h3>\r\n  			</div>\r\n  			<div class=\"panel-body\">\r\n				<div ng-repeat=\"doc in select.data.response.docs\" style=\"padding-bottom:7px\">\r\n					<div select-doc ng-if=\"doc.type == \'dataset\'\" doc=\"doc\"></div>\r\n					<select-group ng-if=\"doc.type == \'group\'\" group=\"doc\"></select-group>\r\n				</div>\r\n				<div vector-select></div>\r\n  			</div>\r\n		</div>\r\n	</div>\r\n	<div style=\"position:relative;padding:5px;padding-left:10px;\" class=\"scrollPanel\" ng-if=\"select.selected\" common-item-metaview container=\"select\"></div>\r\n</div>");
+$templateCache.put("water/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" icsm-toolbar-row map=\"root.map\" ></div>\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n         <water-regions></water-regions>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div icsm-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'datasets\'\" water-select></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" water-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" water-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
+$templateCache.put("water/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'datasets\'}\" ng-click=\"setView(\'datasets\')\">\r\n		<button class=\"undecorated\">Datasets</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");
 $templateCache.put("water/toolbar/toolbar.html","<div icsm-toolbar>\r\n	<div class=\"row toolBarGroup\">\r\n		<search-searches name=\"toolbar\">\r\n			<search-search label=\"Google search\" default=\"true\">\r\n				<div geo-search></div>\r\n			</search-search>\r\n			<search-search label=\"Basins search\">\r\n				<common-basin-search class=\"cossapSearch\"></common-basin-search>\r\n			</search-search>\r\n			<search-search label=\"Catchments search\">\r\n				<common-catchment-search class=\"cossapSearch\"></common-catchment-search>\r\n			</search-search>\r\n		</search-searches>\r\n		<div class=\"pull-right\">\r\n			<div class=\"btn-toolbar radCore\" role=\"toolbar\"  water-toolbar>\r\n				<div class=\"btn-group\">\r\n					<!-- < water-state-toggle></water-state-toggle> -->\r\n				</div>\r\n			</div>\r\n\r\n			<div class=\"btn-toolbar\" style=\"margin:right:10px;display:inline-block\">\r\n				<div class=\"btn-group\">\r\n					<span class=\"btn btn-default\" common-baselayer-control max-zoom=\"16\" title=\"Satellite to Topography bias on base map.\"></span>\r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("water/vector/add.html","<button type=\'button\' ng-disabled=\'!someSelected()\' class=\'undecorated vector-add\' ng-click=\'toggle()\'>\r\n   <span class=\'fa-stack\' tooltip-placement=\'right\' uib-tooltip=\'Extract data from one or more vector types.\'>\r\n	   <i class=\'fa fa-lg fa-download\' ng-class=\'{active:item.download}\'></i>\r\n	</span>\r\n</button>");
 $templateCache.put("water/vector/download.html","");

@@ -13,6 +13,22 @@
          }
       ])
 
+      .directive("transformationTarget", ['configService',
+         function (configService) {
+            return {
+               scope: {
+                  state: "="
+               },
+               templateUrl: "positioning/dialog/transformationtarget.html",
+               link: function(scope) {
+                  configService.getConfig("transformation").then(data => {
+                     scope.transformations = data;
+                  });
+               }
+            };
+         }
+      ])
+
       .directive("uploadDialog", [
          function () {
             return {

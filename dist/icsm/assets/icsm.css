@@ -419,9 +419,13 @@ div.leaflet-control-scale-line {
     display: none;
   }
 }
-.pn-featuretypes-swathe {
+.pn-authorities-pills span.btn-primary {
+  background-color: red;
+}
+
+.pn-authorities-swathe {
   display: inline-block;
-  background-color: #337ab7;
+  background-color: red;
   width: 14px;
   height: 14px;
   border: solid 1px black;
@@ -437,13 +441,9 @@ div.leaflet-control-scale-line {
   height: 14px;
   border: solid 1px black;
 }
-.pn-authorities-pills span.btn-primary {
-  background-color: red;
-}
-
-.pn-authorities-swathe {
+.pn-featuretypes-swathe {
   display: inline-block;
-  background-color: red;
+  background-color: #337ab7;
   width: 14px;
   height: 14px;
   border: solid 1px black;
@@ -809,6 +809,38 @@ img.elvis-logo {
   right: 7px;
   bottom: 15px;
 }
+.reviewing-odd {
+  background-color: #eeeeee;
+}
+
+.row.reviewing-divider {
+  border-top: 1px solid lightgray;
+  padding-top: 5px;
+  margin-top: 5px;
+}
+
+.reviewing-datasets {
+  max-height: 450px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-height: 750px) {
+  .reviewing-datasets {
+    max-height: 350px;
+  }
+}
+
+@media (max-height: 650px) {
+  .reviewing-datasets {
+    max-height: 250px;
+  }
+}
+
+.exclude {
+  color: #777777;
+  text-decoration: line-through;
+}
 .continue-container {
   padding: 4px;
 }
@@ -947,38 +979,6 @@ img.elvis-logo {
   left: 0;
   right: 0;
 }
-.reviewing-odd {
-  background-color: #eeeeee;
-}
-
-.row.reviewing-divider {
-  border-top: 1px solid lightgray;
-  padding-top: 5px;
-  margin-top: 5px;
-}
-
-.reviewing-datasets {
-  max-height: 450px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-@media (max-height: 750px) {
-  .reviewing-datasets {
-    max-height: 350px;
-  }
-}
-
-@media (max-height: 650px) {
-  .reviewing-datasets {
-    max-height: 250px;
-  }
-}
-
-.exclude {
-  color: #777777;
-  text-decoration: line-through;
-}
 .selectContainer {
   width: 100%;
 }
@@ -1056,6 +1056,52 @@ i.fa.active {
   color: #fff;
   background-color: #777;
 }
+.radCore {
+  margin-right: 3px;
+  display: inline-block;
+}
+
+.searchBar {
+  width: 27em;
+  opacity: 0.9;
+}
+
+@media only screen and (max-width:1100px) {
+  .searchBar {
+    width: 23em;
+  }
+}
+
+@media only screen and (max-width:1025px) {
+  .searchBar {
+    width: 20em;
+  }
+}
+
+@media only screen and (max-width:645px) {
+  .searchBar {
+    display: none;
+  }
+}
+
+@media only screen and (max-width:965px) {
+  .radCore,
+  .hideWhenSmall,
+  .steps-indicator,
+  .secondToolbarInfo {
+    display: none;
+  }
+}
+
+div.leaflet-control-scale-line {
+  text-align: center;
+}
+
+@media only screen and (max-width:965px) {
+  div.leaflet-control-scale-line {
+    display: none;
+  }
+}
 .downloadPane {
   padding-left: 0px !important;
   padding-right: 5px !important;
@@ -1072,52 +1118,6 @@ i.fa.active {
   right: 0;
   bottom: 8px;
 }
-.radCore {
-  margin-right: 3px;
-  display: inline-block;
-}
-
-.searchBar {
-  width: 27em;
-  opacity: 0.9;
-}
-
-@media only screen and (max-width:1100px) {
-  .searchBar {
-    width: 23em;
-  }
-}
-
-@media only screen and (max-width:1025px) {
-  .searchBar {
-    width: 20em;
-  }
-}
-
-@media only screen and (max-width:645px) {
-  .searchBar {
-    display: none;
-  }
-}
-
-@media only screen and (max-width:965px) {
-  .radCore,
-  .hideWhenSmall,
-  .steps-indicator,
-  .secondToolbarInfo {
-    display: none;
-  }
-}
-
-div.leaflet-control-scale-line {
-  text-align: center;
-}
-
-@media only screen and (max-width:965px) {
-  div.leaflet-control-scale-line {
-    display: none;
-  }
-}
 .regions-label {
   border: 0;
 }
@@ -1126,52 +1126,6 @@ div.leaflet-control-scale-line {
   font-weight: bold;
   color: red;
   font-size: 120%;
-}
-.radCore {
-  margin-right: 3px;
-  display: inline-block;
-}
-
-.searchBar {
-  width: 27em;
-  opacity: 0.9;
-}
-
-@media only screen and (max-width:1100px) {
-  .searchBar {
-    width: 23em;
-  }
-}
-
-@media only screen and (max-width:1025px) {
-  .searchBar {
-    width: 20em;
-  }
-}
-
-@media only screen and (max-width:645px) {
-  .searchBar {
-    display: none;
-  }
-}
-
-@media only screen and (max-width:965px) {
-  .radCore,
-  .hideWhenSmall,
-  .steps-indicator,
-  .secondToolbarInfo {
-    display: none;
-  }
-}
-
-div.leaflet-control-scale-line {
-  text-align: center;
-}
-
-@media only screen and (max-width:965px) {
-  div.leaflet-control-scale-line {
-    display: none;
-  }
 }
 .selectContainer {
   width: 100%;
@@ -1187,6 +1141,52 @@ div.leaflet-control-scale-line {
 
 i.fa.active {
   color: red;
+}
+.radCore {
+  margin-right: 3px;
+  display: inline-block;
+}
+
+.searchBar {
+  width: 27em;
+  opacity: 0.9;
+}
+
+@media only screen and (max-width:1100px) {
+  .searchBar {
+    width: 23em;
+  }
+}
+
+@media only screen and (max-width:1025px) {
+  .searchBar {
+    width: 20em;
+  }
+}
+
+@media only screen and (max-width:645px) {
+  .searchBar {
+    display: none;
+  }
+}
+
+@media only screen and (max-width:965px) {
+  .radCore,
+  .hideWhenSmall,
+  .steps-indicator,
+  .secondToolbarInfo {
+    display: none;
+  }
+}
+
+div.leaflet-control-scale-line {
+  text-align: center;
+}
+
+@media only screen and (max-width:965px) {
+  div.leaflet-control-scale-line {
+    display: none;
+  }
 }
 .vector-tooltip {
   min-width: 25em;
@@ -1288,17 +1288,6 @@ span.mandatory {
   content: "*";
   color: red;
 }
-.upload-dialog p {
-  padding: 15px;
-  margin-top: 10px;
-}
-
-.ud-info {
-  background-color: #d9edf7;
-  margin-top: 10px;
-  padding: 5px;
-  border-radius: 4px;
-}
 .csv-label {
   display: inline-block;
   max-width: 100%;
@@ -1309,6 +1298,17 @@ span.mandatory {
 .csv-fix-label label {
   width: 10em;
   text-align: right;
+}
+.upload-dialog p {
+  padding: 15px;
+  margin-top: 10px;
+}
+
+.ud-info {
+  background-color: #d9edf7;
+  margin-top: 10px;
+  padding: 5px;
+  border-radius: 4px;
 }
 .hide {
   display: none;
@@ -1331,11 +1331,6 @@ span.mandatory {
   padding-left: 5px;
   padding-right: 5px;
   margin: auto;
-}
-.input-format-pill {
-  font-size: 110%;
-  padding: 4px;
-  margin: 5px;
 }
 .nav-icons {
   margin-top: 7px !important;
@@ -1367,16 +1362,10 @@ span.mandatory {
 .common-header {
   background-color: white;
 }
-.shp-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.shp-fix-label label {
-  width: 10em;
-  text-align: right;
+.input-format-pill {
+  font-size: 110%;
+  padding: 4px;
+  margin: 5px;
 }
 .ed-valid {
   color: green;
@@ -1388,4 +1377,15 @@ span.mandatory {
 
 .ed-active {
   color: red;
+}
+.shp-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.shp-fix-label label {
+  width: 10em;
+  text-align: right;
 }

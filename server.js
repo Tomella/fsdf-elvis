@@ -13,6 +13,10 @@ var express = require("express");
 var request = require('request');
 var mappers = require("./lib/mapper-picker");
 
+// For positioning. We need a token
+var Token = require("./lib/token");
+var token = new Token(config.fmeToken);
+
 
 request.gzip = false;
 
@@ -47,14 +51,7 @@ var argv = yargs.argv;
 var port = process.env.PORT || argv.port;
 var dontProxyHeaderRegex = /^(?:Host|Proxy-Connection|Accept-Encoding|Connection|Keep-Alive|Transfer-Encoding|TE|Trailer|Proxy-Authorization|Proxy-Authenticate|Upgrade)$/i;
 // There should only ever be a couple. We do a contains on the requested host.
-var validHosts = [
-    "localhost",
-    "qldspatial.information.qld.gov.au",
-    ".ga.gov.au",
-    ".motogp.com",
-    "elvis20161a-ga.fmecloud.com",
-    "s3-ap-southeast-2.amazonaws.com"
-];
+var validHosts = config.validHosts;
 var upstreamProxy = argv['upstream-proxy'];
 
 // eventually this mime type configuration will need to change
@@ -111,6 +108,24 @@ app.all('/service/*', function (req, res, next) {
             return res.send("invalid method");
     }
     return req.pipe(r).pipe(res);
+});
+
+app.get('/refreshToken', function(req, res) {
+   token.refresh().then((data) => {
+      res.header({
+         "Content-Type": "application/json;charset=UTF-8"
+      });
+      res.status(200).send(data);
+   });
+});
+
+app.get('/token', function(req, res) {
+   token.value.then((data) => {
+      res.header({
+         "Content-Type": "application/json;charset=UTF-8"
+      });
+      res.status(200).send(data);
+   });
 });
 
 app.get('/xml2js/*', function (req, res, next) {

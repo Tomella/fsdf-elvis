@@ -20,6 +20,12 @@ easily be overlayed with other applications with little likelyhood of name clash
 * The HTML at the base (this is where it is most likely to clash)
 * All other content under the icsm directory.
 
+### How it runs
+#### Postioning
+It requires a couple of environment variables
+ESRI_USERNAME The username to use to generate a token,
+ESRI_PASWORD The password needed to generate a token.
+
 
 ### Google API.
 At the moment the registered Google API key for the cloud VM is in the HTML files. If you want it to work on
