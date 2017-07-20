@@ -167,9 +167,9 @@ class QldStrategy extends BaseStrategy {
       super(http);
       this.QLD_METADATA_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/rest/document?id={EB442CAB-D714-40D8-82C2-A01CA4661324}&f=xml";
       this.QLD_HTML_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/custom/detail.page?fid={EB442CAB-D714-40D8-82C2-A01CA4661324}";
-      this.FRASER_COAST_METADATA_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/rest/document?id=%7bE8CEF5BA-A1B7-4DE5-A703-8161FD9BD3CF%7d&f=xml";
-      this.FRASER_COAST_HTML_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/custom/detail.page?fid=%7bE8CEF5BA-A1B7-4DE5-A703-8161FD9BD3CF%7d";
-      this.FRASER_COAST_BOUNDS = [152.331, -26.003, 153.370, -24.692]; // Extracted from metadata XML
+      this.FRASER_COAST_METADATA_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/rest/document?id={E8CEF5BA-A1B7-4DE5-A703-8161FD9BD3CF}&f=xml";
+      this.FRASER_COAST_HTML_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/custom/detail.page?fid={E8CEF5BA-A1B7-4DE5-A703-8161FD9BD3CF}";
+      this.FRASER_COAST_BOUNDS = [151.16, -28.9, 151.24, -28.82]; // [152.331, -26.003, 153.370, -24.692];  Extracted from metadata XML
    }
 
    constructLink(item) {
