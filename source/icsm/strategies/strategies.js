@@ -167,18 +167,22 @@ class QldStrategy extends BaseStrategy {
       super(http);
       this.QLD_METADATA_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/rest/document?id={EB442CAB-D714-40D8-82C2-A01CA4661324}&f=xml";
       this.QLD_HTML_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/custom/detail.page?fid={EB442CAB-D714-40D8-82C2-A01CA4661324}";
+      this.FRASER_COAST_METADATA_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/rest/document?id=%7bE8CEF5BA-A1B7-4DE5-A703-8161FD9BD3CF%7d&f=xml";
+      this.FRASER_COAST_HTML_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/custom/detail.page?fid=%7bE8CEF5BA-A1B7-4DE5-A703-8161FD9BD3CF%7d";
+      this.FRASER_COAST_BOUNDS = [152.331, -26.003, 153.370, -24.692]; // Extracted from metadata XML
    }
 
    constructLink(item) {
-      var filename = item.file_name;
-      var re = /\_5\d\_/;
-      var index = filename.search(re);
-      var zone = 6;
-      var url = this.QLD_HTML_TEMPLATE;
-      if (index !== -1) {
-         zone = filename.substr(index + 2, 1);
+      let bbox = item.bbox.split(",").map((val) => parseFloat(val.trim()));
+      if (bbox[0] >= this.FRASER_COAST_BOUNDS[0] &&
+         bbox[1] >= this.FRASER_COAST_BOUNDS[1] &&
+         bbox[2] <= this.FRASER_COAST_BOUNDS[2] &&
+         bbox[0] >= this.FRASER_COAST_BOUNDS[3]
+      ) {
+         return this.FRASER_COAST_HTML_TEMPLATE;
+      } else {
+         return this.QLD_HTML_TEMPLATE;
       }
-      return url.replace("${zone}", zone);
    }
 
    hasMetadata(item) {
@@ -186,17 +190,18 @@ class QldStrategy extends BaseStrategy {
    }
 
    requestMetadata(item) {
-      var filename = item.file_name;
-      var re = /\_5\d\_/;
-      var index = filename.search(re);
-      var zone = 6;
-      var url = this.QLD_METADATA_TEMPLATE;
-      if (index !== -1) {
-         zone = filename.substr(index + 2, 1);
-      }
-      url = "xml2js/" + url.replace("${zone}", zone);
+      let url = this.QLD_METADATA_TEMPLATE;
+      let bbox = item.bbox.split(",").map((val) => parseFloat(val.trim()));
 
-      return this.http.get(url).then(response => {
+      if (bbox[0] >= this.FRASER_COAST_BOUNDS[0] &&
+         bbox[1] >= this.FRASER_COAST_BOUNDS[1] &&
+         bbox[2] <= this.FRASER_COAST_BOUNDS[2] &&
+         bbox[0] >= this.FRASER_COAST_BOUNDS[3]
+      ) {
+         url = this.FRASER_COAST_METADATA_TEMPLATE;
+      }
+
+      return this.http.get("xml2js/" + url).then(response => {
          return BaseStrategy.extractData(response.data);
       }, err => {
          return {

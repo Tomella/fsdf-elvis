@@ -48,7 +48,7 @@
       "name": "TAS Government",
       "title": "TAS Government",
       "href": "http://www.ga.gov.au",
-      "enabled": false,
+      "enabled": true,
       "code": "tas",
       "image": "icsm/resources/img/logo-Tas.jpg",
       "height": 42,
