@@ -1,3 +1,12 @@
+.leaflet-popup {
+  position: absolute;
+  text-align: center;
+}
+
+.fi-popup hr {
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
 .wizardPopup {
   position: fixed;
   top: 20px;
@@ -47,15 +56,6 @@
   .downloadInner {
     max-height: 350px;
   }
-}
-.leaflet-popup {
-  position: absolute;
-  text-align: center;
-}
-
-.fi-popup hr {
-  margin-top: 3px;
-  margin-bottom: 3px;
 }
 .nav-icons {
   margin-top: 7px !important;
@@ -130,6 +130,50 @@
 
 .iso19115-head {
   font-weight: bold;
+}
+.mvt,
+.mvt ul,
+.mvt li {
+  position: relative;
+}
+
+.mvt ul {
+  list-style: none;
+  padding-left: 32px;
+}
+
+.mvt li::before,
+.mvt li::after {
+  content: "";
+  position: absolute;
+  left: -12px;
+}
+
+.mvt li::before {
+  border-top: 1px solid #000;
+  top: 9px;
+  width: 8px;
+  height: 0;
+}
+
+.mvt li::after {
+  border-left: 1px solid #000;
+  height: 100%;
+  width: 0px;
+  top: 2px;
+}
+
+.mvt ul > li:last-child::after {
+  height: 8px;
+}
+
+.metaview-head {
+  font-weight: bold;
+}
+
+.metaview-info {
+  padding-left: 3px;
+  padding-right: 3px;
 }
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
@@ -242,50 +286,6 @@
 .altthemesdropdown .altthemescurrent {
   color: #fff;
   background-color: #777;
-}
-.mvt,
-.mvt ul,
-.mvt li {
-  position: relative;
-}
-
-.mvt ul {
-  list-style: none;
-  padding-left: 32px;
-}
-
-.mvt li::before,
-.mvt li::after {
-  content: "";
-  position: absolute;
-  left: -12px;
-}
-
-.mvt li::before {
-  border-top: 1px solid #000;
-  top: 9px;
-  width: 8px;
-  height: 0;
-}
-
-.mvt li::after {
-  border-left: 1px solid #000;
-  height: 100%;
-  width: 0px;
-  top: 2px;
-}
-
-.mvt ul > li:last-child::after {
-  height: 8px;
-}
-
-.metaview-head {
-  font-weight: bold;
-}
-
-.metaview-info {
-  padding-left: 3px;
-  padding-right: 3px;
 }
 .icsmTabs {
   position: absolute;
@@ -419,17 +419,6 @@ div.leaflet-control-scale-line {
     display: none;
   }
 }
-.pn-classifications-pills span.btn-primary {
-  background-color: green;
-}
-
-.pn-classifications-swathe {
-  display: inline-block;
-  background-color: green;
-  width: 14px;
-  height: 14px;
-  border: solid 1px black;
-}
 .pn-authorities-pills span.btn-primary {
   background-color: red;
 }
@@ -441,19 +430,23 @@ div.leaflet-control-scale-line {
   height: 14px;
   border: solid 1px black;
 }
+.pn-classifications-pills span.btn-primary {
+  background-color: green;
+}
+
+.pn-classifications-swathe {
+  display: inline-block;
+  background-color: green;
+  width: 14px;
+  height: 14px;
+  border: solid 1px black;
+}
 .pn-featuretypes-swathe {
   display: inline-block;
   background-color: #337ab7;
   width: 14px;
   height: 14px;
   border: solid 1px black;
-}
-.pn-tab-content-item {
-  padding-right: 3px;
-  background: #FFF;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 .pn-container {
   overflow-y: auto;
@@ -493,6 +486,13 @@ div.leaflet-control-scale-line {
 .pn-results-list:last-child {
   border-bottom: 0;
   padding-bottom: 0;
+}
+.pn-tab-content-item {
+  padding-right: 3px;
+  background: #FFF;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .pn-features {
   max-block-size: 300px;
@@ -809,21 +809,6 @@ img.elvis-logo {
   right: 7px;
   bottom: 15px;
 }
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
 .continue-container {
   padding: 4px;
 }
@@ -994,6 +979,21 @@ i.fa.active {
   color: #777777;
   text-decoration: line-through;
 }
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
+}
 .icsm-icon {
   background: url("icsm/img/global-sprites.svg") no-repeat;
   display: inline-block;
@@ -1127,6 +1127,21 @@ div.leaflet-control-scale-line {
   color: red;
   font-size: 120%;
 }
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
+}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -1173,21 +1188,6 @@ div.leaflet-control-scale-line {
     display: none;
   }
 }
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
 .vector-tooltip {
   min-width: 25em;
 }
@@ -1201,6 +1201,17 @@ i.fa.active {
 
 .vector-add:disabled {
   color: gray;
+}
+.csv-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.csv-fix-label label {
+  width: 10em;
+  text-align: right;
 }
 .start-content-container {
   position: fixed;
@@ -1265,17 +1276,6 @@ i.fa.active {
 .select-land {
   background-position: -675px;
 }
-.upload-dialog p {
-  padding: 15px;
-  margin-top: 10px;
-}
-
-.ud-info {
-  background-color: #d9edf7;
-  margin-top: 10px;
-  padding: 5px;
-  border-radius: 4px;
-}
 .main-body {
   position: fixed;
   top: 85px;
@@ -1299,16 +1299,16 @@ span.mandatory {
   content: "*";
   color: red;
 }
-.csv-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
+.upload-dialog p {
+  padding: 15px;
+  margin-top: 10px;
 }
 
-.csv-fix-label label {
-  width: 10em;
-  text-align: right;
+.ud-info {
+  background-color: #d9edf7;
+  margin-top: 10px;
+  padding: 5px;
+  border-radius: 4px;
 }
 .hide {
   display: none;
@@ -1367,17 +1367,6 @@ span.mandatory {
 .common-header {
   background-color: white;
 }
-.shp-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.shp-fix-label label {
-  width: 10em;
-  text-align: right;
-}
 .ed-valid {
   color: green;
 }
@@ -1388,4 +1377,15 @@ span.mandatory {
 
 .ed-active {
   color: red;
+}
+.shp-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.shp-fix-label label {
+  width: 10em;
+  text-align: right;
 }
