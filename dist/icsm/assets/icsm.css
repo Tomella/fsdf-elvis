@@ -1,12 +1,3 @@
-.leaflet-popup {
-  position: absolute;
-  text-align: center;
-}
-
-.fi-popup hr {
-  margin-top: 3px;
-  margin-bottom: 3px;
-}
 .wizardPopup {
   position: fixed;
   top: 20px;
@@ -57,35 +48,14 @@
     max-height: 350px;
   }
 }
-.nav-icons {
-  margin-top: 7px !important;
+.leaflet-popup {
+  position: absolute;
+  text-align: center;
 }
 
-@media only screen and (max-width:1200px) {
-  .nav-icons {
-    margin-top: 30px;
-  }
-}
-
-.breadcrumbsContainer {
-  margin-left: 245px;
-}
-
-.header-logo img {
-  padding-top: 3px;
-}
-
-.header-logo {
-  padding-right: 20px;
-}
-
-.applicationTitle {
-  padding-left: 20px;
-  font-size: 200%;
-}
-
-.common-header {
-  background-color: white;
+.fi-popup hr {
+  margin-top: 3px;
+  margin-bottom: 3px;
 }
 .common-legend {
   position: abssolute;
@@ -130,6 +100,36 @@
 
 .iso19115-head {
   font-weight: bold;
+}
+.nav-icons {
+  margin-top: 7px !important;
+}
+
+@media only screen and (max-width:1200px) {
+  .nav-icons {
+    margin-top: 30px;
+  }
+}
+
+.breadcrumbsContainer {
+  margin-left: 245px;
+}
+
+.header-logo img {
+  padding-top: 3px;
+}
+
+.header-logo {
+  padding-right: 20px;
+}
+
+.applicationTitle {
+  padding-left: 20px;
+  font-size: 200%;
+}
+
+.common-header {
+  background-color: white;
 }
 .mvt,
 .mvt ul,
@@ -448,6 +448,31 @@ div.leaflet-control-scale-line {
   height: 14px;
   border: solid 1px black;
 }
+.pn-tab-content-item {
+  padding-right: 3px;
+  background: #FFF;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.pn-features {
+  max-block-size: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.pn-search-container {
+  height: 97%;
+}
+
+.tooltip-inner {
+  max-width: 350px;
+}
+
+.pn-pill {
+  color: #fff;
+  margin: 4px;
+}
 .pn-container {
   overflow-y: auto;
   position: absolute;
@@ -486,31 +511,6 @@ div.leaflet-control-scale-line {
 .pn-results-list:last-child {
   border-bottom: 0;
   padding-bottom: 0;
-}
-.pn-tab-content-item {
-  padding-right: 3px;
-  background: #FFF;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-.pn-features {
-  max-block-size: 300px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.pn-search-container {
-  height: 97%;
-}
-
-.tooltip-inner {
-  max-width: 350px;
-}
-
-.pn-pill {
-  color: #fff;
-  margin: 4px;
 }
 /* Overrides */
 
@@ -809,6 +809,53 @@ img.elvis-logo {
   right: 7px;
   bottom: 15px;
 }
+.reviewing-odd {
+  background-color: #eeeeee;
+}
+
+.row.reviewing-divider {
+  border-top: 1px solid lightgray;
+  padding-top: 5px;
+  margin-top: 5px;
+}
+
+.reviewing-datasets {
+  max-height: 450px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-height: 750px) {
+  .reviewing-datasets {
+    max-height: 350px;
+  }
+}
+
+@media (max-height: 650px) {
+  .reviewing-datasets {
+    max-height: 250px;
+  }
+}
+
+.exclude {
+  color: #777777;
+  text-decoration: line-through;
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
+}
 .continue-container {
   padding: 4px;
 }
@@ -947,52 +994,51 @@ img.elvis-logo {
   left: 0;
   right: 0;
 }
-.reviewing-odd {
-  background-color: #eeeeee;
+.radCore {
+  margin-right: 3px;
+  display: inline-block;
 }
 
-.row.reviewing-divider {
-  border-top: 1px solid lightgray;
-  padding-top: 5px;
-  margin-top: 5px;
+.searchBar {
+  width: 27em;
+  opacity: 0.9;
 }
 
-.reviewing-datasets {
-  max-height: 450px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-@media (max-height: 750px) {
-  .reviewing-datasets {
-    max-height: 350px;
+@media only screen and (max-width:1100px) {
+  .searchBar {
+    width: 23em;
   }
 }
 
-@media (max-height: 650px) {
-  .reviewing-datasets {
-    max-height: 250px;
+@media only screen and (max-width:1025px) {
+  .searchBar {
+    width: 20em;
   }
 }
 
-.exclude {
-  color: #777777;
-  text-decoration: line-through;
-}
-.selectContainer {
-  width: 100%;
+@media only screen and (max-width:645px) {
+  .searchBar {
+    display: none;
+  }
 }
 
-.selectAbstractTooltip {
-  /* width:450px; */
+@media only screen and (max-width:965px) {
+  .radCore,
+  .hideWhenSmall,
+  .steps-indicator,
+  .secondToolbarInfo {
+    display: none;
+  }
 }
 
-.orange {
-  color: orange;
+div.leaflet-control-scale-line {
+  text-align: center;
 }
 
-i.fa.active {
-  color: red;
+@media only screen and (max-width:965px) {
+  div.leaflet-control-scale-line {
+    display: none;
+  }
 }
 .icsm-icon {
   background: url("icsm/img/global-sprites.svg") no-repeat;
@@ -1056,52 +1102,6 @@ i.fa.active {
   color: #fff;
   background-color: #777;
 }
-.radCore {
-  margin-right: 3px;
-  display: inline-block;
-}
-
-.searchBar {
-  width: 27em;
-  opacity: 0.9;
-}
-
-@media only screen and (max-width:1100px) {
-  .searchBar {
-    width: 23em;
-  }
-}
-
-@media only screen and (max-width:1025px) {
-  .searchBar {
-    width: 20em;
-  }
-}
-
-@media only screen and (max-width:645px) {
-  .searchBar {
-    display: none;
-  }
-}
-
-@media only screen and (max-width:965px) {
-  .radCore,
-  .hideWhenSmall,
-  .steps-indicator,
-  .secondToolbarInfo {
-    display: none;
-  }
-}
-
-div.leaflet-control-scale-line {
-  text-align: center;
-}
-
-@media only screen and (max-width:965px) {
-  div.leaflet-control-scale-line {
-    display: none;
-  }
-}
 .downloadPane {
   padding-left: 0px !important;
   padding-right: 5px !important;
@@ -1142,6 +1142,20 @@ div.leaflet-control-scale-line {
 i.fa.active {
   color: red;
 }
+.vector-tooltip {
+  min-width: 25em;
+}
+
+.vector-checkbox {
+  width: 18px;
+  height: 18px;
+  vertical-align: bottom;
+  margin-right: 7px !important;
+}
+
+.vector-add:disabled {
+  color: gray;
+}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -1187,20 +1201,6 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
-}
-.vector-tooltip {
-  min-width: 25em;
-}
-
-.vector-checkbox {
-  width: 18px;
-  height: 18px;
-  vertical-align: bottom;
-  margin-right: 7px !important;
-}
-
-.vector-add:disabled {
-  color: gray;
 }
 .csv-label {
   display: inline-block;
