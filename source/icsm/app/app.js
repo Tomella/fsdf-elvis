@@ -33,6 +33,7 @@
 
       'explorer.config',
       'explorer.confirm',
+      'ed.download',
 		'explorer.drag',
 		'explorer.enter',
       'explorer.flasher',
@@ -85,10 +86,11 @@
 	])
 
 		// Set up all the service providers here.
-		.config(['configServiceProvider', 'projectsServiceProvider', 'persistServiceProvider', 'versionServiceProvider',
-         function (configServiceProvider, projectsServiceProvider, persistServiceProvider, versionServiceProvider) {
+		.config(['configServiceProvider', 'edConfigServiceProvider', 'projectsServiceProvider', 'persistServiceProvider', 'versionServiceProvider',
+         function (configServiceProvider, edConfigServiceProvider, projectsServiceProvider, persistServiceProvider, versionServiceProvider) {
 				configServiceProvider.location("icsm/resources/config/config.json");
-				configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
+            configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
+            edConfigServiceProvider.setLocation("icsm/resources/config/download.json");
 				versionServiceProvider.url("icsm/assets/package.json");
 				projectsServiceProvider.setProject("icsm");
 				persistServiceProvider.handler("local");

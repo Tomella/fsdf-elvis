@@ -22,6 +22,7 @@
     "explorer-ui-components": "https://github.com/Tomella/explorer-ui-components.git#master",
     "explorer-search-components": "https://github.com/Tomella/explorer-search-components.git",
     "leaflet-solr-heatmap": "https://github.com/Tomella/leaflet-solr-heatmap.git#master",
+    "explorer-downloader": "https://github.com/Tomella/explorer-download.git",
     "angular": "~1.4.12",
     "components-font-awesome": "~4.5.0",
     "bg-splitter": "*",
