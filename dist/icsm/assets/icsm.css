@@ -1,3 +1,4 @@
+
 .wizardPopup {
   position: fixed;
   top: 20px;
@@ -418,99 +419,6 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
-}
-.pn-classifications-pills span.btn-primary {
-  background-color: green;
-}
-
-.pn-classifications-swathe {
-  display: inline-block;
-  background-color: green;
-  width: 14px;
-  height: 14px;
-  border: solid 1px black;
-}
-.pn-authorities-pills span.btn-primary {
-  background-color: red;
-}
-
-.pn-authorities-swathe {
-  display: inline-block;
-  background-color: red;
-  width: 14px;
-  height: 14px;
-  border: solid 1px black;
-}
-.pn-featuretypes-swathe {
-  display: inline-block;
-  background-color: #337ab7;
-  width: 14px;
-  height: 14px;
-  border: solid 1px black;
-}
-.pn-tab-content-item {
-  padding-right: 3px;
-  background: #FFF;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-.pn-container {
-  overflow-y: auto;
-  position: absolute;
-  top: 10px;
-  bottom: 0px;
-  left: 0px;
-  right: 7px;
-  margin-bottom: 0;
-}
-
-.pn-results {
-  position: absolute;
-  top: 55px;
-  bottom: 1px;
-  left: 0px;
-  right: 0px;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-.pn-numeric {
-  text-align: right;
-  padding-right: 20px;
-}
-
-.pn-header {
-  font-weight: bold;
-  border-bottom: 1px solid lightgray;
-}
-
-.pn-results-list {
-  border-bottom: 1px solid lightgray;
-  padding-bottom: 4px;
-}
-
-.pn-results-list:last-child {
-  border-bottom: 0;
-  padding-bottom: 0;
-}
-.pn-features {
-  max-block-size: 300px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.pn-search-container {
-  height: 97%;
-}
-
-.tooltip-inner {
-  max-width: 350px;
-}
-
-.pn-pill {
-  color: #fff;
-  margin: 4px;
 }
 /* Overrides */
 
@@ -1118,163 +1026,105 @@ div.leaflet-control-scale-line {
   right: 0;
   bottom: 8px;
 }
-.regions-label {
-  border: 0;
+.pn-authorities-pills span.btn-primary {
+  background-color: red;
 }
 
-.regions-label.over {
-  font-weight: bold;
-  color: red;
-  font-size: 120%;
-}
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
-.radCore {
-  margin-right: 3px;
+.pn-authorities-swathe {
   display: inline-block;
+  background-color: red;
+  width: 14px;
+  height: 14px;
+  border: solid 1px black;
+}
+.pn-classifications-pills span.btn-primary {
+  background-color: green;
 }
 
-.searchBar {
-  width: 27em;
-  opacity: 0.9;
-}
-
-@media only screen and (max-width:1100px) {
-  .searchBar {
-    width: 23em;
-  }
-}
-
-@media only screen and (max-width:1025px) {
-  .searchBar {
-    width: 20em;
-  }
-}
-
-@media only screen and (max-width:645px) {
-  .searchBar {
-    display: none;
-  }
-}
-
-@media only screen and (max-width:965px) {
-  .radCore,
-  .hideWhenSmall,
-  .steps-indicator,
-  .secondToolbarInfo {
-    display: none;
-  }
-}
-
-div.leaflet-control-scale-line {
-  text-align: center;
-}
-
-@media only screen and (max-width:965px) {
-  div.leaflet-control-scale-line {
-    display: none;
-  }
-}
-.vector-tooltip {
-  min-width: 25em;
-}
-
-.vector-checkbox {
-  width: 18px;
-  height: 18px;
-  vertical-align: bottom;
-  margin-right: 7px !important;
-}
-
-.vector-add:disabled {
-  color: gray;
-}
-.csv-label {
+.pn-classifications-swathe {
   display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
+  background-color: green;
+  width: 14px;
+  height: 14px;
+  border: solid 1px black;
 }
-
-.csv-fix-label label {
-  width: 10em;
-  text-align: right;
+.pn-featuretypes-swathe {
+  display: inline-block;
+  background-color: #337ab7;
+  width: 14px;
+  height: 14px;
+  border: solid 1px black;
 }
-.start-content-container {
-  position: fixed;
-  top: 95px;
-  bottom: 6px;
+.pn-tab-content-item {
+  padding-right: 3px;
+  background: #FFF;
+  height: 100%;
   overflow-y: auto;
-  left: 0;
-  right: 0;
+  overflow-x: hidden;
+}
+.pn-container {
+  overflow-y: auto;
+  position: absolute;
+  top: 10px;
+  bottom: 0px;
+  left: 0px;
+  right: 7px;
+  margin-bottom: 0;
 }
 
-@media (min-width: 1200px) {
-  .start-content-container .panel {
-    margin-left: 150px;
-    margin-right: 150px;
-  }
+.pn-results {
+  position: absolute;
+  top: 55px;
+  bottom: 1px;
+  left: 0px;
+  right: 0px;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
-.select-icon {
-  background: url("../resources/img/sprites.svg") no-repeat;
-  display: inline-block;
-  width: 75px;
-  height: 120px;
-  margin: 0 auto 0 auto;
+.pn-numeric {
+  text-align: right;
+  padding-right: 20px;
 }
 
-.select-pin {
-  background-position: 0px;
+.pn-header {
+  font-weight: bold;
+  border-bottom: 1px solid lightgray;
 }
 
-.select-map {
-  background-position: -75px;
+.pn-results-list {
+  border-bottom: 1px solid lightgray;
+  padding-bottom: 4px;
 }
 
-.select-crosshair {
-  background-position: -150px;
+.pn-results-list:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
 }
 
-.select-sign {
-  background-position: -225px;
+.pn-item-footer {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  background-color: #f8f8ff;
+  border-top: 1px solid #f0f0f0;
+}
+.pn-features {
+  max-block-size: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-.select-parcel {
-  background-position: -300px;
+.pn-search-container {
+  height: 97%;
 }
 
-.select-satellite {
-  background-position: -375px;
+.tooltip-inner {
+  max-width: 350px;
 }
 
-.select-ship {
-  background-position: -450px;
-}
-
-.select-water {
-  background-position: -525px;
-}
-
-.select-shore {
-  background-position: -600px;
-}
-
-.select-land {
-  background-position: -675px;
+.pn-pill {
+  color: #fff;
+  margin: 4px;
 }
 .main-body {
   position: fixed;
@@ -1298,6 +1148,17 @@ div.leaflet-control-scale-line {
 span.mandatory {
   content: "*";
   color: red;
+}
+.csv-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.csv-fix-label label {
+  width: 10em;
+  text-align: right;
 }
 .upload-dialog p {
   padding: 15px;
@@ -1388,4 +1249,151 @@ span.mandatory {
 .shp-fix-label label {
   width: 10em;
   text-align: right;
+}
+.start-content-container {
+  position: fixed;
+  top: 95px;
+  bottom: 6px;
+  overflow-y: auto;
+  left: 0;
+  right: 0;
+}
+
+@media (min-width: 1200px) {
+  .start-content-container .panel {
+    margin-left: 150px;
+    margin-right: 150px;
+  }
+}
+
+.select-icon {
+  background: url("../resources/img/sprites.svg") no-repeat;
+  display: inline-block;
+  width: 75px;
+  height: 120px;
+  margin: 0 auto 0 auto;
+}
+
+.select-pin {
+  background-position: 0px;
+}
+
+.select-map {
+  background-position: -75px;
+}
+
+.select-crosshair {
+  background-position: -150px;
+}
+
+.select-sign {
+  background-position: -225px;
+}
+
+.select-parcel {
+  background-position: -300px;
+}
+
+.select-satellite {
+  background-position: -375px;
+}
+
+.select-ship {
+  background-position: -450px;
+}
+
+.select-water {
+  background-position: -525px;
+}
+
+.select-shore {
+  background-position: -600px;
+}
+
+.select-land {
+  background-position: -675px;
+}
+.regions-label {
+  border: 0;
+}
+
+.regions-label.over {
+  font-weight: bold;
+  color: red;
+  font-size: 120%;
+}
+.radCore {
+  margin-right: 3px;
+  display: inline-block;
+}
+
+.searchBar {
+  width: 27em;
+  opacity: 0.9;
+}
+
+@media only screen and (max-width:1100px) {
+  .searchBar {
+    width: 23em;
+  }
+}
+
+@media only screen and (max-width:1025px) {
+  .searchBar {
+    width: 20em;
+  }
+}
+
+@media only screen and (max-width:645px) {
+  .searchBar {
+    display: none;
+  }
+}
+
+@media only screen and (max-width:965px) {
+  .radCore,
+  .hideWhenSmall,
+  .steps-indicator,
+  .secondToolbarInfo {
+    display: none;
+  }
+}
+
+div.leaflet-control-scale-line {
+  text-align: center;
+}
+
+@media only screen and (max-width:965px) {
+  div.leaflet-control-scale-line {
+    display: none;
+  }
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
+}
+.vector-tooltip {
+  min-width: 25em;
+}
+
+.vector-checkbox {
+  width: 18px;
+  height: 18px;
+  vertical-align: bottom;
+  margin-right: 7px !important;
+}
+
+.vector-add:disabled {
+  color: gray;
 }

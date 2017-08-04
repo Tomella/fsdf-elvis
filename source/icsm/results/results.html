@@ -5,7 +5,7 @@
 <div ng-show="list.length" class="results-list">
    <div class="row">
       <div class="col-md-12" uib-tooltip="Number of intersecting or very near datasets to your area of interest.">
-         <h4 style="display:inline-block">Found {{products.length}} datasets</h4>
+         <h4 style="display:inline-block">Found {{products.length | number:0}} datasets</h4>
       </div>
    </div>
    <div class="panel panel-default" style="margin-bottom: 5px; margin-top: 5px;">
@@ -30,7 +30,7 @@
       ng-controller="listCtrl as list">
       <icsm-org-heading org="available" expansions="expansions" mappings="mappings" products="products"></icsm-org-heading>
       <div uib-collapse="!expansions[available.source]">
-         <div class="listRow" ng-class-odd="'listEven'" ng-repeat="(typeKey, types) in available.downloadables | allowedTypes">
+         <div class="listRow" ng-class-odd="'listEven'" ng-if="expansions[available.source]" ng-repeat="(typeKey, types) in available.downloadables | allowedTypes">
             <h5><strong>{{typeKey}}</strong></h5>
             <div ng-repeat="(key, items) in types">
                <div>

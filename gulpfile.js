@@ -164,6 +164,7 @@ gulp.task('watch', function() {
     gulp.watch(directories.source + '/dashboard/**/*(*.js|*.html)', ['dashboardScripts']);
     gulp.watch(directories.source + '/water/**/*(*.js|*.html)', ['waterScripts']);
     gulp.watch(directories.source + '/start/**/*(*.js|*.html)', ['startScripts']);
+    gulp.watch(directories.source + '/placenames/**/*(*.js|*.html)', ['placenamesScripts']);
     gulp.watch(directories.source + '/imagery/**/*(*.js|*.html)', ['imageryScripts']);
     gulp.watch(directories.source + '/positioning/**/*(*.js|*.html)', ['positioningScripts']);
     gulp.watch(directories.source + '/lt/**/*(*.js|*.html)', ['ltScripts']);

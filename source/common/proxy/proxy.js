@@ -1,8 +1,4 @@
-
-(function (angular) {
-
-   'use strict';
-
+{
    angular.module("common.proxy", [])
 
    .provider("proxy", function() {
@@ -35,5 +31,4 @@
          };
       }];
    });
-
-})(angular);
+}

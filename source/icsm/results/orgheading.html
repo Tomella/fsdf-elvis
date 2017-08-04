@@ -3,7 +3,7 @@
       uib-tooltip="Click to collapse/expand this group" tooltip-append-to-body="true"
 		aria-expanded="true" aria-controls="collapse{{mappings[org.source].code}}">
       <img ng-src="{{mappings[org.source].image}}" ng-attr-style="height:{{mappings[org.source].height}}px"></img>
-      <strong>{{org.source}}</strong> (Showing {{org.downloadables | countMatchedDownloadables}} of {{org.downloadables	| countDownloadables}})
+      <strong>{{org.source}}</strong> (Showing {{org.downloadables | countMatchedDownloadables | number:0}} of {{org.downloadables	| countDownloadables | number:0}})
    </button>
 	<span class="listTopExpander">
       <button class="undecorated" ng-show="orgHasSelections()" ng-click="deselectAll()">

@@ -47,6 +47,18 @@
             }
          };
          return service;
-      }]);
+      }])
+
+      .filter("itemLongitude", function() {
+         return function(location) {
+            return location.split(" ")[0];
+         };
+      })
+
+      .filter("itemLatitude", function() {
+         return function(location) {
+            return location.split(" ")[1];
+         };
+      });
 
 })(angular);

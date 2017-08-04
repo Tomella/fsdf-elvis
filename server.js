@@ -190,7 +190,9 @@ app.get('/xml2js/*', function (req, res, next) {
 
 
 app.get('/gazetteer/json', function (req, res, next) {
+   console.log(JSON.stringify(req.params));
    let id = req.param("id");
+
    let mapper = mappers.findById(id);
 
    let url = mapper.createPath(id);
@@ -201,13 +203,12 @@ app.get('/gazetteer/json', function (req, res, next) {
         headers: filterHeaders(req, req.headers),
         encoding: null
     }, function (error, response, body) {
-        var code = 500;
+        var code = response.statusCode;
         var x2js, text, headers, decoder = new StringDecoder('utf8');
         if(error) {
             console.log("Err", error);
         }
-        if (body) {
-            code = response.statusCode;
+        if (code === 200) {
             headers = filterHeaders(req, response.headers);
             headers['Content-Type'] = 'application/json';
             res.header(headers);
@@ -254,8 +255,8 @@ app.get('/gazetteer/wfs', function (req, res, next) {
 });
 
 app.get('/select', function (req, res, next) {
-    var solrSelect = "http://localhost:8983/solr/placenames";
-    //var solrSelect = "http://192.168.0.24:8983/solr/placenames";
+    //var solrSelect = "http://localhost:8983/solr/placenames";
+    var solrSelect = "http://192.168.0.24:8983/solr/placenames";
 
     // encoding : null means "body" passed to the callback will be raw bytes
     request.get(solrSelect + req.url, function (error, response, body) {

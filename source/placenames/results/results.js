@@ -1,7 +1,4 @@
-(function (angular) {
-
-   'use strict';
-
+{
    angular.module("placenames.results", ['placenames.results.item', 'common.scroll'])
 
       .directive("pnResults", ['pnResultsService', function (pnResultsService) {
@@ -108,7 +105,15 @@
          load(id) {
             return this.config.then(({esriTemplate}) => {
                return $http.get(esriTemplate.replace("${id}", id), { cache: true }).then(response => {
+                  console.log("argghhh1! " + response.status)
                   return response.data;
+               },
+               () => {
+                  return {
+                     features: [{
+                        noData: true
+                     }]
+                  }
                });
             });
          },
@@ -131,4 +136,4 @@
 
       return service;
    }
-})(angular);
+}

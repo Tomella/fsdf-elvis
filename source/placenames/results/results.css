@@ -37,3 +37,10 @@
    border-bottom:  0;
    padding-bottom: 0;
 }
+
+.pn-item-footer {
+   padding-top:5px;
+   padding-bottom:5px;
+   background-color:#f8f8ff;
+   border-top:1px solid #f0f0f0
+}

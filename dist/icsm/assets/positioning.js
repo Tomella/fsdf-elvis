@@ -135,23 +135,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       };
    });
 }
-'use strict';
-
-{
-   angular.module('positioning.download', [])
-   /**
-    *
-    * Override the original mars user.
-    *
-    */
-   .directive('posDownload', [function () {
-      return {
-         restrict: 'AE',
-         templateUrl: 'positioning/download/download.html',
-         link: function link(scope) {}
-      };
-   }]);
-}
 "use strict";
 
 {
@@ -215,6 +198,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                messageService.success("Submitted your job. An email will be delivered on completion.");
             };
          }
+      };
+   }]);
+}
+'use strict';
+
+{
+   angular.module('positioning.download', [])
+   /**
+    *
+    * Override the original mars user.
+    *
+    */
+   .directive('posDownload', [function () {
+      return {
+         restrict: 'AE',
+         templateUrl: 'positioning/download/download.html',
+         link: function link(scope) {}
       };
    }]);
 }

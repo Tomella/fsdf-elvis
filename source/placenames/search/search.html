@@ -18,7 +18,7 @@
       </div>
       <div class="clearfix">
          <div>
-            <strong style="float:right">Found {{state.filtered.response.numFound | number}} features</strong>
+            <strong style="float:right">Found {{state.filtered.response.numFound | number:0}} features</strong>
             <pn-featuretypes-pills ng-if="state.featureCodes.length" features="state.featureCodes" update="update()"></pn-featuretypes-pills>
             <pn-classifications-pills ng-if="state.classifications.length" classifications="state.classifications" update="update()"></pn-classifications-pills>
             <pn-authorities-pills ng-if="state.authorities.length" authorities="state.authorities" update="update()"></pn-authorities-pills>
