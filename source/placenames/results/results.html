@@ -8,7 +8,7 @@
       </span>
       <span ng-if="!pr.data.searched.item">
          Matched {{pr.data.searched.data.response.numFound | number}} features, showing {{pr.data.searched.data.response.docs.length | number}} features
-         <a href"javascript:void()" ng-click="pr.download()" ng-show="pr.data.searched.data.response.docs.length | hasSomeData" uib-tooltip="Download listed features in ESRI JSON format" tooltip-placement="bottom">
+         <a href"javascript:void()" ng-click="pr.download()" ng-show="pr.data.searched.data.response.docs.length | resultsHasSomeData" uib-tooltip="Download listed features in ESRI JSON format" tooltip-placement="bottom">
             <i class="fa fa-download"></i>
          </a>
       </span>

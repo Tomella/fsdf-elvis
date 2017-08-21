@@ -31,7 +31,13 @@
          };
       }])
 
-      .factory("pnResultsService", ResultsService);
+      .factory("pnResultsService", ResultsService)
+
+      .filter("resultsHasSomeData", function() {
+         return function(list) {
+            return list.some(item => item)
+         };
+      });
 
    ResultsService.$inject = ['proxy', '$http', '$rootScope', '$timeout', 'configService', 'mapService', 'pnSearchService'];
    function ResultsService(proxy, $http, $rootScope, $timeout, configService, mapService, pnSearchService) {
@@ -109,11 +115,12 @@
                   return response.data;
                },
                () => {
+                  // No data is a valid response.
                   return {
                      features: [{
                         noData: true
                      }]
-                  }
+                  };
                });
             });
          },
