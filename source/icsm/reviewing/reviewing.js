@@ -54,6 +54,8 @@
                                  scope.data.reviewing = false;
                               });
                            }
+                           reviewService.removeRemoved();
+                           scope.data.reviewing = false;
                         }, function () {
                            $log.info('Cancelled');
                         });

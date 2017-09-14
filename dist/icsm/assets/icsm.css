@@ -175,6 +175,92 @@
   padding-left: 3px;
   padding-right: 3px;
 }
+.icsmTabs {
+  position: absolute;
+  top: 60px;
+  right: 30px;
+  z-index: 1;
+}
+
+.icsmTabsOpen {
+  right: 30px;
+}
+
+.panesMapContainer {
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.icsmPanesRow {
+  height: 100%;
+  margin-right: 0;
+}
+
+.icsmPanesCol {
+  height: 100%;
+}
+
+.icsmPanesColRight {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.paneTabsMain {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  padding-top: 8px;
+  right: 0px;
+  background: #FFF;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+.panesTabsContainer {
+  position: absolute;
+  width: 9999px;
+  z-index: inherit;
+  /* keeps ie happy for mousemove events */
+  background: rgba(255, 255, 255, 0);
+}
+
+.paneRotateTabs {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 100%;
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  -sand-transform: rotate(90deg);
+  transform-origin: bottom right;
+  -webkit-transform-origin: bottom right;
+  -ms-transform-origin: bottom right;
+  display: block;
+}
+
+.paneTabItem {
+  float: right;
+  padding: 5px 15px 0px 15px;
+  border: 1px solid #999;
+  background: #FFF;
+  cursor: pointer;
+  height: 30px;
+}
+
+.panesTabContentItem {
+  background: #FFF;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
   display: inline-block;
@@ -287,92 +373,6 @@
   color: #fff;
   background-color: #777;
 }
-.icsmTabs {
-  position: absolute;
-  top: 60px;
-  right: 30px;
-  z-index: 1;
-}
-
-.icsmTabsOpen {
-  right: 30px;
-}
-
-.panesMapContainer {
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.icsmPanesRow {
-  height: 100%;
-  margin-right: 0;
-}
-
-.icsmPanesCol {
-  height: 100%;
-}
-
-.icsmPanesColRight {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-}
-
-.paneTabsMain {
-  position: absolute;
-  top: 0px;
-  bottom: 0px;
-  padding-top: 8px;
-  right: 0px;
-  background: #FFF;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -o-user-select: none;
-  user-select: none;
-}
-
-.panesTabsContainer {
-  position: absolute;
-  width: 9999px;
-  z-index: inherit;
-  /* keeps ie happy for mousemove events */
-  background: rgba(255, 255, 255, 0);
-}
-
-.paneRotateTabs {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 100%;
-  -webkit-transform: rotate(-90deg);
-  -moz-transform: rotate(-90deg);
-  -o-transform: rotate(-90deg);
-  -ms-transform: rotate(-90deg);
-  -sand-transform: rotate(90deg);
-  transform-origin: bottom right;
-  -webkit-transform-origin: bottom right;
-  -ms-transform-origin: bottom right;
-  display: block;
-}
-
-.paneTabItem {
-  float: right;
-  padding: 5px 15px 0px 15px;
-  border: 1px solid #999;
-  background: #FFF;
-  cursor: pointer;
-  height: 30px;
-}
-
-.panesTabContentItem {
-  background: #FFF;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -455,6 +455,24 @@ div.leaflet-control-scale-line {
   overflow-y: auto;
   overflow-x: hidden;
 }
+.pn-features {
+  max-block-size: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.pn-search-container {
+  height: 97%;
+}
+
+.tooltip-inner {
+  max-width: 350px;
+}
+
+.pn-pill {
+  color: #fff;
+  margin: 4px;
+}
 .pn-container {
   overflow-y: auto;
   position: absolute;
@@ -500,24 +518,6 @@ div.leaflet-control-scale-line {
   padding-bottom: 5px;
   background-color: #f8f8ff;
   border-top: 1px solid #f0f0f0;
-}
-.pn-features {
-  max-block-size: 300px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.pn-search-container {
-  height: 97%;
-}
-
-.tooltip-inner {
-  max-width: 350px;
-}
-
-.pn-pill {
-  color: #fff;
-  margin: 4px;
 }
 /* Overrides */
 
@@ -1063,6 +1063,22 @@ i.fa.active {
   color: #fff;
   background-color: #777;
 }
+.downloadPane {
+  padding-left: 0px !important;
+  padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 10px;
+  overflow: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
+}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -1108,22 +1124,6 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
-}
-.downloadPane {
-  padding-left: 0px !important;
-  padding-right: 5px !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 10px;
-  overflow: hidden;
-}
-
-.downloadCont {
-  position: fixed;
-  right: 0;
-  bottom: 8px;
 }
 .regions-label {
   border: 0;
@@ -1295,17 +1295,6 @@ span.mandatory {
   content: "*";
   color: red;
 }
-.upload-dialog p {
-  padding: 15px;
-  margin-top: 10px;
-}
-
-.ud-info {
-  background-color: #d9edf7;
-  margin-top: 10px;
-  padding: 5px;
-  border-radius: 4px;
-}
 .csv-label {
   display: inline-block;
   max-width: 100%;
@@ -1317,12 +1306,28 @@ span.mandatory {
   width: 10em;
   text-align: right;
 }
+.upload-dialog p {
+  padding: 15px;
+  margin-top: 10px;
+}
+
+.ud-info {
+  background-color: #d9edf7;
+  margin-top: 10px;
+  padding: 5px;
+  border-radius: 4px;
+}
 .hide {
   display: none;
 }
 
 .file-container {
   margin-top: 0;
+}
+.input-format-pill {
+  font-size: 110%;
+  padding: 4px;
+  margin: 5px;
 }
 #fileDrop {
   font-weight: bold;
@@ -1338,11 +1343,6 @@ span.mandatory {
   padding-left: 5px;
   padding-right: 5px;
   margin: auto;
-}
-.input-format-pill {
-  font-size: 110%;
-  padding: 4px;
-  margin: 5px;
 }
 .nav-icons {
   margin-top: 7px !important;
