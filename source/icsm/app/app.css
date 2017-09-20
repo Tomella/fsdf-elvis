@@ -213,3 +213,9 @@ input.ng-valid.ng-touched {
 body {
    overflow-y: hidden;
 }
+
+.fa-lg {
+   font-size: 1.6666666em;
+   line-height: .85em;
+   vertical-align: -15%;
+}

@@ -1,7 +1,4 @@
-
-(function (angular) {
-
-	'use strict';
+ {
 
 	angular.module('elvis.header', [])
 
@@ -58,4 +55,4 @@
 		.factory('headerService', ['$http', function () {
 		}]);
 
-})(angular);
+}

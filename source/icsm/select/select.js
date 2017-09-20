@@ -1,155 +1,155 @@
 {
 
-angular.module("icsm.select", ['icsm.select.service'])
+   angular.module("icsm.select", ['icsm.select.service'])
 
-.controller("SelectCtrl", SelectCtrl)
-.controller("SelectCriteriaCtrl", SelectCriteriaCtrl)
+      .controller("SelectCtrl", SelectCtrl)
+      .controller("SelectCriteriaCtrl", SelectCriteriaCtrl)
 
-.directive("icsmSelect", [function() {
-	return {
-		templateUrl : "icsm/select/select.html",
-		link: function(scope, element, attrs) {
-			//console.log("Hello select!");
-		}
-	};
-}])
+      .directive("icsmSelect", [function () {
+         return {
+            templateUrl: "icsm/select/select.html",
+            link: function (scope, element, attrs) {
+               //console.log("Hello select!");
+            }
+         };
+      }])
 
-.directive("selectDoc", [function() {
-	return {
-		templateUrl : "icsm/select/doc.html",
-		link: function(scope, element, attrs) {
-			//console.log("What's up doc!");
-		}
-	};
-}])
-
-
-.directive("selectGroup", [function() {
-	return {
-		templateUrl : "icsm/select/group.html",
-		scope: {
-			group: "="
-		},
-		link: function(scope, element, attrs) {
-			//console.log("What's up doc!");
-		}
-	};
-}])
-
-/**
- * Format the publication date
- */
-.filter("pubDate", function() {
-	return function(string) {
-		var date;
-		if(string) {
-			date = new Date(string);
-			return date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear();
-		}
-		return "-";
-	};
-})
-
-/**
- * Format the array of authors
- */
-.filter("authors", function() {
-	return function(auth) {
-		if(auth) {
-			return auth.join(", ");
-		}
-		return "-";
-	};
-})
-
-/**
- * If the text is larger than a certain size truncate it and add some dots to the end.
- */
-.filter("truncate", function() {
-	return function(text, length) {
-		if(text && text.length > length - 3) {
-			return text.substr(0, length -3) + "...";
-		}
-		return text;
-	};
-});
+      .directive("selectDoc", [function () {
+         return {
+            templateUrl: "icsm/select/doc.html",
+            link: function (scope, element, attrs) {
+               //console.log("What's up doc!");
+            }
+         };
+      }])
 
 
-SelectCriteriaCtrl.$inject = ["selectService"];
-function SelectCriteriaCtrl(selectService) {
-	this.criteria = selectService.getSelectCriteria();
+      .directive("selectGroup", [function () {
+         return {
+            templateUrl: "icsm/select/group.html",
+            scope: {
+               group: "="
+            },
+            link: function (scope, element, attrs) {
+               //console.log("What's up doc!");
+            }
+         };
+      }])
 
-	this.refresh = function() {
-		selectService.refresh();
-	};
-}
+      /**
+       * Format the publication date
+       */
+      .filter("pubDate", function () {
+         return function (string) {
+            var date;
+            if (string) {
+               date = new Date(string);
+               return date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear();
+            }
+            return "-";
+         };
+      })
 
-SelectCtrl.$inject = ['$rootScope', 'configService', 'flashService', 'selectService'];
-function SelectCtrl($rootScope, configService, flashService, selectService) {
-	var flasher, self = this;
+      /**
+       * Format the array of authors
+       */
+      .filter("authors", function () {
+         return function (auth) {
+            if (auth) {
+               return auth.join(", ");
+            }
+            return "-";
+         };
+      })
 
-	$rootScope.$on("select.results.received", function(event, data) {
-		//console.log("Received response")
-		flashService.remove(flasher);
-		self.data = data;
-	});
+      /**
+       * If the text is larger than a certain size truncate it and add some dots to the end.
+       */
+      .filter("truncate", function () {
+         return function (text, length) {
+            if (text && text.length > length - 3) {
+               return text.substr(0, length - 3) + "...";
+            }
+            return text;
+         };
+      });
 
-	configService.getConfig("facets").then(function(config) {
-		this.hasKeywords = config && config.keywordMapped && config.keywordMapped.length > 0;
-	}.bind(this));
 
-	this.select = function() {
-		flashService.remove(flasher);
-		flasher = flashService.add("Selecting", 3000, true);
-		selectService.setFilter(this.filter);
-	};
+   SelectCriteriaCtrl.$inject = ["selectService"];
+   function SelectCriteriaCtrl(selectService) {
+      this.criteria = selectService.getSelectCriteria();
 
-	this.toggle = function(result) {
-		selectService.toggle(result);
-	};
+      this.refresh = function () {
+         selectService.refresh();
+      };
+   }
 
-	this.toggleAll = function() {
-		selectService.toggleAll(this.data.response.docs);
-	};
+   SelectCtrl.$inject = ['$rootScope', 'configService', 'flashService', 'selectService'];
+   function SelectCtrl($rootScope, configService, flashService, selectService) {
+      var flasher, self = this;
 
-	this.showWithin = function() {
-		selectService.showWithin(this.data.response.docs);
-	};
+      $rootScope.$on("select.results.received", function (event, data) {
+         //console.log("Received response")
+         flashService.remove(flasher);
+         self.data = data;
+      });
 
-	this.allShowing = function() {
-		if(!this.data || !this.data.response) {
-			return false;
-		}
-		return !this.data.response.docs.some(function(dataset) {
-			return !dataset.showLayer;
-		});
-	};
+      configService.getConfig("facets").then(function (config) {
+         this.hasKeywords = config && config.keywordMapped && config.keywordMapped.length > 0;
+      }.bind(this));
 
-	this.anyShowing = function() {
-		if(!this.data || !this.data.response) {
-			return false;
-		}
-		return this.data.response.docs.some(function(dataset) {
-			return dataset.showLayer;
-		});
-	};
+      this.select = function () {
+         flashService.remove(flasher);
+         flasher = flashService.add("Selecting", 3000, true);
+         selectService.setFilter(this.filter);
+      };
 
-	this.hideAll = function() {
-		selectService.hideAll(this.data.response.docs);
-	};
+      this.toggle = function (result) {
+         selectService.toggle(result);
+      };
 
-	this.hilight = function(doc) {
-		if(doc.layer) {
-			selectService.hilight(doc.layer);
-		}
-	};
+      this.toggleAll = function () {
+         selectService.toggleAll(this.data.response.docs);
+      };
 
-	this.lolight = function(doc) {
-		if(doc.layer) {
-			selectService.lolight(doc.layer);
-		}
-	};
-}
+      this.showWithin = function () {
+         selectService.showWithin(this.data.response.docs);
+      };
+
+      this.allShowing = function () {
+         if (!this.data || !this.data.response) {
+            return false;
+         }
+         return !this.data.response.docs.some(function (dataset) {
+            return !dataset.showLayer;
+         });
+      };
+
+      this.anyShowing = function () {
+         if (!this.data || !this.data.response) {
+            return false;
+         }
+         return this.data.response.docs.some(function (dataset) {
+            return dataset.showLayer;
+         });
+      };
+
+      this.hideAll = function () {
+         selectService.hideAll(this.data.response.docs);
+      };
+
+      this.hilight = function (doc) {
+         if (doc.layer) {
+            selectService.hilight(doc.layer);
+         }
+      };
+
+      this.lolight = function (doc) {
+         if (doc.layer) {
+            selectService.lolight(doc.layer);
+         }
+      };
+   }
 
 }
 

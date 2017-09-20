@@ -1,5 +1,4 @@
- (function (mapevents) {
-'use strict';
+ {
 
 angular.module("icsm.mapevents", ['geo.map'])
 
@@ -194,4 +193,4 @@ angular.module("icsm.mapevents", ['geo.map'])
          }
       };
    }]);
-})();
+}

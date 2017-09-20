@@ -1,10 +1,4 @@
-/*!
- * Copyright 2016 Geoscience Australia (http://www.ga.gov.au/copyright.html)
- */
-
-(function (angular) {
-
-   'use strict';
+{
 
    angular.module("elvis.reviewing", [])
 
@@ -203,4 +197,4 @@
       return response;
    }
 
-})(angular);
+}

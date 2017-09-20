@@ -1,5 +1,4 @@
-(function (angular) {
-   'use strict';
+{
 
    angular.module('icsm.contributors', [])
 
@@ -91,4 +90,4 @@
       };
    }
 
-})(angular);
+}

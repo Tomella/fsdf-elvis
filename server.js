@@ -1,6 +1,6 @@
 process.env.NO_PROXY = "localhost";
 
-var SERVICES_ROOT = "http://www.ga.gov.au/elvis";
+var SERVICES_ROOT = "http://www.ga.gov.au/explorer-web";
 var NSW_METADATA_TEMPLATE = "https://s3-ap-southeast-2.amazonaws.com/nsw.elvis/z5${zone}/Metadata/";
 
 var START_ABSTRACT_SENTINEL = "<h3>Abstract:</h3>";
