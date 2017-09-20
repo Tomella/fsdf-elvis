@@ -79,69 +79,15 @@
          	"layers": []
          },
          {
-            "name":"Indexes",
+            "name":"All",
             "pseudoBaseLayer" : true,
             "type":["TileLayer", "WMS"],
             "key":"indexes",
             "parameters":[
                 "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetPNG_ElevationAvailableData.fmw",
                 {
-                   "layers" : "public.5dem_ProjectsIndex",
+                   "layers" : "public.5dem_ProjectsIndex,public.NSW_100k_Index_54,public.NSW_100k_Index_55,public.NSW_100k_Index_56,public.NSW_100k_Index_Forward_Program,public.ACT2015-Tile_Index_55,public.QLD_Project_Index_54,public.QLD_Project_Index_55,public.QLD_Project_Index_56",
                    "format" : "image/png",
-                   "transparent" : true,
-                   "opacity" : 0.7
-                }
-            ],
-            "addLayerControl":false,
-            "visible":true
-         },
-         {
-            "name":"NSW",
-            "pseudoBaseLayer" : true,
-            "type":["TileLayer", "WMS"],
-            "key":"available",
-            "parameters":[
-                "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetPNG_ElevationAvailableData.fmw",
-                {
-                   "layers" : "public.NSW_100k_Index_54,public.NSW_100k_Index_55,public.NSW_100k_Index_56,public.NSW_100k_Index_Forward_Program",
-                   "format" : "image/png",
-                   "transparent" : true,
-                   "bounds": [[-38, 140], [-28, 155]],
-                   "opacity" : 0.7
-                }
-            ],
-            "addLayerControl":false,
-            "visible":true
-         },
-         {
-            "name":"Qld",
-            "pseudoBaseLayer" : true,
-            "type":["TileLayer", "WMS"],
-            "key":"indexes",
-            "parameters":[
-                "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetPNG_ElevationAvailableData.fmw",
-                {
-                   "layers" : "public.QLD_Project_Index_54,public.QLD_Project_Index_55,public.QLD_Project_Index_56",
-                   "format" : "image/png",
-                   "bounds": [[-30, 138], [-8, 155]],
-                   "transparent" : true,
-                   "opacity" : 0.7
-                }
-            ],
-            "addLayerControl":false,
-            "visible":true
-         },
-         {
-            "name":"ACT",
-            "pseudoBaseLayer" : true,
-            "type":["TileLayer", "WMS"],
-            "key":"indexes",
-            "parameters":[
-                "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetPNG_ElevationAvailableData.fmw",
-                {
-                   "layers" : "public.ACT2015-Tile_Index_55",
-                   "format" : "image/png",
-                   "bounds": [[-36, 148], [-35, 150]],
                    "transparent" : true,
                    "opacity" : 0.7
                 }
