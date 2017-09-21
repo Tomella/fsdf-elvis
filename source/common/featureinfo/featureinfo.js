@@ -5,11 +5,12 @@
 
       .directive("commonFeatureInfo", ['$http', '$log', '$q', '$timeout', 'featureInfoService', 'flashService', function ($http, $log, $q, $timeout, featureInfoService, flashService) {
          var template = "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetFeatureInfo_ElevationAvailableData.fmw?" +
-                "SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&SRS=EPSG%3A4326&BBOX=${bounds}&WIDTH=${width}&HEIGHT=${height}&" +
+                "SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&SRS=EPSG%3A4326&BBOX=${bounds}&WIDTH=${width}&HEIGHT=${height}" +
                 //"LAYERS=public.5dem_ProjectsIndex&" +
-                "LAYERS=public.NSW_100k_Index&" +
-                //"LAYERS=public.5dem_ProjectsIndex,public.NSW_100k_Index&&cql_Filter=;&" +
-                "STYLES=&QUERY_LAYERS=public.5dem_ProjectsIndex&INFO_FORMAT=application%2Fjson&FEATURE_COUNT=100&X=${x}&Y=${y}&LAYERS=";
+                "&LAYERS=public.ACT2015-Tile_Index_55,public.5dem_ProjectsIndex,public.NSW_100k_Index_54,public.NSW_100k_Index_55," +
+                "public.NSW_100k_Index_56,public.NSW_100k_Index_Forward_Program,public.QLD_Project_Index_54," +
+                "public.QLD_Project_Index_55,public.QLD_Project_Index_56" +
+                "&STYLES=&INFO_FORMAT=application%2Fjson&FEATURE_COUNT=100&X=${x}&Y=${y}";
          var layers = ["public.5dem_ProjectsIndex", "public.NSW_100k_Index"];
 
          return {
@@ -64,18 +65,19 @@
                         url = url.replace("${" + key + "}", value);
                      });
 
-                     $q.all(layers.map(layer => $http.get(url + layer))).then(function (responses) {
-                        var group = responses.filter(response => response.data);
-                        var response;
-                        var popupText = [];
+                     $http.get(url).then(function (httpResponse) {
+                        let group = httpResponse.data;
+                        let response;
+                        var features = [];
+                        let popupText = [];
 
                         map.closePopup();
                         featureInfoService.removeLastLayer(map);
                         flashService.remove(flasher);
 
                         if(!group.length) {
-                           response = responses[0]; // They are the same anyway
                            flasher = flashService.add("No status information available for this point.", 4000);
+                           response = httpResponse;
                         } else {
                            response = {
                               data: {
@@ -91,14 +93,15 @@
                               }
                            };
 
-                           let features = response.data.features;
+                           features = response.data.features;
 
                            group.forEach(response => {
-                              response.data.features.forEach(feature => {
+                              response.features.forEach(feature => {
                                  features.push(feature);
                                  if(feature.properties.maptitle) {
+                                    let title = feature.properties.mapnumber ? "Map number: " +  feature.properties.mapnumber : ""
                                     popupText.push(
-                                       "<strong>Map Title:</strong> <span title='Map number: " + feature.properties.mapnumber + "'>" + feature.properties.maptitle +
+                                       "<strong>Map Title:</strong> <span title='" + title + "'>" + feature.properties.maptitle +
                                        "</span><br/><strong>Status:</strong> " + feature.properties.status);
                                  } else {
                                     /*
@@ -117,7 +120,7 @@
                            });
                         }
 
-                        if(response.data) {
+                        if(features.length) {
                            layer = L.geoJson(response.data, {
                               style: function (feature) {
                                  return {

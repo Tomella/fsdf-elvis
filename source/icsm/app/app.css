@@ -206,7 +206,7 @@ input.ng-valid.ng-touched {
 	display:none!important;
 }
 
-.elevationFixedBottom {
+.elevationContainer {
    border: 1px solid gray;
 }
 
