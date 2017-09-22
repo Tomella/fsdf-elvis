@@ -3,7 +3,8 @@
 
    angular.module("common.featureinfo", [])
 
-      .directive("commonFeatureInfo", ['$http', '$log', '$q', '$timeout', 'featureInfoService', 'flashService', function ($http, $log, $q, $timeout, featureInfoService, flashService) {
+      .directive("commonFeatureInfo", ['$http', '$log', '$q', '$timeout', 'featureInfoService', 'flashService', 'messageService',
+      function ($http, $log, $q, $timeout, featureInfoService, flashService, messageService) {
          var template = "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetFeatureInfo_ElevationAvailableData.fmw?" +
                 "SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&SRS=EPSG%3A4326&BBOX=${bounds}&WIDTH=${width}&HEIGHT=${height}" +
                 //"LAYERS=public.5dem_ProjectsIndex&" +
@@ -59,7 +60,7 @@
                      }
 
                      flashService.remove(flasher);
-                     flasher = flashService.add("Checking available data at this point", 5000, true);
+                     flasher = flashService.add("Checking available data at this point", 30000, true);
 
                      angular.forEach(data, function(value, key) {
                         url = url.replace("${" + key + "}", value);
