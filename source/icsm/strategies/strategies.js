@@ -81,7 +81,7 @@ class ActStrategy extends BaseStrategy {
 class GaStrategy extends BaseStrategy {
    constructor(http) {
       super(http);
-      this.GA_METADATA_TEMPLATE = 'http://www.ga.gov.au/metadata-gateway/metadata/record/gcat_${uuid}';
+      this.GA_METADATA_TEMPLATE = 'https://ecat.ga.gov.au/geonetwork/srv/eng/search#!${uuid}';
       this.UUID_REG_EX = /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/;
    }
 

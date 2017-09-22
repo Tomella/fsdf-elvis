@@ -75,7 +75,7 @@
    			{
                 "name":"SRTM 1 sec DEM image",
                 "help" : "Best viewed at national to state level of zoom.",
-                "metadata" : "http://www.ga.gov.au/metadata-gateway/metadata/record/gcat_7639a737-b2b4-4b2d-9754-9013ca4a6805/dem_1s_WMS",
+                "metadata" : "https://ecat.ga.gov.au/geonetwork/srv/eng/search#!7639a737-b2b4-4b2d-9754-9013ca4a6805/dem_1s_WMS",
                 "pseudoBaseLayer" : true,
                 "type":["TileLayer", "WMS"],
                 "key":"gravity",

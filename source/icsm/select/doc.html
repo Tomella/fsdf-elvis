@@ -1,5 +1,5 @@
 <div ng-class-odd="'odd'" ng-class-even="'even'" ng-mouseleave="select.lolight(doc)" ng-mouseenter="select.hilight(doc)">
-	<span ng-class="{ellipsis:!expanded}" tooltip-enable="!expanded" style="width:100%;display:inline-block;" 
+	<span ng-class="{ellipsis:!expanded}" tooltip-enable="!expanded" style="width:100%;display:inline-block;"
 			tooltip-class="selectAbstractTooltip" tooltip="{{doc.abstract | truncate : 250}}" tooltip-placement="bottom">
 		<button type="button" class="undecorated" ng-click="expanded = !expanded" title="Click to see more about this dataset">
 			<i class="fa pad-right fa-lg" ng-class="{'fa-caret-down':expanded,'fa-caret-right':(!expanded)}"></i>
@@ -7,7 +7,7 @@
 		<download-add item="doc" group="group"></download-add>
 		<icsm-wms data="doc"></icsm-wms>
 		<icsm-bbox data="doc" ng-if="doc.showExtent"></icsm-bbox>
-		<a href="http://www.ga.gov.au/metadata-gateway/metadata/record/{{doc.sysId}}" target="_blank" ><strong>{{doc.title}}</strong></a>
+		<a href="https://ecat.ga.gov.au/geonetwork/srv/eng/search#!{{doc.primaryId}}" target="_blank" ><strong>{{doc.title}}</strong></a>
 	</span>
 	<span ng-class="{ellipsis:!expanded}" style="width:100%;display:inline-block;padding-right:15px;">
 		{{doc.abstract}}

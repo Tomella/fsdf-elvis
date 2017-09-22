@@ -169,9 +169,9 @@ gulp.task('watch', function() {
     gulp.watch(directories.source + '/positioning/**/*(*.js|*.html)', ['positioningScripts']);
     gulp.watch(directories.source + '/lt/**/*(*.js|*.html)', ['ltScripts']);
     gulp.watch(directories.source + '/**/*.css', ['concatCss']);
-    // gulp.watch(directories.assets + '/common.js', ['squashCommon']);
+    gulp.watch(directories.assets + '/common.js', ['squashCommon']);
     gulp.watch(directories.assets + '/icsm.js', ['squashIcsm']);
-    // gulp.watch(directories.assets + '/water.js', ['squashWater']);
+    gulp.watch(directories.assets + '/water.js', ['squashWater']);
     gulp.watch(directories.assets + '/start.js', ['squashStart']);
     gulp.watch(directories.assets + '/imagery.js', ['squashImagery']);
     gulp.watch(directories.assets + '/lt.js', ['squashLt']);

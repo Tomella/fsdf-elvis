@@ -46,6 +46,7 @@
                            this.layer._map.closePopup();
                         }
                      };
+
                      layer.bindPopup(region.name);
                      regions.push(region);
 

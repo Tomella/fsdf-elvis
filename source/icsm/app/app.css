@@ -219,3 +219,7 @@ body {
    line-height: .85em;
    vertical-align: -15%;
 }
+
+.ed-wms-button {
+   display:none;
+}
