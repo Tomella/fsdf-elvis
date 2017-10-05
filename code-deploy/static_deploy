@@ -16,7 +16,7 @@ sudo cp -rf dist/* /var/www/html
 # it replace the GA key
 if [ -n "$GOOGLE_KEY" ]
 then
- /bin/sed -i -e 's/'"$GA_GOOGLE_CLIENT"'/'"$GOOGLE_KEY"'/g' /var/www/html/*.html
+  sudo /bin/sed -i -e 's/'"$GA_GOOGLE_CLIENT"'/'"$GOOGLE_KEY"'/g' /var/www/html/*.html
 fi
 
 # Update any proxies that might have changed
