@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# The default google client. Works on both the ga and fsdf domains
 GA_GOOGLE_CLIENT=client=gme-geoscienceaustralia
 
 # Should be home already but make sure.
@@ -9,6 +10,14 @@ cd /home/ec2-user/fsdf-elvis
 git pull
 # Copy static content to Apache
 sudo cp -rf dist/* /var/www/html
+
+# Sometimes you want to run it on a domain that does not have GA's key registered so
+# you can set the system variable GOOGLE_KEY in your .bash_profile and export it so that
+# it replace the GA key
+if [ -n "$GOOGLE_KEY" ]
+then
+ /bin/sed -i -e 's/'"$GA_GOOGLE_CLIENT"'/'"$GOOGLE_KEY"'/g' /var/www/html/*.html
+fi
 
 # Update any proxies that might have changed
 sudo cp -f code-deploy/proxies.conf /etc/httpd/conf.d
