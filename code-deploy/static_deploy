@@ -1,4 +1,7 @@
 #!/bin/bash
+
+GA_GOOGLE_CLIENT=client=gme-geoscienceaustralia
+
 # Should be home already but make sure.
 cd /home/ec2-user/fsdf-elvis
 
@@ -6,6 +9,7 @@ cd /home/ec2-user/fsdf-elvis
 git pull
 # Copy static content to Apache
 sudo cp -rf dist/* /var/www/html
+
 # Update any proxies that might have changed
 sudo cp -f code-deploy/proxies.conf /etc/httpd/conf.d
 # Pick up any new proxies
