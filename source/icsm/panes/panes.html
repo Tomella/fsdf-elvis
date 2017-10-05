@@ -12,7 +12,7 @@
     		<div icsm-tabs class="icsmTabs"  ng-class="{'icsmTabsClosed':!view, 'icsmTabsOpen':view}"></div>
 		</div>
 		<div class="icsmPanesColRight" ng-class="{'hidden':!view, 'col-md-5':view}" style="padding-left:0; padding-right:0">
-			<div class="panesTabContentItem" ng-show="view == 'downloader'"><ed-panel></ed-panel></div>
+			<div class="panesTabContentItem" ng-show="view == 'downloader'" icsm-products></div>
 			<div class="panesTabContentItem" ng-show="view == 'download'" icsm-view></div>
 			<div class="panesTabContentItem" ng-show="view == 'maps'" icsm-maps></div>
 			<div class="panesTabContentItem" ng-show="view == 'glossary'" icsm-glossary></div>

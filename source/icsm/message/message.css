@@ -1,0 +1,15 @@
+.mess-error {
+   background-color: lightcoral;
+}
+
+.mess-info {
+   background-color: lightblue;
+}
+
+.mess-warn {
+   background-color: #ffbc1e;
+}
+
+.mess-container {
+   font-weight: bold;
+}

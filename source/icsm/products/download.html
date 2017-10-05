@@ -1,0 +1,19 @@
+<div class="well" ng-show="item.showDownload">
+
+   <div class="well">
+      <div ng-show="processing.validClip" class="product-restrict">
+         <span class="product-label">Bounds:</span> {{processing.clip.xMin|number : 4}}&deg; west, {{processing.clip.yMax|number : 4}}&deg; north, {{processing.clip.xMax|number
+         : 4}}&deg; east, {{processing.clip.yMin|number : 4}}&deg; south
+
+         <div ng-show="processing.message" class="product-warning">
+            {{processing.message}}
+         </div>
+      </div>
+      <product-projection processing="processing"></product-projection>
+      <br/>
+      <product-formats processing="processing"></product-formats>
+      <br/>
+      <product-email processing="processing"></product-email>
+   </div>
+   <product-download-submit processing="processing" item="item"></product-download-submit>
+</div>

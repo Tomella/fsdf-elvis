@@ -1,5 +1,4 @@
 {
-
    angular.module("icsm.clip", ['geo.draw'])
 
       .directive('icsmInfoBbox', function () {
@@ -44,13 +43,6 @@
                      });
                   });
 
-                  scope.check = function () {
-                     $timeout.cancel(timer);
-                     timer = $timeout(function () {
-                        $rootScope.$broadcast('icsm.clip.drawn', scope.clip);
-                     }, 4000);
-                  };
-
                   $rootScope.$on('icsm.clip.draw', function (event, data) {
                      if (data && data.message === "oversize") {
                         scope.oversize = true;
@@ -59,9 +51,6 @@
                         }, 6000);
                      } else {
                         delete scope.oversize;
-                     }
-                     if(scope.viewing) {
-                        scope.initiateDraw();
                      }
                   });
 
@@ -90,7 +79,13 @@
                      c.yMax = +data.clip.yMax;
                      c.yMin = +data.clip.yMin;
 
-                     $rootScope.$broadcast('icsm.clip.drawn', c);
+                     $rootScope.$broadcast('icsm.clip.drawn', c);  // Let people know it is drawn
+                     $rootScope.$broadcast('icsm.bounds.draw', [
+                        c.xMin,
+                        c.yMin,
+                        c.xMax,
+                        c.yMax
+                     ]);// Draw it
                   }
                }
             };
@@ -105,7 +100,7 @@
             initiateDraw: function () {
                this.data = null;
                return drawService.drawRectangle({
-                  retryOnOversize: true
+                  retryOnOversize: false
                });
             },
 

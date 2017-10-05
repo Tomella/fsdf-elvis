@@ -15,6 +15,20 @@ angular.module("icsm.mapevents", ['geo.map'])
    function ($rootScope, $timeout, configService, mapService) {
       var marker, poly, bounds;
       var config = configService.getConfig("mapConfig");
+
+      // We want to propagate the events from the download function so that it ripples through to other
+      // parts of the system, namely the clip functionality.
+
+      $rootScope.$on('ed.clip.extent.change.out', function showBbox(event, data) {
+         console.log("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+      });
+
+
+      $rootScope.$on('ed.clip.extent.change.in', function showBbox(event, data) {
+         console.log("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGE");
+      });
+
+
       $rootScope.$on('icsm.bounds.draw', function showBbox(event, bbox) {
          // 149.090045383719,-35.4,149.4,-35.3
          if(!bbox) {

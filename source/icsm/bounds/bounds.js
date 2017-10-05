@@ -1,31 +1,29 @@
 {
-	angular.module("icsm.bounds", [])
+	angular.module("icsm.bounds", ["icsm.message"])
 
-		.directive('icsmBounds', ['flashService', 'messageService', 'boundsService',
-			function (flashService, messageService, boundsService) {
-				let flasher;
+		.directive('icsmBounds', ['icsmMessageService', 'boundsService',
+			function (icsmMessageService, boundsService) {
 				return {
 					restrict: 'AE',
 					link: function () {
 						boundsService.init().then(null, null, function notify(message) {
-							flashService.remove(flasher);
+							icsmMessageService.removeFlash();
 							switch (message.type) {
 								case "error":
 								case "warn":
 								case "info":
-									messageService[message.type](message.text);
+                           icsmMessageService[message.type](message.text);
 									break;
 								default:
-									flashService.remove(flasher);
-									flasher = flashService.add(message.text, message.duration ? message.duration : 8000, message.type === "wait");
+									icsmMessageService.flash(message.text, message.duration ? message.duration : 8000, message.type === "wait");
 							}
 						});
 					}
 				};
 			}])
 
-		.factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService', 'flashService',
-			function ($http, $q, $rootScope, $timeout, configService, flashService) {
+		.factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService',
+			function ($http, $q, $rootScope, $timeout, configService) {
 				let clipTimeout, notify;
 				return {
 					init: function () {
@@ -34,15 +32,9 @@
 							send('Area drawn. Checking for data...');
 							checkSize(clip).then(function (message) {
 								if (message.code === "success") {
-									$rootScope.$broadcast('icsm.bounds.draw', [
-										clip.xMin,
-										clip.yMin,
-										clip.xMax,
-										clip.yMax
-									]);
 									getList(clip);
 								} else {
-									$rootScope.$broadcast('icsm.clip.draw', { message: "oversize" });
+									// $rootScope.$broadcast('icsm.clip.draw', { message: "oversize" });
 								}
 							});
 						});
@@ -162,16 +154,18 @@
 							send("Checking there is data in your selected area...", "wait", 180000);
 							$http.get(urlWithParms).then(function (response) {
 								if (response.data && response.data.available_data) {
-									let message = "There is no data held in your selected area. Please try another area.";
+									let hasData = false;
 									send("", "clear");
 									if (response.data.available_data) {
 										response.data.available_data.forEach(function (group) {
 											if (group.downloadables) {
-												message = "There is intersecting data. Select downloads from the list.";
+												hasData = true;
 											}
 										});
-									}
-									send(message, null, 4000);
+                           }
+                           if (!hasData) {
+                              send("There is no data held in your selected area. Please try another area.", null, 4000);
+                           }
 									$rootScope.$broadcast('site.selection', response.data);
 								}
 							}, function (err) { // If it falls over we don't want to crash.

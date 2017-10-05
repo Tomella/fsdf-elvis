@@ -1,0 +1,10 @@
+<div class="row">
+   <div class="col-md-4">
+      <label for="geoprocessOutCoordSys">
+                  Coordinate System
+               </label>
+   </div>
+   <div class="col-md-8">
+      <select id="geoprocessOutCoordSys" style="width:95%" ng-model="processing.outCoordSys" ng-options="opt.value for opt in config.outCoordSys | productIntersect : processing.clip"></select>
+   </div>
+</div>

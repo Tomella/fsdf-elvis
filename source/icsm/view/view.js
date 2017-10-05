@@ -1,23 +1,23 @@
 {
    angular.module("icsm.view", [])
 
-      .directive("icsmView", ['downloadService', function (downloadService) {
-         return {
-            templateUrl: "icsm/view/view.html",
-            controller: "DownloadCtrl",
-            link: function (scope, element) {
-               downloadService.data().then(function (data) {
-                  scope.data = data;
-               });
+         .directive("icsmView", ['downloadService', function (downloadService) {
+            return {
+               templateUrl: "icsm/view/view.html",
+               controller: "DownloadCtrl",
+               link: function (scope, element) {
+                  downloadService.data().then(function (data) {
+                     scope.data = data;
+                  });
 
-               scope.$watch("data.item", function (item, old) {
-                  if (item || old) {
-                     downloadService.setState(item);
-                  }
-               });
-            }
-         };
-      }])
+                  scope.$watch("data.item", function (item, old) {
+                     if (item || old) {
+                        downloadService.setState(item);
+                     }
+                  });
+               }
+            };
+         }])
 
       .controller("DownloadCtrl", DownloadCtrl)
       .factory("downloadService", DownloadService);
