@@ -1,3 +1,4 @@
+var TOUCHPATH = process.env.HOME + "touched/touched";
 process.env.NO_PROXY = "localhost";
 
 var SERVICES_ROOT = "http://www.ga.gov.au/explorer-web";
@@ -50,7 +51,6 @@ var yargs = require('yargs').options({
 });
 var argv = yargs.argv;
 var port = process.env.PORT || argv.port;
-var TOUCHPATH = process.env.HOME + "touched/touched"
 var dontProxyHeaderRegex = /^(?:Host|Proxy-Connection|Accept-Encoding|Connection|Keep-Alive|Transfer-Encoding|TE|Trailer|Proxy-Authorization|Proxy-Authenticate|Upgrade)$/i;
 // There should only ever be a couple. We do a contains on the requested host.
 var validHosts = config.validHosts;
