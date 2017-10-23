@@ -10,6 +10,7 @@ var END_ABSTRACT_SENTINEL = "<p>";
 
 var config = require("./lib/config");
 var express = require("express");
+var fs = require("fs");
 var request = require('request');
 var mappers = require("./lib/mapper-picker");
 
