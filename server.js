@@ -1,4 +1,4 @@
-var TOUCHPATH = process.env.HOME + "touched/touched";
+
 process.env.NO_PROXY = "localhost";
 
 var SERVICES_ROOT = "http://www.ga.gov.au/explorer-web";
@@ -7,7 +7,7 @@ var NSW_METADATA_TEMPLATE = "https://s3-ap-southeast-2.amazonaws.com/nsw.elvis/z
 var START_ABSTRACT_SENTINEL = "<h3>Abstract:</h3>";
 var START_ABSTRACT_SENTINEL_LENGTH = START_ABSTRACT_SENTINEL.length;
 var END_ABSTRACT_SENTINEL = "<p>";
-
+var TOUCHPATH = os.homedir() + "touched/touched";
 
 var config = require("./lib/config");
 var express = require("express");
