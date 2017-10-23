@@ -7,7 +7,6 @@ var NSW_METADATA_TEMPLATE = "https://s3-ap-southeast-2.amazonaws.com/nsw.elvis/z
 var START_ABSTRACT_SENTINEL = "<h3>Abstract:</h3>";
 var START_ABSTRACT_SENTINEL_LENGTH = START_ABSTRACT_SENTINEL.length;
 var END_ABSTRACT_SENTINEL = "<p>";
-var TOUCHPATH = os.homedir() + "touched/touched";
 
 var config = require("./lib/config");
 var express = require("express");
@@ -27,6 +26,8 @@ request.gzip = false;
 var app = express();
 var url = require('url');
 var X2JS = require('x2js');
+
+var TOUCHPATH = os.homedir() + "touched/touched";
 
 var StringDecoder = require('string_decoder').StringDecoder;
 var yargs = require('yargs').options({
