@@ -17,223 +17,6 @@ specific language governing permissions and limitations
 under the License.
 */
 
-"use strict";
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-{
-   var WaterRegionsService = function () {
-      function WaterRegionsService($http, configService, mapService) {
-         _classCallCheck(this, WaterRegionsService);
-
-         this.$http = $http;
-         this.configService = configService;
-         this.mapService = mapService;
-      }
-
-      _createClass(WaterRegionsService, [{
-         key: "config",
-         value: function config() {
-            return this.configService.getConfig("regions");
-         }
-      }, {
-         key: "features",
-         value: function features() {
-            var _this = this;
-
-            return this.config().then(function (config) {
-               return _this.$http.get(config.regionsUrl, { cache: true }).then(function (response) {
-                  return response.data.features;
-               });
-            });
-         }
-      }, {
-         key: "draw",
-         value: function draw() {
-            var _this2 = this;
-
-            if (this.promise) {
-               return this.promise;
-            }
-
-            this.promise = this.config().then(function (config) {
-               return _this2.mapService.getMap().then(function (map) {
-                  return _this2.features().then(function (features) {
-                     var divisions = _this2.divisions = [];
-                     var regions = _this2.regions = [];
-                     var divisionsMap = _this2.divisionsMap = {};
-
-                     features.forEach(function (feature) {
-                        var name = feature.properties.Division;
-                        divisionsMap[name] = divisionsMap[name] || [];
-                        divisionsMap[name].push(feature);
-                     });
-
-                     Object.keys(divisionsMap).forEach(function (key, index) {
-                        var features = divisionsMap[key];
-                        var color = config.divisionColors[index % config.divisionColors.length];
-                        var division = L.geoJson(features, {
-                           onEachFeature: function onEachFeature(feature, layer) {
-                              var region = {
-                                 layer: layer,
-                                 name: feature.properties.RivRegName,
-                                 feature: feature,
-                                 show: function show() {
-                                    this.layer.openPopup();
-                                 },
-                                 hide: function hide() {
-                                    this.layer._map.closePopup();
-                                 }
-                              };
-
-                              layer.bindPopup(region.name);
-                              regions.push(region);
-
-                              layer.on("mouseover", function () {
-                                 console.log("river", layer);
-                              });
-                           },
-                           style: function style(feature) {
-                              return {
-                                 color: "black",
-                                 fillOpacity: 0.2,
-                                 fillColor: color,
-                                 weight: 1
-                              };
-                           }
-                        });
-
-                        var divisionOptions = config.divisionOptions[key] || {
-                           center: division.getBounds().getCenter()
-                        };
-
-                        var marker = new L.marker(divisionOptions.center, { opacity: 0.01 });
-                        marker.bindLabel(key, { noHide: true, className: "regions-label", offset: [0, 0] });
-                        marker.addTo(map);
-
-                        divisions.push({
-                           layer: division,
-                           name: key,
-                           marker: marker,
-                           features: features
-                        });
-                     });
-
-                     var featureGroup = L.featureGroup(divisions.map(function (division) {
-                        return division.layer;
-                     }), {
-                        style: function style(feature) {
-                           return {
-                              color: "black",
-                              fill: true,
-                              fillColor: "red",
-                              weight: 1
-                           };
-                        }
-                     }).on("mouseover", function (group) {
-                        console.log("division", group);
-                     });
-                     featureGroup.addTo(map);
-                  });
-               });
-            });
-            return this.promise;
-         }
-      }, {
-         key: "divisionColors",
-         get: function get() {
-            return config.divisionColors;
-         }
-      }]);
-
-      return WaterRegionsService;
-   }();
-
-   WaterRegionsService.$invoke = ['$http', 'configService', 'mapService'];
-
-   angular.module("water.regions", ["water.select.division", "water.select.region"]).directive("waterRegions", ["$http", "waterRegionsService", "mapService", function ($http, waterRegionsService, mapService) {
-      return {
-         link: function link(scope) {
-            var layer = void 0;
-            waterRegionsService.draw();
-         }
-      };
-   }]).service("waterRegionsService", WaterRegionsService);
-}
-"use strict";
-
-{
-   var PaneCtrl = function PaneCtrl(paneService) {
-      paneService.data().then(function (data) {
-         this.data = data;
-      }.bind(this));
-   };
-
-   var PaneService = function PaneService() {
-      var data = {};
-
-      return {
-         add: function add(item) {},
-
-         remove: function remove(item) {}
-      };
-   };
-
-   angular.module("water.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
-      return {
-         templateUrl: "water/panes/panes.html",
-         transclude: true,
-         scope: {
-            defaultItem: "@",
-            data: "="
-         },
-         controller: ['$scope', function ($scope) {
-            var changeSize = false;
-
-            $scope.view = $scope.defaultItem;
-
-            $scope.setView = function (what) {
-               var oldView = $scope.view;
-
-               if ($scope.view === what) {
-                  if (what) {
-                     changeSize = true;
-                  }
-                  $scope.view = "";
-               } else {
-                  if (!what) {
-                     changeSize = true;
-                  }
-                  $scope.view = what;
-               }
-
-               $rootScope.$broadcast("view.changed", $scope.view, oldView);
-
-               if (changeSize) {
-                  mapService.getMap().then(function (map) {
-                     map._onResize();
-                  });
-               }
-            };
-            $timeout(function () {
-               $rootScope.$broadcast("view.changed", $scope.view, null);
-            }, 50);
-         }]
-      };
-   }]).directive("icsmTabs", [function () {
-      return {
-         templateUrl: "water/panes/tabs.html",
-         require: "^icsmPanes"
-      };
-   }]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
-
-   PaneCtrl.$inject = ["paneService"];
-
-
-   PaneService.$inject = [];
-}
 'use strict';
 
 {
@@ -330,6 +113,78 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 	}]).controller("RootCtrl", RootCtrl);
 
 	RootCtrl.$invoke = ['$http', 'configService', 'mapService'];
+}
+"use strict";
+
+{
+   var PaneCtrl = function PaneCtrl(paneService) {
+      paneService.data().then(function (data) {
+         this.data = data;
+      }.bind(this));
+   };
+
+   var PaneService = function PaneService() {
+      var data = {};
+
+      return {
+         add: function add(item) {},
+
+         remove: function remove(item) {}
+      };
+   };
+
+   angular.module("water.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
+      return {
+         templateUrl: "water/panes/panes.html",
+         transclude: true,
+         scope: {
+            defaultItem: "@",
+            data: "="
+         },
+         controller: ['$scope', function ($scope) {
+            var changeSize = false;
+
+            $scope.view = $scope.defaultItem;
+
+            $scope.setView = function (what) {
+               var oldView = $scope.view;
+
+               if ($scope.view === what) {
+                  if (what) {
+                     changeSize = true;
+                  }
+                  $scope.view = "";
+               } else {
+                  if (!what) {
+                     changeSize = true;
+                  }
+                  $scope.view = what;
+               }
+
+               $rootScope.$broadcast("view.changed", $scope.view, oldView);
+
+               if (changeSize) {
+                  mapService.getMap().then(function (map) {
+                     map._onResize();
+                  });
+               }
+            };
+            $timeout(function () {
+               $rootScope.$broadcast("view.changed", $scope.view, null);
+            }, 50);
+         }]
+      };
+   }]).directive("icsmTabs", [function () {
+      return {
+         templateUrl: "water/panes/tabs.html",
+         require: "^icsmPanes"
+      };
+   }]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
+
+   PaneCtrl.$inject = ["paneService"];
+
+
+   PaneService.$inject = [];
 }
 "use strict";
 
@@ -902,6 +757,151 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 
 	SelectCtrl.$inject = ['$rootScope', 'configService', 'flashService', 'selectService'];
+}
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+{
+   var WaterRegionsService = function () {
+      function WaterRegionsService($http, configService, mapService) {
+         _classCallCheck(this, WaterRegionsService);
+
+         this.$http = $http;
+         this.configService = configService;
+         this.mapService = mapService;
+      }
+
+      _createClass(WaterRegionsService, [{
+         key: "config",
+         value: function config() {
+            return this.configService.getConfig("regions");
+         }
+      }, {
+         key: "features",
+         value: function features() {
+            var _this = this;
+
+            return this.config().then(function (config) {
+               return _this.$http.get(config.regionsUrl, { cache: true }).then(function (response) {
+                  return response.data.features;
+               });
+            });
+         }
+      }, {
+         key: "draw",
+         value: function draw() {
+            var _this2 = this;
+
+            if (this.promise) {
+               return this.promise;
+            }
+
+            this.promise = this.config().then(function (config) {
+               return _this2.mapService.getMap().then(function (map) {
+                  return _this2.features().then(function (features) {
+                     var divisions = _this2.divisions = [];
+                     var regions = _this2.regions = [];
+                     var divisionsMap = _this2.divisionsMap = {};
+
+                     features.forEach(function (feature) {
+                        var name = feature.properties.Division;
+                        divisionsMap[name] = divisionsMap[name] || [];
+                        divisionsMap[name].push(feature);
+                     });
+
+                     Object.keys(divisionsMap).forEach(function (key, index) {
+                        var features = divisionsMap[key];
+                        var color = config.divisionColors[index % config.divisionColors.length];
+                        var division = L.geoJson(features, {
+                           onEachFeature: function onEachFeature(feature, layer) {
+                              var region = {
+                                 layer: layer,
+                                 name: feature.properties.RivRegName,
+                                 feature: feature,
+                                 show: function show() {
+                                    this.layer.openPopup();
+                                 },
+                                 hide: function hide() {
+                                    this.layer._map.closePopup();
+                                 }
+                              };
+
+                              layer.bindPopup(region.name);
+                              regions.push(region);
+
+                              layer.on("mouseover", function () {
+                                 console.log("river", layer);
+                              });
+                           },
+                           style: function style(feature) {
+                              return {
+                                 color: "black",
+                                 fillOpacity: 0.2,
+                                 fillColor: color,
+                                 weight: 1
+                              };
+                           }
+                        });
+
+                        var divisionOptions = config.divisionOptions[key] || {
+                           center: division.getBounds().getCenter()
+                        };
+
+                        var marker = new L.marker(divisionOptions.center, { opacity: 0.01 });
+                        marker.bindLabel(key, { noHide: true, className: "regions-label", offset: [0, 0] });
+                        marker.addTo(map);
+
+                        divisions.push({
+                           layer: division,
+                           name: key,
+                           marker: marker,
+                           features: features
+                        });
+                     });
+
+                     var featureGroup = L.featureGroup(divisions.map(function (division) {
+                        return division.layer;
+                     }), {
+                        style: function style(feature) {
+                           return {
+                              color: "black",
+                              fill: true,
+                              fillColor: "red",
+                              weight: 1
+                           };
+                        }
+                     }).on("mouseover", function (group) {
+                        console.log("division", group);
+                     });
+                     featureGroup.addTo(map);
+                  });
+               });
+            });
+            return this.promise;
+         }
+      }, {
+         key: "divisionColors",
+         get: function get() {
+            return config.divisionColors;
+         }
+      }]);
+
+      return WaterRegionsService;
+   }();
+
+   WaterRegionsService.$invoke = ['$http', 'configService', 'mapService'];
+
+   angular.module("water.regions", ["water.select.division", "water.select.region"]).directive("waterRegions", ["$http", "waterRegionsService", "mapService", function ($http, waterRegionsService, mapService) {
+      return {
+         link: function link(scope) {
+            var layer = void 0;
+            waterRegionsService.draw();
+         }
+      };
+   }]).service("waterRegionsService", WaterRegionsService);
 }
 "use strict";
 

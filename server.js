@@ -49,6 +49,7 @@ var yargs = require('yargs').options({
 });
 var argv = yargs.argv;
 var port = process.env.PORT || argv.port;
+var TOUCHPATH = process.env.HOME + "touched/touched"
 var dontProxyHeaderRegex = /^(?:Host|Proxy-Connection|Accept-Encoding|Connection|Keep-Alive|Transfer-Encoding|TE|Trailer|Proxy-Authorization|Proxy-Authenticate|Upgrade)$/i;
 // There should only ever be a couple. We do a contains on the requested host.
 var validHosts = config.validHosts;
@@ -126,6 +127,11 @@ app.get('/token', function(req, res) {
       });
       res.status(200).send(data);
    });
+});
+
+// This doesn't refresh Solr straight away. It simply touches a file and it is up to something else to react to the touch
+app.get('/touch', function(req, res) {
+   fs.closeSync(fs.openSync(TOUCHPATH, 'w'));
 });
 
 app.get('/xml2js/*', function (req, res, next) {

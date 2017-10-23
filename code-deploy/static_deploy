@@ -11,7 +11,7 @@ git pull
 # Copy static content to Apache
 sudo cp -rf dist/* /var/www/html
 
-# Sometimes you want to run it on a domain that does not have GA's key registered so
+# Sometimes you want to run it on a domain that does not have GA's Google client ID registered so
 # you can set the system variable GOOGLE_KEY in your .bash_profile and export it so that
 # it replace the GA key
 if [ -n "$GOOGLE_KEY" ]
@@ -21,6 +21,7 @@ then
   cp dist/*.html /tmp/fsdf_work
   /bin/sed -i -e 's/'"$GA_GOOGLE_CLIENT"'/'"$GOOGLE_KEY"'/g' /tmp/fsdf_work/*.html
   sudo cp -f /tmp/fsdf_work/*.html /var/www/html
+  sudo rm -rf /tmp/fsdf_work
 fi
 
 # Update any proxies that might have changed

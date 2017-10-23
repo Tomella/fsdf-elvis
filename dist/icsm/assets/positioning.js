@@ -17,59 +17,6 @@ specific language governing permissions and limitations
 under the License.
 */
 
-'use strict';
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-{
-   var RootCtrl = function RootCtrl(configService) {
-      var _this = this;
-
-      _classCallCheck(this, RootCtrl);
-
-      configService.getConfig().then(function (data) {
-         _this.data = data;
-         _this.state = new State();
-      });
-   };
-
-   RootCtrl.$invoke = ['configService'];
-
-   angular.module("PositioningApp", ['common.altthemes', 'common.navigation', 'common.storage', 'common.templates', 'common.toolbar', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.persist', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'positioning.download', 'positioning.file', 'positioning.filedrop', 'positioning.header', 'positioning.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'page.footer'])
-
-   // Set up all the service providers here.
-   .config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', 'persistServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider, persistServiceProvider) {
-      configServiceProvider.location("icsm/resources/config/positioning.json");
-      configServiceProvider.dynamicLocation("icsm/resources/config/positioning.json?t=");
-      versionServiceProvider.url("icsm/assets/package.json");
-      projectsServiceProvider.setProject("icsm");
-      persistServiceProvider.handler("local");
-   }]).factory("userService", [function () {
-      return {
-         login: noop,
-         hasAcceptedTerms: noop,
-         setAcceptedTerms: noop,
-         getUsername: function getUsername() {
-            return {
-               then: function then(fn) {
-                  return fn("anon");
-               }
-            };
-         }
-      };
-      function noop() {
-         return true;
-      }
-   }]).controller("RootCtrl", RootCtrl).filter('bytes', function () {
-      return function (bytes, precision) {
-         if (isNaN(parseFloat(bytes)) || !isFinite(bytes)) return '-';
-         if (typeof precision === 'undefined') precision = 0;
-         var units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'],
-             number = Math.floor(Math.log(bytes) / Math.log(1024));
-         return (bytes / Math.pow(1024, Math.floor(number))).toFixed(precision) + ' ' + units[number];
-      };
-   });
-}
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -134,6 +81,59 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          }
       };
    }]).service("csvService", CsvService);
+}
+'use strict';
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+{
+   var RootCtrl = function RootCtrl(configService) {
+      var _this = this;
+
+      _classCallCheck(this, RootCtrl);
+
+      configService.getConfig().then(function (data) {
+         _this.data = data;
+         _this.state = new State();
+      });
+   };
+
+   RootCtrl.$invoke = ['configService'];
+
+   angular.module("PositioningApp", ['common.altthemes', 'common.navigation', 'common.storage', 'common.templates', 'common.toolbar', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.persist', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'positioning.download', 'positioning.file', 'positioning.filedrop', 'positioning.header', 'positioning.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'page.footer'])
+
+   // Set up all the service providers here.
+   .config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', 'persistServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider, persistServiceProvider) {
+      configServiceProvider.location("icsm/resources/config/positioning.json");
+      configServiceProvider.dynamicLocation("icsm/resources/config/positioning.json?t=");
+      versionServiceProvider.url("icsm/assets/package.json");
+      projectsServiceProvider.setProject("icsm");
+      persistServiceProvider.handler("local");
+   }]).factory("userService", [function () {
+      return {
+         login: noop,
+         hasAcceptedTerms: noop,
+         setAcceptedTerms: noop,
+         getUsername: function getUsername() {
+            return {
+               then: function then(fn) {
+                  return fn("anon");
+               }
+            };
+         }
+      };
+      function noop() {
+         return true;
+      }
+   }]).controller("RootCtrl", RootCtrl).filter('bytes', function () {
+      return function (bytes, precision) {
+         if (isNaN(parseFloat(bytes)) || !isFinite(bytes)) return '-';
+         if (typeof precision === 'undefined') precision = 0;
+         var units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'],
+             number = Math.floor(Math.log(bytes) / Math.log(1024));
+         return (bytes / Math.pow(1024, Math.floor(number))).toFixed(precision) + ' ' + units[number];
+      };
+   });
 }
 "use strict";
 
