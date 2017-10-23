@@ -133,6 +133,10 @@ app.get('/token', function(req, res) {
 // This doesn't refresh Solr straight away. It simply touches a file and it is up to something else to react to the touch
 app.get('/touch', function(req, res) {
    fs.closeSync(fs.openSync(TOUCHPATH, 'w'));
+   res.header({
+      "Content-Type": "application/json;charset=UTF-8"
+   });
+   res.status(200).send({status: "success"});
 });
 
 app.get('/xml2js/*', function (req, res, next) {
