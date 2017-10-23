@@ -27,7 +27,8 @@ var app = express();
 var url = require('url');
 var X2JS = require('x2js');
 
-var TOUCHPATH = os.homedir() + "touched/touched";
+// A bit ugly but we will get rid of it soon.
+var TOUCHPATH = "/home/ec2-user/touched/touched";
 
 var StringDecoder = require('string_decoder').StringDecoder;
 var yargs = require('yargs').options({
