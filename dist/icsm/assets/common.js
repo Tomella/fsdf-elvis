@@ -19,6 +19,54 @@ under the License.
 
 'use strict';
 
+{
+   /**
+    * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
+    */
+
+   angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider']).directive('commonBaselayerControl', ['$rootScope', 'mapHelper', 'mapService', function ($rootScope, mapHelper, mapService) {
+      var DEFAULTS = {
+         maxZoom: 12
+      };
+
+      return {
+         template: '<slider min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
+         scope: {
+            maxZoom: "="
+         },
+         link: function link(scope, element) {
+            if (typeof scope.maxZoom === "undefined") {
+               scope.maxZoom = DEFAULTS.maxZoom;
+            }
+            scope.slider = {
+               opacity: -1,
+               visibility: true,
+               lastOpacity: 1
+            };
+
+            // Get the initial value
+            mapHelper.getPseudoBaseLayer().then(function (layer) {
+               scope.layer = layer;
+               scope.slider.opacity = layer.options.opacity;
+            });
+
+            scope.$watch('slider.opacity', function (newValue, oldValue) {
+               if (oldValue < 0) return;
+
+               mapService.getMap().then(function (map) {
+                  map.eachLayer(function (layer) {
+                     if (layer.pseudoBaseLayer) {
+                        layer.setOpacity(scope.slider.opacity);
+                     }
+                  });
+               });
+            });
+         }
+      };
+   }]);
+}
+'use strict';
+
 angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAccordionConfig', {
   closeOthers: true
 }).controller('commonAccordionController', ['$scope', '$attrs', 'commonAccordionConfig', function ($scope, $attrs, accordionConfig) {
@@ -254,54 +302,6 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
                bbox._map.removeLayer(bbox);
             }
             return null;
-         }
-      };
-   }]);
-}
-'use strict';
-
-{
-   /**
-    * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
-    */
-
-   angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider']).directive('commonBaselayerControl', ['$rootScope', 'mapHelper', 'mapService', function ($rootScope, mapHelper, mapService) {
-      var DEFAULTS = {
-         maxZoom: 12
-      };
-
-      return {
-         template: '<slider min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
-         scope: {
-            maxZoom: "="
-         },
-         link: function link(scope, element) {
-            if (typeof scope.maxZoom === "undefined") {
-               scope.maxZoom = DEFAULTS.maxZoom;
-            }
-            scope.slider = {
-               opacity: -1,
-               visibility: true,
-               lastOpacity: 1
-            };
-
-            // Get the initial value
-            mapHelper.getPseudoBaseLayer().then(function (layer) {
-               scope.layer = layer;
-               scope.slider.opacity = layer.options.opacity;
-            });
-
-            scope.$watch('slider.opacity', function (newValue, oldValue) {
-               if (oldValue < 0) return;
-
-               mapService.getMap().then(function (map) {
-                  map.eachLayer(function (layer) {
-                     if (layer.pseudoBaseLayer) {
-                        layer.setOpacity(scope.slider.opacity);
-                     }
-                  });
-               });
-            });
          }
       };
    }]);
@@ -2332,6 +2332,57 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 'use strict';
 
 (function (angular) {
+	'use strict';
+
+	angular.module("common.storage", ['explorer.projects']).factory("storageService", ['$log', '$q', 'projectsService', function ($log, $q, projectsService) {
+		return {
+			setGlobalItem: function setGlobalItem(key, value) {
+				this._setItem("_system", key, value);
+			},
+
+			setItem: function setItem(key, value) {
+				projectsService.getCurrentProject().then(function (project) {
+					this._setItem(project, key, value);
+				}.bind(this));
+			},
+
+			_setItem: function _setItem(project, key, value) {
+				$log.debug("Fetching state for key locally" + key);
+				localStorage.setItem("mars.anon." + project + "." + key, JSON.stringify(value));
+			},
+
+			getGlobalItem: function getGlobalItem(key) {
+				return this._getItem("_system", key);
+			},
+
+			getItem: function getItem(key) {
+				var deferred = $q.defer();
+				projectsService.getCurrentProject().then(function (project) {
+					this._getItem(project, key).then(function (response) {
+						deferred.resolve(response);
+					});
+				}.bind(this));
+				return deferred.promise;
+			},
+
+			_getItem: function _getItem(project, key) {
+				$log.debug("Fetching state locally for key " + key);
+				var item = localStorage.getItem("mars.anon." + project + "." + key);
+				if (item) {
+					try {
+						item = JSON.parse(item);
+					} catch (e) {
+						// Do nothing as it will be a string
+					}
+				}
+				return $q.when(item);
+			}
+		};
+	}]);
+})(angular);
+'use strict';
+
+(function (angular) {
 
     angular.module('ui.bootstrap-slider', []).directive('slider', ['$parse', '$timeout', function ($parse, $timeout) {
         return {
@@ -2528,57 +2579,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
         };
     }]);
-})(angular);
-'use strict';
-
-(function (angular) {
-	'use strict';
-
-	angular.module("common.storage", ['explorer.projects']).factory("storageService", ['$log', '$q', 'projectsService', function ($log, $q, projectsService) {
-		return {
-			setGlobalItem: function setGlobalItem(key, value) {
-				this._setItem("_system", key, value);
-			},
-
-			setItem: function setItem(key, value) {
-				projectsService.getCurrentProject().then(function (project) {
-					this._setItem(project, key, value);
-				}.bind(this));
-			},
-
-			_setItem: function _setItem(project, key, value) {
-				$log.debug("Fetching state for key locally" + key);
-				localStorage.setItem("mars.anon." + project + "." + key, JSON.stringify(value));
-			},
-
-			getGlobalItem: function getGlobalItem(key) {
-				return this._getItem("_system", key);
-			},
-
-			getItem: function getItem(key) {
-				var deferred = $q.defer();
-				projectsService.getCurrentProject().then(function (project) {
-					this._getItem(project, key).then(function (response) {
-						deferred.resolve(response);
-					});
-				}.bind(this));
-				return deferred.promise;
-			},
-
-			_getItem: function _getItem(project, key) {
-				$log.debug("Fetching state locally for key " + key);
-				var item = localStorage.getItem("mars.anon." + project + "." + key);
-				if (item) {
-					try {
-						item = JSON.parse(item);
-					} catch (e) {
-						// Do nothing as it will be a string
-					}
-				}
-				return $q.when(item);
-			}
-		};
-	}]);
 })(angular);
 "use strict";
 

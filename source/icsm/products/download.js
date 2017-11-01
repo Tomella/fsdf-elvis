@@ -3,7 +3,7 @@
 
       .directive("productDownloadButton", ['configService', function (configService) {
          return {
-            template: "<button ng-disabled='!show' ng-click='item.showDownload = !item.showDownload' type='button' class='undecorated' title='Click to start download'>" +
+            template: "<button ng-click='item.showDownload = !item.showDownload' type='button' class='undecorated' title='Click to start download'>" +
             "<i class='fa fa-lg fa-download' ng-class='{active:item.showDownload}'></i></button>",
             scope: {
                item: "="
