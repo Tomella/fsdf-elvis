@@ -24,10 +24,12 @@ then
   sudo rm -rf /tmp/fsdf_work
 fi
 
+## We used to do the proxy configuration here but once it became shared we moved it to its own project
 # Update any proxies that might have changed
-sudo cp -f code-deploy/proxies.conf /etc/httpd/conf.d
+# sudo cp -f code-deploy/proxies.conf /etc/httpd/conf.d
 # Pick up any new proxies
-sudo service httpd restart
+# sudo service httpd restart
+
 # Stop the application
 sudo service fsdf stop
 # Update the service

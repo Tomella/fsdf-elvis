@@ -135,6 +135,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       };
    }]).service("csvService", CsvService);
 }
+'use strict';
+
+{
+   angular.module('positioning.download', [])
+   /**
+    *
+    * Override the original mars user.
+    *
+    */
+   .directive('posDownload', [function () {
+      return {
+         restrict: 'AE',
+         templateUrl: 'positioning/download/download.html',
+         link: function link(scope) {}
+      };
+   }]);
+}
 "use strict";
 
 {
@@ -198,23 +215,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                messageService.success("Submitted your job. An email will be delivered on completion.");
             };
          }
-      };
-   }]);
-}
-'use strict';
-
-{
-   angular.module('positioning.download', [])
-   /**
-    *
-    * Override the original mars user.
-    *
-    */
-   .directive('posDownload', [function () {
-      return {
-         restrict: 'AE',
-         templateUrl: 'positioning/download/download.html',
-         link: function link(scope) {}
       };
    }]);
 }
@@ -582,31 +582,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 }
 "use strict";
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-{
-   var ShpService = function ShpService($q) {
-      _classCallCheck(this, ShpService);
-
-      this.$q = $q;
-   };
-
-   ShpService.$invoke = ["$q"];
-
-   angular.module("positioning.shp", []).directive("shpFile", ["shpService", function (shpService) {
-      return {
-         templateUrl: "positioning/shapefile/shapefile.html",
-         restrict: 'AE',
-         scope: {
-            state: "=",
-            settings: "="
-         },
-         link: function link(scope) {}
-      };
-   }]).service("shpService", ShpService);
-}
-"use strict";
-
 function CSVToArray(strData, strDelimiter) {
    // Check to see if the delimiter is defined. If not,
    // then default to comma.
@@ -946,6 +921,31 @@ var State = function () {
 
    return State;
 }();
+"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+{
+   var ShpService = function ShpService($q) {
+      _classCallCheck(this, ShpService);
+
+      this.$q = $q;
+   };
+
+   ShpService.$invoke = ["$q"];
+
+   angular.module("positioning.shp", []).directive("shpFile", ["shpService", function (shpService) {
+      return {
+         templateUrl: "positioning/shapefile/shapefile.html",
+         restrict: 'AE',
+         scope: {
+            state: "=",
+            settings: "="
+         },
+         link: function link(scope) {}
+      };
+   }]).service("shpService", ShpService);
+}
 "use strict";
 
 {

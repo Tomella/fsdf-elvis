@@ -430,13 +430,6 @@ div.leaflet-control-scale-line {
   height: 14px;
   border: solid 1px black;
 }
-.pn-featuretypes-swathe {
-  display: inline-block;
-  background-color: #337ab7;
-  width: 14px;
-  height: 14px;
-  border: solid 1px black;
-}
 .pn-classifications-pills span.btn-primary {
   background-color: green;
 }
@@ -448,30 +441,19 @@ div.leaflet-control-scale-line {
   height: 14px;
   border: solid 1px black;
 }
+.pn-featuretypes-swathe {
+  display: inline-block;
+  background-color: #337ab7;
+  width: 14px;
+  height: 14px;
+  border: solid 1px black;
+}
 .pn-tab-content-item {
   padding-right: 3px;
   background: #FFF;
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-}
-.pn-features {
-  max-block-size: 300px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.pn-search-container {
-  height: 97%;
-}
-
-.tooltip-inner {
-  max-width: 350px;
-}
-
-.pn-pill {
-  color: #fff;
-  margin: 4px;
 }
 .pn-container {
   overflow-y: auto;
@@ -518,6 +500,24 @@ div.leaflet-control-scale-line {
   padding-bottom: 5px;
   background-color: #f8f8ff;
   border-top: 1px solid #f0f0f0;
+}
+.pn-features {
+  max-block-size: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.pn-search-container {
+  height: 97%;
+}
+
+.tooltip-inner {
+  max-width: 350px;
+}
+
+.pn-pill {
+  color: #fff;
+  margin: 4px;
 }
 /* Overrides */
 
@@ -841,28 +841,6 @@ img.elvis-logo {
 .mess-container {
   font-weight: bold;
 }
-.product-valid {
-  color: green;
-}
-
-.product-invalid {
-  color: red;
-}
-
-.product-warning {
-  color: darkorange;
-}
-
-.product-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.product-restrict {
-  padding-bottom: 8px;
-}
 .continue-container {
   padding: 4px;
 }
@@ -1001,20 +979,27 @@ img.elvis-logo {
   left: 0;
   right: 0;
 }
-.selectContainer {
-  width: 100%;
+.product-valid {
+  color: green;
 }
 
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
+.product-invalid {
   color: red;
+}
+
+.product-warning {
+  color: darkorange;
+}
+
+.product-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.product-restrict {
+  padding-bottom: 8px;
 }
 .reviewing-odd {
   background-color: #eeeeee;
@@ -1047,6 +1032,21 @@ i.fa.active {
 .exclude {
   color: #777777;
   text-decoration: line-through;
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
 }
 .icsm-icon {
   background: url("icsm/img/global-sprites.svg") no-repeat;
@@ -1172,30 +1172,6 @@ div.leaflet-control-scale-line {
   right: 0;
   bottom: 8px;
 }
-.regions-label {
-  border: 0;
-}
-
-.regions-label.over {
-  font-weight: bold;
-  color: red;
-  font-size: 120%;
-}
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -1242,6 +1218,15 @@ div.leaflet-control-scale-line {
     display: none;
   }
 }
+.regions-label {
+  border: 0;
+}
+
+.regions-label.over {
+  font-weight: bold;
+  color: red;
+  font-size: 120%;
+}
 .vector-tooltip {
   min-width: 25em;
 }
@@ -1255,6 +1240,21 @@ div.leaflet-control-scale-line {
 
 .vector-add:disabled {
   color: gray;
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
 }
 .start-content-container {
   position: fixed;
