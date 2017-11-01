@@ -33,7 +33,7 @@
       <div>
          <div class="listRow" ng-class-odd="'listEven'" ng-repeat="(typeKey, types) in available.downloadables | allowedTypes">
             <span>
-               <strong>{{typeKey}}</strong>
+               <strong>{{typeKey}} ({{types | keysLength}})</strong>
                <button class="pull-right undecorated" ng-click="expansions[available.source + '_' + typeKey] = !expansions[available.source + '_' + typeKey]">
                   [{{expansions[available.source + '_' + typeKey]?"collapse":"expand"}}]
                </button>
