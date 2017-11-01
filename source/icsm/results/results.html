@@ -1,5 +1,6 @@
 <div ng-show="!list || !list.length">
-   <div class="alert alert-warning" role="alert"><strong>Select an area</strong> to find datasets within.</div>
+   <div class="alert alert-warning" role="alert">
+      <strong>Select an area</strong> to find datasets within.</div>
 </div>
 
 <div ng-show="list.length" class="results-list">
@@ -10,16 +11,16 @@
    </div>
    <div class="panel panel-default" style="margin-bottom: 5px; margin-top: 5px;">
       <div class="panel-body" style="float:clear">
-         <span class="filter-text" style="float:left;width:50%" >
+         <span class="filter-text" style="float:left;width:50%">
             <div class="input-group input-group-sm">
                <span class="input-group-addon" id="names1">Filter:</span>
                <input type="text" ng-model="filters.filter" class="form-control" ng-change="update()" placeholder="Filter names" aria-describedby="names1">
             </div>
          </span>
          <span class="filter-type" style="padding:10px; float:right">
-				<span class="listTypeLabel">Filter by type:</span>
+            <span class="listTypeLabel">Filter by type:</span>
             <span ng-repeat="type in filters.types" class="listType">
-               <input type="checkbox" ng-model="type.selected" ng-change="update()"/>
+               <input type="checkbox" ng-model="type.selected" ng-change="update()" />
                <span uib-tooltip="{{type.description}}">{{type.label}}</span>
             </span>
          </span>
@@ -29,46 +30,55 @@
    <div ng-repeat="available in list" class="well" style="padding-left:4px;padding-right:4px" ng-show="list.someMatches(available)"
       ng-controller="listCtrl as list">
       <icsm-org-heading org="available" expansions="expansions" mappings="mappings" products="products"></icsm-org-heading>
-      <div uib-collapse="!expansions[available.source]">
-         <div class="listRow" ng-class-odd="'listEven'" ng-if="expansions[available.source]" ng-repeat="(typeKey, types) in available.downloadables | allowedTypes">
-            <h5><strong>{{typeKey}}</strong></h5>
-            <div ng-repeat="(key, items) in types">
-               <div>
-                  <h5>
-                     <button ng-click="list.checkChildren(items)" style="width:7em" class="btn btn-xs btn-default">
-                        <span ng-show="!list.childrenChecked(items)">Select all</span>
-                        <span ng-show="list.childrenChecked(items)">Deselect all</span>
-                     </button>
-                     <strong uib-tooltip="{{filter.types[key].description}}">{{key}}</strong>
-                  </h5>
-                  <div ng-repeat="item in items | matchedItems" icsm-abstract-hover item="item" >
-                     <div tooltip-append-to-body="true" uib-tooltip-template="'icsm/results/abstracttooltip.html'" tooltip-popup-delay="400"
-                              data-ng-mouseenter="show(item)" data-ng-mouseleave="hide(item)">
-                        <input type="checkbox" ng-model="item.selected" />
-                        <icsm-abstract item="item"></icsm-abstract>
-                        <common-cc version="mappings[item.source].ccLicence"></common-cc>
-                        <span class="listItem" item="item" icsm-abstract-link></span>
-                        <span ng-show="item.file_size" style="float:right;padding-top:3px">({{item.file_size | fileSize}})</span>
-                     </div>
-                     <div ng-show="item.showAbstract" class="well">
-                        <span ng-show="!item.metadata">
-                           <i class="fa fa-spinner fa-spin fa-lg fa-fw"></i>
-                           <span>Loading metadata...</span>
-                        </span>
-                        <div ng-show="item.metadata.abstract">
-                           <strong>{{item.metadata.title}}</strong> -
-                           <span class="icsm-abstract-body" ng-bind-html="item.metadata.abstractText"></span >
+      <div>
+         <div class="listRow" ng-class-odd="'listEven'" ng-repeat="(typeKey, types) in available.downloadables | allowedTypes">
+            <span>
+               <strong>{{typeKey}}</strong>
+               <button class="pull-right undecorated" ng-click="expansions[available.source + '_' + typeKey] = !expansions[available.source + '_' + typeKey]">
+                  [{{expansions[available.source + '_' + typeKey]?"collapse":"expand"}}]
+               </button>
+            </span>
+            <div ng-if="expansions[available.source + '_' + typeKey]">
+               <div ng-repeat="(key, items) in types">
+                  <div>
+                     <h5>
+                        <button ng-click="list.checkChildren(items)" style="width:7em" class="btn btn-xs btn-default">
+                           <span ng-show="!list.childrenChecked(items)">Select all</span>
+                           <span ng-show="list.childrenChecked(items)">Deselect all</span>
+                        </button>
+                        <strong uib-tooltip="{{filter.types[key].description}}">{{key}}</strong>
+                     </h5>
+                     <div ng-repeat="item in items | matchedItems" icsm-abstract-hover item="item">
+                        <div tooltip-append-to-body="true" uib-tooltip-template="'icsm/results/abstracttooltip.html'" tooltip-popup-delay="400" data-ng-mouseenter="show(item)"
+                           data-ng-mouseleave="hide(item)">
+                           <input type="checkbox" ng-model="item.selected" />
+                           <icsm-abstract item="item"></icsm-abstract>
+                           <common-cc version="mappings[item.source].ccLicence"></common-cc>
+                           <span class="listItem" item="item" icsm-abstract-link></span>
+                           <span ng-show="item.file_size" style="float:right;padding-top:3px">({{item.file_size | fileSize}})</span>
                         </div>
-                        <div ng-show="!item.metadata.abstract">
-                           <i class="fa fa-lg fa-exclamation-triangle" style="color:orange"></i>
-                           There is no abstract available for this dataset.
+                        <div ng-show="item.showAbstract" class="well">
+                           <span ng-show="!item.metadata">
+                              <i class="fa fa-spinner fa-spin fa-lg fa-fw"></i>
+                              <span>Loading metadata...</span>
+                           </span>
+                           <div ng-show="item.metadata.abstract">
+                              <strong>{{item.metadata.title}}</strong> -
+                              <span class="icsm-abstract-body" ng-bind-html="item.metadata.abstractText"></span>
+                           </div>
+                           <div ng-show="!item.metadata.abstract">
+                              <i class="fa fa-lg fa-exclamation-triangle" style="color:orange"></i>
+                              There is no abstract available for this dataset.
+                           </div>
                         </div>
                      </div>
-						</div>
-					</div>
-				</div>
-				<div style="text-align:right"><button class="undecorated" ng-click="expansions[available.source] = false">[collapse]</button></div>
-			</div>
-		</div>
-	</div>
+                  </div>
+               </div>
+               <div style="text-align:right">
+                  <button class="undecorated" ng-click="expansions[available.source + '_' + typeKey] = false">[collapse]</button>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
 </div>
