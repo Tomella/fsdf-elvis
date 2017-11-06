@@ -20,6 +20,37 @@ under the License.
 'use strict';
 
 (function (angular) {
+   'use strict';
+
+   angular.module("placenames.authorities", []).directive('pnAuthorities', [function () {
+      return {
+         restrict: 'EA',
+         templateUrl: "placenames/authorities/authorities.html",
+         bindToController: {
+            authorities: "=",
+            update: "&"
+         },
+         controller: function controller() {
+            console.log(this.authorities);
+         },
+         controllerAs: "pa"
+      };
+   }]).directive('pnAuthoritiesPills', [function () {
+      return {
+         restrict: 'EA',
+         template: '<span class="pn-authorities-pills" pn-pills pills="pap.authorities" class="pn-feature-pills" update="pap.update()"></span>',
+         bindToController: {
+            authorities: "=",
+            update: "&"
+         },
+         controller: function controller() {},
+         controllerAs: "pap"
+      };
+   }]);
+})(angular);
+'use strict';
+
+(function (angular) {
 
 	'use strict';
 
@@ -63,37 +94,6 @@ under the License.
 			}
 		});
 	}
-})(angular);
-'use strict';
-
-(function (angular) {
-   'use strict';
-
-   angular.module("placenames.authorities", []).directive('pnAuthorities', [function () {
-      return {
-         restrict: 'EA',
-         templateUrl: "placenames/authorities/authorities.html",
-         bindToController: {
-            authorities: "=",
-            update: "&"
-         },
-         controller: function controller() {
-            console.log(this.authorities);
-         },
-         controllerAs: "pa"
-      };
-   }]).directive('pnAuthoritiesPills', [function () {
-      return {
-         restrict: 'EA',
-         template: '<span class="pn-authorities-pills" pn-pills pills="pap.authorities" class="pn-feature-pills" update="pap.update()"></span>',
-         bindToController: {
-            authorities: "=",
-            update: "&"
-         },
-         controller: function controller() {},
-         controllerAs: "pap"
-      };
-   }]);
 })(angular);
 'use strict';
 
@@ -222,37 +222,6 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 (function (angular) {
    'use strict';
 
-   angular.module("placenames.classifications", []).directive('pnClassifications', [function () {
-      return {
-         restrict: 'EA',
-         templateUrl: "placenames/classifications/classifications.html",
-         bindToController: {
-            classifications: "=",
-            update: "&"
-         },
-         controller: function controller() {
-            console.log(this.classifications);
-         },
-         controllerAs: "pc"
-      };
-   }]).directive('pnClassificationsPills', [function () {
-      return {
-         restrict: 'EA',
-         template: '<span pn-pills class="pn-classifications-pills" pills="pcp.classifications" class="pn-feature-pills" update="pcp.update()"></span>',
-         bindToController: {
-            classifications: "=",
-            update: "&"
-         },
-         controller: function controller() {},
-         controllerAs: "pcp"
-      };
-   }]);
-})(angular);
-'use strict';
-
-(function (angular) {
-   'use strict';
-
    angular.module("placenames.featuretypes", ['placenames.pills']).directive('pnFeaturetypes', [function () {
       return {
          restrict: 'EA',
@@ -284,6 +253,37 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
          });
       };
    });
+})(angular);
+'use strict';
+
+(function (angular) {
+   'use strict';
+
+   angular.module("placenames.classifications", []).directive('pnClassifications', [function () {
+      return {
+         restrict: 'EA',
+         templateUrl: "placenames/classifications/classifications.html",
+         bindToController: {
+            classifications: "=",
+            update: "&"
+         },
+         controller: function controller() {
+            console.log(this.classifications);
+         },
+         controllerAs: "pc"
+      };
+   }]).directive('pnClassificationsPills', [function () {
+      return {
+         restrict: 'EA',
+         template: '<span pn-pills class="pn-classifications-pills" pills="pcp.classifications" class="pn-feature-pills" update="pcp.update()"></span>',
+         bindToController: {
+            classifications: "=",
+            update: "&"
+         },
+         controller: function controller() {},
+         controllerAs: "pcp"
+      };
+   }]);
 })(angular);
 'use strict';
 
@@ -996,48 +996,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 (function (angular) {
 
-	'use strict';
-
-	angular.module("placenames.toolbar", []).directive("pnToolbar", [function () {
-		return {
-			controller: 'toolbarLinksCtrl'
-		};
-	}])
-
-	/**
-  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
-  */
-	.directive('pnToolbarRow', [function () {
-		var DEFAULT_TITLE = "Satellite to Topography bias on base map.";
-
-		return {
-			scope: {
-				map: "=",
-				overlaytitle: "=?"
-			},
-			restrict: 'AE',
-			templateUrl: 'placenames/toolbar/toolbar.html',
-			link: function link(scope) {
-				scope.overlaytitle = scope.overlaytitle ? scope.overlaytitle : DEFAULT_TITLE;
-			}
-		};
-	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
-
-		var self = this;
-		configService.getConfig().then(function (config) {
-			self.links = config.toolbarLinks;
-		});
-
-		$scope.item = "";
-		$scope.toggleItem = function (item) {
-			$scope.item = $scope.item === item ? "" : item;
-		};
-	}]);
-})(angular);
-"use strict";
-
-(function (angular) {
-
    'use strict';
 
    angular.module("placenames.utils", []).filter("pnSplitBar", function () {
@@ -1077,9 +1035,51 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return service;
    }]);
 })(angular);
+"use strict";
+
+(function (angular) {
+
+	'use strict';
+
+	angular.module("placenames.toolbar", []).directive("pnToolbar", [function () {
+		return {
+			controller: 'toolbarLinksCtrl'
+		};
+	}])
+
+	/**
+  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
+  */
+	.directive('pnToolbarRow', [function () {
+		var DEFAULT_TITLE = "Satellite to Topography bias on base map.";
+
+		return {
+			scope: {
+				map: "=",
+				overlaytitle: "=?"
+			},
+			restrict: 'AE',
+			templateUrl: 'placenames/toolbar/toolbar.html',
+			link: function link(scope) {
+				scope.overlaytitle = scope.overlaytitle ? scope.overlaytitle : DEFAULT_TITLE;
+			}
+		};
+	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
+
+		var self = this;
+		configService.getConfig().then(function (config) {
+			self.links = config.toolbarLinks;
+		});
+
+		$scope.item = "";
+		$scope.toggleItem = function (item) {
+			$scope.item = $scope.item === item ? "" : item;
+		};
+	}]);
+})(angular);
 angular.module("placenames.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("placenames/authorities/authorities.html","<div ng-repeat=\"item in pa.authorities | pnUnselectedFacets\" class=\"row\">\r\n   <div class=\"col-md-12 ellipsis\" title=\'Jurisdiction: {{item.jurisdiction}}\'>\r\n      <input type=\"checkbox\" ng-model=\"item.selected\" ng-change=\"pa.update()\" />\r\n      <span>\r\n         <a target=\"_blank\" href=\"http://www.google.com/search?q={{item.name}}\">{{item.name}}</a>\r\n         ({{(item.count | number) + (item.count || item.count == 0?\' of \':\'\')}}{{item.total | number}})\r\n      </span>\r\n   </div>\r\n</div>");
-$templateCache.put("placenames/classifications/classifications.html","<div ng-repeat=\"item in pc.classifications | pnUnselectedFacets\" class=\"row\">\r\n   <div class=\"col-md-12 ellipsis\" title=\'Across all authorities there are a total of {{item.total | number}} features classed as \"{{item.name}}\"\'>\r\n      <input type=\"checkbox\" ng-model=\"item.selected\" ng-change=\"pc.update()\" />\r\n      <span>\r\n         <a target=\"_blank\" href=\"http://www.google.com/search?q={{key}}\">{{item.name}}</a>\r\n         ({{(item.count | number) + (item.count || item.count == 0?\' of \':\'\')}}{{item.total | number}})\r\n      </span>\r\n   </div>\r\n</div>");
 $templateCache.put("placenames/featuretypes/featuretypes.html","<div ng-repeat=\"facet in vm.types | pnHasName | pnUnselectedFacets | orderBy:\'name\'\" class=\"row\">\r\n   <div class=\"col-md-12 ellipsis\">\r\n      <input type=\"checkbox\" ng-model=\"facet.selected\" ng-change=\"vm.update()\" />\r\n      <span tooltip-append-to-body=\"true\" tooltip-placement=\"top-left\" uib-tooltip=\"{{facet.name}}\">\r\n         <a target=\"_blank\" href=\"http://www.google.com/search?q={{facet.name | pnClean}}\">{{facet.name}}</a>\r\n         ({{(facet.count | number) + (facet.count || facet.count == 0?\' of \':\'\')}}{{facet.total | number}})\r\n      </span>\r\n   </div>\r\n</div>");
+$templateCache.put("placenames/classifications/classifications.html","<div ng-repeat=\"item in pc.classifications | pnUnselectedFacets\" class=\"row\">\r\n   <div class=\"col-md-12 ellipsis\" title=\'Across all authorities there are a total of {{item.total | number}} features classed as \"{{item.name}}\"\'>\r\n      <input type=\"checkbox\" ng-model=\"item.selected\" ng-change=\"pc.update()\" />\r\n      <span>\r\n         <a target=\"_blank\" href=\"http://www.google.com/search?q={{key}}\">{{item.name}}</a>\r\n         ({{(item.count | number) + (item.count || item.count == 0?\' of \':\'\')}}{{item.total | number}})\r\n      </span>\r\n   </div>\r\n</div>");
 $templateCache.put("placenames/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-header\">\r\n\r\n        <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".ga-header-collapse\">\r\n            <span class=\"sr-only\">Toggle navigation</span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n        </button>\r\n\r\n        <a href=\"/\" class=\"appTitle visible-xs\"><h1 style=\"font-size:120%\">{{heading}}</h1></a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n        	<li common-navigation current=\"current\" role=\"menuitem\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");
 $templateCache.put("placenames/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" pn-toolbar-row map=\"root.map\" ></div>\r\n			<div class=\"panesMapContainer target\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div pn-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"pn-tab-content-item\" ng-show=\"view == \'search\'\" ><pn-search></pn-search></div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("placenames/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n</div>\r\n");
