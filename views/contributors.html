@@ -39,7 +39,7 @@ $.get("icsm/resources/config/contributors.json").done(function(data) {
          '<span style="width:280px;display:inline-block"><img height="' +
          item.height + '" style="padding:5px" src="' + item.image +
          '"></img></span><span style="width:15em"><a href="' + item.href +
-         '">'+ item.name +'</a></span><span style="float:right; padding:9px;">' +
+         '">'+ item.name +'</a></span><span style="float:right; padding:10px;">' +
          (item.enabled? tick(): cross()) + '</span></div>');
     }
     target.innerHTML = buffer.join("\n");
