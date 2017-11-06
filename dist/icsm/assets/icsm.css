@@ -430,13 +430,6 @@ div.leaflet-control-scale-line {
   height: 14px;
   border: solid 1px black;
 }
-.pn-featuretypes-swathe {
-  display: inline-block;
-  background-color: #337ab7;
-  width: 14px;
-  height: 14px;
-  border: solid 1px black;
-}
 .pn-classifications-pills span.btn-primary {
   background-color: green;
 }
@@ -444,6 +437,13 @@ div.leaflet-control-scale-line {
 .pn-classifications-swathe {
   display: inline-block;
   background-color: green;
+  width: 14px;
+  height: 14px;
+  border: solid 1px black;
+}
+.pn-featuretypes-swathe {
+  display: inline-block;
+  background-color: #337ab7;
   width: 14px;
   height: 14px;
   border: solid 1px black;
@@ -1110,6 +1110,22 @@ i.fa.active {
   color: #fff;
   background-color: #777;
 }
+.downloadPane {
+  padding-left: 0px !important;
+  padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 10px;
+  overflow: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
+}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -1156,22 +1172,6 @@ div.leaflet-control-scale-line {
     display: none;
   }
 }
-.downloadPane {
-  padding-left: 0px !important;
-  padding-right: 5px !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 10px;
-  overflow: hidden;
-}
-
-.downloadCont {
-  position: fixed;
-  right: 0;
-  bottom: 8px;
-}
 .regions-label {
   border: 0;
 }
@@ -1180,6 +1180,52 @@ div.leaflet-control-scale-line {
   font-weight: bold;
   color: red;
   font-size: 120%;
+}
+.radCore {
+  margin-right: 3px;
+  display: inline-block;
+}
+
+.searchBar {
+  width: 27em;
+  opacity: 0.9;
+}
+
+@media only screen and (max-width:1100px) {
+  .searchBar {
+    width: 23em;
+  }
+}
+
+@media only screen and (max-width:1025px) {
+  .searchBar {
+    width: 20em;
+  }
+}
+
+@media only screen and (max-width:645px) {
+  .searchBar {
+    display: none;
+  }
+}
+
+@media only screen and (max-width:965px) {
+  .radCore,
+  .hideWhenSmall,
+  .steps-indicator,
+  .secondToolbarInfo {
+    display: none;
+  }
+}
+
+div.leaflet-control-scale-line {
+  text-align: center;
+}
+
+@media only screen and (max-width:965px) {
+  div.leaflet-control-scale-line {
+    display: none;
+  }
 }
 .selectContainer {
   width: 100%;
@@ -1209,75 +1255,6 @@ i.fa.active {
 
 .vector-add:disabled {
   color: gray;
-}
-.radCore {
-  margin-right: 3px;
-  display: inline-block;
-}
-
-.searchBar {
-  width: 27em;
-  opacity: 0.9;
-}
-
-@media only screen and (max-width:1100px) {
-  .searchBar {
-    width: 23em;
-  }
-}
-
-@media only screen and (max-width:1025px) {
-  .searchBar {
-    width: 20em;
-  }
-}
-
-@media only screen and (max-width:645px) {
-  .searchBar {
-    display: none;
-  }
-}
-
-@media only screen and (max-width:965px) {
-  .radCore,
-  .hideWhenSmall,
-  .steps-indicator,
-  .secondToolbarInfo {
-    display: none;
-  }
-}
-
-div.leaflet-control-scale-line {
-  text-align: center;
-}
-
-@media only screen and (max-width:965px) {
-  div.leaflet-control-scale-line {
-    display: none;
-  }
-}
-.main-body {
-  position: fixed;
-  top: 85px;
-  left: 0px;
-  right: 0px;
-  bottom: 8px;
-  overflow-y: auto;
-}
-
-.point-at-box {
-  transform: rotate(-35deg);
-}
-
-@media screen and (max-width: 990px) {
-  .point-at-box {
-    transform: rotate(135deg);
-  }
-}
-
-span.mandatory {
-  content: "*";
-  color: red;
 }
 .start-content-container {
   position: fixed;
@@ -1353,6 +1330,36 @@ span.mandatory {
   width: 10em;
   text-align: right;
 }
+.main-body {
+  position: fixed;
+  top: 85px;
+  left: 0px;
+  right: 0px;
+  bottom: 8px;
+  overflow-y: auto;
+}
+
+.point-at-box {
+  transform: rotate(-35deg);
+}
+
+@media screen and (max-width: 990px) {
+  .point-at-box {
+    transform: rotate(135deg);
+  }
+}
+
+span.mandatory {
+  content: "*";
+  color: red;
+}
+.hide {
+  display: none;
+}
+
+.file-container {
+  margin-top: 0;
+}
 .upload-dialog p {
   padding: 15px;
   margin-top: 10px;
@@ -1363,13 +1370,6 @@ span.mandatory {
   margin-top: 10px;
   padding: 5px;
   border-radius: 4px;
-}
-.hide {
-  display: none;
-}
-
-.file-container {
-  margin-top: 0;
 }
 #fileDrop {
   font-weight: bold;
@@ -1385,6 +1385,22 @@ span.mandatory {
   padding-left: 5px;
   padding-right: 5px;
   margin: auto;
+}
+.input-format-pill {
+  font-size: 110%;
+  padding: 4px;
+  margin: 5px;
+}
+.ed-valid {
+  color: green;
+}
+
+.ed-invalid {
+  color: red;
+}
+
+.ed-active {
+  color: red;
 }
 .nav-icons {
   margin-top: 7px !important;
@@ -1415,22 +1431,6 @@ span.mandatory {
 
 .common-header {
   background-color: white;
-}
-.input-format-pill {
-  font-size: 110%;
-  padding: 4px;
-  margin: 5px;
-}
-.ed-valid {
-  color: green;
-}
-
-.ed-invalid {
-  color: red;
-}
-
-.ed-active {
-  color: red;
 }
 .shp-label {
   display: inline-block;

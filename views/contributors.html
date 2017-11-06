@@ -36,9 +36,9 @@ $.get("icsm/resources/config/contributors.json").done(function(data) {
       let item = data[i];
       buffer.push(
          '<div style="display:inline-block; width: 58em;border-radius: 5px;margin: 40px; margin-top: 15px; margin-bottom: 0px; border: 1px solid gray">' +
-         '<span style="width:280px;display:inline-block"><img height="' +
+         '<span style="width:280px;display:inline-block"><a target="_blank" href="' + item.image + '" title="Click to see full size image"><img height="' +
          item.height + '" style="padding:5px" src="' + item.image +
-         '"></img></span><span style="width:15em"><a href="' + item.href +
+         '"></img></a></span><span style="width:15em"><a href="' + item.href +
          '">'+ item.name +'</a></span><span style="float:right; padding:10px;">' +
          (item.enabled? tick(): cross()) + '</span></div>');
     }
