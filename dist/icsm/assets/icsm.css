@@ -57,6 +57,36 @@
   margin-top: 3px;
   margin-bottom: 3px;
 }
+.nav-icons {
+  margin-top: 7px !important;
+}
+
+@media only screen and (max-width:1200px) {
+  .nav-icons {
+    margin-top: 30px;
+  }
+}
+
+.breadcrumbsContainer {
+  margin-left: 245px;
+}
+
+.header-logo img {
+  padding-top: 3px;
+}
+
+.header-logo {
+  padding-right: 20px;
+}
+
+.applicationTitle {
+  padding-left: 20px;
+  font-size: 200%;
+}
+
+.common-header {
+  background-color: white;
+}
 .iso19115,
 .iso19115 ul,
 .iso19115 li {
@@ -95,36 +125,6 @@
 
 .iso19115-head {
   font-weight: bold;
-}
-.nav-icons {
-  margin-top: 7px !important;
-}
-
-@media only screen and (max-width:1200px) {
-  .nav-icons {
-    margin-top: 30px;
-  }
-}
-
-.breadcrumbsContainer {
-  margin-left: 245px;
-}
-
-.header-logo img {
-  padding-top: 3px;
-}
-
-.header-logo {
-  padding-right: 20px;
-}
-
-.applicationTitle {
-  padding-left: 20px;
-  font-size: 200%;
-}
-
-.common-header {
-  background-color: white;
 }
 .common-legend {
   position: abssolute;
@@ -419,17 +419,6 @@ div.leaflet-control-scale-line {
     display: none;
   }
 }
-.pn-authorities-pills span.btn-primary {
-  background-color: red;
-}
-
-.pn-authorities-swathe {
-  display: inline-block;
-  background-color: red;
-  width: 14px;
-  height: 14px;
-  border: solid 1px black;
-}
 .pn-classifications-pills span.btn-primary {
   background-color: green;
 }
@@ -437,6 +426,17 @@ div.leaflet-control-scale-line {
 .pn-classifications-swathe {
   display: inline-block;
   background-color: green;
+  width: 14px;
+  height: 14px;
+  border: solid 1px black;
+}
+.pn-authorities-pills span.btn-primary {
+  background-color: red;
+}
+
+.pn-authorities-swathe {
+  display: inline-block;
+  background-color: red;
   width: 14px;
   height: 14px;
   border: solid 1px black;
@@ -863,38 +863,6 @@ img.elvis-logo {
 .product-restrict {
   padding-bottom: 8px;
 }
-.reviewing-odd {
-  background-color: #eeeeee;
-}
-
-.row.reviewing-divider {
-  border-top: 1px solid lightgray;
-  padding-top: 5px;
-  margin-top: 5px;
-}
-
-.reviewing-datasets {
-  max-height: 450px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-@media (max-height: 750px) {
-  .reviewing-datasets {
-    max-height: 350px;
-  }
-}
-
-@media (max-height: 650px) {
-  .reviewing-datasets {
-    max-height: 250px;
-  }
-}
-
-.exclude {
-  color: #777777;
-  text-decoration: line-through;
-}
 .continue-container {
   padding: 4px;
 }
@@ -1032,6 +1000,38 @@ img.elvis-logo {
   bottom: 0;
   left: 0;
   right: 0;
+}
+.reviewing-odd {
+  background-color: #eeeeee;
+}
+
+.row.reviewing-divider {
+  border-top: 1px solid lightgray;
+  padding-top: 5px;
+  margin-top: 5px;
+}
+
+.reviewing-datasets {
+  max-height: 450px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-height: 750px) {
+  .reviewing-datasets {
+    max-height: 350px;
+  }
+}
+
+@media (max-height: 650px) {
+  .reviewing-datasets {
+    max-height: 250px;
+  }
+}
+
+.exclude {
+  color: #777777;
+  text-decoration: line-through;
 }
 .selectContainer {
   width: 100%;
@@ -1181,6 +1181,35 @@ div.leaflet-control-scale-line {
   color: red;
   font-size: 120%;
 }
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
+}
+.vector-tooltip {
+  min-width: 25em;
+}
+
+.vector-checkbox {
+  width: 18px;
+  height: 18px;
+  vertical-align: bottom;
+  margin-right: 7px !important;
+}
+
+.vector-add:disabled {
+  color: gray;
+}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -1226,35 +1255,6 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
-}
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
-.vector-tooltip {
-  min-width: 25em;
-}
-
-.vector-checkbox {
-  width: 18px;
-  height: 18px;
-  vertical-align: bottom;
-  margin-right: 7px !important;
-}
-
-.vector-add:disabled {
-  color: gray;
 }
 .start-content-container {
   position: fixed;
@@ -1319,6 +1319,28 @@ i.fa.active {
 .select-land {
   background-position: -675px;
 }
+.csv-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.csv-fix-label label {
+  width: 10em;
+  text-align: right;
+}
+.upload-dialog p {
+  padding: 15px;
+  margin-top: 10px;
+}
+
+.ud-info {
+  background-color: #d9edf7;
+  margin-top: 10px;
+  padding: 5px;
+  border-radius: 4px;
+}
 .main-body {
   position: fixed;
   top: 85px;
@@ -1341,28 +1363,6 @@ i.fa.active {
 span.mandatory {
   content: "*";
   color: red;
-}
-.upload-dialog p {
-  padding: 15px;
-  margin-top: 10px;
-}
-
-.ud-info {
-  background-color: #d9edf7;
-  margin-top: 10px;
-  padding: 5px;
-  border-radius: 4px;
-}
-.csv-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.csv-fix-label label {
-  width: 10em;
-  text-align: right;
 }
 .hide {
   display: none;

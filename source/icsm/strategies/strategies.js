@@ -81,13 +81,14 @@ class ActStrategy extends BaseStrategy {
 class GaStrategy extends BaseStrategy {
    constructor(http) {
       super(http); // https://ecat.ga.gov.au/geonetwork/srv/eng/xml.metadata.get?uuid=22be4b55-2465-4320-e053-10a3070a5236
+      this.GA_LINK_METADATA_TEMPLATE = 'https://ecat.ga.gov.au/geonetwork/srv/eng/search#!${uuid}';
       this.GA_METADATA_TEMPLATE = 'https://ecat.ga.gov.au/geonetwork/srv/eng/xml.metadata.get?uuid=${uuid}';
       this.UUID_REG_EX = /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/;
    }
 
    constructLink(item) {
       var uuid = item.metadata_id;
-      return uuid ? this.GA_METADATA_TEMPLATE.replace("${uuid}", uuid) : null;
+      return uuid ? this.GA_LINK_METADATA_TEMPLATE.replace("${uuid}", uuid) : null;
    }
 
    hasMetadata(item) {
