@@ -87,11 +87,6 @@
 .common-header {
   background-color: white;
 }
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
-}
 .iso19115,
 .iso19115 ul,
 .iso19115 li {
@@ -130,6 +125,11 @@
 
 .iso19115-head {
   font-weight: bold;
+}
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
 }
 .mvt,
 .mvt ul,
@@ -373,17 +373,6 @@
   overflow-y: auto;
   overflow-x: hidden;
 }
-.pn-classifications-pills span.btn-primary {
-  background-color: green;
-}
-
-.pn-classifications-swathe {
-  display: inline-block;
-  background-color: green;
-  width: 14px;
-  height: 14px;
-  border: solid 1px black;
-}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -441,6 +430,17 @@ div.leaflet-control-scale-line {
   height: 14px;
   border: solid 1px black;
 }
+.pn-classifications-pills span.btn-primary {
+  background-color: green;
+}
+
+.pn-classifications-swathe {
+  display: inline-block;
+  background-color: green;
+  width: 14px;
+  height: 14px;
+  border: solid 1px black;
+}
 .pn-featuretypes-swathe {
   display: inline-block;
   background-color: #337ab7;
@@ -454,24 +454,6 @@ div.leaflet-control-scale-line {
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-}
-.pn-features {
-  max-block-size: 300px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.pn-search-container {
-  height: 97%;
-}
-
-.tooltip-inner {
-  max-width: 350px;
-}
-
-.pn-pill {
-  color: #fff;
-  margin: 4px;
 }
 .pn-container {
   overflow-y: auto;
@@ -518,6 +500,24 @@ div.leaflet-control-scale-line {
   padding-bottom: 5px;
   background-color: #f8f8ff;
   border-top: 1px solid #f0f0f0;
+}
+.pn-features {
+  max-block-size: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.pn-search-container {
+  height: 97%;
+}
+
+.tooltip-inner {
+  max-width: 350px;
+}
+
+.pn-pill {
+  color: #fff;
+  margin: 4px;
 }
 /* Overrides */
 
@@ -826,21 +826,6 @@ img.elvis-logo {
   right: 7px;
   bottom: 15px;
 }
-.mess-error {
-  background-color: lightcoral;
-}
-
-.mess-info {
-  background-color: lightblue;
-}
-
-.mess-warn {
-  background-color: #ffbc1e;
-}
-
-.mess-container {
-  font-weight: bold;
-}
 .product-valid {
   color: green;
 }
@@ -862,6 +847,53 @@ img.elvis-logo {
 
 .product-restrict {
   padding-bottom: 8px;
+}
+.mess-error {
+  background-color: lightcoral;
+}
+
+.mess-info {
+  background-color: lightblue;
+}
+
+.mess-warn {
+  background-color: #ffbc1e;
+}
+
+.mess-container {
+  font-weight: bold;
+}
+.reviewing-odd {
+  background-color: #eeeeee;
+}
+
+.row.reviewing-divider {
+  border-top: 1px solid lightgray;
+  padding-top: 5px;
+  margin-top: 5px;
+}
+
+.reviewing-datasets {
+  max-height: 450px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-height: 750px) {
+  .reviewing-datasets {
+    max-height: 350px;
+  }
+}
+
+@media (max-height: 650px) {
+  .reviewing-datasets {
+    max-height: 250px;
+  }
+}
+
+.exclude {
+  color: #777777;
+  text-decoration: line-through;
 }
 .continue-container {
   padding: 4px;
@@ -1000,38 +1032,6 @@ img.elvis-logo {
   bottom: 0;
   left: 0;
   right: 0;
-}
-.reviewing-odd {
-  background-color: #eeeeee;
-}
-
-.row.reviewing-divider {
-  border-top: 1px solid lightgray;
-  padding-top: 5px;
-  margin-top: 5px;
-}
-
-.reviewing-datasets {
-  max-height: 450px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-@media (max-height: 750px) {
-  .reviewing-datasets {
-    max-height: 350px;
-  }
-}
-
-@media (max-height: 650px) {
-  .reviewing-datasets {
-    max-height: 250px;
-  }
-}
-
-.exclude {
-  color: #777777;
-  text-decoration: line-through;
 }
 .selectContainer {
   width: 100%;
@@ -1172,15 +1172,6 @@ div.leaflet-control-scale-line {
   right: 0;
   bottom: 8px;
 }
-.regions-label {
-  border: 0;
-}
-
-.regions-label.over {
-  font-weight: bold;
-  color: red;
-  font-size: 120%;
-}
 .selectContainer {
   width: 100%;
 }
@@ -1195,6 +1186,15 @@ div.leaflet-control-scale-line {
 
 i.fa.active {
   color: red;
+}
+.regions-label {
+  border: 0;
+}
+
+.regions-label.over {
+  font-weight: bold;
+  color: red;
+  font-size: 120%;
 }
 .radCore {
   margin-right: 3px;
@@ -1319,6 +1319,17 @@ div.leaflet-control-scale-line {
 .select-land {
   background-position: -675px;
 }
+.csv-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.csv-fix-label label {
+  width: 10em;
+  text-align: right;
+}
 .main-body {
   position: fixed;
   top: 85px;
@@ -1342,17 +1353,6 @@ span.mandatory {
   content: "*";
   color: red;
 }
-.csv-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.csv-fix-label label {
-  width: 10em;
-  text-align: right;
-}
 .upload-dialog p {
   padding: 15px;
   margin-top: 10px;
@@ -1370,21 +1370,6 @@ span.mandatory {
 
 .file-container {
   margin-top: 0;
-}
-#fileDrop {
-  font-weight: bold;
-  font-size: 200%;
-  line-height: 2;
-  height: 285px;
-  width: 350px;
-  z-index: 1;
-  background-color: #eeeeee;
-  text-align: center;
-  border: 1px dashed gray;
-  padding: 15px;
-  padding-left: 5px;
-  padding-right: 5px;
-  margin: auto;
 }
 .input-format-pill {
   font-size: 110%;
@@ -1420,6 +1405,21 @@ span.mandatory {
 
 .common-header {
   background-color: white;
+}
+#fileDrop {
+  font-weight: bold;
+  font-size: 200%;
+  line-height: 2;
+  height: 285px;
+  width: 350px;
+  z-index: 1;
+  background-color: #eeeeee;
+  text-align: center;
+  border: 1px dashed gray;
+  padding: 15px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: auto;
 }
 .ed-valid {
   color: green;

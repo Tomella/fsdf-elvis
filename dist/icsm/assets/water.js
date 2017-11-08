@@ -17,248 +17,6 @@ specific language governing permissions and limitations
 under the License.
 */
 
-'use strict';
-
-{
-	var RootCtrl = function RootCtrl($http, configService, mapService) {
-		var self = this;
-		mapService.getMap().then(function (map) {
-			self.map = map;
-		});
-		configService.getConfig().then(function (data) {
-			self.data = data;
-			// If its got WebGL its got everything we need.
-			try {
-				var canvas = document.createElement('canvas');
-				data.modern = !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
-			} catch (e) {
-				data.modern = false;
-			}
-		});
-	};
-
-	angular.module("WaterApp", ['common.accordion', 'common.altthemes', 'common.baselayer.control', 'common.basin', 'common.bbox', 'common.catchment', 'common.cc', 'common.clip', 'common.download', 'common.extent', 'common.header', 'common.iso19115', 'common.metaview', 'common.navigation', 'common.recursionhelper', 'common.storage', 'common.templates', 'common.tile', 'common.wms', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.projects', 'explorer.tabs', 'explorer.version',
-
-	// Wire in external search providers
-	'exp.search.geosearch', 'exp.search.searches', 'exp.search.lastsearch', 'exp.search.templates', 'exp.search.map.service', 'exp.ui.templates', 'explorer.map.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer', 'geo.draw',
-	// 'geo.elevation',
-	//'icsm.elevation',
-	//'geo.extent',
-	//'geo.geosearch',
-	'geo.map', 'geo.maphelper', 'geo.measure', 'water.panes', "water.regions", 'water.templates', 'water.toolbar', 'water.select', 'water.vector', 'water.vector.download', 'water.vector.geoprocess'])
-
-	// Set up all the service providers here.
-	.config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', 'lastSearchServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider, lastSearchServiceProvider) {
-		lastSearchServiceProvider.noListen();
-		configServiceProvider.location("icsm/resources/config/water.json");
-		configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
-		versionServiceProvider.url("icsm/assets/package.json");
-		projectsServiceProvider.setProject("icsm");
-	}]).config(['$routeProvider', function ($routeProvider) {
-		$routeProvider.when('/administrativeBoundaries', {
-			templateUrl: "admin/app/app.html",
-			controller: "adminCtrl",
-			controllerAs: "admin"
-		}).when('/positioning', {
-			templateUrl: "positioning/app/app.html",
-			controller: "positioningCtrl",
-			controllerAs: "positioning"
-		}).when('/placeNames', {
-			templateUrl: "placenames/app/app.html",
-			controller: "placeNamesCtrl",
-			controllerAs: "placeNames"
-		}).when('/landParcelAndProperty', {
-			templateUrl: "landParcelAndProperty/app/app.html",
-			controller: "landParcelAndPropertyCtrl",
-			controllerAs: "landParcelAndProperty"
-		}).when('/imagery', {
-			templateUrl: "imagery/app/app.html",
-			controller: "imageryCtrl",
-			controllerAs: "imagery"
-		}).when('/transport', {
-			templateUrl: "transport/app/app.html",
-			controller: "transportCtrl",
-			controllerAs: "transport"
-		}).when('/water', {
-			templateUrl: "water/app/app.html",
-			controller: "waterCtrl",
-			controllerAs: "water"
-		}).when('/elevationAndDepth', {
-			templateUrl: "elevationAndDepth/app/app.html",
-			controller: "elevationAndDepthCtrl",
-			controllerAs: "elevationAndDepth"
-		}).when('/landCover', {
-			templateUrl: "landCover/app/app.html",
-			controller: "landCoverCtrl",
-			controllerAs: "landCover"
-		}).when('/icsm', {
-			templateUrl: "icsm/app/app.html",
-			controller: "icsmCtrl",
-			controllerAs: "icsm"
-		}).otherwise({
-			redirectTo: "/icsm"
-		});
-	}]).factory("userService", [function () {
-		return {
-			login: noop,
-			hasAcceptedTerms: noop,
-			setAcceptedTerms: noop,
-			getUsername: function getUsername() {
-				return "anon";
-			}
-		};
-		function noop() {
-			return true;
-		}
-	}]).controller("RootCtrl", RootCtrl);
-
-	RootCtrl.$invoke = ['$http', 'configService', 'mapService'];
-}
-"use strict";
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-{
-   var WaterRegionsService = function () {
-      function WaterRegionsService($http, configService, mapService) {
-         _classCallCheck(this, WaterRegionsService);
-
-         this.$http = $http;
-         this.configService = configService;
-         this.mapService = mapService;
-      }
-
-      _createClass(WaterRegionsService, [{
-         key: "config",
-         value: function config() {
-            return this.configService.getConfig("regions");
-         }
-      }, {
-         key: "features",
-         value: function features() {
-            var _this = this;
-
-            return this.config().then(function (config) {
-               return _this.$http.get(config.regionsUrl, { cache: true }).then(function (response) {
-                  return response.data.features;
-               });
-            });
-         }
-      }, {
-         key: "draw",
-         value: function draw() {
-            var _this2 = this;
-
-            if (this.promise) {
-               return this.promise;
-            }
-
-            this.promise = this.config().then(function (config) {
-               return _this2.mapService.getMap().then(function (map) {
-                  return _this2.features().then(function (features) {
-                     var divisions = _this2.divisions = [];
-                     var regions = _this2.regions = [];
-                     var divisionsMap = _this2.divisionsMap = {};
-
-                     features.forEach(function (feature) {
-                        var name = feature.properties.Division;
-                        divisionsMap[name] = divisionsMap[name] || [];
-                        divisionsMap[name].push(feature);
-                     });
-
-                     Object.keys(divisionsMap).forEach(function (key, index) {
-                        var features = divisionsMap[key];
-                        var color = config.divisionColors[index % config.divisionColors.length];
-                        var division = L.geoJson(features, {
-                           onEachFeature: function onEachFeature(feature, layer) {
-                              var region = {
-                                 layer: layer,
-                                 name: feature.properties.RivRegName,
-                                 feature: feature,
-                                 show: function show() {
-                                    this.layer.openPopup();
-                                 },
-                                 hide: function hide() {
-                                    this.layer._map.closePopup();
-                                 }
-                              };
-
-                              layer.bindPopup(region.name);
-                              regions.push(region);
-
-                              layer.on("mouseover", function () {
-                                 console.log("river", layer);
-                              });
-                           },
-                           style: function style(feature) {
-                              return {
-                                 color: "black",
-                                 fillOpacity: 0.2,
-                                 fillColor: color,
-                                 weight: 1
-                              };
-                           }
-                        });
-
-                        var divisionOptions = config.divisionOptions[key] || {
-                           center: division.getBounds().getCenter()
-                        };
-
-                        var marker = new L.marker(divisionOptions.center, { opacity: 0.01 });
-                        marker.bindLabel(key, { noHide: true, className: "regions-label", offset: [0, 0] });
-                        marker.addTo(map);
-
-                        divisions.push({
-                           layer: division,
-                           name: key,
-                           marker: marker,
-                           features: features
-                        });
-                     });
-
-                     var featureGroup = L.featureGroup(divisions.map(function (division) {
-                        return division.layer;
-                     }), {
-                        style: function style(feature) {
-                           return {
-                              color: "black",
-                              fill: true,
-                              fillColor: "red",
-                              weight: 1
-                           };
-                        }
-                     }).on("mouseover", function (group) {
-                        console.log("division", group);
-                     });
-                     featureGroup.addTo(map);
-                  });
-               });
-            });
-            return this.promise;
-         }
-      }, {
-         key: "divisionColors",
-         get: function get() {
-            return config.divisionColors;
-         }
-      }]);
-
-      return WaterRegionsService;
-   }();
-
-   WaterRegionsService.$invoke = ['$http', 'configService', 'mapService'];
-
-   angular.module("water.regions", ["water.select.division", "water.select.region"]).directive("waterRegions", ["$http", "waterRegionsService", "mapService", function ($http, waterRegionsService, mapService) {
-      return {
-         link: function link(scope) {
-            var layer = void 0;
-            waterRegionsService.draw();
-         }
-      };
-   }]).service("waterRegionsService", WaterRegionsService);
-}
 "use strict";
 
 {
@@ -902,6 +660,248 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 
 	SelectCtrl.$inject = ['$rootScope', 'configService', 'flashService', 'selectService'];
+}
+'use strict';
+
+{
+	var RootCtrl = function RootCtrl($http, configService, mapService) {
+		var self = this;
+		mapService.getMap().then(function (map) {
+			self.map = map;
+		});
+		configService.getConfig().then(function (data) {
+			self.data = data;
+			// If its got WebGL its got everything we need.
+			try {
+				var canvas = document.createElement('canvas');
+				data.modern = !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+			} catch (e) {
+				data.modern = false;
+			}
+		});
+	};
+
+	angular.module("WaterApp", ['common.accordion', 'common.altthemes', 'common.baselayer.control', 'common.basin', 'common.bbox', 'common.catchment', 'common.cc', 'common.clip', 'common.download', 'common.extent', 'common.header', 'common.iso19115', 'common.metaview', 'common.navigation', 'common.recursionhelper', 'common.storage', 'common.templates', 'common.tile', 'common.wms', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.projects', 'explorer.tabs', 'explorer.version',
+
+	// Wire in external search providers
+	'exp.search.geosearch', 'exp.search.searches', 'exp.search.lastsearch', 'exp.search.templates', 'exp.search.map.service', 'exp.ui.templates', 'explorer.map.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer', 'geo.draw',
+	// 'geo.elevation',
+	//'icsm.elevation',
+	//'geo.extent',
+	//'geo.geosearch',
+	'geo.map', 'geo.maphelper', 'geo.measure', 'water.panes', "water.regions", 'water.templates', 'water.toolbar', 'water.select', 'water.vector', 'water.vector.download', 'water.vector.geoprocess'])
+
+	// Set up all the service providers here.
+	.config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', 'lastSearchServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider, lastSearchServiceProvider) {
+		lastSearchServiceProvider.noListen();
+		configServiceProvider.location("icsm/resources/config/water.json");
+		configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
+		versionServiceProvider.url("icsm/assets/package.json");
+		projectsServiceProvider.setProject("icsm");
+	}]).config(['$routeProvider', function ($routeProvider) {
+		$routeProvider.when('/administrativeBoundaries', {
+			templateUrl: "admin/app/app.html",
+			controller: "adminCtrl",
+			controllerAs: "admin"
+		}).when('/positioning', {
+			templateUrl: "positioning/app/app.html",
+			controller: "positioningCtrl",
+			controllerAs: "positioning"
+		}).when('/placeNames', {
+			templateUrl: "placenames/app/app.html",
+			controller: "placeNamesCtrl",
+			controllerAs: "placeNames"
+		}).when('/landParcelAndProperty', {
+			templateUrl: "landParcelAndProperty/app/app.html",
+			controller: "landParcelAndPropertyCtrl",
+			controllerAs: "landParcelAndProperty"
+		}).when('/imagery', {
+			templateUrl: "imagery/app/app.html",
+			controller: "imageryCtrl",
+			controllerAs: "imagery"
+		}).when('/transport', {
+			templateUrl: "transport/app/app.html",
+			controller: "transportCtrl",
+			controllerAs: "transport"
+		}).when('/water', {
+			templateUrl: "water/app/app.html",
+			controller: "waterCtrl",
+			controllerAs: "water"
+		}).when('/elevationAndDepth', {
+			templateUrl: "elevationAndDepth/app/app.html",
+			controller: "elevationAndDepthCtrl",
+			controllerAs: "elevationAndDepth"
+		}).when('/landCover', {
+			templateUrl: "landCover/app/app.html",
+			controller: "landCoverCtrl",
+			controllerAs: "landCover"
+		}).when('/icsm', {
+			templateUrl: "icsm/app/app.html",
+			controller: "icsmCtrl",
+			controllerAs: "icsm"
+		}).otherwise({
+			redirectTo: "/icsm"
+		});
+	}]).factory("userService", [function () {
+		return {
+			login: noop,
+			hasAcceptedTerms: noop,
+			setAcceptedTerms: noop,
+			getUsername: function getUsername() {
+				return "anon";
+			}
+		};
+		function noop() {
+			return true;
+		}
+	}]).controller("RootCtrl", RootCtrl);
+
+	RootCtrl.$invoke = ['$http', 'configService', 'mapService'];
+}
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+{
+   var WaterRegionsService = function () {
+      function WaterRegionsService($http, configService, mapService) {
+         _classCallCheck(this, WaterRegionsService);
+
+         this.$http = $http;
+         this.configService = configService;
+         this.mapService = mapService;
+      }
+
+      _createClass(WaterRegionsService, [{
+         key: "config",
+         value: function config() {
+            return this.configService.getConfig("regions");
+         }
+      }, {
+         key: "features",
+         value: function features() {
+            var _this = this;
+
+            return this.config().then(function (config) {
+               return _this.$http.get(config.regionsUrl, { cache: true }).then(function (response) {
+                  return response.data.features;
+               });
+            });
+         }
+      }, {
+         key: "draw",
+         value: function draw() {
+            var _this2 = this;
+
+            if (this.promise) {
+               return this.promise;
+            }
+
+            this.promise = this.config().then(function (config) {
+               return _this2.mapService.getMap().then(function (map) {
+                  return _this2.features().then(function (features) {
+                     var divisions = _this2.divisions = [];
+                     var regions = _this2.regions = [];
+                     var divisionsMap = _this2.divisionsMap = {};
+
+                     features.forEach(function (feature) {
+                        var name = feature.properties.Division;
+                        divisionsMap[name] = divisionsMap[name] || [];
+                        divisionsMap[name].push(feature);
+                     });
+
+                     Object.keys(divisionsMap).forEach(function (key, index) {
+                        var features = divisionsMap[key];
+                        var color = config.divisionColors[index % config.divisionColors.length];
+                        var division = L.geoJson(features, {
+                           onEachFeature: function onEachFeature(feature, layer) {
+                              var region = {
+                                 layer: layer,
+                                 name: feature.properties.RivRegName,
+                                 feature: feature,
+                                 show: function show() {
+                                    this.layer.openPopup();
+                                 },
+                                 hide: function hide() {
+                                    this.layer._map.closePopup();
+                                 }
+                              };
+
+                              layer.bindPopup(region.name);
+                              regions.push(region);
+
+                              layer.on("mouseover", function () {
+                                 console.log("river", layer);
+                              });
+                           },
+                           style: function style(feature) {
+                              return {
+                                 color: "black",
+                                 fillOpacity: 0.2,
+                                 fillColor: color,
+                                 weight: 1
+                              };
+                           }
+                        });
+
+                        var divisionOptions = config.divisionOptions[key] || {
+                           center: division.getBounds().getCenter()
+                        };
+
+                        var marker = new L.marker(divisionOptions.center, { opacity: 0.01 });
+                        marker.bindLabel(key, { noHide: true, className: "regions-label", offset: [0, 0] });
+                        marker.addTo(map);
+
+                        divisions.push({
+                           layer: division,
+                           name: key,
+                           marker: marker,
+                           features: features
+                        });
+                     });
+
+                     var featureGroup = L.featureGroup(divisions.map(function (division) {
+                        return division.layer;
+                     }), {
+                        style: function style(feature) {
+                           return {
+                              color: "black",
+                              fill: true,
+                              fillColor: "red",
+                              weight: 1
+                           };
+                        }
+                     }).on("mouseover", function (group) {
+                        console.log("division", group);
+                     });
+                     featureGroup.addTo(map);
+                  });
+               });
+            });
+            return this.promise;
+         }
+      }, {
+         key: "divisionColors",
+         get: function get() {
+            return config.divisionColors;
+         }
+      }]);
+
+      return WaterRegionsService;
+   }();
+
+   WaterRegionsService.$invoke = ['$http', 'configService', 'mapService'];
+
+   angular.module("water.regions", ["water.select.division", "water.select.region"]).directive("waterRegions", ["$http", "waterRegionsService", "mapService", function ($http, waterRegionsService, mapService) {
+      return {
+         link: function link(scope) {
+            var layer = void 0;
+            waterRegionsService.draw();
+         }
+      };
+   }]).service("waterRegionsService", WaterRegionsService);
 }
 "use strict";
 

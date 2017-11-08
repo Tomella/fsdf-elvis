@@ -14,6 +14,9 @@
 								case "info":
                            icsmMessageService[message.type](message.text);
 									break;
+                        case "wait":
+                           icsmMessageService.wait(message.text);
+                           break;
 								default:
 									icsmMessageService.flash(message.text, message.duration ? message.duration : 8000, message.type === "wait");
 							}

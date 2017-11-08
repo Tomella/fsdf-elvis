@@ -18,6 +18,10 @@
                   return data;
                },
 
+               wait: text => {
+                  return service.message("wait", text);
+               },
+
                info: text => {
                   return service.message("info", text);
                },
