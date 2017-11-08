@@ -87,6 +87,11 @@
 .common-header {
   background-color: white;
 }
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
+}
 .iso19115,
 .iso19115 ul,
 .iso19115 li {
@@ -126,10 +131,49 @@
 .iso19115-head {
   font-weight: bold;
 }
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
+.mvt,
+.mvt ul,
+.mvt li {
+  position: relative;
+}
+
+.mvt ul {
+  list-style: none;
+  padding-left: 32px;
+}
+
+.mvt li::before,
+.mvt li::after {
+  content: "";
+  position: absolute;
+  left: -12px;
+}
+
+.mvt li::before {
+  border-top: 1px solid #000;
+  top: 9px;
+  width: 8px;
+  height: 0;
+}
+
+.mvt li::after {
+  border-left: 1px solid #000;
+  height: 100%;
+  width: 0px;
+  top: 2px;
+}
+
+.mvt ul > li:last-child::after {
+  height: 8px;
+}
+
+.metaview-head {
+  font-weight: bold;
+}
+
+.metaview-info {
+  padding-left: 3px;
+  padding-right: 3px;
 }
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
@@ -243,50 +287,6 @@
   color: #fff;
   background-color: #777;
 }
-.mvt,
-.mvt ul,
-.mvt li {
-  position: relative;
-}
-
-.mvt ul {
-  list-style: none;
-  padding-left: 32px;
-}
-
-.mvt li::before,
-.mvt li::after {
-  content: "";
-  position: absolute;
-  left: -12px;
-}
-
-.mvt li::before {
-  border-top: 1px solid #000;
-  top: 9px;
-  width: 8px;
-  height: 0;
-}
-
-.mvt li::after {
-  border-left: 1px solid #000;
-  height: 100%;
-  width: 0px;
-  top: 2px;
-}
-
-.mvt ul > li:last-child::after {
-  height: 8px;
-}
-
-.metaview-head {
-  font-weight: bold;
-}
-
-.metaview-info {
-  padding-left: 3px;
-  padding-right: 3px;
-}
 .icsmTabs {
   position: absolute;
   top: 0px;
@@ -373,6 +373,17 @@
   overflow-y: auto;
   overflow-x: hidden;
 }
+.pn-classifications-pills span.btn-primary {
+  background-color: green;
+}
+
+.pn-classifications-swathe {
+  display: inline-block;
+  background-color: green;
+  width: 14px;
+  height: 14px;
+  border: solid 1px black;
+}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -418,17 +429,6 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
-}
-.pn-classifications-pills span.btn-primary {
-  background-color: green;
-}
-
-.pn-classifications-swathe {
-  display: inline-block;
-  background-color: green;
-  width: 14px;
-  height: 14px;
-  border: solid 1px black;
 }
 .pn-authorities-pills span.btn-primary {
   background-color: red;
@@ -518,70 +518,6 @@ div.leaflet-control-scale-line {
   padding-bottom: 5px;
   background-color: #f8f8ff;
   border-top: 1px solid #f0f0f0;
-}
-.contributors {
-  margin: 2px;
-  padding: 10px;
-  padding-left: 8px;
-  position: fixed;
-  top: 70px;
-  right: 1px;
-  opacity: 0.95;
-  z-index: 6;
-  background-color: white;
-  white-space: nowrap;
-  text-align: center;
-  -webkit-transition: height 1s;
-  /* Safari */
-  transition: height 1s;
-}
-
-.contributors img {
-  -webkit-transition: height 1s;
-  /* Safari */
-  transition: height 1s;
-}
-
-.contributors.transitioned-up img {
-  height: 0;
-}
-
-.contributors.transitioned-up .contributors-unstick {
-  display: none;
-}
-
-.contributors.transitioned-down {
-  border: 1px solid gray;
-  border-radius: 3px;
-}
-
-.transitioned-up {
-  height: 0px;
-  border: 0 none;
-  margin: 0;
-  padding: 0;
-}
-
-.contributors.transitioned-up a {
-  height: 0px;
-  border: 0 none;
-  margin: 0;
-  padding: 0;
-  border-radius: 0;
-}
-
-.contributors-unstick {
-  vertical-align: top;
-  font-weight: bold;
-}
-
-.contributors-link {
-  font-weight: bold;
-}
-
-.elevation-and-depth {
-  padding-left: 12px;
-  padding-right: 12px;
 }
 /* Overrides */
 
@@ -812,6 +748,70 @@ body {
 
 .ed-wms-button {
   display: none;
+}
+.contributors {
+  margin: 2px;
+  padding: 10px;
+  padding-left: 8px;
+  position: fixed;
+  top: 70px;
+  right: 1px;
+  opacity: 0.95;
+  z-index: 6;
+  background-color: white;
+  white-space: nowrap;
+  text-align: center;
+  -webkit-transition: height 1s;
+  /* Safari */
+  transition: height 1s;
+}
+
+.contributors img {
+  -webkit-transition: height 1s;
+  /* Safari */
+  transition: height 1s;
+}
+
+.contributors.transitioned-up img {
+  height: 0;
+}
+
+.contributors.transitioned-up .contributors-unstick {
+  display: none;
+}
+
+.contributors.transitioned-down {
+  border: 1px solid gray;
+  border-radius: 3px;
+}
+
+.transitioned-up {
+  height: 0px;
+  border: 0 none;
+  margin: 0;
+  padding: 0;
+}
+
+.contributors.transitioned-up a {
+  height: 0px;
+  border: 0 none;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+}
+
+.contributors-unstick {
+  vertical-align: top;
+  font-weight: bold;
+}
+
+.contributors-link {
+  font-weight: bold;
+}
+
+.elevation-and-depth {
+  padding-left: 12px;
+  padding-right: 12px;
 }
 img.elvis-logo {
   height: 75px;
@@ -1048,68 +1048,6 @@ img.elvis-logo {
 i.fa.active {
   color: red;
 }
-.downloadPane {
-  padding-left: 0px !important;
-  padding-right: 5px !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 10px;
-  overflow: hidden;
-}
-
-.downloadCont {
-  position: fixed;
-  right: 0;
-  bottom: 8px;
-}
-.radCore {
-  margin-right: 3px;
-  display: inline-block;
-}
-
-.searchBar {
-  width: 27em;
-  opacity: 0.9;
-}
-
-@media only screen and (max-width:1100px) {
-  .searchBar {
-    width: 23em;
-  }
-}
-
-@media only screen and (max-width:1025px) {
-  .searchBar {
-    width: 20em;
-  }
-}
-
-@media only screen and (max-width:645px) {
-  .searchBar {
-    display: none;
-  }
-}
-
-@media only screen and (max-width:965px) {
-  .radCore,
-  .hideWhenSmall,
-  .steps-indicator,
-  .secondToolbarInfo {
-    display: none;
-  }
-}
-
-div.leaflet-control-scale-line {
-  text-align: center;
-}
-
-@media only screen and (max-width:965px) {
-  div.leaflet-control-scale-line {
-    display: none;
-  }
-}
 .icsm-icon {
   background: url("icsm/img/global-sprites.svg") no-repeat;
   display: inline-block;
@@ -1171,6 +1109,68 @@ div.leaflet-control-scale-line {
 .themesdropdown .themescurrent {
   color: #fff;
   background-color: #777;
+}
+.radCore {
+  margin-right: 3px;
+  display: inline-block;
+}
+
+.searchBar {
+  width: 27em;
+  opacity: 0.9;
+}
+
+@media only screen and (max-width:1100px) {
+  .searchBar {
+    width: 23em;
+  }
+}
+
+@media only screen and (max-width:1025px) {
+  .searchBar {
+    width: 20em;
+  }
+}
+
+@media only screen and (max-width:645px) {
+  .searchBar {
+    display: none;
+  }
+}
+
+@media only screen and (max-width:965px) {
+  .radCore,
+  .hideWhenSmall,
+  .steps-indicator,
+  .secondToolbarInfo {
+    display: none;
+  }
+}
+
+div.leaflet-control-scale-line {
+  text-align: center;
+}
+
+@media only screen and (max-width:965px) {
+  div.leaflet-control-scale-line {
+    display: none;
+  }
+}
+.downloadPane {
+  padding-left: 0px !important;
+  padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 10px;
+  overflow: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
 }
 .regions-label {
   border: 0;
@@ -1319,17 +1319,6 @@ div.leaflet-control-scale-line {
 .select-land {
   background-position: -675px;
 }
-.csv-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.csv-fix-label label {
-  width: 10em;
-  text-align: right;
-}
 .main-body {
   position: fixed;
   top: 85px;
@@ -1353,6 +1342,17 @@ span.mandatory {
   content: "*";
   color: red;
 }
+.csv-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.csv-fix-label label {
+  width: 10em;
+  text-align: right;
+}
 .upload-dialog p {
   padding: 15px;
   margin-top: 10px;
@@ -1363,6 +1363,13 @@ span.mandatory {
   margin-top: 10px;
   padding: 5px;
   border-radius: 4px;
+}
+.hide {
+  display: none;
+}
+
+.file-container {
+  margin-top: 0;
 }
 #fileDrop {
   font-weight: bold;
@@ -1378,13 +1385,6 @@ span.mandatory {
   padding-left: 5px;
   padding-right: 5px;
   margin: auto;
-}
-.hide {
-  display: none;
-}
-
-.file-container {
-  margin-top: 0;
 }
 .input-format-pill {
   font-size: 110%;
@@ -1421,17 +1421,6 @@ span.mandatory {
 .common-header {
   background-color: white;
 }
-.shp-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.shp-fix-label label {
-  width: 10em;
-  text-align: right;
-}
 .ed-valid {
   color: green;
 }
@@ -1442,4 +1431,15 @@ span.mandatory {
 
 .ed-active {
   color: red;
+}
+.shp-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.shp-fix-label label {
+  width: 10em;
+  text-align: right;
 }

@@ -116,78 +116,6 @@ under the License.
 }
 "use strict";
 
-{
-   var PaneCtrl = function PaneCtrl(paneService) {
-      paneService.data().then(function (data) {
-         this.data = data;
-      }.bind(this));
-   };
-
-   var PaneService = function PaneService() {
-      var data = {};
-
-      return {
-         add: function add(item) {},
-
-         remove: function remove(item) {}
-      };
-   };
-
-   angular.module("water.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
-      return {
-         templateUrl: "water/panes/panes.html",
-         transclude: true,
-         scope: {
-            defaultItem: "@",
-            data: "="
-         },
-         controller: ['$scope', function ($scope) {
-            var changeSize = false;
-
-            $scope.view = $scope.defaultItem;
-
-            $scope.setView = function (what) {
-               var oldView = $scope.view;
-
-               if ($scope.view === what) {
-                  if (what) {
-                     changeSize = true;
-                  }
-                  $scope.view = "";
-               } else {
-                  if (!what) {
-                     changeSize = true;
-                  }
-                  $scope.view = what;
-               }
-
-               $rootScope.$broadcast("view.changed", $scope.view, oldView);
-
-               if (changeSize) {
-                  mapService.getMap().then(function (map) {
-                     map._onResize();
-                  });
-               }
-            };
-            $timeout(function () {
-               $rootScope.$broadcast("view.changed", $scope.view, null);
-            }, 50);
-         }]
-      };
-   }]).directive("icsmTabs", [function () {
-      return {
-         templateUrl: "water/panes/tabs.html",
-         require: "^icsmPanes"
-      };
-   }]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
-
-   PaneCtrl.$inject = ["paneService"];
-
-
-   PaneService.$inject = [];
-}
-"use strict";
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -330,6 +258,78 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          }
       };
    }]).service("waterRegionsService", WaterRegionsService);
+}
+"use strict";
+
+{
+   var PaneCtrl = function PaneCtrl(paneService) {
+      paneService.data().then(function (data) {
+         this.data = data;
+      }.bind(this));
+   };
+
+   var PaneService = function PaneService() {
+      var data = {};
+
+      return {
+         add: function add(item) {},
+
+         remove: function remove(item) {}
+      };
+   };
+
+   angular.module("water.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
+      return {
+         templateUrl: "water/panes/panes.html",
+         transclude: true,
+         scope: {
+            defaultItem: "@",
+            data: "="
+         },
+         controller: ['$scope', function ($scope) {
+            var changeSize = false;
+
+            $scope.view = $scope.defaultItem;
+
+            $scope.setView = function (what) {
+               var oldView = $scope.view;
+
+               if ($scope.view === what) {
+                  if (what) {
+                     changeSize = true;
+                  }
+                  $scope.view = "";
+               } else {
+                  if (!what) {
+                     changeSize = true;
+                  }
+                  $scope.view = what;
+               }
+
+               $rootScope.$broadcast("view.changed", $scope.view, oldView);
+
+               if (changeSize) {
+                  mapService.getMap().then(function (map) {
+                     map._onResize();
+                  });
+               }
+            };
+            $timeout(function () {
+               $rootScope.$broadcast("view.changed", $scope.view, null);
+            }, 50);
+         }]
+      };
+   }]).directive("icsmTabs", [function () {
+      return {
+         templateUrl: "water/panes/tabs.html",
+         require: "^icsmPanes"
+      };
+   }]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
+
+   PaneCtrl.$inject = ["paneService"];
+
+
+   PaneService.$inject = [];
 }
 "use strict";
 

@@ -89,6 +89,12 @@
                   $rootScope.$broadcast('icsm.bbox.draw', null);
                };
 
+               $rootScope.$on("clip.initiate.draw", function (event, data) {
+                  scope.list = null;
+                  scope.products = [];
+                  scope.productsMap = [];
+               });
+
                $rootScope.$on('site.selection', function (event, data) {
                   scope.list = null;
                   scope.products = [];
