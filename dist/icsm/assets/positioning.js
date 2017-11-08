@@ -17,6 +17,59 @@ specific language governing permissions and limitations
 under the License.
 */
 
+'use strict';
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+{
+   var RootCtrl = function RootCtrl(configService) {
+      var _this = this;
+
+      _classCallCheck(this, RootCtrl);
+
+      configService.getConfig().then(function (data) {
+         _this.data = data;
+         _this.state = new State();
+      });
+   };
+
+   RootCtrl.$invoke = ['configService'];
+
+   angular.module("PositioningApp", ['common.altthemes', 'common.navigation', 'common.storage', 'common.templates', 'common.toolbar', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.persist', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'positioning.download', 'positioning.file', 'positioning.filedrop', 'positioning.header', 'positioning.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'page.footer'])
+
+   // Set up all the service providers here.
+   .config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', 'persistServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider, persistServiceProvider) {
+      configServiceProvider.location("icsm/resources/config/positioning.json");
+      configServiceProvider.dynamicLocation("icsm/resources/config/positioning.json?t=");
+      versionServiceProvider.url("icsm/assets/package.json");
+      projectsServiceProvider.setProject("icsm");
+      persistServiceProvider.handler("local");
+   }]).factory("userService", [function () {
+      return {
+         login: noop,
+         hasAcceptedTerms: noop,
+         setAcceptedTerms: noop,
+         getUsername: function getUsername() {
+            return {
+               then: function then(fn) {
+                  return fn("anon");
+               }
+            };
+         }
+      };
+      function noop() {
+         return true;
+      }
+   }]).controller("RootCtrl", RootCtrl).filter('bytes', function () {
+      return function (bytes, precision) {
+         if (isNaN(parseFloat(bytes)) || !isFinite(bytes)) return '-';
+         if (typeof precision === 'undefined') precision = 0;
+         var units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'],
+             number = Math.floor(Math.log(bytes) / Math.log(1024));
+         return (bytes / Math.pow(1024, Math.floor(number))).toFixed(precision) + ' ' + units[number];
+      };
+   });
+}
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -81,59 +134,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          }
       };
    }]).service("csvService", CsvService);
-}
-'use strict';
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-{
-   var RootCtrl = function RootCtrl(configService) {
-      var _this = this;
-
-      _classCallCheck(this, RootCtrl);
-
-      configService.getConfig().then(function (data) {
-         _this.data = data;
-         _this.state = new State();
-      });
-   };
-
-   RootCtrl.$invoke = ['configService'];
-
-   angular.module("PositioningApp", ['common.altthemes', 'common.navigation', 'common.storage', 'common.templates', 'common.toolbar', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.persist', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'positioning.download', 'positioning.file', 'positioning.filedrop', 'positioning.header', 'positioning.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'page.footer'])
-
-   // Set up all the service providers here.
-   .config(['configServiceProvider', 'projectsServiceProvider', 'versionServiceProvider', 'persistServiceProvider', function (configServiceProvider, projectsServiceProvider, versionServiceProvider, persistServiceProvider) {
-      configServiceProvider.location("icsm/resources/config/positioning.json");
-      configServiceProvider.dynamicLocation("icsm/resources/config/positioning.json?t=");
-      versionServiceProvider.url("icsm/assets/package.json");
-      projectsServiceProvider.setProject("icsm");
-      persistServiceProvider.handler("local");
-   }]).factory("userService", [function () {
-      return {
-         login: noop,
-         hasAcceptedTerms: noop,
-         setAcceptedTerms: noop,
-         getUsername: function getUsername() {
-            return {
-               then: function then(fn) {
-                  return fn("anon");
-               }
-            };
-         }
-      };
-      function noop() {
-         return true;
-      }
-   }]).controller("RootCtrl", RootCtrl).filter('bytes', function () {
-      return function (bytes, precision) {
-         if (isNaN(parseFloat(bytes)) || !isFinite(bytes)) return '-';
-         if (typeof precision === 'undefined') precision = 0;
-         var units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'],
-             number = Math.floor(Math.log(bytes) / Math.log(1024));
-         return (bytes / Math.pow(1024, Math.floor(number))).toFixed(precision) + ' ' + units[number];
-      };
-   });
 }
 "use strict";
 
@@ -271,83 +271,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 }
 "use strict";
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-{
-   var FileController = function FileController() {
-      _classCallCheck(this, FileController);
-   };
-
-   angular.module("positioning.file", ["positioning.format", "positioning.csv", "positioning.shp", "positioning.dialog"]).directive("file", function () {
-      return {
-         templateUrl: "positioning/file/file.html"
-      };
-   }).controller("fileController", FileController);
-}
-"use strict";
-
-{
-   angular.module("positioning.format", []).directive("inputFormat", function () {
-      return {
-         scope: {
-            list: "="
-         },
-         templateUrl: "positioning/formats/formats.html"
-      };
-   });
-}
-'use strict';
-
-{
-	angular.module('positioning.header', []).controller('headerController', ['$scope', '$q', '$timeout', function ($scope, $q, $timeout) {
-
-		var modifyConfigSource = function modifyConfigSource(headerConfig) {
-			return headerConfig;
-		};
-
-		$scope.$on('headerUpdated', function (event, args) {
-			$scope.headerConfig = modifyConfigSource(args);
-		});
-	}]).directive('icsmHeader', [function () {
-		var defaults = {
-			heading: "ICSM",
-			headingtitle: "ICSM",
-			helpurl: "help.html",
-			helptitle: "Get help about ICSM",
-			helpalttext: "Get help about ICSM",
-			skiptocontenttitle: "Skip to content",
-			skiptocontent: "Skip to content",
-			quicklinksurl: "/search/api/quickLinks/json?lang=en-US"
-		};
-		return {
-			transclude: true,
-			restrict: 'EA',
-			templateUrl: "positioning/header/header.html",
-			scope: {
-				breadcrumbs: "=",
-				current: "=",
-				heading: "=",
-				headingtitle: "=",
-				helpurl: "=",
-				helptitle: "=",
-				helpalttext: "=",
-				skiptocontenttitle: "=",
-				skiptocontent: "=",
-				quicklinksurl: "="
-			},
-			link: function link(scope, element, attrs) {
-				var data = angular.copy(defaults);
-				angular.forEach(defaults, function (value, key) {
-					if (!(key in scope)) {
-						scope[key] = value;
-					}
-				});
-			}
-		};
-	}]);
-}
-"use strict";
-
 {
    angular.module("positioning.filename", []).directive("filename", [function () {
       return {
@@ -426,6 +349,33 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 }
 "use strict";
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+{
+   var FileController = function FileController() {
+      _classCallCheck(this, FileController);
+   };
+
+   angular.module("positioning.file", ["positioning.format", "positioning.csv", "positioning.shp", "positioning.dialog"]).directive("file", function () {
+      return {
+         templateUrl: "positioning/file/file.html"
+      };
+   }).controller("fileController", FileController);
+}
+"use strict";
+
+{
+   angular.module("positioning.format", []).directive("inputFormat", function () {
+      return {
+         scope: {
+            list: "="
+         },
+         templateUrl: "positioning/formats/formats.html"
+      };
+   });
+}
+"use strict";
+
 {
    angular.module("positioning.output", []).directive("outputFormat", function () {
       return {
@@ -435,6 +385,56 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          templateUrl: 'positioning/output/output.html'
       };
    });
+}
+'use strict';
+
+{
+	angular.module('positioning.header', []).controller('headerController', ['$scope', '$q', '$timeout', function ($scope, $q, $timeout) {
+
+		var modifyConfigSource = function modifyConfigSource(headerConfig) {
+			return headerConfig;
+		};
+
+		$scope.$on('headerUpdated', function (event, args) {
+			$scope.headerConfig = modifyConfigSource(args);
+		});
+	}]).directive('icsmHeader', [function () {
+		var defaults = {
+			heading: "ICSM",
+			headingtitle: "ICSM",
+			helpurl: "help.html",
+			helptitle: "Get help about ICSM",
+			helpalttext: "Get help about ICSM",
+			skiptocontenttitle: "Skip to content",
+			skiptocontent: "Skip to content",
+			quicklinksurl: "/search/api/quickLinks/json?lang=en-US"
+		};
+		return {
+			transclude: true,
+			restrict: 'EA',
+			templateUrl: "positioning/header/header.html",
+			scope: {
+				breadcrumbs: "=",
+				current: "=",
+				heading: "=",
+				headingtitle: "=",
+				helpurl: "=",
+				helptitle: "=",
+				helpalttext: "=",
+				skiptocontenttitle: "=",
+				skiptocontent: "=",
+				quicklinksurl: "="
+			},
+			link: function link(scope, element, attrs) {
+				var data = angular.copy(defaults);
+				angular.forEach(defaults, function (value, key) {
+					if (!(key in scope)) {
+						scope[key] = value;
+					}
+				});
+			}
+		};
+	}]);
 }
 "use strict";
 
@@ -960,12 +960,12 @@ $templateCache.put("positioning/dialog/dialog.html","<div class=\"upload-dialog\
 $templateCache.put("positioning/dialog/isepsg4283.html","<div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-6\">\r\n         <label for=\"isEpsg4283\">\r\n					The data provided is in the <a target=\"_blank\" href=\"http://spatialreference.org/ref/epsg/4283/\">EPSG:4283</a> projection <mandatory />\r\n			</label>\r\n      </div>\r\n      <div class=\"col-md-6\" style=\"text-align:right\">\r\n         <button id=\"isEpsg4283\" type=\"button\" title=\"The data must be in the EPSG:4283 projection to be transformed correctly.\"\r\n               class=\"btn btn-default btn-xs\" ng-click=\"state.isEpsg4283 = !state.isEpsg4283\">\r\n            <i class=\"fa\" style=\"width:12px;height:12px;color:green\" ng-class=\"{\'fa-check\':state.isEpsg4283}\" aria-hidden=\"true\"></i>\r\n         </button>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("positioning/dialog/submit.html","<div style=\"padding-bottom:2px\">\r\n   <div class=\"row\">\r\n      <div class=\"col-md-6\" style=\"padding-top:7px\">\r\n         <div class=\"progress\">\r\n            <div class=\"progress-bar\" role=\"progressbar\" aria-valuenow=\"{{state.percentComplete}}\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: {{state.percentComplete}}%;\">\r\n                <span class=\"sr-only\">60% Complete</span>\r\n            </div>\r\n         </div>\r\n      </div>\r\n      <div class=\"col-md-4\" style=\"padding-top:7px\">\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Select a valid coordinate system.\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-crosshairs fa-2x\" ng-class=\"{\'ed-valid\': state.validProjection, \'ed-invalid\': !state.validProjection }\"></i>\r\n         </span>\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Select a latitude and longitude columns.\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-arrows fa-2x\" ng-class=\"{\'ed-valid\': state.validFields, \'ed-invalid\': !state.validFields}\"></i>\r\n         </span>\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Select a valid download format.\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-files-o fa-2x\" ng-class=\"{\'ed-valid\': state.validFormat, \'ed-invalid\': !state.validFormat}\"></i>\r\n         </span>\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Provide an email address.\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-envelope fa-2x\" ng-class=\"{\'ed-valid\': state.validEmail, \'ed-invalid\': !state.validEmail}\"></i>\r\n         </span>\r\n      </div>\r\n      <div class=\"col-md-2\">\r\n         <button type=\"button\" class=\"btn btn-primary\" ng-click=\"cancel()\">Cancel</button>\r\n         <button type=\"button\" ng-disabled=\"!state.ready\" class=\"btn btn-primary\">Submit</button>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("positioning/dialog/transformationtarget.html","<div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-6\">\r\n         <label for=\"csvElevation\">\r\n				   Choose a transformation <mandatory />\r\n   			</label>\r\n      </div>\r\n      <div class=\"col-md-6\" style=\"text-align: right\">\r\n         <select id=\"transformation\" ng-model=\"state.transformation\">\r\n               <option ng-selected=\"true\" value=\"\"></option>\r\n               <option ng-repeat=\"option in transformations\" value=\"{{option.key}}\">{{option.value}}</option>\r\n            </select>\r\n      </div>\r\n   </div>\r\n</div>");
-$templateCache.put("positioning/file/file.html","<div class=\"container-fluid file-container\" ng-controller=\"RootCtrl as root\">\r\n   <div class=\"row\">\r\n      <div class=\"col-md-6\" style=\"border-right: 2px solid lightgray\">\r\n         <h3>Purpose</h3>\r\n         This Geoscience Australia FME Web Service is provided to give spatial data software users and developers a\r\n         system to check their datum transformations with a standard. It can be used to transform data that references\r\n         the Geocentric Datum of Australia 1994 (GDA94) to data referenced on the\r\n         Geocentric Datum of Australia 2020 (GDA2020).  It may also be used to check transformations\r\n         from older Australian datums; Australian Geodetic Datum 1966 (AGD66) and AGD84, to GDA94.\r\n         <br/><br/>\r\n         <file-drop state=\"root.state\" />\r\n\r\n         <h3>Targets</h3>\r\n         The 7-parameter similarity transformation is currently available for GDA94 to GDA2020.\r\n         The NTv2 transformation grid or 7-parameter similarity transformation is available for AGD66/AGD84 to GDA94.\r\n         <br/>\r\n         <br/>\r\n         <input-format list=\"root.data.fileUploadFormats\" />\r\n      </div>\r\n      <div class=\"col-md-6\" >\r\n         <upload-dialog state=\"root.state\" settings=\"root.data\"/>\r\n      </div>\r\n   </div>\r\n</div>");
-$templateCache.put("positioning/formats/formats.html","<div class=\"panel panel-default\">\r\n  <div class=\"panel-heading\"><h3 class=\"panel-title\">Allowed input file types</h3></div>\r\n  <div class=\"panel-body\">\r\n    <span class=\"label label-info input-format-pill\" ng-repeat=\"item in list\" title=\"{{item.description}} Extensions: {{item.extensions.join(\', \')}}\">\r\n       <a ng-href=\"{{item.url}}\" target=\"_blank\">{{item.name}}</a>\r\n    </span>\r\n  </div>\r\n</div>");
-$templateCache.put("positioning/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-header\">\r\n\r\n        <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".ga-header-collapse\">\r\n            <span class=\"sr-only\">Toggle navigation</span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n        </button>\r\n        <a href=\"/\" class=\"appTitle visible-xs\">\r\n            <h1 style=\"font-size:120%\">{{heading}}</h1>\r\n        </a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n        	<li common-navigation current=\"current\" role=\"menuitem\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");
 $templateCache.put("positioning/filename/filename.html","<div class=\"input-group\">\r\n   <span class=\"input-group-addon\" id=\"nedf-filename\">Filename</span>\r\n   <input type=\"text\" ng-maxlength=\"30\" ng-trim=\"true\" ng-keypress=\"restrict($event)\"\r\n         ng-model=\"state.outputName\" class=\"form-control\"\r\n         placeholder=\"Filename\" aria-describedby=\"pos-filename\" />\r\n   <span class=\"input-group-addon\" id=\"basic-addon2\">.zip</span>\r\n</div>");
 $templateCache.put("positioning/filedrop/filedrop.html","<div id=\"fileDrop\" title=\"Drop the files you would like to reproject to GDA2020\">\r\n   <br/> Drop <br/> File(s) <br/> Here\r\n</div>");
+$templateCache.put("positioning/file/file.html","<div class=\"container-fluid file-container\" ng-controller=\"RootCtrl as root\">\r\n   <div class=\"row\">\r\n      <div class=\"col-md-6\" style=\"border-right: 2px solid lightgray\">\r\n         <h3>Purpose</h3>\r\n         This Geoscience Australia FME Web Service is provided to give spatial data software users and developers a\r\n         system to check their datum transformations with a standard. It can be used to transform data that references\r\n         the Geocentric Datum of Australia 1994 (GDA94) to data referenced on the\r\n         Geocentric Datum of Australia 2020 (GDA2020).  It may also be used to check transformations\r\n         from older Australian datums; Australian Geodetic Datum 1966 (AGD66) and AGD84, to GDA94.\r\n         <br/><br/>\r\n         <file-drop state=\"root.state\" />\r\n\r\n         <h3>Targets</h3>\r\n         The 7-parameter similarity transformation is currently available for GDA94 to GDA2020.\r\n         The NTv2 transformation grid or 7-parameter similarity transformation is available for AGD66/AGD84 to GDA94.\r\n         <br/>\r\n         <br/>\r\n         <input-format list=\"root.data.fileUploadFormats\" />\r\n      </div>\r\n      <div class=\"col-md-6\" >\r\n         <upload-dialog state=\"root.state\" settings=\"root.data\"/>\r\n      </div>\r\n   </div>\r\n</div>");
+$templateCache.put("positioning/formats/formats.html","<div class=\"panel panel-default\">\r\n  <div class=\"panel-heading\"><h3 class=\"panel-title\">Allowed input file types</h3></div>\r\n  <div class=\"panel-body\">\r\n    <span class=\"label label-info input-format-pill\" ng-repeat=\"item in list\" title=\"{{item.description}} Extensions: {{item.extensions.join(\', \')}}\">\r\n       <a ng-href=\"{{item.url}}\" target=\"_blank\">{{item.name}}</a>\r\n    </span>\r\n  </div>\r\n</div>");
 $templateCache.put("positioning/output/output.html","<div class=\"row\">\r\n   <div class=\"col-md-3\">\r\n      <label for=\"geoprocessOutputFormat\">\r\n					Output Format<mandatory />\r\n				</label>\r\n   </div>\r\n   <div class=\"col-md-9\">\r\n      <select id=\"geoprocessOutputFormat\" style=\"width:95%\" ng-model=\"state.outFormat\" ng-options=\"opt.value for opt in settings.processing.outFormat\"></select>\r\n   </div>\r\n</div>");
+$templateCache.put("positioning/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-header\">\r\n\r\n        <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".ga-header-collapse\">\r\n            <span class=\"sr-only\">Toggle navigation</span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n        </button>\r\n        <a href=\"/\" class=\"appTitle visible-xs\">\r\n            <h1 style=\"font-size:120%\">{{heading}}</h1>\r\n        </a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n        	<li common-navigation current=\"current\" role=\"menuitem\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");
 $templateCache.put("positioning/progress/progresscsv.html","<div class=\"row\">\r\n      <div class=\"col-md-4\" style=\"padding-top:7px\">\r\n         <div class=\"progress\">\r\n            <div class=\"progress-bar\" role=\"progressbar\" aria-valuenow=\"{{state.percentage}}\"\r\n                     aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: {{state.percentage}}%;\">\r\n                <span class=\"sr-only\"></span>\r\n            </div>\r\n         </div>\r\n      </div>\r\n      <div class=\"col-md-5\" style=\"padding-top:7px\">\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Add information about your file.\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-file-text-o fa-lg\" ng-class=\"{\'ed-valid\': state.validFileInfo, \'ed-invalid\': !state.validFileInfo}\"></i>\r\n         </span>\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Select a transformation.\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-cogs fa-lg\" ng-class=\"{\'ed-valid\': state.transformation, \'ed-invalid\': !state.transformation}\"></i>\r\n         </span>\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Provide an email address.\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-envelope fa-lg\" ng-class=\"{\'ed-valid\': state.validEmail, \'ed-invalid\': !state.validEmail}\"></i>\r\n         </span>\r\n      </div>\r\n      <div class=\"col-md-3\">\r\n         <button type=\"button\" class=\"btn btn-primary\" ng-click=\"cancel()\">Cancel</button>\r\n         <button class=\"btn btn-primary pull-right\" ng-disabled=\"!state.validForm\" ng-click=\"submit()\" disabled=\"disabled\">Submit</button>\r\n      </div>\r\n\r\n   </div>");
 $templateCache.put("positioning/progress/progresshapefile.html","<div class=\"row\">\r\n      <div class=\"col-md-4\" style=\"padding-top:7px\">\r\n         <div class=\"progress\">\r\n            <div class=\"progress-bar\" role=\"progressbar\" aria-valuenow=\"{{state.percentage}}\"\r\n                     aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: {{state.percentage}}%;\">\r\n                <span class=\"sr-only\"></span>\r\n            </div>\r\n         </div>\r\n      </div>\r\n      <div class=\"col-md-5\" style=\"padding-top:7px\">\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Provide four files for reprojection\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-file-o fa-lg\" ng-class=\"{\'ed-valid\': state.full, \'ed-invalid\': !state.full}\"></i>\r\n         </span>\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Select a transformation.\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-cogs fa-lg\" ng-class=\"{\'ed-valid\': state.transformation, \'ed-invalid\': !state.transformation}\"></i>\r\n         </span>\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Provide an email address.\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-envelope fa-lg\" ng-class=\"{\'ed-valid\': state.validEmail, \'ed-invalid\': !state.validEmail}\"></i>\r\n         </span>\r\n      </div>\r\n      <div class=\"col-md-3\">\r\n         <button type=\"button\" class=\"btn btn-primary\" ng-click=\"cancel()\">Cancel</button>\r\n         <button class=\"btn btn-primary pull-right\" ng-disabled=\"!state.validForm\" ng-click=\"submit()\" disabled=\"disabled\">Submit</button>\r\n      </div>\r\n   </div>");
 $templateCache.put("positioning/shapefile/shapefile.html","<div>\r\n  <h4>Selected Shapefiles</h4>\r\n  <div ng-repeat=\"(key, file) in state.file\">\r\n		<div class=\"row\" ng-if=\"!file\">\r\n			<div class=\"col-md-12\">\r\n            <i class=\"fa fa-warning\" style=\"color:#f4c842\"></i>\r\n            Please drag and drop a file named {{state.outputName}}.{{key}} extension to complete your set for upload.\r\n			</div>\r\n		</div>\r\n      <div class=\"row\" ng-if=\"file\">\r\n			<div class=\"col-md-12\" ng-if=\"file\">\r\n            <i class=\"fa fa-check-square\" style=\"color:#328737\"></i>\r\n            {{file.name}} ({{file.size | bytes}})\r\n			</div>\r\n		</div>\r\n  </div>\r\n</div>");}]);

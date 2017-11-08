@@ -20,12 +20,8 @@
                link: function (scope, element) {
                   let timer;
 
-                  scope.clip = {
-                     xMax: null,
-                     xMin: null,
-                     yMax: null,
-                     yMin: null
-                  };
+                  scope.clip = clipService.data.clip;
+
                   scope.typing = false;
 
                   if (typeof scope.showBounds === "undefined") {
@@ -56,37 +52,8 @@
 
                   scope.initiateDraw = function () {
                      messageService.info("Click on the map and drag to define your area of interest.");
-                     // It can only be triggered this way if the tab is open.
-                     scope.viewing = true;
                      clipService.initiateDraw();
                   };
-
-                  // We use viewing to determine if we care about a size greater than
-                  $rootScope.$on("view.changed", function(event, data) {
-                     scope.viewing = "download" === data;
-                  });
-
-                  $rootScope.$on("bounds.drawn", function(event, data) {
-                     console.log("data", data);
-                     drawComplete(clipService.setClip(data));
-                  });
-
-                  function drawComplete(data) {
-                     let c = scope.clip;
-
-                     c.xMax = +data.clip.xMax;
-                     c.xMin = +data.clip.xMin;
-                     c.yMax = +data.clip.yMax;
-                     c.yMin = +data.clip.yMin;
-
-                     $rootScope.$broadcast('icsm.clip.drawn', c);  // Let people know it is drawn
-                     $rootScope.$broadcast('icsm.bounds.draw', [
-                        c.xMin,
-                        c.yMin,
-                        c.xMax,
-                        c.yMax
-                     ]);// Draw it
-                  }
                }
             };
          }])
@@ -96,39 +63,58 @@
          let options = {
             maxAreaDegrees: 4
          },
-         service = {
-            initiateDraw: function () {
-               $rootScope.$broadcast("clip.initiate.draw", {started: true});
-               this.data = null;
-               return drawService.drawRectangle({
-                  retryOnOversize: false
-               });
-            },
+            service = {
+               data: {
+                  clip: {}
+               },
+               initiateDraw: function () {
+                  $rootScope.$broadcast("clip.initiate.draw", { started: true });
+                  let clip = this.data.clip;
+                  delete clip.xMin;
+                  delete clip.xMax;
+                  delete clip.yMin;
+                  delete clip.yMax;
+                  delete clip.area;
+                  return drawService.drawRectangle({
+                     retryOnOversize: false
+                  });
+               },
 
-            cancelDraw: function () {
-               drawService.cancelDrawRectangle();
-            },
+               cancelDraw: function () {
+                  drawService.cancelDrawRectangle();
+               },
 
-            setClip: function(data) {
-               return drawComplete(data);
-            }
-         };
+               setClip: function (data) {
+                  return drawComplete(data);
+               }
+            };
+
+            $rootScope.$on("bounds.drawn", function (event, data) {
+               console.log("data", data);
+               service.setClip(data);
+               let c = service.data.clip;
+
+               $rootScope.$broadcast('icsm.clip.drawn', c);  // Let people know it is drawn
+               $rootScope.$broadcast('icsm.bounds.draw', [
+                     c.xMin,
+                     c.yMin,
+                     c.xMax,
+                     c.yMax
+                  ]);// Draw it
+            });
 
          return service;
 
-         function drawComplete(data) {
-            let clip = {
-               xMax: data.bounds.getEast().toFixed(5),
-               xMin: data.bounds.getWest().toFixed(5),
-               yMax: data.bounds.getNorth().toFixed(5),
-               yMin: data.bounds.getSouth().toFixed(5)
-            };
-            let area = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
 
-            service.data = {
-               clip: clip,
-               area: area
-            };
+
+         function drawComplete(data) {
+            let clip = service.data.clip;
+            clip.xMax = data.bounds.getEast().toFixed(5);
+            clip.xMin = data.bounds.getWest().toFixed(5);
+            clip.yMax = data.bounds.getNorth().toFixed(5);
+            clip.yMin = data.bounds.getSouth().toFixed(5);
+
+            service.data.area = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
 
             return service.data;
          }

@@ -72,7 +72,7 @@
 								$timeout(function () {
 									send("", "clear");
 									send("The selected area is too large to process. Please restrict to approximately " +
-										"2 degrees square.",
+										"4 degrees square.",
 										"error");
 									deferred.resolve(result);
 								});

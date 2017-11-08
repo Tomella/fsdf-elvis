@@ -1,5 +1,5 @@
 <div class="well well-sm mess-container" ng-show="message.type && message.text"
-   ng-class="{'mess-info': message.type == 'error', 'mess-warn': message.type == 'warn', 'mess-info1': (message.type == 'info' || message.type == 'wait')}">
+   ng-class="{'mess-error': message.type == 'error', 'mess-warn': message.type == 'warn', 'mess-info': (message.type == 'info' || message.type == 'wait')}">
    <i class="fa fa-spinner fa-spin fa-fw" aria-hidden="true" ng-if="message.type == 'wait'"></i>
    <span>{{message.text}}</span>
 </div>
