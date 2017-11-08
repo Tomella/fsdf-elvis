@@ -31,19 +31,19 @@
       ng-controller="listCtrl as list">
       <icsm-org-heading org="available" expansions="expansions" mappings="mappings" products="products"></icsm-org-heading>
       <div>
-         <div class="listRow" ng-class-odd="'listEven'" ng-repeat="(typeKey, types) in available.downloadables | allowedTypes">
+         <div class="listRow" ng-class-odd="'listEven'" ng-repeat="(typeKey, types) in available.downloadables | allowedTypes" ng-show="types | hasTypeMatches">
             <span>
-               <strong>{{typeKey}} ({{types | keysLength}})</strong>
+               <h5>{{typeKey}}</h5>
             </span>
             <div>
-               <div ng-repeat="(key, items) in types">
+               <div ng-repeat="(key, items) in types" ng-show="(items | countMatchedItems) != 0">
                   <div>
                      <h5>
                         <button ng-click="list.checkChildren(items)" style="width:7em" class="btn btn-xs btn-default">
                            <span ng-show="!list.childrenChecked(items)">Select all</span>
                            <span ng-show="list.childrenChecked(items)">Deselect all</span>
                         </button>
-                        <strong uib-tooltip="{{filter.types[key].description}}">{{key}} ({{items.length}})</strong>
+                        <span uib-tooltip="{{filter.types[key].description}}">{{key}} (Showing {{items | countMatchedItems | number:0}} of {{items.length}})</span>
                         <button class="pull-right undecorated" ng-click="expansions[available.source + '_' + key] = !expansions[available.source + '_' + key]">
                            [{{expansions[available.source + '_' + key]?"collapse":"expand"}}]
                         </button>

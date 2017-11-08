@@ -98,6 +98,7 @@
          },
          service = {
             initiateDraw: function () {
+               $rootScope.$broadcast("clip.initiate.draw", {started: true});
                this.data = null;
                return drawService.drawRectangle({
                   retryOnOversize: false

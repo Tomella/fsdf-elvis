@@ -311,6 +311,29 @@
          };
       })
 
+      .filter("countMatchedItems", function () {
+         return function (items) {
+            if (!items) {
+               return "";
+            } else {
+               return items.filter(item => item.matched).length;
+            }
+         };
+      })
+
+      .filter("hasTypeMatches", function () {
+         return function (types) {
+            if(!types) {
+               return false;
+            }
+            var count = 0;
+            Object.keys(types).forEach(key => {
+               count += types[key].filter(item => item.matched).length;
+            })
+            return count > 0;
+         };
+      })
+
       .filter("matchedTypes", function () {
          var data = listService.data;
 
@@ -347,7 +370,7 @@
 
       .filter("keysLength", [function () {
          return function (list) {
-            if(!list) {
+            if (!list) {
                return 0;
             }
             return Object.keys(list).reduce((sum, key) => sum + list[key].length, 0);
@@ -428,6 +451,15 @@
             angular.forEach(group, function (subGroup) {
                matches |= subGroup.some(item => item.matched);
             });
+         });
+         return matches;
+      };
+
+
+      this.someChildMatches = function (downloadables) {
+         var matches = false;
+         angular.forEach(group, function (subGroup) {
+            matches |= subGroup.some(item => item.matched);
          });
          return matches;
       };
