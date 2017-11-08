@@ -80,8 +80,8 @@ class ActStrategy extends BaseStrategy {
 
 class GaStrategy extends BaseStrategy {
    constructor(http) {
-      super(http);
-      this.GA_METADATA_TEMPLATE = 'https://ecat.ga.gov.au/geonetwork/srv/eng/search#!${uuid}';
+      super(http); // https://ecat.ga.gov.au/geonetwork/srv/eng/xml.metadata.get?uuid=22be4b55-2465-4320-e053-10a3070a5236
+      this.GA_METADATA_TEMPLATE = 'https://ecat.ga.gov.au/geonetwork/srv/eng/xml.metadata.get?uuid=${uuid}';
       this.UUID_REG_EX = /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/;
    }
 
@@ -96,10 +96,10 @@ class GaStrategy extends BaseStrategy {
 
    requestMetadata(item) {
       var uuid = item.metadata_id;
-      var url = uuid ? ("xml2js/" + this.GA_METADATA_TEMPLATE.replace("${uuid}", uuid) + "/xml") : null;
+      var url = uuid ? ("xml2js/" + this.GA_METADATA_TEMPLATE.replace("${uuid}", uuid)) : null;
       if(url) {
          return this.http.get(url).then(response => {
-            return BaseStrategy.extractData(response.data.GetRecordByIdResponse);
+            return BaseStrategy.extractData(response.data);
          }, err => {
             return {
                title: this.NO_METADATA
