@@ -34,11 +34,8 @@
          <div class="listRow" ng-class-odd="'listEven'" ng-repeat="(typeKey, types) in available.downloadables | allowedTypes">
             <span>
                <strong>{{typeKey}} ({{types | keysLength}})</strong>
-               <button class="pull-right undecorated" ng-click="expansions[available.source + '_' + typeKey] = !expansions[available.source + '_' + typeKey]">
-                  [{{expansions[available.source + '_' + typeKey]?"collapse":"expand"}}]
-               </button>
             </span>
-            <div ng-if="expansions[available.source + '_' + typeKey]">
+            <div>
                <div ng-repeat="(key, items) in types">
                   <div>
                      <h5>
@@ -46,8 +43,13 @@
                            <span ng-show="!list.childrenChecked(items)">Select all</span>
                            <span ng-show="list.childrenChecked(items)">Deselect all</span>
                         </button>
-                        <strong uib-tooltip="{{filter.types[key].description}}">{{key}}</strong>
+                        <strong uib-tooltip="{{filter.types[key].description}}">{{key}} ({{items.length}})</strong>
+                        <button class="pull-right undecorated" ng-click="expansions[available.source + '_' + key] = !expansions[available.source + '_' + key]">
+                           [{{expansions[available.source + '_' + key]?"collapse":"expand"}}]
+                        </button>
                      </h5>
+                  </div>
+                  <div ng-if="expansions[available.source + '_' + key]">
                      <div ng-repeat="item in items | matchedItems" icsm-abstract-hover item="item">
                         <div tooltip-append-to-body="true" uib-tooltip-template="'icsm/results/abstracttooltip.html'" tooltip-popup-delay="400" data-ng-mouseenter="show(item)"
                            data-ng-mouseleave="hide(item)">
@@ -72,10 +74,10 @@
                            </div>
                         </div>
                      </div>
+                     <div style="text-align:right">
+                        <button class="undecorated" ng-click="expansions[available.source + '_' + key] = false">[collapse]</button>
+                     </div>
                   </div>
-               </div>
-               <div style="text-align:right">
-                  <button class="undecorated" ng-click="expansions[available.source + '_' + typeKey] = false">[collapse]</button>
                </div>
             </div>
          </div>

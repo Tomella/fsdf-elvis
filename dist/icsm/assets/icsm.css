@@ -126,6 +126,118 @@
 .iso19115-head {
   font-weight: bold;
 }
+.altthemes-icon {
+  background: url("../resources/img/dbl_sprites.svg") no-repeat;
+  display: inline-block;
+  width: 40px;
+  height: 62px;
+  margin: 0 auto 0 auto;
+}
+
+.altthemes-pin {
+  background-position: 0px;
+}
+
+.altthemes-map {
+  background-position: -40px;
+}
+
+.altthemes-crosshair {
+  background-position: -80px;
+}
+
+.altthemes-sign {
+  background-position: -120px;
+}
+
+.altthemes-parcel {
+  background-position: -160px;
+}
+
+.altthemes-satellite {
+  background-position: -200px;
+}
+
+.altthemes-ship {
+  background-position: -240px;
+}
+
+.altthemes-water {
+  background-position: -280px;
+}
+
+.altthemes-shore {
+  background-position: -320px;
+}
+
+.altthemes-land {
+  background-position: -360px;
+}
+
+@media only screen and (max-width:1200px) {
+  .altthemes-icon {
+    background: url("../resources/img/alt-sprites.svg") no-repeat;
+    display: inline-block;
+    width: 25px;
+    height: 40px;
+    margin: 0 auto 0 auto;
+  }
+
+  .altthemes-pin {
+    background-position: 0px;
+  }
+
+  .altthemes-map {
+    background-position: -25px;
+  }
+
+  .altthemes-crosshair {
+    background-position: -50px;
+  }
+
+  .altthemes-sign {
+    background-position: -75px;
+  }
+
+  .altthemes-parcel {
+    background-position: -100px;
+  }
+
+  .altthemes-satellite {
+    background-position: -125px;
+  }
+
+  .altthemes-ship {
+    background-position: -150px;
+  }
+
+  .altthemes-water {
+    background-position: -175px;
+  }
+
+  .altthemes-shore {
+    background-position: -200px;
+  }
+
+  .altthemes-land {
+    background-position: -225px;
+  }
+}
+
+.altthemesItemCompact {
+  margin-top: 0px !important;
+}
+
+.altthemesdropdown {
+  margin-top: -8px;
+  padding-right: 20px;
+  z-index: 100000;
+}
+
+.altthemesdropdown .altthemescurrent {
+  color: #fff;
+  background-color: #777;
+}
 .common-legend {
   position: abssolute;
   bottom: 45px;
@@ -261,118 +373,6 @@
   padding-left: 3px;
   padding-right: 3px;
 }
-.altthemes-icon {
-  background: url("../resources/img/dbl_sprites.svg") no-repeat;
-  display: inline-block;
-  width: 40px;
-  height: 62px;
-  margin: 0 auto 0 auto;
-}
-
-.altthemes-pin {
-  background-position: 0px;
-}
-
-.altthemes-map {
-  background-position: -40px;
-}
-
-.altthemes-crosshair {
-  background-position: -80px;
-}
-
-.altthemes-sign {
-  background-position: -120px;
-}
-
-.altthemes-parcel {
-  background-position: -160px;
-}
-
-.altthemes-satellite {
-  background-position: -200px;
-}
-
-.altthemes-ship {
-  background-position: -240px;
-}
-
-.altthemes-water {
-  background-position: -280px;
-}
-
-.altthemes-shore {
-  background-position: -320px;
-}
-
-.altthemes-land {
-  background-position: -360px;
-}
-
-@media only screen and (max-width:1200px) {
-  .altthemes-icon {
-    background: url("../resources/img/alt-sprites.svg") no-repeat;
-    display: inline-block;
-    width: 25px;
-    height: 40px;
-    margin: 0 auto 0 auto;
-  }
-
-  .altthemes-pin {
-    background-position: 0px;
-  }
-
-  .altthemes-map {
-    background-position: -25px;
-  }
-
-  .altthemes-crosshair {
-    background-position: -50px;
-  }
-
-  .altthemes-sign {
-    background-position: -75px;
-  }
-
-  .altthemes-parcel {
-    background-position: -100px;
-  }
-
-  .altthemes-satellite {
-    background-position: -125px;
-  }
-
-  .altthemes-ship {
-    background-position: -150px;
-  }
-
-  .altthemes-water {
-    background-position: -175px;
-  }
-
-  .altthemes-shore {
-    background-position: -200px;
-  }
-
-  .altthemes-land {
-    background-position: -225px;
-  }
-}
-
-.altthemesItemCompact {
-  margin-top: 0px !important;
-}
-
-.altthemesdropdown {
-  margin-top: -8px;
-  padding-right: 20px;
-  z-index: 100000;
-}
-
-.altthemesdropdown .altthemescurrent {
-  color: #fff;
-  background-color: #777;
-}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -419,17 +419,6 @@ div.leaflet-control-scale-line {
     display: none;
   }
 }
-.pn-authorities-pills span.btn-primary {
-  background-color: red;
-}
-
-.pn-authorities-swathe {
-  display: inline-block;
-  background-color: red;
-  width: 14px;
-  height: 14px;
-  border: solid 1px black;
-}
 .pn-classifications-pills span.btn-primary {
   background-color: green;
 }
@@ -441,6 +430,24 @@ div.leaflet-control-scale-line {
   height: 14px;
   border: solid 1px black;
 }
+.pn-featuretypes-swathe {
+  display: inline-block;
+  background-color: #337ab7;
+  width: 14px;
+  height: 14px;
+  border: solid 1px black;
+}
+.pn-authorities-pills span.btn-primary {
+  background-color: red;
+}
+
+.pn-authorities-swathe {
+  display: inline-block;
+  background-color: red;
+  width: 14px;
+  height: 14px;
+  border: solid 1px black;
+}
 .pn-tab-content-item {
   padding-right: 3px;
   background: #FFF;
@@ -448,12 +455,23 @@ div.leaflet-control-scale-line {
   overflow-y: auto;
   overflow-x: hidden;
 }
-.pn-featuretypes-swathe {
-  display: inline-block;
-  background-color: #337ab7;
-  width: 14px;
-  height: 14px;
-  border: solid 1px black;
+.pn-features {
+  max-block-size: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.pn-search-container {
+  height: 97%;
+}
+
+.tooltip-inner {
+  max-width: 350px;
+}
+
+.pn-pill {
+  color: #fff;
+  margin: 4px;
 }
 .pn-container {
   overflow-y: auto;
@@ -500,24 +518,6 @@ div.leaflet-control-scale-line {
   padding-bottom: 5px;
   background-color: #f8f8ff;
   border-top: 1px solid #f0f0f0;
-}
-.pn-features {
-  max-block-size: 300px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.pn-search-container {
-  height: 97%;
-}
-
-.tooltip-inner {
-  max-width: 350px;
-}
-
-.pn-pill {
-  color: #fff;
-  margin: 4px;
 }
 /* Overrides */
 
@@ -841,6 +841,28 @@ img.elvis-logo {
 .mess-container {
   font-weight: bold;
 }
+.product-valid {
+  color: green;
+}
+
+.product-invalid {
+  color: red;
+}
+
+.product-warning {
+  color: darkorange;
+}
+
+.product-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.product-restrict {
+  padding-bottom: 8px;
+}
 .continue-container {
   padding: 4px;
 }
@@ -994,28 +1016,6 @@ img.elvis-logo {
 i.fa.active {
   color: red;
 }
-.product-valid {
-  color: green;
-}
-
-.product-invalid {
-  color: red;
-}
-
-.product-warning {
-  color: darkorange;
-}
-
-.product-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.product-restrict {
-  padding-bottom: 8px;
-}
 .reviewing-odd {
   background-color: #eeeeee;
 }
@@ -1110,52 +1110,6 @@ i.fa.active {
   color: #fff;
   background-color: #777;
 }
-.radCore {
-  margin-right: 3px;
-  display: inline-block;
-}
-
-.searchBar {
-  width: 27em;
-  opacity: 0.9;
-}
-
-@media only screen and (max-width:1100px) {
-  .searchBar {
-    width: 23em;
-  }
-}
-
-@media only screen and (max-width:1025px) {
-  .searchBar {
-    width: 20em;
-  }
-}
-
-@media only screen and (max-width:645px) {
-  .searchBar {
-    display: none;
-  }
-}
-
-@media only screen and (max-width:965px) {
-  .radCore,
-  .hideWhenSmall,
-  .steps-indicator,
-  .secondToolbarInfo {
-    display: none;
-  }
-}
-
-div.leaflet-control-scale-line {
-  text-align: center;
-}
-
-@media only screen and (max-width:965px) {
-  div.leaflet-control-scale-line {
-    display: none;
-  }
-}
 .downloadPane {
   padding-left: 0px !important;
   padding-right: 5px !important;
@@ -1172,29 +1126,51 @@ div.leaflet-control-scale-line {
   right: 0;
   bottom: 8px;
 }
-.selectContainer {
-  width: 100%;
+.radCore {
+  margin-right: 3px;
+  display: inline-block;
 }
 
-.selectAbstractTooltip {
-  /* width:450px; */
+.searchBar {
+  width: 27em;
+  opacity: 0.9;
 }
 
-.orange {
-  color: orange;
+@media only screen and (max-width:1100px) {
+  .searchBar {
+    width: 23em;
+  }
 }
 
-i.fa.active {
-  color: red;
-}
-.regions-label {
-  border: 0;
+@media only screen and (max-width:1025px) {
+  .searchBar {
+    width: 20em;
+  }
 }
 
-.regions-label.over {
-  font-weight: bold;
-  color: red;
-  font-size: 120%;
+@media only screen and (max-width:645px) {
+  .searchBar {
+    display: none;
+  }
+}
+
+@media only screen and (max-width:965px) {
+  .radCore,
+  .hideWhenSmall,
+  .steps-indicator,
+  .secondToolbarInfo {
+    display: none;
+  }
+}
+
+div.leaflet-control-scale-line {
+  text-align: center;
+}
+
+@media only screen and (max-width:965px) {
+  div.leaflet-control-scale-line {
+    display: none;
+  }
 }
 .radCore {
   margin-right: 3px;
@@ -1241,6 +1217,30 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
+}
+.regions-label {
+  border: 0;
+}
+
+.regions-label.over {
+  font-weight: bold;
+  color: red;
+  font-size: 120%;
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
 }
 .vector-tooltip {
   min-width: 25em;
@@ -1342,17 +1342,6 @@ span.mandatory {
   content: "*";
   color: red;
 }
-.csv-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.csv-fix-label label {
-  width: 10em;
-  text-align: right;
-}
 .upload-dialog p {
   padding: 15px;
   margin-top: 10px;
@@ -1363,6 +1352,17 @@ span.mandatory {
   margin-top: 10px;
   padding: 5px;
   border-radius: 4px;
+}
+.csv-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.csv-fix-label label {
+  width: 10em;
+  text-align: right;
 }
 .hide {
   display: none;
@@ -1390,28 +1390,6 @@ span.mandatory {
   font-size: 110%;
   padding: 4px;
   margin: 5px;
-}
-.ed-valid {
-  color: green;
-}
-
-.ed-invalid {
-  color: red;
-}
-
-.ed-active {
-  color: red;
-}
-.shp-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.shp-fix-label label {
-  width: 10em;
-  text-align: right;
 }
 .nav-icons {
   margin-top: 7px !important;
@@ -1442,4 +1420,26 @@ span.mandatory {
 
 .common-header {
   background-color: white;
+}
+.ed-valid {
+  color: green;
+}
+
+.ed-invalid {
+  color: red;
+}
+
+.ed-active {
+  color: red;
+}
+.shp-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.shp-fix-label label {
+  width: 10em;
+  text-align: right;
 }

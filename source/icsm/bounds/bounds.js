@@ -1,8 +1,8 @@
 {
 	angular.module("icsm.bounds", ["icsm.message"])
 
-		.directive('icsmBounds', ['icsmMessageService', 'boundsService',
-			function (icsmMessageService, boundsService) {
+		.directive('icsmBounds', ['$rootScope', 'icsmMessageService', 'boundsService',
+			function ($rootScope, icsmMessageService, boundsService) {
 				return {
 					restrict: 'AE',
 					link: function () {

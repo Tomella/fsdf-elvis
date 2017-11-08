@@ -24,7 +24,7 @@ angular.module("common.geoprocess", [])
 					geoprocessService.removeClip();
 					removeReferenceLayer();
 				}
-				if(newData && newData != oldData) {
+				if(newData && newData !== oldData) {
 					scope.stage = "bbox";
 					drawReferenceLayer();
 				}
