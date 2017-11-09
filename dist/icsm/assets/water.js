@@ -17,6 +17,78 @@ specific language governing permissions and limitations
 under the License.
 */
 
+"use strict";
+
+{
+   var PaneCtrl = function PaneCtrl(paneService) {
+      paneService.data().then(function (data) {
+         this.data = data;
+      }.bind(this));
+   };
+
+   var PaneService = function PaneService() {
+      var data = {};
+
+      return {
+         add: function add(item) {},
+
+         remove: function remove(item) {}
+      };
+   };
+
+   angular.module("water.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
+      return {
+         templateUrl: "water/panes/panes.html",
+         transclude: true,
+         scope: {
+            defaultItem: "@",
+            data: "="
+         },
+         controller: ['$scope', function ($scope) {
+            var changeSize = false;
+
+            $scope.view = $scope.defaultItem;
+
+            $scope.setView = function (what) {
+               var oldView = $scope.view;
+
+               if ($scope.view === what) {
+                  if (what) {
+                     changeSize = true;
+                  }
+                  $scope.view = "";
+               } else {
+                  if (!what) {
+                     changeSize = true;
+                  }
+                  $scope.view = what;
+               }
+
+               $rootScope.$broadcast("view.changed", $scope.view, oldView);
+
+               if (changeSize) {
+                  mapService.getMap().then(function (map) {
+                     map._onResize();
+                  });
+               }
+            };
+            $timeout(function () {
+               $rootScope.$broadcast("view.changed", $scope.view, null);
+            }, 50);
+         }]
+      };
+   }]).directive("icsmTabs", [function () {
+      return {
+         templateUrl: "water/panes/tabs.html",
+         require: "^icsmPanes"
+      };
+   }]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
+
+   PaneCtrl.$inject = ["paneService"];
+
+
+   PaneService.$inject = [];
+}
 'use strict';
 
 {
@@ -258,78 +330,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          }
       };
    }]).service("waterRegionsService", WaterRegionsService);
-}
-"use strict";
-
-{
-   var PaneCtrl = function PaneCtrl(paneService) {
-      paneService.data().then(function (data) {
-         this.data = data;
-      }.bind(this));
-   };
-
-   var PaneService = function PaneService() {
-      var data = {};
-
-      return {
-         add: function add(item) {},
-
-         remove: function remove(item) {}
-      };
-   };
-
-   angular.module("water.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
-      return {
-         templateUrl: "water/panes/panes.html",
-         transclude: true,
-         scope: {
-            defaultItem: "@",
-            data: "="
-         },
-         controller: ['$scope', function ($scope) {
-            var changeSize = false;
-
-            $scope.view = $scope.defaultItem;
-
-            $scope.setView = function (what) {
-               var oldView = $scope.view;
-
-               if ($scope.view === what) {
-                  if (what) {
-                     changeSize = true;
-                  }
-                  $scope.view = "";
-               } else {
-                  if (!what) {
-                     changeSize = true;
-                  }
-                  $scope.view = what;
-               }
-
-               $rootScope.$broadcast("view.changed", $scope.view, oldView);
-
-               if (changeSize) {
-                  mapService.getMap().then(function (map) {
-                     map._onResize();
-                  });
-               }
-            };
-            $timeout(function () {
-               $rootScope.$broadcast("view.changed", $scope.view, null);
-            }, 50);
-         }]
-      };
-   }]).directive("icsmTabs", [function () {
-      return {
-         templateUrl: "water/panes/tabs.html",
-         require: "^icsmPanes"
-      };
-   }]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
-
-   PaneCtrl.$inject = ["paneService"];
-
-
-   PaneService.$inject = [];
 }
 "use strict";
 
@@ -902,6 +902,39 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 
 	SelectCtrl.$inject = ['$rootScope', 'configService', 'flashService', 'selectService'];
+}
+"use strict";
+
+{
+	angular.module("water.toolbar", []).directive("icsmToolbar", [function () {
+		return {
+			controller: 'toolbarLinksCtrl'
+		};
+	}])
+
+	/**
+  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
+  */
+	.directive('icsmToolbarRow', [function () {
+		return {
+			scope: {
+				map: "="
+			},
+			restrict: 'AE',
+			templateUrl: 'water/toolbar/toolbar.html'
+		};
+	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
+		var _this = this;
+
+		configService.getConfig().then(function (config) {
+			_this.links = config.toolbarLinks;
+		});
+
+		$scope.item = "";
+		$scope.toggleItem = function (item) {
+			$scope.item = $scope.item === item ? "" : item;
+		};
+	}]);
 }
 "use strict";
 
@@ -1587,39 +1620,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 	VectorDownloadService.$inject = ['$http', '$q', '$rootScope', 'mapService', 'storageService'];
 }
-"use strict";
-
-{
-	angular.module("water.toolbar", []).directive("icsmToolbar", [function () {
-		return {
-			controller: 'toolbarLinksCtrl'
-		};
-	}])
-
-	/**
-  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
-  */
-	.directive('icsmToolbarRow', [function () {
-		return {
-			scope: {
-				map: "="
-			},
-			restrict: 'AE',
-			templateUrl: 'water/toolbar/toolbar.html'
-		};
-	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
-		var _this = this;
-
-		configService.getConfig().then(function (config) {
-			_this.links = config.toolbarLinks;
-		});
-
-		$scope.item = "";
-		$scope.toggleItem = function (item) {
-			$scope.item = $scope.item === item ? "" : item;
-		};
-	}]);
-}
 angular.module("water.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("water/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" icsm-toolbar-row map=\"root.map\" ></div>\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n         <water-regions></water-regions>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div icsm-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'datasets\'\" water-select></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" water-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" water-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("water/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'datasets\'}\" ng-click=\"setView(\'datasets\')\">\r\n		<button class=\"undecorated\">Datasets</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");
 $templateCache.put("water/select/division.html","<div class=\"row\" ng-repeat=\"division in divisions\">\r\n   <div class=\"col-md-12\" ng-mouseenter=\"hilight(division)\" ng-mouseleave=\"lolight(division)\">\r\n      <label>\r\n         <input type=\"radio\" ng-model=\"state.division\" name=\"divisionsRadio\" value=\"{{division.name}}\">\r\n         {{division.name}}\r\n      </label>\r\n   </div>\r\n</div>");
@@ -1627,9 +1627,9 @@ $templateCache.put("water/select/doc.html","<div ng-class-odd=\"\'odd\'\" ng-cla
 $templateCache.put("water/select/group.html","<div class=\"panel panel-default\" style=\"margin-bottom:-5px;\" >\r\n	<div class=\"panel-heading\"><common-wms data=\"group\"></common-wms> <strong>{{group.title}}</strong></div>\r\n	<div class=\"panel-body\">\r\n   		<div ng-repeat=\"doc in group.docs\">\r\n   			<div select-doc doc=\"doc\" group=\"group\"></div>\r\n		</div>\r\n	</div>\r\n</div>\r\n");
 $templateCache.put("water/select/region.html","<div class=\"row\" ng-repeat=\"region in regions\">\r\n   <div class=\"col-md-12\" ng-mouseenter=\"hilight(region)\" ng-mouseleave=\"lolight(region)\">\r\n      <label>\r\n         <input type=\"radio\" ng-model=\"state.region\" name=\"regionsRadio\" value=\"{{region.name}}\">\r\n         {{region.name}}\r\n      </label>\r\n   </div>\r\n</div>");
 $templateCache.put("water/select/select.html","<div ng-controller=\"SelectCtrl as select\">\r\n	<div style=\"position:relative;padding:5px;padding-left:10px;\" class=\"scrollPanel\" ng-if=\"!select.selected\">\r\n		<div class=\"panel panel-default\" style=\"margin-bottom:-5px\">\r\n  			<div class=\"panel-heading\">\r\n  				<h3 class=\"panel-title\">Available datasets</h3>\r\n  			</div>\r\n  			<div class=\"panel-body\">\r\n				<div ng-repeat=\"doc in select.data.response.docs\" style=\"padding-bottom:7px\">\r\n					<div select-doc ng-if=\"doc.type == \'dataset\'\" doc=\"doc\"></div>\r\n					<select-group ng-if=\"doc.type == \'group\'\" group=\"doc\"></select-group>\r\n				</div>\r\n				<div vector-select></div>\r\n  			</div>\r\n		</div>\r\n	</div>\r\n	<div style=\"position:relative;padding:5px;padding-left:10px;\" class=\"scrollPanel\" ng-if=\"select.selected\" common-item-metaview container=\"select\"></div>\r\n</div>");
+$templateCache.put("water/toolbar/toolbar.html","<div icsm-toolbar>\r\n	<div class=\"row toolBarGroup\">\r\n		<search-searches name=\"toolbar\">\r\n			<search-search label=\"Google search\" default=\"true\">\r\n				<div geo-search></div>\r\n			</search-search>\r\n			<search-search label=\"Basins search\">\r\n				<common-basin-search class=\"cossapSearch\"></common-basin-search>\r\n			</search-search>\r\n			<search-search label=\"Catchments search\">\r\n				<common-catchment-search class=\"cossapSearch\"></common-catchment-search>\r\n			</search-search>\r\n		</search-searches>\r\n		<div class=\"pull-right\">\r\n			<div class=\"btn-toolbar radCore\" role=\"toolbar\"  water-toolbar>\r\n				<div class=\"btn-group\">\r\n					<!-- < water-state-toggle></water-state-toggle> -->\r\n				</div>\r\n			</div>\r\n\r\n			<div class=\"btn-toolbar\" style=\"margin:right:10px;display:inline-block\">\r\n				<div class=\"btn-group\">\r\n					<span class=\"btn btn-default\" common-baselayer-control max-zoom=\"16\" title=\"Satellite to Topography bias on base map.\"></span>\r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("water/vector/add.html","<button type=\'button\' ng-disabled=\'!someSelected()\' class=\'undecorated vector-add\' ng-click=\'toggle()\'>\r\n   <span class=\'fa-stack\' tooltip-placement=\'right\' uib-tooltip=\'Extract data from one or more vector types.\'>\r\n	   <i class=\'fa fa-lg fa-download\' ng-class=\'{active:item.download}\'></i>\r\n	</span>\r\n</button>");
 $templateCache.put("water/vector/download.html","");
 $templateCache.put("water/vector/geoprocess.html","<div class=\"container-fluido\" style=\"overflow-x:hidden\" ng-form>\r\n	<div ng-show=\"stage==\'bbox\'\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12\">\r\n            <div uib-accordion>\r\n               <div uib-accordion-group class=\"panel\" heading=\"By drawn bounding box\" is-open=\"data.processing.bboxSelected\">\r\n				      <wizard-clip trigger=\"stage == \'bbox\'\" drawn=\"drawn()\" clip=\"data.processing.clip\" bounds=\"data.bounds\" open=\"data.processing.bboxSelected\"></wizard-clip>\r\n               </div>\r\n               <div uib-accordion-group class=\"panel\" heading=\"By division\" is-open=\"data.processing.divisionSelected\">\r\n                  <select-division state=\"data.processing\" open=\"data.processing.divisionSelected\"></select-division>\r\n               </div>\r\n               <div uib-accordion-group class=\"panel\" heading=\"By river region\" is-open=\"data.processing.regionSelected\">\r\n                  <select-region state=\"data.processing\" open=\"data.processing.regionSelected\"></select-region>\r\n               </div>\r\n            </div>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n 			<div class=\"col-md-12\">\r\n				<button class=\"btn btn-primary pull-right\"\r\n                  ng-disabled=\"(data.processing.bboxSelected &&  (!validClip(data) || checkingOrFailed)) || (data.processing.divisionSelected && ! data.processing.division) || (data.processing.regionSelected && ! data.processing.region)\"\r\n                  ng-click=\"stage=\'formats\'\">Next</button>\r\n			</div>\r\n		</div>\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Select an area of interest.</strong> There are two ways to select your area of interest:\r\n			<ol>\r\n				<li>Draw an area on the map with the mouse by clicking a corner and while holding the left mouse button\r\n					down drag diagonally across the map to the opposite corner or</li>\r\n				<li>Type your co-ordinates into the areas above.</li>\r\n			</ol>\r\n			Once drawn the points can be modified by the overwriting the values above or drawing another area by clicking the draw button again.\r\n			Ensure you select from the highlighted areas as the data can be quite sparse for some data.<br/>\r\n			<p style=\"padding-top:5px\">\r\n			<strong>Warning:</strong> Some extracts can be huge. It is best if you start with a small area to experiment with first. An email will be sent\r\n			with the size of the extract. Download judiciously.\r\n			</p>\r\n			<p style=\"padding-top\"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n				You can zoom in and out using the mouse wheel or the \"+\" and \"-\" map control on the top left of the map. If you\r\n				don\'t like the position of your drawn area, hit the \"Draw\" button and draw a new bounding box.\r\n			</p>\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'formats\'\">\r\n		<div class=\"well\">\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-3\">\r\n				<label for=\"vectorGeoprocessOutputFormat\">\r\n					Output Format\r\n				</label>\r\n			</div>\r\n			<div class=\"col-md-9\">\r\n				<select id=\"vectorGeoprocessOutputFormat\" style=\"width:95%\" ng-model=\"data.processing.outFormat\" ng-options=\"opt.value for opt in config.refData.vectorFileFormat\"></select>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\">\r\n			<div class=\"col-md-3\">\r\n				<label for=\"geoprocessOutCoordSys\">\r\n					Coordinate System\r\n				</label>\r\n			</div>\r\n			<div class=\"col-md-9\">\r\n				<select id=\"vectorGeoprocessOutCoordSys\" style=\"width:95%\" ng-model=\"data.processing.outCoordSys\" ng-options=\"opt.value for opt in config.refData.outCoordSys | sysIntersect : data.processing.clip\"></select>\r\n			</div>\r\n		</div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" ng-click=\"stage=\'bbox\'\">Previous</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!validSansEmail(data)\" ng-click=\"stage=\'email\'\">Next</button>\r\n   			</div>\r\n		</div>\r\n\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Data representation.</strong> Select how you want your data presented.<br/>\r\n			Output format is the structure of the data and you should choose a format compatible with the tools that you will use to manipulate the data.\r\n			<ul>\r\n				<li ng-repeat=\"format in outFormats\"><strong>{{format.value}}</strong> - {{format.description}}</li>\r\n			</ul>\r\n			Select what <i>coordinate system</i> or projection you would like. If in doubt select WGS84.<br/>\r\n			Not all projections cover all of Australia. If the area you select is not covered by a particular projection then the option to download in that projection will not be available.\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'email\'\">\r\n		<div class=\"well\" exp-enter=\"stage=\'confirm\'\">\r\n			<div download-email></div>\r\n			<br/>\r\n			<div download-filename data=\"data.processing\"></div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" ng-click=\"stage=\'formats\'\">Previous</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!allDataSet(data)\" ng-click=\"stage=\'confirm\'\">Submit</button>\r\n   			</div>\r\n		</div>\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Email notification</strong> The extract of data can take some time. By providing an email address we will be able to notify you when the job is complete. The email will provide a link to the extracted\r\n			data which will be packaged up as a single file. To be able to proceed you need to have provided:\r\n			<ul>\r\n				<li>An area of interest to extract the data (referred to as a bounding box).</li>\r\n				<li>An output format.</li>\r\n				<li>A valid coordinate system or projection.</li>\r\n				<li>An email address to receive the details of the extraction.</li>\r\n				<li><strong>Note:</strong>Email addresses need to be and are stored in the system.</li>\r\n			</ul>\r\n			<strong style=\"font-size:120%\">Optional filename</strong> The extract of data can take some time. By providing an optional filename it will allow you\r\n			to associate extracted data to your purpose for downloading data. For example:\r\n			<ul>\r\n				<li>myHouse will have a file named myHouse.zip</li>\r\n				<li>Sorrento would result in a file named Sorrento.zip</li>\r\n			</ul>\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'confirm\'\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12 abstractContainer\">\r\n				{{data.abstract}}\r\n			</div>\r\n		</div>\r\n		<h3>You have chosen:</h3>\r\n		<table class=\"table table-striped\">\r\n			<tbody>\r\n				<tr ng-if=\"data.processing.bboxSelected\">\r\n					<th>Area</th>\r\n					<td>\r\n						<span style=\"display:inline-block; width: 10em\">Lower left (lat/lng&deg;):</span> {{data.processing.clip.yMin | number : 6}}, {{data.processing.clip.xMin | number : 6}}<br/>\r\n						<span style=\"display:inline-block;width: 10em\">Upper right (lat/lng&deg;):</span> {{data.processing.clip.yMax | number : 6}}, {{data.processing.clip.xMax | number : 6}}\r\n					</td>\r\n				</tr>\r\n				<tr ng-if=\"data.processing.divisionSelected\">\r\n					<th>Division</th>\r\n					<td>\r\n						{{data.processing.division}}\r\n               </td>\r\n				</tr>\r\n				<tr ng-if=\"data.processing.regionSelected\">\r\n					<th>River Region</th>\r\n					<td>\r\n						{{data.processing.region}}\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Output format</th>\r\n					<td>{{data.processing.outFormat.value}}</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Coordinate system</th>\r\n					<td>{{data.processing.outCoordSys.value}}</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Email address</th>\r\n					<td>{{email}}</td>\r\n				</tr>\r\n				<tr ng-show=\"data.processing.filename\">\r\n					<th>Filename</th>\r\n					<td>{{data.processing.filename}}</td>\r\n				</tr>\r\n			</tbody>\r\n		</table>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" style=\"width:6em\" ng-click=\"stage=\'email\'\">Back</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-click=\"startExtract()\">Confirm</button>\r\n   			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("water/vector/popup.html","<exp-modal icon-class=\"fa-download\"  is-open=\"data.item.download\" title=\"Download wizard\" on-close=\"vdl.remove()\">\r\n	<div class=\"container-fluid downloadInner\" >\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><common-wms data=\"vdl.data.item\"></common-wms>\r\n					<a href=\"https://ecat.ga.gov.au/geonetwork/srv/eng/search#!{{vdl.data.item.primaryId}}\" target=\"_blank\"><strong class=\"ng-binding\">{{vdl.data.item.title}}</strong></a>\r\n				</h4>\r\n   			</div>\r\n		</div>\r\n		<vector-geoprocess data=\"vdl.data.item\"></vector-geoprocess>\r\n	</div>\r\n</exp-modal>");
-$templateCache.put("water/vector/vector.html","<div class=\"panel panel-default\" style=\"margin-bottom:-5px;\">\r\n   <div class=\"panel-heading\">\r\n		<vector-add group=\"vect.group\"></vector-add>\r\n      <common-tile data=\"vect.group\"></common-tile>\r\n		<common-bbox data=\"vect.group\"></common-bbox>\r\n		<common-cc></common-cc>\r\n      <strong>{{vect.group.title}}</strong>\r\n   </div>\r\n   <div class=\"panel-body\">\r\n      <div ng-repeat=\"doc in vect.group.docs\">\r\n         <div ng-class-odd=\"\'odd\'\" ng-class-even=\"\'even\'\" style=\"padding-left:12px\" ng-mouseleave=\"vect.lolight(doc)\" ng-mouseenter=\"vect.hilight(doc)\" >\r\n            <span style=\"width:100%;display:inline-block;padding-bottom:8px\">\r\n               <input type=\"checkbox\" class=\"vector-checkbox\" ng-model=\"doc.selected\">\r\n		         <common-metaview url=\"\'https://ecat.ga.gov.au/geonetwork/srv/eng/search#!\' + doc.primaryId + \'/xml\'\" container=\"select\" item=\"doc\"></common-metaview>\r\n		         <a href=\"https://ecat.ga.gov.au/geonetwork/srv/eng/search#!{{doc.primaryId}}\" target=\"_blank\" tooltip-append-to-body=\"true\"\r\n                           uib-tooltip=\"{{doc.abstract}}\" tooltip-placement=\"auto bottom\" tooltip-class=\"vector-tooltip\">\r\n                  <strong>{{doc.title}}</strong>\r\n               </a>\r\n	         </span>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
-$templateCache.put("water/toolbar/toolbar.html","<div icsm-toolbar>\r\n	<div class=\"row toolBarGroup\">\r\n		<search-searches name=\"toolbar\">\r\n			<search-search label=\"Google search\" default=\"true\">\r\n				<div geo-search></div>\r\n			</search-search>\r\n			<search-search label=\"Basins search\">\r\n				<common-basin-search class=\"cossapSearch\"></common-basin-search>\r\n			</search-search>\r\n			<search-search label=\"Catchments search\">\r\n				<common-catchment-search class=\"cossapSearch\"></common-catchment-search>\r\n			</search-search>\r\n		</search-searches>\r\n		<div class=\"pull-right\">\r\n			<div class=\"btn-toolbar radCore\" role=\"toolbar\"  water-toolbar>\r\n				<div class=\"btn-group\">\r\n					<!-- < water-state-toggle></water-state-toggle> -->\r\n				</div>\r\n			</div>\r\n\r\n			<div class=\"btn-toolbar\" style=\"margin:right:10px;display:inline-block\">\r\n				<div class=\"btn-group\">\r\n					<span class=\"btn btn-default\" common-baselayer-control max-zoom=\"16\" title=\"Satellite to Topography bias on base map.\"></span>\r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");}]);
+$templateCache.put("water/vector/vector.html","<div class=\"panel panel-default\" style=\"margin-bottom:-5px;\">\r\n   <div class=\"panel-heading\">\r\n		<vector-add group=\"vect.group\"></vector-add>\r\n      <common-tile data=\"vect.group\"></common-tile>\r\n		<common-bbox data=\"vect.group\"></common-bbox>\r\n		<common-cc></common-cc>\r\n      <strong>{{vect.group.title}}</strong>\r\n   </div>\r\n   <div class=\"panel-body\">\r\n      <div ng-repeat=\"doc in vect.group.docs\">\r\n         <div ng-class-odd=\"\'odd\'\" ng-class-even=\"\'even\'\" style=\"padding-left:12px\" ng-mouseleave=\"vect.lolight(doc)\" ng-mouseenter=\"vect.hilight(doc)\" >\r\n            <span style=\"width:100%;display:inline-block;padding-bottom:8px\">\r\n               <input type=\"checkbox\" class=\"vector-checkbox\" ng-model=\"doc.selected\">\r\n		         <common-metaview url=\"\'https://ecat.ga.gov.au/geonetwork/srv/eng/search#!\' + doc.primaryId + \'/xml\'\" container=\"select\" item=\"doc\"></common-metaview>\r\n		         <a href=\"https://ecat.ga.gov.au/geonetwork/srv/eng/search#!{{doc.primaryId}}\" target=\"_blank\" tooltip-append-to-body=\"true\"\r\n                           uib-tooltip=\"{{doc.abstract}}\" tooltip-placement=\"auto bottom\" tooltip-class=\"vector-tooltip\">\r\n                  <strong>{{doc.title}}</strong>\r\n               </a>\r\n	         </span>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");}]);

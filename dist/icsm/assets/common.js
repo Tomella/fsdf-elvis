@@ -19,142 +19,52 @@ under the License.
 
 'use strict';
 
-angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAccordionConfig', {
-  closeOthers: true
-}).controller('commonAccordionController', ['$scope', '$attrs', 'commonAccordionConfig', function ($scope, $attrs, accordionConfig) {
-  // This array keeps track of the accordion groups
-  this.groups = [];
+{
+   /**
+    * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
+    */
 
-  // Ensure that all the groups in this accordion are closed, unless close-others explicitly says not to
-  this.closeOthers = function (openGroup) {
-    var closeOthers = angular.isDefined($attrs.closeOthers) ? $scope.$eval($attrs.closeOthers) : accordionConfig.closeOthers;
-    if (closeOthers) {
-      angular.forEach(this.groups, function (group) {
-        if (group !== openGroup) {
-          group.isOpen = false;
-        }
-      });
-    }
-  };
-
-  // This is called from the accordion-group directive to add itself to the accordion
-  this.addGroup = function (groupScope) {
-    var that = this;
-    this.groups.push(groupScope);
-
-    groupScope.$on('$destroy', function (event) {
-      that.removeGroup(groupScope);
-    });
-  };
-
-  // This is called from the accordion-group directive when to remove itself
-  this.removeGroup = function (group) {
-    var index = this.groups.indexOf(group);
-    if (index !== -1) {
-      this.groups.splice(index, 1);
-    }
-  };
-}])
-
-// The accordion directive simply sets up the directive controller
-// and adds an accordion CSS class to itself element.
-.directive('commonAccordion', function () {
-  return {
-    controller: 'commonAccordionController',
-    controllerAs: 'accordion',
-    transclude: true,
-    templateUrl: function templateUrl(element, attrs) {
-      return attrs.templateUrl || 'common/accordion/accordion.html';
-    }
-  };
-})
-
-// The accordion-group directive indicates a block of html that will expand and collapse in an accordion
-.directive('commonAccordionGroup', function () {
-  return {
-    require: '^commonAccordion', // We need this directive to be inside an accordion
-    transclude: true, // It transcludes the contents of the directive into the template
-    restrict: 'A',
-    templateUrl: function templateUrl(element, attrs) {
-      return attrs.templateUrl || 'common/accordion/accordionGroup.html';
-    },
-    scope: {
-      heading: '@', // Interpolate the heading attribute onto this scope
-      panelClass: '@?', // Ditto with panelClass
-      isOpen: '=?',
-      isDisabled: '=?'
-    },
-    controller: function controller() {
-      this.setHeading = function (element) {
-        this.heading = element;
-      };
-    },
-    link: function link(scope, element, attrs, accordionCtrl) {
-      element.addClass('panel');
-      accordionCtrl.addGroup(scope);
-
-      scope.openClass = attrs.openClass || 'panel-open';
-      scope.panelClass = attrs.panelClass || 'panel-default';
-      scope.$watch('isOpen', function (value) {
-        element.toggleClass(scope.openClass, !!value);
-        if (value) {
-          accordionCtrl.closeOthers(scope);
-        }
-      });
-
-      scope.toggleOpen = function ($event) {
-        if (!scope.isDisabled) {
-          if (!$event || $event.which === 32) {
-            scope.isOpen = !scope.isOpen;
-          }
-        }
+   angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider']).directive('commonBaselayerControl', ['$rootScope', 'mapHelper', 'mapService', function ($rootScope, mapHelper, mapService) {
+      var DEFAULTS = {
+         maxZoom: 12
       };
 
-      var id = 'accordiongroup-' + scope.$id + '-' + Math.floor(Math.random() * 10000);
-      scope.headingId = id + '-tab';
-      scope.panelId = id + '-panel';
-    }
-  };
-})
+      return {
+         template: '<slider min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
+         scope: {
+            maxZoom: "="
+         },
+         link: function link(scope, element) {
+            if (typeof scope.maxZoom === "undefined") {
+               scope.maxZoom = DEFAULTS.maxZoom;
+            }
+            scope.slider = {
+               opacity: -1,
+               visibility: true,
+               lastOpacity: 1
+            };
 
-// Use accordion-heading below an accordion-group to provide a heading containing HTML
-.directive('commonAccordionHeading', function () {
-  return {
-    transclude: true, // Grab the contents to be used as the heading
-    template: '', // In effect remove this element!
-    replace: true,
-    require: '^commonAccordionGroup',
-    link: function link(scope, element, attrs, accordionGroupCtrl, transclude) {
-      // Pass the heading to the accordion-group controller
-      // so that it can be transcluded into the right place in the template
-      // [The second parameter to transclude causes the elements to be cloned so that they work in ng-repeat]
-      accordionGroupCtrl.setHeading(transclude(scope, angular.noop));
-    }
-  };
-})
+            // Get the initial value
+            mapHelper.getPseudoBaseLayer().then(function (layer) {
+               scope.layer = layer;
+               scope.slider.opacity = layer.options.opacity;
+            });
 
-// Use in the accordion-group template to indicate where you want the heading to be transcluded
-// You must provide the property on the accordion-group controller that will hold the transcluded element
-.directive('commonAccordionTransclude', function () {
-  return {
-    require: '^commonAccordionGroup',
-    link: function link(scope, element, attrs, controller) {
-      scope.$watch(function () {
-        return controller[attrs.commonAccordionTransclude];
-      }, function (heading) {
-        if (heading) {
-          var elem = angular.element(element[0].querySelector(getHeaderSelectors()));
-          elem.html('');
-          elem.append(heading);
-        }
-      });
-    }
-  };
+            scope.$watch('slider.opacity', function (newValue, oldValue) {
+               if (oldValue < 0) return;
 
-  function getHeaderSelectors() {
-    return 'common-accordion-header,' + 'data-common-accordion-header,' + 'x-common-accordion-header,' + 'common\\:accordion-header,' + '[common-accordion-header],' + '[data-common-accordion-header],' + '[x-common-accordion-header]';
-  }
-});
+               mapService.getMap().then(function (map) {
+                  map.eachLayer(function (layer) {
+                     if (layer.pseudoBaseLayer) {
+                        layer.setOpacity(scope.slider.opacity);
+                     }
+                  });
+               });
+            });
+         }
+      };
+   }]);
+}
 "use strict";
 
 {
@@ -258,53 +168,108 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
       };
    }]);
 }
-'use strict';
+"use strict";
 
 {
-   /**
-    * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
-    */
+   (function () {
 
-   angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider']).directive('commonBaselayerControl', ['$rootScope', 'mapHelper', 'mapService', function ($rootScope, mapHelper, mapService) {
-      var DEFAULTS = {
-         maxZoom: 12
-      };
-
-      return {
-         template: '<slider min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
-         scope: {
-            maxZoom: "="
+      var versions = {
+         3: {
+            version: "3.0",
+            link: "https://creativecommons.org/licenses/by/3.0/au/"
          },
-         link: function link(scope, element) {
-            if (typeof scope.maxZoom === "undefined") {
-               scope.maxZoom = DEFAULTS.maxZoom;
-            }
-            scope.slider = {
-               opacity: -1,
-               visibility: true,
-               lastOpacity: 1
-            };
-
-            // Get the initial value
-            mapHelper.getPseudoBaseLayer().then(function (layer) {
-               scope.layer = layer;
-               scope.slider.opacity = layer.options.opacity;
-            });
-
-            scope.$watch('slider.opacity', function (newValue, oldValue) {
-               if (oldValue < 0) return;
-
-               mapService.getMap().then(function (map) {
-                  map.eachLayer(function (layer) {
-                     if (layer.pseudoBaseLayer) {
-                        layer.setOpacity(scope.slider.opacity);
-                     }
-                  });
-               });
-            });
+         4: {
+            version: "4.0",
+            link: "https://creativecommons.org/licenses/by/4.0/"
          }
       };
-   }]);
+
+      angular.module("common.cc", []).directive('commonCc', [function () {
+         return {
+            templateUrl: 'common/cc/cc.html',
+            scope: {
+               version: "=?"
+            },
+            link: function link(scope) {
+               if (!scope.version) {
+                  scope.details = versions[4];
+               } else {
+                  scope.details = versions[scope.version];
+               }
+               scope.template = 'common/cc/cctemplate.html';
+            }
+         };
+      }]);
+   })();
+}
+"use strict";
+
+{
+
+	angular.module("common.clip", ['geo.draw']).directive("wizardClip", ['$timeout', 'clipService', 'flashService', function ($timeout, clipService, flashService) {
+		return {
+			templateUrl: "common/clip/clip.html",
+			scope: {
+				clip: "=",
+				bounds: "=",
+				trigger: "=",
+				drawn: "&"
+			},
+			link: function link(scope, element) {
+				if (typeof scope.showBounds === "undefined") {
+					scope.showBounds = false;
+				}
+				scope.$watch("bounds", function (bounds) {
+					if (bounds && scope.trigger) {
+						$timeout(function () {
+							scope.initiateDraw();
+						});
+					} else if (!bounds) {
+						clipService.cancelDraw();
+					}
+				});
+
+				scope.initiateDraw = function () {
+					clipService.initiateDraw().then(drawComplete);
+
+					function drawComplete(data) {
+						var c = scope.clip;
+						var response;
+
+						c.xMax = +data.clip.xMax;
+						c.xMin = +data.clip.xMin;
+						c.yMax = +data.clip.yMax;
+						c.yMin = +data.clip.yMin;
+						if (scope.drawn) {
+							response = scope.drawn();
+							if (response && response.code && response.code === "oversize") {
+								scope.initiateDraw();
+							}
+						}
+					}
+				};
+			}
+		};
+	}]).factory("clipService", ['$q', '$rootScope', 'drawService', function ($q, $rootScope, drawService) {
+		return {
+			initiateDraw: function initiateDraw() {
+				return drawService.drawRectangle().then(drawComplete);
+			},
+
+			cancelDraw: function cancelDraw() {
+				drawService.cancelDrawRectangle();
+			}
+		};
+
+		function drawComplete(data) {
+			return { clip: {
+					xMax: data.bounds.getEast().toFixed(5),
+					xMin: data.bounds.getWest().toFixed(5),
+					yMax: data.bounds.getNorth().toFixed(5),
+					yMin: data.bounds.getSouth().toFixed(5)
+				} };
+		}
+	}]);
 }
 'use strict';
 
@@ -517,109 +482,6 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
 "use strict";
 
 {
-
-	angular.module("common.clip", ['geo.draw']).directive("wizardClip", ['$timeout', 'clipService', 'flashService', function ($timeout, clipService, flashService) {
-		return {
-			templateUrl: "common/clip/clip.html",
-			scope: {
-				clip: "=",
-				bounds: "=",
-				trigger: "=",
-				drawn: "&"
-			},
-			link: function link(scope, element) {
-				if (typeof scope.showBounds === "undefined") {
-					scope.showBounds = false;
-				}
-				scope.$watch("bounds", function (bounds) {
-					if (bounds && scope.trigger) {
-						$timeout(function () {
-							scope.initiateDraw();
-						});
-					} else if (!bounds) {
-						clipService.cancelDraw();
-					}
-				});
-
-				scope.initiateDraw = function () {
-					clipService.initiateDraw().then(drawComplete);
-
-					function drawComplete(data) {
-						var c = scope.clip;
-						var response;
-
-						c.xMax = +data.clip.xMax;
-						c.xMin = +data.clip.xMin;
-						c.yMax = +data.clip.yMax;
-						c.yMin = +data.clip.yMin;
-						if (scope.drawn) {
-							response = scope.drawn();
-							if (response && response.code && response.code === "oversize") {
-								scope.initiateDraw();
-							}
-						}
-					}
-				};
-			}
-		};
-	}]).factory("clipService", ['$q', '$rootScope', 'drawService', function ($q, $rootScope, drawService) {
-		return {
-			initiateDraw: function initiateDraw() {
-				return drawService.drawRectangle().then(drawComplete);
-			},
-
-			cancelDraw: function cancelDraw() {
-				drawService.cancelDrawRectangle();
-			}
-		};
-
-		function drawComplete(data) {
-			return { clip: {
-					xMax: data.bounds.getEast().toFixed(5),
-					xMin: data.bounds.getWest().toFixed(5),
-					yMax: data.bounds.getNorth().toFixed(5),
-					yMin: data.bounds.getSouth().toFixed(5)
-				} };
-		}
-	}]);
-}
-"use strict";
-
-{
-   (function () {
-
-      var versions = {
-         3: {
-            version: "3.0",
-            link: "https://creativecommons.org/licenses/by/3.0/au/"
-         },
-         4: {
-            version: "4.0",
-            link: "https://creativecommons.org/licenses/by/4.0/"
-         }
-      };
-
-      angular.module("common.cc", []).directive('commonCc', [function () {
-         return {
-            templateUrl: 'common/cc/cc.html',
-            scope: {
-               version: "=?"
-            },
-            link: function link(scope) {
-               if (!scope.version) {
-                  scope.details = versions[4];
-               } else {
-                  scope.details = versions[scope.version];
-               }
-               scope.template = 'common/cc/cctemplate.html';
-            }
-         };
-      }]);
-   })();
-}
-"use strict";
-
-{
    angular.module("common.draw", ['geo.map']).directive("commonDraw", ['$log', '$rootScope', 'commonDrawService', function ($log, $rootScope, commonDrawService) {
       var DEFAULTS = {
          rectangleEvent: "geo.draw.rectangle.created",
@@ -722,6 +584,64 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
       };
    }]);
 }
+"use strict";
+
+(function (angular) {
+	'use strict';
+
+	angular.module("common.extent", ["explorer.switch"]).directive("commonExtent", ['extentService', function (extentService) {
+		return {
+			restrict: "AE",
+			templateUrl: "common/extent/extent.html",
+			controller: ['$scope', function ($scope) {
+				$scope.parameters = extentService.getParameters();
+			}],
+			link: function link(scope, element, attrs) {}
+		};
+	}]).factory("extentService", ExtentService);
+
+	ExtentService.$inject = ['mapService', 'searchService'];
+	function ExtentService(mapService, searchService) {
+		var bbox = searchService.getSearchCriteria().bbox;
+
+		if (bbox.fromMap) {
+			enableMapListeners();
+		}
+
+		return {
+			getParameters: function getParameters() {
+				return bbox;
+			}
+		};
+
+		function enableMapListeners() {
+			mapService.getMap().then(function (map) {
+				map.on("moveend", execute);
+				map.on("zoomend", execute);
+				execute();
+			});
+		}
+
+		function disableMapListeners() {
+			return mapService.getMap().then(function (map) {
+				map.off("moveend", execute);
+				map.off("zoomend", execute);
+				return map;
+			});
+		}
+
+		function execute() {
+			mapService.getMap().then(function (map) {
+				var bounds = map.getBounds();
+				bbox.yMin = bounds.getSouth();
+				bbox.xMin = bounds.getWest();
+				bbox.yMax = bounds.getNorth();
+				bbox.xMax = bounds.getEast();
+				searchService.refresh();
+			});
+		}
+	}
+})(angular);
 "use strict";
 
 (function (angular, L) {
@@ -869,64 +789,6 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
       };
    }]);
 })(angular, L);
-"use strict";
-
-(function (angular) {
-	'use strict';
-
-	angular.module("common.extent", ["explorer.switch"]).directive("commonExtent", ['extentService', function (extentService) {
-		return {
-			restrict: "AE",
-			templateUrl: "common/extent/extent.html",
-			controller: ['$scope', function ($scope) {
-				$scope.parameters = extentService.getParameters();
-			}],
-			link: function link(scope, element, attrs) {}
-		};
-	}]).factory("extentService", ExtentService);
-
-	ExtentService.$inject = ['mapService', 'searchService'];
-	function ExtentService(mapService, searchService) {
-		var bbox = searchService.getSearchCriteria().bbox;
-
-		if (bbox.fromMap) {
-			enableMapListeners();
-		}
-
-		return {
-			getParameters: function getParameters() {
-				return bbox;
-			}
-		};
-
-		function enableMapListeners() {
-			mapService.getMap().then(function (map) {
-				map.on("moveend", execute);
-				map.on("zoomend", execute);
-				execute();
-			});
-		}
-
-		function disableMapListeners() {
-			return mapService.getMap().then(function (map) {
-				map.off("moveend", execute);
-				map.off("zoomend", execute);
-				return map;
-			});
-		}
-
-		function execute() {
-			mapService.getMap().then(function (map) {
-				var bounds = map.getBounds();
-				bbox.yMin = bounds.getSouth();
-				bbox.xMin = bounds.getWest();
-				bbox.yMax = bounds.getNorth();
-				bbox.xMax = bounds.getEast();
-				searchService.refresh();
-			});
-		}
-	}
-})(angular);
 "use strict";
 
 (function (angular, L) {
@@ -1518,25 +1380,6 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
 })(angular);
 'use strict';
 
-(function (angular) {
-
-   'use strict';
-
-   angular.module('common.legend', []).directive('commonLegend', [function () {
-      return {
-         template: "<img ng-href='url' ng-if='url'></img>",
-         scope: {
-            map: "="
-         },
-         restrict: "AE",
-         link: function link(scope) {
-            if (scope.map) {}
-         }
-      };
-   }]);
-})(angular);
-'use strict';
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -1766,6 +1609,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
       return MetaviewService;
    }();
+})(angular);
+'use strict';
+
+(function (angular) {
+
+   'use strict';
+
+   angular.module('common.legend', []).directive('commonLegend', [function () {
+      return {
+         template: "<img ng-href='url' ng-if='url'></img>",
+         scope: {
+            map: "="
+         },
+         restrict: "AE",
+         link: function link(scope) {
+            if (scope.map) {}
+         }
+      };
+   }]);
 })(angular);
 'use strict';
 
@@ -2115,6 +1977,144 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       };
    }]);
 })(angular);
+'use strict';
+
+angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAccordionConfig', {
+  closeOthers: true
+}).controller('commonAccordionController', ['$scope', '$attrs', 'commonAccordionConfig', function ($scope, $attrs, accordionConfig) {
+  // This array keeps track of the accordion groups
+  this.groups = [];
+
+  // Ensure that all the groups in this accordion are closed, unless close-others explicitly says not to
+  this.closeOthers = function (openGroup) {
+    var closeOthers = angular.isDefined($attrs.closeOthers) ? $scope.$eval($attrs.closeOthers) : accordionConfig.closeOthers;
+    if (closeOthers) {
+      angular.forEach(this.groups, function (group) {
+        if (group !== openGroup) {
+          group.isOpen = false;
+        }
+      });
+    }
+  };
+
+  // This is called from the accordion-group directive to add itself to the accordion
+  this.addGroup = function (groupScope) {
+    var that = this;
+    this.groups.push(groupScope);
+
+    groupScope.$on('$destroy', function (event) {
+      that.removeGroup(groupScope);
+    });
+  };
+
+  // This is called from the accordion-group directive when to remove itself
+  this.removeGroup = function (group) {
+    var index = this.groups.indexOf(group);
+    if (index !== -1) {
+      this.groups.splice(index, 1);
+    }
+  };
+}])
+
+// The accordion directive simply sets up the directive controller
+// and adds an accordion CSS class to itself element.
+.directive('commonAccordion', function () {
+  return {
+    controller: 'commonAccordionController',
+    controllerAs: 'accordion',
+    transclude: true,
+    templateUrl: function templateUrl(element, attrs) {
+      return attrs.templateUrl || 'common/accordion/accordion.html';
+    }
+  };
+})
+
+// The accordion-group directive indicates a block of html that will expand and collapse in an accordion
+.directive('commonAccordionGroup', function () {
+  return {
+    require: '^commonAccordion', // We need this directive to be inside an accordion
+    transclude: true, // It transcludes the contents of the directive into the template
+    restrict: 'A',
+    templateUrl: function templateUrl(element, attrs) {
+      return attrs.templateUrl || 'common/accordion/accordionGroup.html';
+    },
+    scope: {
+      heading: '@', // Interpolate the heading attribute onto this scope
+      panelClass: '@?', // Ditto with panelClass
+      isOpen: '=?',
+      isDisabled: '=?'
+    },
+    controller: function controller() {
+      this.setHeading = function (element) {
+        this.heading = element;
+      };
+    },
+    link: function link(scope, element, attrs, accordionCtrl) {
+      element.addClass('panel');
+      accordionCtrl.addGroup(scope);
+
+      scope.openClass = attrs.openClass || 'panel-open';
+      scope.panelClass = attrs.panelClass || 'panel-default';
+      scope.$watch('isOpen', function (value) {
+        element.toggleClass(scope.openClass, !!value);
+        if (value) {
+          accordionCtrl.closeOthers(scope);
+        }
+      });
+
+      scope.toggleOpen = function ($event) {
+        if (!scope.isDisabled) {
+          if (!$event || $event.which === 32) {
+            scope.isOpen = !scope.isOpen;
+          }
+        }
+      };
+
+      var id = 'accordiongroup-' + scope.$id + '-' + Math.floor(Math.random() * 10000);
+      scope.headingId = id + '-tab';
+      scope.panelId = id + '-panel';
+    }
+  };
+})
+
+// Use accordion-heading below an accordion-group to provide a heading containing HTML
+.directive('commonAccordionHeading', function () {
+  return {
+    transclude: true, // Grab the contents to be used as the heading
+    template: '', // In effect remove this element!
+    replace: true,
+    require: '^commonAccordionGroup',
+    link: function link(scope, element, attrs, accordionGroupCtrl, transclude) {
+      // Pass the heading to the accordion-group controller
+      // so that it can be transcluded into the right place in the template
+      // [The second parameter to transclude causes the elements to be cloned so that they work in ng-repeat]
+      accordionGroupCtrl.setHeading(transclude(scope, angular.noop));
+    }
+  };
+})
+
+// Use in the accordion-group template to indicate where you want the heading to be transcluded
+// You must provide the property on the accordion-group controller that will hold the transcluded element
+.directive('commonAccordionTransclude', function () {
+  return {
+    require: '^commonAccordionGroup',
+    link: function link(scope, element, attrs, controller) {
+      scope.$watch(function () {
+        return controller[attrs.commonAccordionTransclude];
+      }, function (heading) {
+        if (heading) {
+          var elem = angular.element(element[0].querySelector(getHeaderSelectors()));
+          elem.html('');
+          elem.append(heading);
+        }
+      });
+    }
+  };
+
+  function getHeaderSelectors() {
+    return 'common-accordion-header,' + 'data-common-accordion-header,' + 'x-common-accordion-header,' + 'common\\:accordion-header,' + '[common-accordion-header],' + '[data-common-accordion-header],' + '[x-common-accordion-header]';
+  }
+});
 'use strict';
 
 (function (angular) {
@@ -2584,6 +2584,48 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 (function (angular) {
 
+	'use strict';
+
+	angular.module("common.toolbar", []).directive("icsmToolbar", [function () {
+		return {
+			controller: 'toolbarLinksCtrl'
+		};
+	}])
+
+	/**
+  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
+  */
+	.directive('icsmToolbarRow', [function () {
+		var DEFAULT_TITLE = "Satellite to Topography bias on base map.";
+
+		return {
+			scope: {
+				map: "=",
+				overlaytitle: "=?"
+			},
+			restrict: 'AE',
+			templateUrl: 'common/toolbar/toolbar.html',
+			link: function link(scope) {
+				scope.overlaytitle = scope.overlaytitle ? scope.overlaytitle : DEFAULT_TITLE;
+			}
+		};
+	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
+
+		var self = this;
+		configService.getConfig().then(function (config) {
+			self.links = config.toolbarLinks;
+		});
+
+		$scope.item = "";
+		$scope.toggleItem = function (item) {
+			$scope.item = $scope.item == item ? "" : item;
+		};
+	}]);
+})(angular);
+"use strict";
+
+(function (angular) {
+
    'use strict';
 
    angular.module("common.tile", []).directive("commonTile", ['$rootScope', 'tileService', function ($rootScope, tileService) {
@@ -2732,48 +2774,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          };
       }
    }]);
-})(angular);
-"use strict";
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module("common.toolbar", []).directive("icsmToolbar", [function () {
-		return {
-			controller: 'toolbarLinksCtrl'
-		};
-	}])
-
-	/**
-  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
-  */
-	.directive('icsmToolbarRow', [function () {
-		var DEFAULT_TITLE = "Satellite to Topography bias on base map.";
-
-		return {
-			scope: {
-				map: "=",
-				overlaytitle: "=?"
-			},
-			restrict: 'AE',
-			templateUrl: 'common/toolbar/toolbar.html',
-			link: function link(scope) {
-				scope.overlaytitle = scope.overlaytitle ? scope.overlaytitle : DEFAULT_TITLE;
-			}
-		};
-	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
-
-		var self = this;
-		configService.getConfig().then(function (config) {
-			self.links = config.toolbarLinks;
-		});
-
-		$scope.item = "";
-		$scope.toggleItem = function (item) {
-			$scope.item = $scope.item == item ? "" : item;
-		};
-	}]);
 })(angular);
 "use strict";
 
@@ -2953,14 +2953,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}
 	}]);
 })(angular);
-angular.module("common.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("common/accordion/accordion.html","<div role=\"tablist\" class=\"panel-group\" ng-transclude></div>");
-$templateCache.put("common/accordion/accordionGroup.html","<div role=\"tab\" id=\"{{::headingId}}\" aria-selected=\"{{isOpen}}\" class=\"panel-heading\" ng-keypress=\"toggleOpen($event)\">\r\n  <h4 class=\"panel-title\">\r\n    <a role=\"button\" data-toggle=\"collapse\" href aria-expanded=\"{{isOpen}}\"\r\n            aria-controls=\"{{::panelId}}\" tabindex=\"0\" class=\"accordion-toggle\" ng-click=\"toggleOpen()\"\r\n            common-accordion-transclude=\"heading\" ng-disabled=\"isDisabled\" uib-tabindex-toggle>\r\n      <span common-accordion-header ng-class=\"{\'text-muted\': isDisabled}\">{{heading}}</span>\r\n   </a>\r\n  </h4>\r\n</div>\r\n<div id=\"{{::panelId}}\" aria-labelledby=\"{{::headingId}}\" aria-hidden=\"{{!isOpen}}\" role=\"tabpanel\"\r\n            class=\"panel-collapse collapse\" uib-collapse=\"!isOpen\">\r\n  <div class=\"panel-body\" ng-transclude></div>\r\n</div>");
-$templateCache.put("common/bbox/bbox.html","<button type=\"button\" class=\"undecorated\" ng-click=\"toggle()\" tooltip-placement=\"right\" title=\"Show data extent on the map.\">\r\n	<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-eye orange\':data.hasBbox,\'fa-eye-slash\':!data.hasBbox}\"></i>\r\n</button>");
-$templateCache.put("common/download/download.html","<exp-modal ng-controller=\"DownloadCtrl as dl\" icon-class=\"fa-download\" is-open=\"dl.data.item.download\" title=\"Download data\" on-close=\"dl.remove()\" is-modal=\"true\">\r\n	<div style=\"padding:5px;\">\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><common-wms data=\"dl.data.item\"></common-wms><common-tile data=\"dl.data.item\"></common-tile>{{dl.data.item.title}}</h4>\r\n				{{dl.data.item.abstract}}\r\n   			</div>\r\n		</div>\r\n		<nedf-geoprocess data=\"dl.data.item\"></nedf-geoprocess>\r\n	</div>\r\n</exp-modal>");
-$templateCache.put("common/download/popup.html","<exp-modal icon-class=\"fa-download\"  is-open=\"data.item.download\" title=\"Download wizard\" on-close=\"dl.remove()\">\r\n	<div class=\"container-fluid downloadInner\" >\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><common-wms data=\"dl.data.item\"></common-wms>\r\n					<a href=\"https://ecat.ga.gov.au/geonetwork/srv/eng/search#!{{dl.data.item.primaryId}}\" target=\"_blank\"><strong class=\"ng-binding\">{{dl.data.item.title}}</strong></a>\r\n				</h4>\r\n   			</div>\r\n		</div>\r\n		<wizard-geoprocess data=\"dl.data.item\"></wizard-geoprocess>\r\n	</div>\r\n</exp-modal>");
-$templateCache.put("common/clip/clip.html","<div class=\"well well-sm\">\r\n<div class=\"container-fluid\">\r\n	<div class=\"row\">\r\n		<div class=\"col-md-12\">\r\n			<button style=\"margin-top:0px;\" ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" class=\"btn btn-primary btn-xs\">Draw</button>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-3\"> </div>\r\n		<div class=\"col-md-8\">\r\n			<strong>Y Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-6\">\r\n			<strong>X Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMin|number : 4}} min)</span></span>\r\n		</div>\r\n		<div class=\"col-md-6\">\r\n			<strong>X Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-offset-3 col-md-8\">\r\n			<strong>Y Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMin|number : 4}} min)</span></span>\r\n		</div>\r\n	</div>\r\n</div>\r\n</div>");
+angular.module("common.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("common/bbox/bbox.html","<button type=\"button\" class=\"undecorated\" ng-click=\"toggle()\" tooltip-placement=\"right\" title=\"Show data extent on the map.\">\r\n	<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-eye orange\':data.hasBbox,\'fa-eye-slash\':!data.hasBbox}\"></i>\r\n</button>");
 $templateCache.put("common/cc/cc.html","<button type=\"button\" class=\"undecorated\" title=\"View CCBy {{details.version}} licence details\"\r\n      popover-trigger=\"outsideClick\"\r\n      uib-popover-template=\"template\" popover-placement=\"bottom\" popover-append-to-body=\"true\">\r\n	<i ng-class=\"{active:data.isWmsShowing}\" class=\"fa fa-lg fa-gavel\"></i>\r\n</button>");
 $templateCache.put("common/cc/cctemplate.html","<div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-12\">\r\n         <a target=\"_blank\" ng-href=\"{{details.link}}\">Creative Commons Attribution {{details.version}} </a>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-2\">\r\n         <span class=\"fa-stack\" aria-hidden=\"true\">\r\n         <i class=\"fa fa-check-circle-o fa-stack-2x\" aria-hidden=\"true\"></i>\r\n      </span>\r\n      </div>\r\n      <div class=\"col-md-10\">\r\n         You may use this work for commercial purposes.\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-2\">\r\n         <span class=\"fa-stack\" aria-hidden=\"true\">\r\n         <i class=\"fa fa-circle-o fa-stack-2x\"></i>\r\n         <i class=\"fa fa-female fa-stack-1x\"></i>\r\n      </span>\r\n      </div>\r\n      <div class=\"col-md-10\">\r\n         You must attribute the creator in your own works.\r\n      </div>\r\n   </div>\r\n</div>");
+$templateCache.put("common/clip/clip.html","<div class=\"well well-sm\">\r\n<div class=\"container-fluid\">\r\n	<div class=\"row\">\r\n		<div class=\"col-md-12\">\r\n			<button style=\"margin-top:0px;\" ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" class=\"btn btn-primary btn-xs\">Draw</button>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-3\"> </div>\r\n		<div class=\"col-md-8\">\r\n			<strong>Y Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-6\">\r\n			<strong>X Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMin|number : 4}} min)</span></span>\r\n		</div>\r\n		<div class=\"col-md-6\">\r\n			<strong>X Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-offset-3 col-md-8\">\r\n			<strong>Y Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMin|number : 4}} min)</span></span>\r\n		</div>\r\n	</div>\r\n</div>\r\n</div>");
+$templateCache.put("common/download/download.html","<exp-modal ng-controller=\"DownloadCtrl as dl\" icon-class=\"fa-download\" is-open=\"dl.data.item.download\" title=\"Download data\" on-close=\"dl.remove()\" is-modal=\"true\">\r\n	<div style=\"padding:5px;\">\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><common-wms data=\"dl.data.item\"></common-wms><common-tile data=\"dl.data.item\"></common-tile>{{dl.data.item.title}}</h4>\r\n				{{dl.data.item.abstract}}\r\n   			</div>\r\n		</div>\r\n		<nedf-geoprocess data=\"dl.data.item\"></nedf-geoprocess>\r\n	</div>\r\n</exp-modal>");
+$templateCache.put("common/download/popup.html","<exp-modal icon-class=\"fa-download\"  is-open=\"data.item.download\" title=\"Download wizard\" on-close=\"dl.remove()\">\r\n	<div class=\"container-fluid downloadInner\" >\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><common-wms data=\"dl.data.item\"></common-wms>\r\n					<a href=\"https://ecat.ga.gov.au/geonetwork/srv/eng/search#!{{dl.data.item.primaryId}}\" target=\"_blank\"><strong class=\"ng-binding\">{{dl.data.item.title}}</strong></a>\r\n				</h4>\r\n   			</div>\r\n		</div>\r\n		<wizard-geoprocess data=\"dl.data.item\"></wizard-geoprocess>\r\n	</div>\r\n</exp-modal>");
 $templateCache.put("common/extent/extent.html","<div class=\"row\" style=\"border-top: 1px solid gray; padding-top:5px\">\r\n	<div class=\"col-md-5\">\r\n		<div class=\"form-inline\">\r\n			<label>\r\n				<input id=\"extentEnable\" type=\"checkbox\" ng-model=\"parameters.fromMap\" ng-click=\"change()\"></input> \r\n				Restrict area to map\r\n			</label>\r\n		</div>\r\n	</div>\r\n	 \r\n	<div class=\"col-md-7\" ng-show=\"parameters.fromMap\">\r\n		<div class=\"container-fluid\">\r\n			<div class=\"row\">\r\n				<div class=\"col-md-offset-3 col-md-8\">\r\n					<strong>Y Max:</strong> \r\n					<span>{{parameters.yMax | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n			<div class=\"row\">\r\n				<div class=\"col-md-6\">\r\n					<strong>X Min:</strong>\r\n					<span>{{parameters.xMin | number : 4}}</span> \r\n				</div>\r\n				<div class=\"col-md-6\">\r\n					<strong>X Max:</strong>\r\n					<span>{{parameters.xMax | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n			<div class=\"row\">\r\n				<div class=\"col-md-offset-3 col-md-8\">\r\n					<strong>Y Min:</strong>\r\n					<span>{{parameters.yMin | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/geoprocess/geoprocess.html","<div class=\"container-fluid\" style=\"overflow-x:hidden\" ng-form>\r\n	<div ng-show=\"stage==\'bbox\'\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12\">\r\n				<wizard-clip trigger=\"stage == \'bbox\'\" drawn=\"drawn()\" clip=\"data.processing.clip\" bounds=\"data.bounds\"></wizard-clip>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n 			<div class=\"col-md-12\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!validClip(data) || checkingOrFailed\" ng-click=\"stage=\'formats\'\">Next</button>\r\n			</div>\r\n		</div>\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Select an area of interest.</strong> There are two ways to select your area of interest:\r\n			<ol>\r\n				<li>Draw an area on the map with the mouse by clicking a corner and while holding the left mouse button\r\n					down drag diagonally across the map to the opposite corner or</li>\r\n				<li>Type your co-ordinates into the areas above.</li>\r\n			</ol>\r\n			Once drawn the points can be modified by the overwriting the values above or drawing another area by clicking the draw button again.\r\n			Ensure you select from the highlighted areas as the data can be quite sparse for some data.<br/>\r\n			<p style=\"padding-top:5px\">\r\n			<strong>Warning:</strong> Some extracts can be huge. It is best if you start with a small area to experiment with first. An email will be sent\r\n			with the size of the extract. Download judiciously.\r\n			</p>\r\n			<p style=\"padding-top\"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n				You can zoom in and out using the mouse wheel or the \"+\" and \"-\" map control on the top left of the map. If you\r\n				don\'t like the position of your drawn area, hit the \"Draw\" button and draw a new bounding box.\r\n			</p>\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'formats\'\">\r\n		<div class=\"well\">\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-3\">\r\n				<label for=\"geoprocessOutputFormat\">\r\n					Output Format\r\n				</label>\r\n			</div>\r\n			<div class=\"col-md-9\">\r\n				<select id=\"geoprocessOutputFormat\" style=\"width:95%\" ng-model=\"data.processing.outFormat\" ng-options=\"opt.value for opt in config.outFormat\"></select>\r\n			</div>\r\n		</div>\r\n		<div class=\"row\">\r\n			<div class=\"col-md-3\">\r\n				<label for=\"geoprocessOutCoordSys\">\r\n					Coordinate System\r\n				</label>\r\n			</div>\r\n			<div class=\"col-md-9\">\r\n				<select id=\"geoprocessOutCoordSys\" style=\"width:95%\" ng-model=\"data.processing.outCoordSys\" ng-options=\"opt.value for opt in config.outCoordSys | sysIntersect : data.processing.clip\"></select>\r\n			</div>\r\n		</div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" ng-click=\"stage=\'bbox\'\">Previous</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!validSansEmail(data)\" ng-click=\"stage=\'email\'\">Next</button>\r\n   			</div>\r\n		</div>\r\n\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Data representation.</strong> Select how you want your data presented.<br/>\r\n			Output format is the structure of the data and you should choose a format compatible with the tools that you will use to manipulate the data.\r\n			<ul>\r\n				<li ng-repeat=\"format in outFormats\"><strong>{{format.value}}</strong> - {{format.description}}</li>\r\n			</ul>\r\n			Select what <i>coordinate system</i> or projection you would like. If in doubt select WGS84.<br/>\r\n			Not all projections cover all of Australia. If the area you select is not covered by a particular projection then the option to download in that projection will not be available.\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'email\'\">\r\n		<div class=\"well\" exp-enter=\"stage=\'confirm\'\">\r\n			<div download-email></div>\r\n			<br/>\r\n			<div download-filename data=\"data.processing\"></div>\r\n		</div>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" ng-click=\"stage=\'formats\'\">Previous</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-disabled=\"!allDataSet(data)\" ng-click=\"stage=\'confirm\'\">Submit</button>\r\n   			</div>\r\n		</div>\r\n		<div class=\"well\">\r\n			<strong style=\"font-size:120%\">Email notification</strong> The extract of data can take some time. By providing an email address we will be able to notify you when the job is complete. The email will provide a link to the extracted\r\n			data which will be packaged up as a single file. To be able to proceed you need to have provided:\r\n			<ul>\r\n				<li>An area of interest to extract the data (referred to as a bounding box).</li>\r\n				<li>An output format.</li>\r\n				<li>A valid coordinate system or projection.</li>\r\n				<li>An email address to receive the details of the extraction.</li>\r\n				<li><strong>Note:</strong>Email addresses need to be and are stored in the system.</li>\r\n			</ul>\r\n			<strong style=\"font-size:120%\">Optional filename</strong> The extract of data can take some time. By providing an optional filename it will allow you\r\n			to associate extracted data to your purpose for downloading data. For example:\r\n			<ul>\r\n				<li>myHouse will have a file named myHouse.zip</li>\r\n				<li>Sorrento would result in a file named Sorrento.zip</li>\r\n			</ul>\r\n		</div>\r\n	</div>\r\n\r\n	<div ng-show=\"stage==\'confirm\'\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12 abstractContainer\">\r\n				{{data.abstract}}\r\n			</div>\r\n		</div>\r\n		<h3>You have chosen:</h3>\r\n		<table class=\"table table-striped\">\r\n			<tbody>\r\n				<tr>\r\n					<th>Area</th>\r\n					<td>\r\n						<span style=\"display:inline-block; width: 10em\">Lower left (lat/lng&deg;):</span> {{data.processing.clip.yMin | number : 6}}, {{data.processing.clip.xMin | number : 6}}<br/>\r\n						<span style=\"display:inline-block;width: 10em\">Upper right (lat/lng&deg;):</span> {{data.processing.clip.yMax | number : 6}}, {{data.processing.clip.xMax | number : 6}}\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Output format</th>\r\n					<td>{{data.processing.outFormat.value}}</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Coordinate system</th>\r\n					<td>{{data.processing.outCoordSys.value}}</td>\r\n				</tr>\r\n				<tr>\r\n					<th>Email address</th>\r\n					<td>{{email}}</td>\r\n				</tr>\r\n				<tr ng-show=\"data.processing.filename\">\r\n					<th>Filename</th>\r\n					<td>{{data.processing.filename}}</td>\r\n				</tr>\r\n			</tbody>\r\n		</table>\r\n		<div class=\"row\" style=\"height:55px\">\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary\" style=\"width:6em\" ng-click=\"stage=\'email\'\">Back</button>\r\n			</div>\r\n			<div class=\"col-md-6\">\r\n				<button class=\"btn btn-primary pull-right\" ng-click=\"startExtract()\">Confirm</button>\r\n   			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-header\">\r\n\r\n        <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".ga-header-collapse\">\r\n            <span class=\"sr-only\">Toggle navigation</span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n        </button>\r\n\r\n        <a href=\"/\" class=\"appTitle visible-xs\">\r\n            <h1 style=\"font-size:120%\">{{heading}}</h1>\r\n        </a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n        	<li common-navigation role=\"menuitem\" current=\"current\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");
@@ -2975,6 +2973,8 @@ $templateCache.put("common/metaview/metaview.html","<button type=\"button\" clas
 $templateCache.put("common/navigation/altthemes.html","<span class=\"altthemes-container\">\r\n	<span ng-repeat=\"item in themes | altthemesMatchCurrent : current\">\r\n       <a title=\"{{item.label}}\" ng-href=\"{{item.url}}\" class=\"altthemesItemCompact\" target=\"_blank\">\r\n         <span class=\"altthemes-icon\" ng-class=\"item.className\"></span>\r\n       </a>\r\n    </li>\r\n</span>");
 $templateCache.put("common/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" icsm-toolbar-row map=\"root.map\" overlaytitle=\"\'Change overlay opacity\'\"></div>\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div class=\"common-legend\" common-legend map=\"data.map\"></div>\r\n    		<div icsm-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'download\'\" icsm-view></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'maps\'\" icsm-maps></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" icsm-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" icsm-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n		<button class=\"undecorated\">Download</button>\r\n	</div>\r\n	<!-- \r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n	-->\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");
+$templateCache.put("common/accordion/accordion.html","<div role=\"tablist\" class=\"panel-group\" ng-transclude></div>");
+$templateCache.put("common/accordion/accordionGroup.html","<div role=\"tab\" id=\"{{::headingId}}\" aria-selected=\"{{isOpen}}\" class=\"panel-heading\" ng-keypress=\"toggleOpen($event)\">\r\n  <h4 class=\"panel-title\">\r\n    <a role=\"button\" data-toggle=\"collapse\" href aria-expanded=\"{{isOpen}}\"\r\n            aria-controls=\"{{::panelId}}\" tabindex=\"0\" class=\"accordion-toggle\" ng-click=\"toggleOpen()\"\r\n            common-accordion-transclude=\"heading\" ng-disabled=\"isDisabled\" uib-tabindex-toggle>\r\n      <span common-accordion-header ng-class=\"{\'text-muted\': isDisabled}\">{{heading}}</span>\r\n   </a>\r\n  </h4>\r\n</div>\r\n<div id=\"{{::panelId}}\" aria-labelledby=\"{{::headingId}}\" aria-hidden=\"{{!isOpen}}\" role=\"tabpanel\"\r\n            class=\"panel-collapse collapse\" uib-collapse=\"!isOpen\">\r\n  <div class=\"panel-body\" ng-transclude></div>\r\n</div>");
 $templateCache.put("common/search/basin.html","<div class=\"btn-group pull-left radSearch\" style=\"position:relative;width:27em;opacity:0.9\">\r\n	<div class=\"input-group\" style=\"width:100%;\">\r\n		<input type=\"text\" size=\"32\" class=\"form-control\" style=\"border-top-right-radius:4px;border-bottom-right-radius:4px;\"\r\n				ng-keyup=\"keyup($event)\" ng-focus=\"changing()\" ng-model=\"nameFilter\" placeholder=\"Find a basin of interest\">\r\n		<div class=\"input-group-btn\"></div>\r\n	</div>\r\n	<div style=\"width:26em; position:absolute;left:15px\">\r\n		<div class=\"row\" ng-repeat=\"region in basinData.basins | basinFilterList : nameFilter : 10 | orderBy : \'name\'\"\r\n				style=\"background-color:white;\">\r\n			<div class=\"col-md-12 rw-sub-list-trigger\">\r\n				<button class=\"undecorated zoomButton\" ng-click=\"zoomToLocation(region);\">{{region.name}}</button>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/search/catchment.html","<div class=\"btn-group pull-left radSearch\" style=\"position:relative;width:27em;opacity:0.9\">\r\n	<div class=\"input-group\" style=\"width:100%;\">\r\n		<input type=\"text\" size=\"32\" class=\"form-control\" style=\"border-top-right-radius:4px;border-bottom-right-radius:4px;\"\r\n				ng-keyup=\"keyup($event)\" ng-focus=\"changing()\" ng-model=\"nameFilter\" placeholder=\"Find a catchment of interest\">\r\n		<div class=\"input-group-btn\"></div>\r\n	</div>\r\n	<div style=\"width:26em; position:absolute;left:15px\">\r\n		<div class=\"row\" ng-repeat=\"region in catchmentData.catchments | catchmentFilterList : nameFilter : 10 | orderBy : \'name\'\"\r\n				style=\"background-color:white;\">\r\n			<div class=\"col-md-12 rw-sub-list-trigger\">\r\n				<button class=\"undecorated zoomButton\" ng-click=\"zoomToLocation(region);\">{{region.name}}</button>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/toolbar/toolbar.html","<div icsm-toolbar>\r\n	<div class=\"row toolBarGroup\">\r\n		<div class=\"btn-group searchBar\" ng-show=\"root.whichSearch != \'region\'\">\r\n			<div class=\"input-group\" geo-search>\r\n				<input type=\"text\" ng-autocomplete ng-model=\"values.from.description\" options=\'{country:\"au\"}\'\r\n							size=\"32\" title=\"Select a locality to pan the map to.\" class=\"form-control\" aria-label=\"...\">\r\n				<div class=\"input-group-btn\">\r\n    				<button ng-click=\"zoom(false)\" exp-ga=\"[\'send\', \'event\', \'icsm\', \'click\', \'zoom to location\']\"\r\n						class=\"btn btn-default\"\r\n						title=\"Pan and potentially zoom to location.\"><i class=\"fa fa-search\"></i></button>\r\n				</div>\r\n			</div>\r\n		</div>\r\n\r\n		<div class=\"pull-right\">\r\n			<div class=\"btn-toolbar radCore\" role=\"toolbar\"  icsm-toolbar>\r\n				<div class=\"btn-group\">\r\n					<!-- < icsm-state-toggle></icsm-state-toggle> -->\r\n				</div>\r\n			</div>\r\n\r\n			<div class=\"btn-toolbar\" style=\"margin:right:10px;display:inline-block\">\r\n				<div class=\"btn-group\" title=\"{{overlaytitle}}\">\r\n					<span class=\"btn btn-default\" common-baselayer-control max-zoom=\"16\"></span>\r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");}]);

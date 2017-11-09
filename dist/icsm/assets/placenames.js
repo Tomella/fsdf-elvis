@@ -996,48 +996,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 (function (angular) {
 
-	'use strict';
-
-	angular.module("placenames.toolbar", []).directive("pnToolbar", [function () {
-		return {
-			controller: 'toolbarLinksCtrl'
-		};
-	}])
-
-	/**
-  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
-  */
-	.directive('pnToolbarRow', [function () {
-		var DEFAULT_TITLE = "Satellite to Topography bias on base map.";
-
-		return {
-			scope: {
-				map: "=",
-				overlaytitle: "=?"
-			},
-			restrict: 'AE',
-			templateUrl: 'placenames/toolbar/toolbar.html',
-			link: function link(scope) {
-				scope.overlaytitle = scope.overlaytitle ? scope.overlaytitle : DEFAULT_TITLE;
-			}
-		};
-	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
-
-		var self = this;
-		configService.getConfig().then(function (config) {
-			self.links = config.toolbarLinks;
-		});
-
-		$scope.item = "";
-		$scope.toggleItem = function (item) {
-			$scope.item = $scope.item === item ? "" : item;
-		};
-	}]);
-})(angular);
-"use strict";
-
-(function (angular) {
-
    'use strict';
 
    angular.module("placenames.utils", []).filter("pnSplitBar", function () {
@@ -1076,6 +1034,48 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
       return service;
    }]);
+})(angular);
+"use strict";
+
+(function (angular) {
+
+	'use strict';
+
+	angular.module("placenames.toolbar", []).directive("pnToolbar", [function () {
+		return {
+			controller: 'toolbarLinksCtrl'
+		};
+	}])
+
+	/**
+  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
+  */
+	.directive('pnToolbarRow', [function () {
+		var DEFAULT_TITLE = "Satellite to Topography bias on base map.";
+
+		return {
+			scope: {
+				map: "=",
+				overlaytitle: "=?"
+			},
+			restrict: 'AE',
+			templateUrl: 'placenames/toolbar/toolbar.html',
+			link: function link(scope) {
+				scope.overlaytitle = scope.overlaytitle ? scope.overlaytitle : DEFAULT_TITLE;
+			}
+		};
+	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
+
+		var self = this;
+		configService.getConfig().then(function (config) {
+			self.links = config.toolbarLinks;
+		});
+
+		$scope.item = "";
+		$scope.toggleItem = function (item) {
+			$scope.item = $scope.item === item ? "" : item;
+		};
+	}]);
 })(angular);
 angular.module("placenames.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("placenames/classifications/classifications.html","<div ng-repeat=\"item in pc.classifications | pnUnselectedFacets\" class=\"row\">\r\n   <div class=\"col-md-12 ellipsis\" title=\'Across all authorities there are a total of {{item.total | number}} features classed as \"{{item.name}}\"\'>\r\n      <input type=\"checkbox\" ng-model=\"item.selected\" ng-change=\"pc.update()\" />\r\n      <span>\r\n         <a target=\"_blank\" href=\"http://www.google.com/search?q={{key}}\">{{item.name}}</a>\r\n         ({{(item.count | number) + (item.count || item.count == 0?\' of \':\'\')}}{{item.total | number}})\r\n      </span>\r\n   </div>\r\n</div>");
 $templateCache.put("placenames/authorities/authorities.html","<div ng-repeat=\"item in pa.authorities | pnUnselectedFacets\" class=\"row\">\r\n   <div class=\"col-md-12 ellipsis\" title=\'Jurisdiction: {{item.jurisdiction}}\'>\r\n      <input type=\"checkbox\" ng-model=\"item.selected\" ng-change=\"pa.update()\" />\r\n      <span>\r\n         <a target=\"_blank\" href=\"http://www.google.com/search?q={{item.name}}\">{{item.name}}</a>\r\n         ({{(item.count | number) + (item.count || item.count == 0?\' of \':\'\')}}{{item.total | number}})\r\n      </span>\r\n   </div>\r\n</div>");

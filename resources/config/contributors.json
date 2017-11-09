@@ -71,6 +71,16 @@
       "showText": false
    },
    {
+      "name": "VIC Government",
+      "title": "VIC Government",
+      "href": "http://www.delwp.vic.gov.au/",
+      "enabled": false,
+      "code": "vic",
+      "image": "icsm/resources/img/Victoria-State-Gov-DELWP-right-pms-2945-rgb.png",
+      "height": 34,
+      "showText": false
+   },
+   {
       "name": "WA Government",
       "title": "WA Government",
       "href": "http://www.ga.gov.au",
