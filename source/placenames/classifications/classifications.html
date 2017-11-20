@@ -1,9 +1,0 @@
-<div ng-repeat="item in pc.classifications | pnUnselectedFacets" class="row">
-   <div class="col-md-12 ellipsis" title='Across all authorities there are a total of {{item.total | number}} features classed as "{{item.name}}"'>
-      <input type="checkbox" ng-model="item.selected" ng-change="pc.update()" />
-      <span>
-         <a target="_blank" href="http://www.google.com/search?q={{key}}">{{item.name}}</a>
-         ({{(item.count | number) + (item.count || item.count == 0?' of ':'')}}{{item.total | number}})
-      </span>
-   </div>
-</div>

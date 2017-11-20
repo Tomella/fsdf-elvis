@@ -17,9 +17,9 @@
                         case "csv":
                            handleCsv(file);
                            break;
-                        case "dbf":
-                        case "prj":
-                        case "shp":
+                        // case "dbf":
+                        // case "prj":
+                        // case "shp":
                         case "shx":
                            handleShapefile(ext, file);
                            break;

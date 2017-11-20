@@ -21,13 +21,13 @@ class BaseStrategy {
    static resolvedPromise(data) {
       // Create a very poor man's promise for IE11 or anybody really. It'll work anywhere.
       var response = {
-         then: function(fn) {
+         then: function (fn) {
             this.fn = fn;
          }
       };
 
-      setTimeout(function() {
-         if(response.fn) {
+      setTimeout(function () {
+         if (response.fn) {
             response.fn(data);
          }
       }, 1);
@@ -98,7 +98,7 @@ class GaStrategy extends BaseStrategy {
    requestMetadata(item) {
       var uuid = item.metadata_id;
       var url = uuid ? ("xml2js/" + this.GA_METADATA_TEMPLATE.replace("${uuid}", uuid)) : null;
-      if(url) {
+      if (url) {
          return this.http.get(url).then(response => {
             return BaseStrategy.extractData(response.data);
          }, err => {
@@ -166,6 +166,8 @@ class NtStrategy extends BaseStrategy {
 class QldStrategy extends BaseStrategy {
    constructor(http) {
       super(http);
+
+      this.XML_METADATA_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/rest/document?id={metadata_id}&f=xml";
       this.QLD_METADATA_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/rest/document?id={EB442CAB-D714-40D8-82C2-A01CA4661324}&f=xml";
       this.QLD_HTML_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/custom/detail.page?fid={EB442CAB-D714-40D8-82C2-A01CA4661324}";
       this.FRASER_COAST_METADATA_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/rest/document?id={E8CEF5BA-A1B7-4DE5-A703-8161FD9BD3CF}&f=xml";
@@ -177,6 +179,10 @@ class QldStrategy extends BaseStrategy {
    }
 
    constructLink(item) {
+      if (item.metadata_url) {
+         return item.metadata_url;
+      }
+
       let bbox = item.bbox.split(",").map((val) => parseFloat(val.trim()));
       if (bbox[0] >= this.FRASER_COAST_BOUNDS[0] &&
          bbox[1] >= this.FRASER_COAST_BOUNDS[1] &&
@@ -194,15 +200,21 @@ class QldStrategy extends BaseStrategy {
    }
 
    requestMetadata(item) {
-      let url = this.QLD_METADATA_TEMPLATE;
-      let bbox = item.bbox.split(",").map((val) => parseFloat(val.trim()));
+      let url;
 
-      if (bbox[0] >= this.FRASER_COAST_BOUNDS[0] &&
-         bbox[1] >= this.FRASER_COAST_BOUNDS[1] &&
-         bbox[2] <= this.FRASER_COAST_BOUNDS[2] &&
-         bbox[0] >= this.FRASER_COAST_BOUNDS[3]
-      ) {
-         url = this.FRASER_COAST_METADATA_TEMPLATE;
+      if (item.metadata_id) {
+         url = this.XML_METADATA_TEMPLATE.replace("metadata_id", item.metadata_id);
+      } else {
+         url = this.QLD_METADATA_TEMPLATE;
+         let bbox = item.bbox.split(",").map((val) => parseFloat(val.trim()));
+
+         if (bbox[0] >= this.FRASER_COAST_BOUNDS[0] &&
+            bbox[1] >= this.FRASER_COAST_BOUNDS[1] &&
+            bbox[2] <= this.FRASER_COAST_BOUNDS[2] &&
+            bbox[0] >= this.FRASER_COAST_BOUNDS[3]
+         ) {
+            url = this.FRASER_COAST_METADATA_TEMPLATE;
+         }
       }
 
       return this.http.get("xml2js/" + url).then(response => {

@@ -44,16 +44,11 @@ gulp.task('views', function () {
 });
 
 //Concatenate & Minify JS
-gulp.task('scripts', ["commonScripts", "placenamesScripts", "dashboardScripts", "icsmScripts", "waterScripts", 'imageryScripts', 'startScripts', 'ltScripts', 'positioningScripts']);
+gulp.task('scripts', ["commonScripts", "dashboardScripts", "icsmScripts", "waterScripts", 'imageryScripts', 'startScripts', 'ltScripts', 'positioningScripts']);
 
 //Concatenate & Minify JS
 gulp.task('commonScripts', function() {
    return prepareScripts('common');
-});
-
-//Concatenate & Minify JS
-gulp.task('placenamesScripts', function() {
-   return prepareScripts('placenames');
 });
 
 gulp.task('positioningScripts', function() {
@@ -128,10 +123,6 @@ gulp.task('squashIcsm', function() {
 	return squashJs('icsm');
 });
 
-gulp.task('squashPlacenames', function() {
-	return squashJs('placenames');
-});
-
 gulp.task('squashWater', function() {
 	return squashJs('water');
 });
@@ -164,7 +155,6 @@ gulp.task('watch', function() {
     gulp.watch(directories.source + '/dashboard/**/*(*.js|*.html)', ['dashboardScripts']);
     gulp.watch(directories.source + '/water/**/*(*.js|*.html)', ['waterScripts']);
     gulp.watch(directories.source + '/start/**/*(*.js|*.html)', ['startScripts']);
-    gulp.watch(directories.source + '/placenames/**/*(*.js|*.html)', ['placenamesScripts']);
     gulp.watch(directories.source + '/imagery/**/*(*.js|*.html)', ['imageryScripts']);
     gulp.watch(directories.source + '/positioning/**/*(*.js|*.html)', ['positioningScripts']);
     gulp.watch(directories.source + '/lt/**/*(*.js|*.html)', ['ltScripts']);
@@ -195,19 +185,6 @@ gulp.task('build', ['views', 'package', 'scripts', 'concatCss', 'resources'])
 
 // Default Task
 gulp.task('default', ['lint', 'scripts', 'concatCss', 'watch', 'package', 'resources', 'views']);
-
-
-gulp.task('placenames', ['placenamesScripts'], function() {
-	// We watch both JS and HTML files.
-    gulp.watch(directories.source + '/**/*(*.js|*.html)', ['lint']);
-    gulp.watch(directories.source + '/common/**/*(*.js|*.html)', ['commonScripts']);
-    gulp.watch(directories.source + '/placenames/**/*(*.js|*.html)', ['placenamesScripts']);
-    gulp.watch(directories.source + '/**/*.css', ['concatCss']);
-    gulp.watch(directories.assets + '/common.js', ['squashCommon']);
-    gulp.watch(directories.assets + '/placenames.js', ['squashPlacenames']);
-    gulp.watch(directories.views +  '/*', ['views']);
-    gulp.watch(directories.resources + '/**/*', ['resources']);
-});
 
 function prepareNamedTemplates(name) {
    return gulp.src(directories.source + '/' + name + '/**/*.html')

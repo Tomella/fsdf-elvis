@@ -1,9 +1,0 @@
-<div ng-repeat="item in pa.authorities | pnUnselectedFacets" class="row">
-   <div class="col-md-12 ellipsis" title='Jurisdiction: {{item.jurisdiction}}'>
-      <input type="checkbox" ng-model="item.selected" ng-change="pa.update()" />
-      <span>
-         <a target="_blank" href="http://www.google.com/search?q={{item.name}}">{{item.name}}</a>
-         ({{(item.count | number) + (item.count || item.count == 0?' of ':'')}}{{item.total | number}})
-      </span>
-   </div>
-</div>

@@ -17,174 +17,6 @@ specific language governing permissions and limitations
 under the License.
 */
 
-'use strict';
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-{
-	var RootCtrl = function RootCtrl($http, configService, mapService) {
-		var _this = this;
-
-		_classCallCheck(this, RootCtrl);
-
-		mapService.getMap().then(function (map) {
-			_this.map = map;
-		});
-		configService.getConfig().then(function (data) {
-			_this.data = data;
-			// If its got WebGL its got everything we need.
-			try {
-				var canvas = document.createElement('canvas');
-				data.modern = !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
-			} catch (e) {
-				data.modern = false;
-			}
-		});
-	};
-
-	RootCtrl.$invoke = ['$http', 'configService', 'mapService'];
-
-	angular.module("IcsmApp", ['common.altthemes', 'common.baselayer.control', 'common.cc', 'common.featureinfo', 'common.header', 'common.legend', 'common.navigation',
-	//'common.panes',
-	'common.storage', 'common.templates', 'common.toolbar', 'explorer.config', 'explorer.confirm',
-	// 'ed.download',
-	'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.persist', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'explorer.map.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer',
-
-	//'geo.baselayer.control',
-	'geo.draw', 'geo.elevation', 'geo.geosearch', 'geo.map', 'geo.maphelper', 'geo.measure', 'icsm.bounds', 'icsm.contributors', 'icsm.clip', 'icsm.glossary', 'icsm.help', 'icsm.panes', 'icsm.products',
-	// Alternate list
-	'elvis.header', 'elvis.results', 'elvis.reviewing', 'icsm.mapevents', 'icsm.select', 'icsm.splash', 'icsm.state', 'icsm.layerswitch', 'icsm.templates', 'icsm.view'])
-
-	// Set up all the service providers here.
-	.config(['configServiceProvider', 'projectsServiceProvider', 'persistServiceProvider', 'versionServiceProvider', function (configServiceProvider, projectsServiceProvider, persistServiceProvider, versionServiceProvider) {
-		configServiceProvider.location("icsm/resources/config/config.json");
-		configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
-		versionServiceProvider.url("icsm/assets/package.json");
-		projectsServiceProvider.setProject("icsm");
-		persistServiceProvider.handler("local");
-	}]).factory("userService", [function () {
-		return {
-			login: noop,
-			hasAcceptedTerms: noop,
-			setAcceptedTerms: noop,
-			getUsername: function getUsername() {
-				return "anon";
-			}
-		};
-		function noop() {
-			return true;
-		}
-	}]).controller("RootCtrl", RootCtrl);
-}
-'use strict';
-
-{
-   angular.module("icsm.clip", ['geo.draw']).directive('icsmInfoBbox', function () {
-      return {
-         restrict: 'AE',
-         templateUrl: 'icsm/clip/infobbox.html'
-      };
-   }).directive("icsmClip", ['$rootScope', '$timeout', 'clipService', 'messageService', 'mapService', function ($rootScope, $timeout, clipService, messageService, mapService) {
-      return {
-         templateUrl: "icsm/clip/clip.html",
-         scope: {
-            bounds: "=",
-            trigger: "=",
-            drawn: "&"
-         },
-         link: function link(scope, element) {
-            var timer = void 0;
-
-            scope.clip = clipService.data.clip;
-
-            scope.typing = false;
-
-            if (typeof scope.showBounds === "undefined") {
-               scope.showBounds = false;
-            }
-            mapService.getMap().then(function (map) {
-               scope.$watch("bounds", function (bounds) {
-                  if (bounds && scope.trigger) {
-                     $timeout(function () {
-                        scope.initiateDraw();
-                     });
-                  } else if (!bounds) {
-                     clipService.cancelDraw();
-                  }
-               });
-            });
-
-            $rootScope.$on('icsm.clip.draw', function (event, data) {
-               if (data && data.message === "oversize") {
-                  scope.oversize = true;
-                  $timeout(function () {
-                     delete scope.oversize;
-                  }, 6000);
-               } else {
-                  delete scope.oversize;
-               }
-            });
-
-            scope.initiateDraw = function () {
-               messageService.info("Click on the map and drag to define your area of interest.");
-               clipService.initiateDraw();
-            };
-         }
-      };
-   }]).factory("clipService", ['$q', '$rootScope', 'drawService', function ($q, $rootScope, drawService) {
-      var options = {
-         maxAreaDegrees: 4
-      },
-          service = {
-         data: {
-            clip: {}
-         },
-         initiateDraw: function initiateDraw() {
-            $rootScope.$broadcast("clip.initiate.draw", { started: true });
-            var clip = this.data.clip;
-            delete clip.xMin;
-            delete clip.xMax;
-            delete clip.yMin;
-            delete clip.yMax;
-            delete clip.area;
-            return drawService.drawRectangle({
-               retryOnOversize: false
-            });
-         },
-
-         cancelDraw: function cancelDraw() {
-            drawService.cancelDrawRectangle();
-         },
-
-         setClip: function setClip(data) {
-            return drawComplete(data);
-         }
-      };
-
-      $rootScope.$on("bounds.drawn", function (event, data) {
-         console.log("data", data);
-         service.setClip(data);
-         var c = service.data.clip;
-
-         $rootScope.$broadcast('icsm.clip.drawn', c); // Let people know it is drawn
-         $rootScope.$broadcast('icsm.bounds.draw', [c.xMin, c.yMin, c.xMax, c.yMax]); // Draw it
-      });
-
-      return service;
-
-      function drawComplete(data) {
-         var clip = service.data.clip;
-         clip.xMax = data.bounds.getEast().toFixed(5);
-         clip.xMin = data.bounds.getWest().toFixed(5);
-         clip.yMax = data.bounds.getNorth().toFixed(5);
-         clip.yMin = data.bounds.getSouth().toFixed(5);
-
-         service.data.area = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
-
-         return service.data;
-      }
-   }]);
-}
 "use strict";
 
 {
@@ -351,6 +183,65 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}
 	}]);
 }
+'use strict';
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+{
+	var RootCtrl = function RootCtrl($http, configService, mapService) {
+		var _this = this;
+
+		_classCallCheck(this, RootCtrl);
+
+		mapService.getMap().then(function (map) {
+			_this.map = map;
+		});
+		configService.getConfig().then(function (data) {
+			_this.data = data;
+			// If its got WebGL its got everything we need.
+			try {
+				var canvas = document.createElement('canvas');
+				data.modern = !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+			} catch (e) {
+				data.modern = false;
+			}
+		});
+	};
+
+	RootCtrl.$invoke = ['$http', 'configService', 'mapService'];
+
+	angular.module("IcsmApp", ['common.altthemes', 'common.baselayer.control', 'common.cc', 'common.featureinfo', 'common.header', 'common.legend', 'common.navigation',
+	//'common.panes',
+	'common.storage', 'common.templates', 'common.toolbar', 'explorer.config', 'explorer.confirm',
+	// 'ed.download',
+	'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.persist', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'explorer.map.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer',
+
+	//'geo.baselayer.control',
+	'geo.draw', 'geo.elevation', 'geo.geosearch', 'geo.map', 'geo.maphelper', 'geo.measure', 'icsm.bounds', 'icsm.contributors', 'icsm.clip', 'icsm.glossary', 'icsm.help', 'icsm.panes', 'icsm.products',
+	// Alternate list
+	'elvis.header', 'elvis.results', 'elvis.reviewing', 'icsm.mapevents', 'icsm.select', 'icsm.splash', 'icsm.state', 'icsm.layerswitch', 'icsm.templates', 'icsm.view'])
+
+	// Set up all the service providers here.
+	.config(['configServiceProvider', 'projectsServiceProvider', 'persistServiceProvider', 'versionServiceProvider', function (configServiceProvider, projectsServiceProvider, persistServiceProvider, versionServiceProvider) {
+		configServiceProvider.location("icsm/resources/config/config.json");
+		configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
+		versionServiceProvider.url("icsm/assets/package.json");
+		projectsServiceProvider.setProject("icsm");
+		persistServiceProvider.handler("local");
+	}]).factory("userService", [function () {
+		return {
+			login: noop,
+			hasAcceptedTerms: noop,
+			setAcceptedTerms: noop,
+			getUsername: function getUsername() {
+				return "anon";
+			}
+		};
+		function noop() {
+			return true;
+		}
+	}]).controller("RootCtrl", RootCtrl);
+}
 "use strict";
 
 {
@@ -437,6 +328,115 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    });
 
    ContributorsService.$inject = ["$http"];
+}
+'use strict';
+
+{
+   angular.module("icsm.clip", ['geo.draw']).directive('icsmInfoBbox', function () {
+      return {
+         restrict: 'AE',
+         templateUrl: 'icsm/clip/infobbox.html'
+      };
+   }).directive("icsmClip", ['$rootScope', '$timeout', 'clipService', 'messageService', 'mapService', function ($rootScope, $timeout, clipService, messageService, mapService) {
+      return {
+         templateUrl: "icsm/clip/clip.html",
+         scope: {
+            bounds: "=",
+            trigger: "=",
+            drawn: "&"
+         },
+         link: function link(scope, element) {
+            var timer = void 0;
+
+            scope.clip = clipService.data.clip;
+
+            scope.typing = false;
+
+            if (typeof scope.showBounds === "undefined") {
+               scope.showBounds = false;
+            }
+            mapService.getMap().then(function (map) {
+               scope.$watch("bounds", function (bounds) {
+                  if (bounds && scope.trigger) {
+                     $timeout(function () {
+                        scope.initiateDraw();
+                     });
+                  } else if (!bounds) {
+                     clipService.cancelDraw();
+                  }
+               });
+            });
+
+            $rootScope.$on('icsm.clip.draw', function (event, data) {
+               if (data && data.message === "oversize") {
+                  scope.oversize = true;
+                  $timeout(function () {
+                     delete scope.oversize;
+                  }, 6000);
+               } else {
+                  delete scope.oversize;
+               }
+            });
+
+            scope.initiateDraw = function () {
+               messageService.info("Click on the map and drag to define your area of interest.");
+               clipService.initiateDraw();
+            };
+         }
+      };
+   }]).factory("clipService", ['$q', '$rootScope', 'drawService', function ($q, $rootScope, drawService) {
+      var options = {
+         maxAreaDegrees: 4
+      },
+          service = {
+         data: {
+            clip: {}
+         },
+         initiateDraw: function initiateDraw() {
+            $rootScope.$broadcast("clip.initiate.draw", { started: true });
+            var clip = this.data.clip;
+            delete clip.xMin;
+            delete clip.xMax;
+            delete clip.yMin;
+            delete clip.yMax;
+            delete clip.area;
+            return drawService.drawRectangle({
+               retryOnOversize: false
+            });
+         },
+
+         cancelDraw: function cancelDraw() {
+            drawService.cancelDrawRectangle();
+         },
+
+         setClip: function setClip(data) {
+            return drawComplete(data);
+         }
+      };
+
+      $rootScope.$on("bounds.drawn", function (event, data) {
+         console.log("data", data);
+         service.setClip(data);
+         var c = service.data.clip;
+
+         $rootScope.$broadcast('icsm.clip.drawn', c); // Let people know it is drawn
+         $rootScope.$broadcast('icsm.bounds.draw', [c.xMin, c.yMin, c.xMax, c.yMax]); // Draw it
+      });
+
+      return service;
+
+      function drawComplete(data) {
+         var clip = service.data.clip;
+         clip.xMax = data.bounds.getEast().toFixed(5);
+         clip.xMin = data.bounds.getWest().toFixed(5);
+         clip.yMax = data.bounds.getNorth().toFixed(5);
+         clip.yMin = data.bounds.getSouth().toFixed(5);
+
+         service.data.area = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
+
+         return service.data;
+      }
+   }]);
 }
 "use strict";
 
@@ -3123,6 +3123,7 @@ var QldStrategy = function (_BaseStrategy6) {
 
       var _this8 = _possibleConstructorReturn(this, (QldStrategy.__proto__ || Object.getPrototypeOf(QldStrategy)).call(this, http));
 
+      _this8.XML_METADATA_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/rest/document?id={metadata_id}&f=xml";
       _this8.QLD_METADATA_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/rest/document?id={EB442CAB-D714-40D8-82C2-A01CA4661324}&f=xml";
       _this8.QLD_HTML_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/custom/detail.page?fid={EB442CAB-D714-40D8-82C2-A01CA4661324}";
       _this8.FRASER_COAST_METADATA_TEMPLATE = "http://qldspatial.information.qld.gov.au/catalogue/rest/document?id={E8CEF5BA-A1B7-4DE5-A703-8161FD9BD3CF}&f=xml";
@@ -3136,6 +3137,10 @@ var QldStrategy = function (_BaseStrategy6) {
    _createClass(QldStrategy, [{
       key: 'constructLink',
       value: function constructLink(item) {
+         if (item.metadata_url) {
+            return item.metadata_url;
+         }
+
          var bbox = item.bbox.split(",").map(function (val) {
             return parseFloat(val.trim());
          });
@@ -3155,13 +3160,19 @@ var QldStrategy = function (_BaseStrategy6) {
       value: function requestMetadata(item) {
          var _this9 = this;
 
-         var url = this.QLD_METADATA_TEMPLATE;
-         var bbox = item.bbox.split(",").map(function (val) {
-            return parseFloat(val.trim());
-         });
+         var url = void 0;
 
-         if (bbox[0] >= this.FRASER_COAST_BOUNDS[0] && bbox[1] >= this.FRASER_COAST_BOUNDS[1] && bbox[2] <= this.FRASER_COAST_BOUNDS[2] && bbox[0] >= this.FRASER_COAST_BOUNDS[3]) {
-            url = this.FRASER_COAST_METADATA_TEMPLATE;
+         if (item.metadata_id) {
+            url = this.XML_METADATA_TEMPLATE.replace("metadata_id", item.metadata_id);
+         } else {
+            url = this.QLD_METADATA_TEMPLATE;
+            var bbox = item.bbox.split(",").map(function (val) {
+               return parseFloat(val.trim());
+            });
+
+            if (bbox[0] >= this.FRASER_COAST_BOUNDS[0] && bbox[1] >= this.FRASER_COAST_BOUNDS[1] && bbox[2] <= this.FRASER_COAST_BOUNDS[2] && bbox[0] >= this.FRASER_COAST_BOUNDS[3]) {
+               url = this.FRASER_COAST_METADATA_TEMPLATE;
+            }
          }
 
          return this.http.get("xml2js/" + url).then(function (response) {
@@ -3512,10 +3523,10 @@ var Strategies = function () {
    DownloadService.$inject = ['$http', '$q', '$rootScope', 'mapService', 'storageService'];
 }
 angular.module("icsm.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("icsm/app/app.html","<div>\r\n	<!-- BEGIN: Sticky Header -->\r\n	<div explorer-header style=\"z-index:1\"\r\n			class=\"navbar navbar-default navbar-fixed-top\"\r\n			heading=\"\'Elevation\'\"\r\n			headingtitle=\"\'ICSM\'\"\r\n			breadcrumbs=\"[{name:\'ICSM\', title: \'Reload Elevation\', url: \'.\'}]\"\r\n			helptitle=\"\'Get help about Elevation\'\"\r\n			helpalttext=\"\'Get help about Elevation\'\">\r\n	</div>\r\n	<!-- END: Sticky Header -->\r\n\r\n	<!-- Messages go here. They are fixed to the tab bar. -->\r\n	<div explorer-messages class=\"marsMessages noPrint\"></div>\r\n	<icsm-panes data=\"root.data\" default-item=\"download\"></icsm-panes>\r\n</div>");
-$templateCache.put("icsm/clip/clip.html","<div class=\"well well-sm\" style=\"margin-bottom:5px\">\r\n	<div class=\"container-fluid\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12\" style=\"padding:0\">\r\n				<div class=\"\" role=\"group\" aria-label=\"...\">\r\n					<button ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\"\r\n                      tooltip-append-to-body=\"true\" tooltip-placement=\"bottom\" uib-tooltip=\"Enable drawing of a bounding box. On enabling, click on the map and drag diagonally\"\r\n						class=\"btn btn-primary btn-default\">Select an area...</button>\r\n					<button ng-click=\"showInfo = !showInfo\" tooltip-placement=\"bottom\" uib-tooltip=\"Information.\" style=\"float:right\" class=\"btn btn-primary btn-default\"><i class=\"fa fa-info\"></i></button>\r\n				</div>\r\n				<exp-info title=\"Selecting an area\" show-close=\"true\" style=\"width:450px;position:fixed;top:200px;right:40px\" is-open=\"showInfo\">\r\n					<icsm-info-bbox></icsm-info-bbox>\r\n            </exp-info>\r\n            <div class=\"row\" ng-hide=\"(!clip.xMin && clip.xMin !== 0) || oversize\" style=\"padding-top:7px;\">\r\n               <div class=\"col-md-12 ng-binding\">\r\n                  Selected bounds: {{clip.xMin | number : 4}}° west,\r\n                     {{clip.yMax | number : 4}}° north,\r\n                     {{clip.xMax | number : 4}}° east,\r\n                     {{clip.yMin | number : 4}}° south\r\n               </div>\r\n            </div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
-$templateCache.put("icsm/clip/infobbox.html","<div class=\"\">\r\n	<strong style=\"font-size:120%\">Select an area of interest.</strong>\r\n   By hitting the \"Select an area...\" button an area on the map can be selected with the mouse by clicking a\r\n   corner and while holding the left mouse button\r\n	down drag diagonally across the map to the opposite corner.\r\n	<br/>\r\n	Clicking the \"Select an area...\" button again allows replacing a previous area selection. <br/>\r\n	<strong>Notes:</strong>\r\n   <ul>\r\n      <li>The data does not cover all of Australia.</li>\r\n      <li>Restrict a search area to below four square degrees. eg 2x2 or 1x4</li>\r\n   </ul>\r\n	<p style=\"padding-top:5px\"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n		You can zoom in and out using the mouse wheel or the \"+\" and \"-\" map control on the top left of the map. If you\r\n		don\'t like the position of your drawn area, hit the \"Draw\" button and draw a new bounding box.\r\n	</p>\r\n</div>");
 $templateCache.put("icsm/contributors/contributors.html","<span class=\"contributors\" ng-mouseenter=\"over()\" ng-mouseleave=\"out()\"\r\n      ng-class=\"(contributors.show || contributors.ingroup || contributors.stick) ? \'transitioned-down\' : \'transitioned-up\'\">\r\n   <button class=\"undecorated contributors-unstick\" ng-click=\"unstick()\" style=\"float:right\">X</button>\r\n   <div ng-repeat=\"contributor in contributors.orgs | activeContributors\" style=\"text-align:cnter\">\r\n      <a ng-href=\"{{contributor.href}}\" name=\"contributors{{$index}}\" title=\"{{contributor.title}}\" target=\"_blank\">\r\n         <img ng-src=\"{{contributor.image}}\" alt=\"{{contributor.title}}\" class=\"elvis-logo\" ng-class=\"contributor.class\"></img>\r\n      </a>\r\n   </div>\r\n</span>");
 $templateCache.put("icsm/contributors/show.html","<a ng-mouseenter=\"over()\" ng-mouseleave=\"out()\" class=\"contributors-link\" title=\"Click to lock/unlock contributors list.\"\r\n      ng-click=\"toggleStick()\" href=\"#contributors0\">Contributors</a>");
+$templateCache.put("icsm/clip/clip.html","<div class=\"well well-sm\" style=\"margin-bottom:5px\">\r\n	<div class=\"container-fluid\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12\" style=\"padding:0\">\r\n				<div class=\"\" role=\"group\" aria-label=\"...\">\r\n					<button ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\"\r\n                      tooltip-append-to-body=\"true\" tooltip-placement=\"bottom\" uib-tooltip=\"Enable drawing of a bounding box. On enabling, click on the map and drag diagonally\"\r\n						class=\"btn btn-primary btn-default\">Select an area...</button>\r\n					<button ng-click=\"showInfo = !showInfo\" tooltip-placement=\"bottom\" uib-tooltip=\"Information.\" style=\"float:right\" class=\"btn btn-primary btn-default\"><i class=\"fa fa-info\"></i></button>\r\n				</div>\r\n				<exp-info title=\"Selecting an area\" show-close=\"true\" style=\"width:450px;position:fixed;top:200px;right:40px\" is-open=\"showInfo\">\r\n					<icsm-info-bbox></icsm-info-bbox>\r\n            </exp-info>\r\n            <div class=\"row\" ng-hide=\"(!clip.xMin && clip.xMin !== 0) || oversize\" style=\"padding-top:7px;\">\r\n               <div class=\"col-md-12 ng-binding\">\r\n                  Selected bounds: {{clip.xMin | number : 4}}° west,\r\n                     {{clip.yMax | number : 4}}° north,\r\n                     {{clip.xMax | number : 4}}° east,\r\n                     {{clip.yMin | number : 4}}° south\r\n               </div>\r\n            </div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
+$templateCache.put("icsm/clip/infobbox.html","<div class=\"\">\r\n	<strong style=\"font-size:120%\">Select an area of interest.</strong>\r\n   By hitting the \"Select an area...\" button an area on the map can be selected with the mouse by clicking a\r\n   corner and while holding the left mouse button\r\n	down drag diagonally across the map to the opposite corner.\r\n	<br/>\r\n	Clicking the \"Select an area...\" button again allows replacing a previous area selection. <br/>\r\n	<strong>Notes:</strong>\r\n   <ul>\r\n      <li>The data does not cover all of Australia.</li>\r\n      <li>Restrict a search area to below four square degrees. eg 2x2 or 1x4</li>\r\n   </ul>\r\n	<p style=\"padding-top:5px\"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n		You can zoom in and out using the mouse wheel or the \"+\" and \"-\" map control on the top left of the map. If you\r\n		don\'t like the position of your drawn area, hit the \"Draw\" button and draw a new bounding box.\r\n	</p>\r\n</div>");
 $templateCache.put("icsm/glossary/glossary.html","<div ng-controller=\"GlossaryCtrl as glossary\">\r\n   <div style=\"position:relative;padding:5px;padding-left:10px;\">\r\n      <div class=\"panel\" style=\"padding:5px;\">\r\n         <p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n	         <strong>Glossary</strong>\r\n         </p>\r\n\r\n         <div class=\"panel-body\">\r\n            <table class=\"table table-striped\">\r\n               <thead>\r\n                  <tr>\r\n                     <th>Term</th>\r\n                     <th>Definition</th>\r\n                  </tr>\r\n               </thead>\r\n               <tbody>\r\n                  <tr ng-repeat=\"term in glossary.terms\">\r\n                     <td>{{term.term}}</td>\r\n                     <td>{{term.definition}}</td>\r\n                  </tr>\r\n               </tbody>\r\n            </table>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n        	<li role=\"menuitem\" style=\"padding-right:10px;position: relative;top: -3px;\">\r\n              <span class=\"altthemes-container\">\r\n	               <span>\r\n                     <a title=\"Location INformation Knowledge platform (LINK)\" href=\"http://fsdf.org.au/\" target=\"_blank\">\r\n                        <img alt=\"FSDF\" src=\"icsm/resources/img/FSDFimagev4.0.png\" style=\"height: 66px\">\r\n                     </a>\r\n                  </span>\r\n               </span>\r\n           </li>\r\n        	<li common-navigation role=\"menuitem\" current=\"current\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n<div class=\"contributorsLink\" style=\"position: absolute; right:7px; bottom:15px\">\r\n      <icsm-contributors-link></icsm-contributors-link>\r\n</div>\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");
 $templateCache.put("icsm/help/faqs.html","<p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n   <strong>FAQS</strong>\r\n</p>\r\n\r\n<h5 ng-repeat=\"faq in faqs\"><button type=\"button\" class=\"undecorated\" ng-click=\"focus(faq.key)\">{{faq.question}}</button></h5>\r\n<hr/>\r\n<div class=\"row\" ng-repeat=\"faq in faqs\">\r\n   <div class=\"col-md-12\">\r\n      <h5 tabindex=\"0\" id=\"faqs_{{faq.key}}\">{{faq.question}}</h5>\r\n      <span ng-bind-html=\"faq.answer\"></span>\r\n      <hr/>\r\n   </div>\r\n</div>");
