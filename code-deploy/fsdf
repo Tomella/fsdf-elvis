@@ -9,6 +9,10 @@
 # Below is the source function library, leave it be
 . /etc/init.d/functions
 
+# We need environment variables for passwords and the likes
+. /home/ec2-user/.bash_profile
+
+
 FOREVER=/usr/bin/forever
 FSDF_SERVER_SCRIPT=/home/ec2-user/fsdf-elvis/server.js
 SERVICE_NAME=fsdf
