@@ -115,9 +115,10 @@
                                           area : "5560.00",
                                           status : "Available"
                                     */
-                                    popupText.push(
-                                       "<strong>File name:</strong> " + feature.properties.object_name +
-                                       "</span><br/><strong>Status:</strong> " + feature.properties.status);
+                                    let buffer = feature.properties.project ?
+                                          ("<strong>Project name:</strong> " + feature.properties.project ) :
+                                          ("<strong>File name:</strong> " + feature.properties.object_name);
+                                    popupText.push(buffer + "</span><br/><strong>Status:</strong> " + feature.properties.status);
                                  }
                               });
                            });

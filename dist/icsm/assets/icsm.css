@@ -87,11 +87,6 @@
 .common-header {
   background-color: white;
 }
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
-}
 .iso19115,
 .iso19115 ul,
 .iso19115 li {
@@ -130,6 +125,11 @@
 
 .iso19115-head {
   font-weight: bold;
+}
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
 }
 .mvt,
 .mvt ul,
@@ -174,93 +174,6 @@
 .metaview-info {
   padding-left: 3px;
   padding-right: 3px;
-}
-.icsmTabs {
-  position: absolute;
-  top: 0px;
-  right: 30px;
-  z-index: 1;
-}
-
-.icsmTabsOpen {
-  right: 30px;
-  height: 0;
-}
-
-.panesMapContainer {
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.icsmPanesRow {
-  height: 100%;
-  margin-right: 0;
-}
-
-.icsmPanesCol {
-  height: 100%;
-}
-
-.icsmPanesColRight {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-}
-
-.paneTabsMain {
-  position: absolute;
-  top: 0px;
-  bottom: 0px;
-  padding-top: 8px;
-  right: 0px;
-  background: #FFF;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -o-user-select: none;
-  user-select: none;
-}
-
-.panesTabsContainer {
-  position: absolute;
-  width: 9999px;
-  z-index: inherit;
-  /* keeps ie happy for mousemove events */
-  background: rgba(255, 255, 255, 0);
-}
-
-.paneRotateTabs {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 100%;
-  -webkit-transform: rotate(-90deg);
-  -moz-transform: rotate(-90deg);
-  -o-transform: rotate(-90deg);
-  -ms-transform: rotate(-90deg);
-  -sand-transform: rotate(90deg);
-  transform-origin: bottom right;
-  -webkit-transform-origin: bottom right;
-  -ms-transform-origin: bottom right;
-  display: block;
-}
-
-.paneTabItem {
-  float: right;
-  padding: 5px 15px 0px 15px;
-  border: 1px solid #999;
-  background: #FFF;
-  cursor: pointer;
-  height: 30px;
-}
-
-.panesTabContentItem {
-  background: #FFF;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
@@ -373,6 +286,93 @@
 .altthemesdropdown .altthemescurrent {
   color: #fff;
   background-color: #777;
+}
+.icsmTabs {
+  position: absolute;
+  top: 0px;
+  right: 30px;
+  z-index: 1;
+}
+
+.icsmTabsOpen {
+  right: 30px;
+  height: 0;
+}
+
+.panesMapContainer {
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.icsmPanesRow {
+  height: 100%;
+  margin-right: 0;
+}
+
+.icsmPanesCol {
+  height: 100%;
+}
+
+.icsmPanesColRight {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.paneTabsMain {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  padding-top: 8px;
+  right: 0px;
+  background: #FFF;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+.panesTabsContainer {
+  position: absolute;
+  width: 9999px;
+  z-index: inherit;
+  /* keeps ie happy for mousemove events */
+  background: rgba(255, 255, 255, 0);
+}
+
+.paneRotateTabs {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 100%;
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  -sand-transform: rotate(90deg);
+  transform-origin: bottom right;
+  -webkit-transform-origin: bottom right;
+  -ms-transform-origin: bottom right;
+  display: block;
+}
+
+.paneTabItem {
+  float: right;
+  padding: 5px 15px 0px 15px;
+  border: 1px solid #999;
+  background: #FFF;
+  cursor: pointer;
+  height: 30px;
+}
+
+.panesTabContentItem {
+  background: #FFF;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .radCore {
   margin-right: 3px;
@@ -902,21 +902,6 @@ img.elvis-logo {
   left: 0;
   right: 0;
 }
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
 .reviewing-odd {
   background-color: #eeeeee;
 }
@@ -948,6 +933,21 @@ i.fa.active {
 .exclude {
   color: #777777;
   text-decoration: line-through;
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
 }
 .radCore {
   margin-right: 3px;
@@ -994,22 +994,6 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
-}
-.downloadPane {
-  padding-left: 0px !important;
-  padding-right: 5px !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 10px;
-  overflow: hidden;
-}
-
-.downloadCont {
-  position: fixed;
-  right: 0;
-  bottom: 8px;
 }
 .icsm-icon {
   background: url("icsm/img/global-sprites.svg") no-repeat;
@@ -1072,6 +1056,22 @@ div.leaflet-control-scale-line {
 .themesdropdown .themescurrent {
   color: #fff;
   background-color: #777;
+}
+.downloadPane {
+  padding-left: 0px !important;
+  padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 10px;
+  overflow: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
 }
 .regions-label {
   border: 0;
@@ -1157,29 +1157,6 @@ div.leaflet-control-scale-line {
 .vector-add:disabled {
   color: gray;
 }
-.main-body {
-  position: fixed;
-  top: 85px;
-  left: 0px;
-  right: 0px;
-  bottom: 8px;
-  overflow-y: auto;
-}
-
-.point-at-box {
-  transform: rotate(-35deg);
-}
-
-@media screen and (max-width: 990px) {
-  .point-at-box {
-    transform: rotate(135deg);
-  }
-}
-
-span.mandatory {
-  content: "*";
-  color: red;
-}
 .start-content-container {
   position: fixed;
   top: 95px;
@@ -1242,6 +1219,29 @@ span.mandatory {
 
 .select-land {
   background-position: -675px;
+}
+.main-body {
+  position: fixed;
+  top: 85px;
+  left: 0px;
+  right: 0px;
+  bottom: 8px;
+  overflow-y: auto;
+}
+
+.point-at-box {
+  transform: rotate(-35deg);
+}
+
+@media screen and (max-width: 990px) {
+  .point-at-box {
+    transform: rotate(135deg);
+  }
+}
+
+span.mandatory {
+  content: "*";
+  color: red;
 }
 .csv-label {
   display: inline-block;
