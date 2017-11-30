@@ -22,6 +22,11 @@
                            controller: ['$scope', '$uibModalInstance', 'products',
                               function ($scope, $uibModalInstance, products) {
                                  $scope.products = products;
+                                 $scope.paging = {
+                                    page: 1,
+                                    pageSize: 15
+                                 };
+
                                  $scope.accept = function () {
                                     $uibModalInstance.close(true);
                                  };
@@ -33,6 +38,13 @@
                                  $scope.noneSelected = function (products) {
                                     return !products.some(product => product.selected);
                                  };
+
+                                 $scope.setPage = function(page, pagesize) {
+                                    $scope.page = $scope.products ? $scope.products
+                                          .filter(product => product.selected).slice(pagesize * (page - 1), page * pagesize) : [];
+                                 }
+
+                                 $scope.setPage(1, 15);
                               }],
                            resolve: {
                               products: function () {

@@ -1,0 +1,31 @@
+<div ng-show="(items | matchedItems).length > paging.pageSize"
+      paging page="paging.page" page-size="paging.pageSize"
+      total="(items | matchedItems).length"
+      paging-action="setPage(page, pageSize)">
+</div>
+<div>
+   <div ng-repeat="item in data| matchedItems" icsm-abstract-hover item="item">
+      <div tooltip-append-to-body="true" uib-tooltip-template="'icsm/results/abstracttooltip.html'" tooltip-popup-delay="400" data-ng-mouseenter="show(item)"
+         data-ng-mouseleave="hide(item)">
+         <input type="checkbox" ng-model="item.selected" />
+         <icsm-abstract item="item"></icsm-abstract>
+         <common-cc version="mappings[item.source].ccLicence"></common-cc>
+         <span class="listItem" item="item" icsm-abstract-link></span>
+         <span ng-show="item.file_size" style="float:right;padding-top:3px">({{item.file_size | fileSize}})</span>
+      </div>
+      <div ng-show="item.showAbstract" class="well">
+         <span ng-show="!item.metadata">
+            <i class="fa fa-spinner fa-spin fa-lg fa-fw"></i>
+            <span>Loading metadata...</span>
+         </span>
+         <div ng-show="item.metadata.abstract">
+            <strong>{{item.metadata.title}}</strong> -
+            <span class="icsm-abstract-body" ng-bind-html="item.metadata.abstractText"></span>
+         </div>
+         <div ng-show="!item.metadata.abstract">
+            <i class="fa fa-lg fa-exclamation-triangle" style="color:orange"></i>
+            There is no abstract available for this dataset.
+         </div>
+      </div>
+   </div>
+</div>

@@ -649,6 +649,19 @@ body {
 .ed-wms-button {
   display: none;
 }
+img.elvis-logo {
+  height: 75px;
+}
+
+.icsm-logo.last {
+  padding-right: 10px;
+}
+
+.contributorsLink {
+  position: absolute;
+  right: 7px;
+  bottom: 15px;
+}
 .contributors {
   margin: 2px;
   padding: 10px;
@@ -713,19 +726,6 @@ body {
   padding-left: 12px;
   padding-right: 12px;
 }
-img.elvis-logo {
-  height: 75px;
-}
-
-.icsm-logo.last {
-  padding-right: 10px;
-}
-
-.contributorsLink {
-  position: absolute;
-  right: 7px;
-  bottom: 15px;
-}
 .mess-error {
   background-color: lightcoral;
 }
@@ -762,38 +762,6 @@ img.elvis-logo {
 
 .product-restrict {
   padding-bottom: 8px;
-}
-.reviewing-odd {
-  background-color: #eeeeee;
-}
-
-.row.reviewing-divider {
-  border-top: 1px solid lightgray;
-  padding-top: 5px;
-  margin-top: 5px;
-}
-
-.reviewing-datasets {
-  max-height: 450px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-@media (max-height: 750px) {
-  .reviewing-datasets {
-    max-height: 350px;
-  }
-}
-
-@media (max-height: 650px) {
-  .reviewing-datasets {
-    max-height: 250px;
-  }
-}
-
-.exclude {
-  color: #777777;
-  text-decoration: line-through;
 }
 .continue-container {
   padding: 4px;
@@ -932,6 +900,38 @@ img.elvis-logo {
   bottom: 0;
   left: 0;
   right: 0;
+}
+.reviewing-odd {
+  background-color: #eeeeee;
+}
+
+.row.reviewing-divider {
+  border-top: 1px solid lightgray;
+  padding-top: 5px;
+  margin-top: 5px;
+}
+
+.reviewing-datasets {
+  max-height: 450px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-height: 750px) {
+  .reviewing-datasets {
+    max-height: 350px;
+  }
+}
+
+@media (max-height: 650px) {
+  .reviewing-datasets {
+    max-height: 250px;
+  }
+}
+
+.exclude {
+  color: #777777;
+  text-decoration: line-through;
 }
 .selectContainer {
   width: 100%;

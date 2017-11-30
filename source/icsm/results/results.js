@@ -1,6 +1,6 @@
 {
 
-   angular.module("elvis.results", ['elvis.results.continue'])
+   angular.module("elvis.results", ['elvis.results.continue', 'icsm.subtype'])
 
       .directive('icsmOrgHeading', [function () {
          return {
@@ -8,26 +8,7 @@
             restrict: 'AE',
             scope: {
                org: "=",
-               expansions: "=",
-               mappings: "=",
-               products: "="
-            },
-            link: function (scope) {
-               scope.orgHasSelections = function () {
-                  var source = scope.org.source;
-                  return scope.products.some(product => {
-                     return product.source === source && product.selected;
-                  });
-               };
-
-               scope.deselectAll = function () {
-                  var source = scope.org.source;
-                  scope.products.filter(product => {
-                     return product.source === source && product.selected;
-                  }).forEach(product => {
-                     product.selected = false;
-                  });
-               };
+               mappings: "="
             }
          };
       }])
@@ -400,37 +381,38 @@
       })
 
       .filter('fileSize', function () {
+         return fileSize;
+      });
+
+      function fileSize(size) {
          var meg = 1000 * 1000;
          var gig = meg * 1000;
          var ter = gig * 1000;
 
-         return function (size) {
-            if (!size) {
-               return "-";
-            }
+         if (!size) {
+            return "-";
+         }
 
-            if (("" + size).indexOf(" ") > -1) {
-               return size;
-            }
+         if (("" + size).indexOf(" ") > -1) {
+            return size;
+         }
 
-            size = parseFloat(size);
+         size = parseFloat(size);
 
-            if (size < 1000) {
-               return size + " bytes";
-            }
-            if (size < meg) {
-               return (size / 1000).toFixed(1) + " kB";
-            }
-            if (size < gig) {
-               return (size / meg).toFixed(1) + " MB";
-            }
-            if (size < ter) {
-               return (size / gig).toFixed(1) + " GB";
-            }
-            return (size / ter).toFixed(1) + " TB";
-         };
-      });
-
+         if (size < 1000) {
+            return size + " bytes";
+         }
+         if (size < meg) {
+            return (size / 1000).toFixed(1) + " kB";
+         }
+         if (size < gig) {
+            return (size / meg).toFixed(1) + " MB";
+         }
+         if (size < ter) {
+            return (size / gig).toFixed(1) + " GB";
+         }
+         return (size / ter).toFixed(1) + " TB";
+      }
 
    ListCtrl.$inject = ['listService'];
    function ListCtrl(listService) {
