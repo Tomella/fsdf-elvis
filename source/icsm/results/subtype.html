@@ -4,7 +4,7 @@
       paging-action="setPage(page, pageSize)">
 </div>
 <div>
-   <div ng-repeat="item in data| matchedItems" icsm-abstract-hover item="item">
+   <div ng-repeat="item in data" icsm-abstract-hover item="item">
       <div tooltip-append-to-body="true" uib-tooltip-template="'icsm/results/abstracttooltip.html'" tooltip-popup-delay="400" data-ng-mouseenter="show(item)"
          data-ng-mouseleave="hide(item)">
          <input type="checkbox" ng-model="item.selected" />

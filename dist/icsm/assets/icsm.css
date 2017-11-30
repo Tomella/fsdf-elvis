@@ -649,19 +649,6 @@ body {
 .ed-wms-button {
   display: none;
 }
-img.elvis-logo {
-  height: 75px;
-}
-
-.icsm-logo.last {
-  padding-right: 10px;
-}
-
-.contributorsLink {
-  position: absolute;
-  right: 7px;
-  bottom: 15px;
-}
 .contributors {
   margin: 2px;
   padding: 10px;
@@ -725,6 +712,19 @@ img.elvis-logo {
 .elevation-and-depth {
   padding-left: 12px;
   padding-right: 12px;
+}
+img.elvis-logo {
+  height: 75px;
+}
+
+.icsm-logo.last {
+  padding-right: 10px;
+}
+
+.contributorsLink {
+  position: absolute;
+  right: 7px;
+  bottom: 15px;
 }
 .mess-error {
   background-color: lightcoral;
@@ -1242,17 +1242,6 @@ span.mandatory {
   content: "*";
   color: red;
 }
-.upload-dialog p {
-  padding: 15px;
-  margin-top: 10px;
-}
-
-.ud-info {
-  background-color: #d9edf7;
-  margin-top: 10px;
-  padding: 5px;
-  border-radius: 4px;
-}
 .csv-label {
   display: inline-block;
   max-width: 100%;
@@ -1270,6 +1259,17 @@ span.mandatory {
 
 .file-container {
   margin-top: 0;
+}
+.upload-dialog p {
+  padding: 15px;
+  margin-top: 10px;
+}
+
+.ud-info {
+  background-color: #d9edf7;
+  margin-top: 10px;
+  padding: 5px;
+  border-radius: 4px;
 }
 #fileDrop {
   font-weight: bold;

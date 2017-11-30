@@ -9,21 +9,20 @@
             mappings: "="
          },
          link: function(scope) {
+            let timer = null;
+
             scope.paging = {
                page: 1,
                pageSize: 20
             };
 
-            scope.$watch("items", function (newVal, oldVal) {
-               scope.data = null;
-               if (newVal) {
-                  scope.matchedItems = scope.items.filter(item => item.matched);
-                  scope.setPage(1, 20);
-               }
+            scope.$on("filter.changed", () => {
+               scope.setPage(1, 20);
             });
 
             scope.setPage = function(page, pagesize) {
-               scope.data = scope.matchedItems ? scope.matchedItems.slice(pagesize * (page - 1), page * pagesize) : [];
+               let matchedItems = scope.items.filter(item => item.matched);
+               scope.data = matchedItems.slice(pagesize * (page - 1), page * pagesize);
             };
 
             scope.setPage(1, 20);

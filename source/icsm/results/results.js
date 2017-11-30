@@ -59,6 +59,7 @@
                         product.matched = product.file_name.toUpperCase().indexOf(upperFilter) > -1;
                      });
                   }
+                  scope.$broadcast("filter.changed")
                };
 
                scope.show = function (data) {
