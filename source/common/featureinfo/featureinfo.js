@@ -10,7 +10,7 @@
                 //"LAYERS=public.5dem_ProjectsIndex&" +
                 "&LAYERS=public.ACT2015-Tile_Index_55,public.5dem_ProjectsIndex,public.NSW_100k_Index_54,public.NSW_100k_Index_55," +
                 "public.NSW_100k_Index_56,public.NSW_100k_Index_Forward_Program,public.QLD_Project_Index_54," +
-                "public.QLD_Project_Index_55,public.QLD_Project_Index_56" +
+                "public.QLD_Project_Index_55,public.QLD_Project_Index_56,public.QLD_Elevation_Metadata_Index" +
                 "&STYLES=&INFO_FORMAT=application%2Fjson&FEATURE_COUNT=100&X=${x}&Y=${y}";
          var layers = ["public.5dem_ProjectsIndex", "public.NSW_100k_Index"];
 
@@ -71,6 +71,8 @@
                         let response;
                         var features = [];
                         let popupText = [];
+
+                        console.log(group);
 
                         map.closePopup();
                         featureInfoService.removeLastLayer(map);

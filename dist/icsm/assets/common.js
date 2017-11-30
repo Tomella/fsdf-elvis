@@ -155,40 +155,6 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
     return 'common-accordion-header,' + 'data-common-accordion-header,' + 'x-common-accordion-header,' + 'common\\:accordion-header,' + '[common-accordion-header],' + '[data-common-accordion-header],' + '[x-common-accordion-header]';
   }
 });
-"use strict";
-
-{
-   (function () {
-
-      var versions = {
-         3: {
-            version: "3.0",
-            link: "https://creativecommons.org/licenses/by/3.0/au/"
-         },
-         4: {
-            version: "4.0",
-            link: "https://creativecommons.org/licenses/by/4.0/"
-         }
-      };
-
-      angular.module("common.cc", []).directive('commonCc', [function () {
-         return {
-            templateUrl: 'common/cc/cc.html',
-            scope: {
-               version: "=?"
-            },
-            link: function link(scope) {
-               if (!scope.version) {
-                  scope.details = versions[4];
-               } else {
-                  scope.details = versions[scope.version];
-               }
-               scope.template = 'common/cc/cctemplate.html';
-            }
-         };
-      }]);
-   })();
-}
 'use strict';
 
 {
@@ -236,6 +202,40 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
          }
       };
    }]);
+}
+"use strict";
+
+{
+   (function () {
+
+      var versions = {
+         3: {
+            version: "3.0",
+            link: "https://creativecommons.org/licenses/by/3.0/au/"
+         },
+         4: {
+            version: "4.0",
+            link: "https://creativecommons.org/licenses/by/4.0/"
+         }
+      };
+
+      angular.module("common.cc", []).directive('commonCc', [function () {
+         return {
+            templateUrl: 'common/cc/cc.html',
+            scope: {
+               version: "=?"
+            },
+            link: function link(scope) {
+               if (!scope.version) {
+                  scope.details = versions[4];
+               } else {
+                  scope.details = versions[scope.version];
+               }
+               scope.template = 'common/cc/cctemplate.html';
+            }
+         };
+      }]);
+   })();
 }
 "use strict";
 
@@ -619,64 +619,6 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
 })(angular, $);
 "use strict";
 
-(function (angular) {
-	'use strict';
-
-	angular.module("common.extent", ["explorer.switch"]).directive("commonExtent", ['extentService', function (extentService) {
-		return {
-			restrict: "AE",
-			templateUrl: "common/extent/extent.html",
-			controller: ['$scope', function ($scope) {
-				$scope.parameters = extentService.getParameters();
-			}],
-			link: function link(scope, element, attrs) {}
-		};
-	}]).factory("extentService", ExtentService);
-
-	ExtentService.$inject = ['mapService', 'searchService'];
-	function ExtentService(mapService, searchService) {
-		var bbox = searchService.getSearchCriteria().bbox;
-
-		if (bbox.fromMap) {
-			enableMapListeners();
-		}
-
-		return {
-			getParameters: function getParameters() {
-				return bbox;
-			}
-		};
-
-		function enableMapListeners() {
-			mapService.getMap().then(function (map) {
-				map.on("moveend", execute);
-				map.on("zoomend", execute);
-				execute();
-			});
-		}
-
-		function disableMapListeners() {
-			return mapService.getMap().then(function (map) {
-				map.off("moveend", execute);
-				map.off("zoomend", execute);
-				return map;
-			});
-		}
-
-		function execute() {
-			mapService.getMap().then(function (map) {
-				var bounds = map.getBounds();
-				bbox.yMin = bounds.getSouth();
-				bbox.xMin = bounds.getWest();
-				bbox.yMax = bounds.getNorth();
-				bbox.xMax = bounds.getEast();
-				searchService.refresh();
-			});
-		}
-	}
-})(angular);
-"use strict";
-
 {
    angular.module("common.draw", ['geo.map']).directive("commonDraw", ['$log', '$rootScope', 'commonDrawService', function ($log, $rootScope, commonDrawService) {
       var DEFAULTS = {
@@ -788,7 +730,7 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
    angular.module("common.featureinfo", []).directive("commonFeatureInfo", ['$http', '$log', '$q', '$timeout', 'featureInfoService', 'flashService', 'messageService', function ($http, $log, $q, $timeout, featureInfoService, flashService, messageService) {
       var template = "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetFeatureInfo_ElevationAvailableData.fmw?" + "SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&SRS=EPSG%3A4326&BBOX=${bounds}&WIDTH=${width}&HEIGHT=${height}" +
       //"LAYERS=public.5dem_ProjectsIndex&" +
-      "&LAYERS=public.ACT2015-Tile_Index_55,public.5dem_ProjectsIndex,public.NSW_100k_Index_54,public.NSW_100k_Index_55," + "public.NSW_100k_Index_56,public.NSW_100k_Index_Forward_Program,public.QLD_Project_Index_54," + "public.QLD_Project_Index_55,public.QLD_Project_Index_56" + "&STYLES=&INFO_FORMAT=application%2Fjson&FEATURE_COUNT=100&X=${x}&Y=${y}";
+      "&LAYERS=public.ACT2015-Tile_Index_55,public.5dem_ProjectsIndex,public.NSW_100k_Index_54,public.NSW_100k_Index_55," + "public.NSW_100k_Index_56,public.NSW_100k_Index_Forward_Program,public.QLD_Project_Index_54," + "public.QLD_Project_Index_55,public.QLD_Project_Index_56,public.QLD_Elevation_Metadata_Index" + "&STYLES=&INFO_FORMAT=application%2Fjson&FEATURE_COUNT=100&X=${x}&Y=${y}";
       var layers = ["public.5dem_ProjectsIndex", "public.NSW_100k_Index"];
 
       return {
@@ -848,6 +790,8 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
                      var response = void 0;
                      var features = [];
                      var popupText = [];
+
+                     console.log(group);
 
                      map.closePopup();
                      featureInfoService.removeLastLayer(map);
@@ -927,6 +871,64 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
       };
    }]);
 })(angular, L);
+"use strict";
+
+(function (angular) {
+	'use strict';
+
+	angular.module("common.extent", ["explorer.switch"]).directive("commonExtent", ['extentService', function (extentService) {
+		return {
+			restrict: "AE",
+			templateUrl: "common/extent/extent.html",
+			controller: ['$scope', function ($scope) {
+				$scope.parameters = extentService.getParameters();
+			}],
+			link: function link(scope, element, attrs) {}
+		};
+	}]).factory("extentService", ExtentService);
+
+	ExtentService.$inject = ['mapService', 'searchService'];
+	function ExtentService(mapService, searchService) {
+		var bbox = searchService.getSearchCriteria().bbox;
+
+		if (bbox.fromMap) {
+			enableMapListeners();
+		}
+
+		return {
+			getParameters: function getParameters() {
+				return bbox;
+			}
+		};
+
+		function enableMapListeners() {
+			mapService.getMap().then(function (map) {
+				map.on("moveend", execute);
+				map.on("zoomend", execute);
+				execute();
+			});
+		}
+
+		function disableMapListeners() {
+			return mapService.getMap().then(function (map) {
+				map.off("moveend", execute);
+				map.off("zoomend", execute);
+				return map;
+			});
+		}
+
+		function execute() {
+			mapService.getMap().then(function (map) {
+				var bounds = map.getBounds();
+				bbox.yMin = bounds.getSouth();
+				bbox.xMin = bounds.getWest();
+				bbox.yMax = bounds.getNorth();
+				bbox.xMax = bounds.getEast();
+				searchService.refresh();
+			});
+		}
+	}
+})(angular);
 "use strict";
 
 (function (angular, L) {
@@ -1767,80 +1769,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       return MetaviewService;
    }();
 })(angular);
-"use strict";
-
-(function (angular) {
-	'use strict';
-
-	angular.module("common.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
-		return {
-			templateUrl: "common/panes/panes.html",
-			transclude: true,
-			replace: true,
-			scope: {
-				defaultItem: "@",
-				data: "="
-			},
-			controller: ['$scope', function ($scope) {
-				var changeSize = false;
-
-				$scope.view = $scope.defaultItem;
-
-				$scope.setView = function (what) {
-					var oldView = $scope.view;
-
-					if ($scope.view == what) {
-						if (what) {
-							changeSize = true;
-						}
-						$scope.view = "";
-					} else {
-						if (!what) {
-							changeSize = true;
-						}
-						$scope.view = what;
-					}
-
-					$rootScope.$broadcast("view.changed", $scope.view, oldView);
-
-					if (changeSize) {
-						mapService.getMap().then(function (map) {
-							map._onResize();
-						});
-					}
-				};
-				$timeout(function () {
-					$rootScope.$broadcast("view.changed", $scope.view, null);
-				}, 50);
-			}]
-		};
-	}]).directive("icsmTabs", [function () {
-		return {
-			templateUrl: "common/panes/tabs.html",
-			require: "^icsmPanes"
-		};
-	}]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
-
-	PaneCtrl.$inject = ["paneService"];
-	function PaneCtrl(paneService) {
-		var _this = this;
-
-		paneService.data().then(function (data) {
-			_this.data = data;
-		});
-	}
-
-	PaneService.$inject = [];
-	function PaneService() {
-		var data = {};
-
-		return {
-			add: function add(item) {},
-
-			remove: function remove(item) {}
-		};
-	}
-})(angular);
 'use strict';
 
 (function (angular) {
@@ -2000,6 +1928,80 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   }]).factory('navigationService', [function () {
     return {};
   }]);
+})(angular);
+"use strict";
+
+(function (angular) {
+	'use strict';
+
+	angular.module("common.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
+		return {
+			templateUrl: "common/panes/panes.html",
+			transclude: true,
+			replace: true,
+			scope: {
+				defaultItem: "@",
+				data: "="
+			},
+			controller: ['$scope', function ($scope) {
+				var changeSize = false;
+
+				$scope.view = $scope.defaultItem;
+
+				$scope.setView = function (what) {
+					var oldView = $scope.view;
+
+					if ($scope.view == what) {
+						if (what) {
+							changeSize = true;
+						}
+						$scope.view = "";
+					} else {
+						if (!what) {
+							changeSize = true;
+						}
+						$scope.view = what;
+					}
+
+					$rootScope.$broadcast("view.changed", $scope.view, oldView);
+
+					if (changeSize) {
+						mapService.getMap().then(function (map) {
+							map._onResize();
+						});
+					}
+				};
+				$timeout(function () {
+					$rootScope.$broadcast("view.changed", $scope.view, null);
+				}, 50);
+			}]
+		};
+	}]).directive("icsmTabs", [function () {
+		return {
+			templateUrl: "common/panes/tabs.html",
+			require: "^icsmPanes"
+		};
+	}]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
+
+	PaneCtrl.$inject = ["paneService"];
+	function PaneCtrl(paneService) {
+		var _this = this;
+
+		paneService.data().then(function (data) {
+			_this.data = data;
+		});
+	}
+
+	PaneService.$inject = [];
+	function PaneService() {
+		var data = {};
+
+		return {
+			add: function add(item) {},
+
+			remove: function remove(item) {}
+		};
+	}
 })(angular);
 "use strict";
 
@@ -2972,9 +2974,9 @@ $templateCache.put("common/metaview/iso19115.html","<iso19115-metadata node=\"da
 $templateCache.put("common/metaview/iso19115node.html","<ul>\r\n   <li>\r\n      <span class=\"metaview-head\">{{key | metaviewNodeName}}</span>\r\n      <span>{{node | metaviewText}}</span>\r\n      <ng-repeat ng-if=\"isArray()\" ng-repeat=\"next in node\" node=\"next]\">\r\n         <metaview-iso19115-array ng-repeat=\"nextKey in getKeys() track by $index\" node=\"node[nextKey]\" key=\"nextKey\"></metaview-iso19115-array>\r\n      </ng-repeat>\r\n      <metaview-iso19115-node ng-if=\"!isArray()\" ng-repeat=\"nextKey in getKeys() track by $index\" node=\"node[nextKey]\" key=\"nextKey\"></metaview-iso19115-node>\r\n   </li>\r\n</ul>");
 $templateCache.put("common/metaview/item.html","<div>\r\n	<button class=\"btn btn-sm btn-outline-primary\" ng-click=\"container.selected = null\"><i class=\"fa fa-angle-double-left\"></i> Back</button>\r\n      <span style=\"font-weight: bold;padding-left:10px; font-size:130%\">{{container.selected.title}}</span>\r\n      <metaview-iso19115 data=\"container.selected\"></metaview-iso19115>\r\n</div>");
 $templateCache.put("common/metaview/metaview.html","<button type=\"button\" class=\"undecorated\" title=\"View metadata\" ng-click=\"select()\">\r\n	<i class=\"fa fa-lg fa-info metaview-info\"></i>\r\n</button>");
+$templateCache.put("common/navigation/altthemes.html","<span class=\"altthemes-container\">\r\n	<span ng-repeat=\"item in themes | altthemesMatchCurrent : current\">\r\n       <a title=\"{{item.label}}\" ng-href=\"{{item.url}}\" class=\"altthemesItemCompact\" target=\"_blank\">\r\n         <span class=\"altthemes-icon\" ng-class=\"item.className\"></span>\r\n       </a>\r\n    </li>\r\n</span>");
 $templateCache.put("common/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" icsm-toolbar-row map=\"root.map\" overlaytitle=\"\'Change overlay opacity\'\"></div>\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div class=\"common-legend\" common-legend map=\"data.map\"></div>\r\n    		<div icsm-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'download\'\" icsm-view></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'maps\'\" icsm-maps></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" icsm-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" icsm-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n		<button class=\"undecorated\">Download</button>\r\n	</div>\r\n	<!-- \r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n	-->\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");
-$templateCache.put("common/navigation/altthemes.html","<span class=\"altthemes-container\">\r\n	<span ng-repeat=\"item in themes | altthemesMatchCurrent : current\">\r\n       <a title=\"{{item.label}}\" ng-href=\"{{item.url}}\" class=\"altthemesItemCompact\" target=\"_blank\">\r\n         <span class=\"altthemes-icon\" ng-class=\"item.className\"></span>\r\n       </a>\r\n    </li>\r\n</span>");
 $templateCache.put("common/search/basin.html","<div class=\"btn-group pull-left radSearch\" style=\"position:relative;width:27em;opacity:0.9\">\r\n	<div class=\"input-group\" style=\"width:100%;\">\r\n		<input type=\"text\" size=\"32\" class=\"form-control\" style=\"border-top-right-radius:4px;border-bottom-right-radius:4px;\"\r\n				ng-keyup=\"keyup($event)\" ng-focus=\"changing()\" ng-model=\"nameFilter\" placeholder=\"Find a basin of interest\">\r\n		<div class=\"input-group-btn\"></div>\r\n	</div>\r\n	<div style=\"width:26em; position:absolute;left:15px\">\r\n		<div class=\"row\" ng-repeat=\"region in basinData.basins | basinFilterList : nameFilter : 10 | orderBy : \'name\'\"\r\n				style=\"background-color:white;\">\r\n			<div class=\"col-md-12 rw-sub-list-trigger\">\r\n				<button class=\"undecorated zoomButton\" ng-click=\"zoomToLocation(region);\">{{region.name}}</button>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/search/catchment.html","<div class=\"btn-group pull-left radSearch\" style=\"position:relative;width:27em;opacity:0.9\">\r\n	<div class=\"input-group\" style=\"width:100%;\">\r\n		<input type=\"text\" size=\"32\" class=\"form-control\" style=\"border-top-right-radius:4px;border-bottom-right-radius:4px;\"\r\n				ng-keyup=\"keyup($event)\" ng-focus=\"changing()\" ng-model=\"nameFilter\" placeholder=\"Find a catchment of interest\">\r\n		<div class=\"input-group-btn\"></div>\r\n	</div>\r\n	<div style=\"width:26em; position:absolute;left:15px\">\r\n		<div class=\"row\" ng-repeat=\"region in catchmentData.catchments | catchmentFilterList : nameFilter : 10 | orderBy : \'name\'\"\r\n				style=\"background-color:white;\">\r\n			<div class=\"col-md-12 rw-sub-list-trigger\">\r\n				<button class=\"undecorated zoomButton\" ng-click=\"zoomToLocation(region);\">{{region.name}}</button>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/toolbar/toolbar.html","<div icsm-toolbar>\r\n	<div class=\"row toolBarGroup\">\r\n		<div class=\"btn-group searchBar\" ng-show=\"root.whichSearch != \'region\'\">\r\n			<div class=\"input-group\" geo-search>\r\n				<input type=\"text\" ng-autocomplete ng-model=\"values.from.description\" options=\'{country:\"au\"}\'\r\n							size=\"32\" title=\"Select a locality to pan the map to.\" class=\"form-control\" aria-label=\"...\">\r\n				<div class=\"input-group-btn\">\r\n    				<button ng-click=\"zoom(false)\" exp-ga=\"[\'send\', \'event\', \'icsm\', \'click\', \'zoom to location\']\"\r\n						class=\"btn btn-default\"\r\n						title=\"Pan and potentially zoom to location.\"><i class=\"fa fa-search\"></i></button>\r\n				</div>\r\n			</div>\r\n		</div>\r\n\r\n		<div class=\"pull-right\">\r\n			<div class=\"btn-toolbar radCore\" role=\"toolbar\"  icsm-toolbar>\r\n				<div class=\"btn-group\">\r\n					<!-- < icsm-state-toggle></icsm-state-toggle> -->\r\n				</div>\r\n			</div>\r\n\r\n			<div class=\"btn-toolbar\" style=\"margin:right:10px;display:inline-block\">\r\n				<div class=\"btn-group\" title=\"{{overlaytitle}}\">\r\n					<span class=\"btn btn-default\" common-baselayer-control max-zoom=\"16\"></span>\r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");}]);
