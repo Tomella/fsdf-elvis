@@ -296,6 +296,7 @@
 
 .icsmTabsOpen {
   right: 30px;
+  height: 0;
 }
 
 .panesMapContainer {
@@ -1081,21 +1082,6 @@ div.leaflet-control-scale-line {
   color: red;
   font-size: 120%;
 }
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -1141,6 +1127,21 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
 }
 .vector-tooltip {
   min-width: 25em;
@@ -1219,6 +1220,17 @@ div.leaflet-control-scale-line {
 .select-land {
   background-position: -675px;
 }
+.csv-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.csv-fix-label label {
+  width: 10em;
+  text-align: right;
+}
 .main-body {
   position: fixed;
   top: 85px;
@@ -1242,24 +1254,6 @@ span.mandatory {
   content: "*";
   color: red;
 }
-.csv-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.csv-fix-label label {
-  width: 10em;
-  text-align: right;
-}
-.hide {
-  display: none;
-}
-
-.file-container {
-  margin-top: 0;
-}
 .upload-dialog p {
   padding: 15px;
   margin-top: 10px;
@@ -1270,6 +1264,13 @@ span.mandatory {
   margin-top: 10px;
   padding: 5px;
   border-radius: 4px;
+}
+.hide {
+  display: none;
+}
+
+.file-container {
+  margin-top: 0;
 }
 #fileDrop {
   font-weight: bold;
