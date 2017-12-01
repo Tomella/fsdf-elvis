@@ -421,7 +421,11 @@
 
       this.checkChildren = function (children) {
          var allChecked = this.childrenChecked(children);
-         children.filter(child => child.matched).forEach(child => {
+         let filtered = children;
+         if(!allChecked) {
+            filtered = children.filter(child => child.matched);
+         }
+         filtered.forEach(child => {
             if (allChecked) {
                delete child.selected;
             } else {
