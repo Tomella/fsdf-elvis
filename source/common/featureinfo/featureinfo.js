@@ -8,9 +8,9 @@
          var template = "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetFeatureInfo_ElevationAvailableData.fmw?" +
                 "SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&SRS=EPSG%3A4326&BBOX=${bounds}&WIDTH=${width}&HEIGHT=${height}" +
                 //"LAYERS=public.5dem_ProjectsIndex&" +
-                "&LAYERS=public.ACT2015-Tile_Index_55,public.5dem_ProjectsIndex,public.NSW_100k_Index_54,public.NSW_100k_Index_55," +
+                "&LAYERS=public.QLD_Elevation_Metadata_Index,public.ACT2015-Tile_Index_55,public.5dem_ProjectsIndex,public.NSW_100k_Index_54,public.NSW_100k_Index_55," +
                 "public.NSW_100k_Index_56,public.NSW_100k_Index_Forward_Program,public.QLD_Project_Index_54," +
-                "public.QLD_Project_Index_55,public.QLD_Project_Index_56,public.QLD_Elevation_Metadata_Index" +
+                "public.QLD_Project_Index_55,public.QLD_Project_Index_56" +
                 "&STYLES=&INFO_FORMAT=application%2Fjson&FEATURE_COUNT=100&X=${x}&Y=${y}";
          var layers = ["public.5dem_ProjectsIndex", "public.NSW_100k_Index"];
 

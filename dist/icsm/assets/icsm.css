@@ -48,15 +48,6 @@
     max-height: 350px;
   }
 }
-.leaflet-popup {
-  position: absolute;
-  text-align: center;
-}
-
-.fi-popup hr {
-  margin-top: 3px;
-  margin-bottom: 3px;
-}
 .nav-icons {
   margin-top: 7px !important;
 }
@@ -86,6 +77,15 @@
 
 .common-header {
   background-color: white;
+}
+.leaflet-popup {
+  position: absolute;
+  text-align: center;
+}
+
+.fi-popup hr {
+  margin-top: 3px;
+  margin-bottom: 3px;
 }
 .iso19115,
 .iso19115 ul,
@@ -1073,15 +1073,6 @@ div.leaflet-control-scale-line {
   right: 0;
   bottom: 8px;
 }
-.regions-label {
-  border: 0;
-}
-
-.regions-label.over {
-  font-weight: bold;
-  color: red;
-  font-size: 120%;
-}
 .selectContainer {
   width: 100%;
 }
@@ -1096,6 +1087,15 @@ div.leaflet-control-scale-line {
 
 i.fa.active {
   color: red;
+}
+.regions-label {
+  border: 0;
+}
+
+.regions-label.over {
+  font-weight: bold;
+  color: red;
+  font-size: 120%;
 }
 .radCore {
   margin-right: 3px;
@@ -1254,6 +1254,13 @@ span.mandatory {
   width: 10em;
   text-align: right;
 }
+.hide {
+  display: none;
+}
+
+.file-container {
+  margin-top: 0;
+}
 .upload-dialog p {
   padding: 15px;
   margin-top: 10px;
@@ -1264,13 +1271,6 @@ span.mandatory {
   margin-top: 10px;
   padding: 5px;
   border-radius: 4px;
-}
-.hide {
-  display: none;
-}
-
-.file-container {
-  margin-top: 0;
 }
 #fileDrop {
   font-weight: bold;
