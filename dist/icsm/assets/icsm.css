@@ -87,11 +87,6 @@
 .common-header {
   background-color: white;
 }
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
-}
 .iso19115,
 .iso19115 ul,
 .iso19115 li {
@@ -130,6 +125,98 @@
 
 .iso19115-head {
   font-weight: bold;
+}
+.icsmTabs {
+  position: absolute;
+  top: 0px;
+  right: 30px;
+  z-index: 1;
+}
+
+.icsmTabsOpen {
+  right: 30px;
+  height: 0;
+}
+
+.panesMapContainer {
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.icsmPanesRow {
+  height: 100%;
+  margin-right: 0;
+}
+
+.icsmPanesCol {
+  height: 100%;
+}
+
+.icsmPanesColRight {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.paneTabsMain {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  padding-top: 8px;
+  right: 0px;
+  background: #FFF;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+.panesTabsContainer {
+  position: absolute;
+  width: 9999px;
+  z-index: inherit;
+  /* keeps ie happy for mousemove events */
+  background: rgba(255, 255, 255, 0);
+}
+
+.paneRotateTabs {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 100%;
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  -sand-transform: rotate(90deg);
+  transform-origin: bottom right;
+  -webkit-transform-origin: bottom right;
+  -ms-transform-origin: bottom right;
+  display: block;
+}
+
+.paneTabItem {
+  float: right;
+  padding: 5px 15px 0px 15px;
+  border: 1px solid #999;
+  background: #FFF;
+  cursor: pointer;
+  height: 30px;
+}
+
+.panesTabContentItem {
+  background: #FFF;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
 }
 .mvt,
 .mvt ul,
@@ -286,93 +373,6 @@
 .altthemesdropdown .altthemescurrent {
   color: #fff;
   background-color: #777;
-}
-.icsmTabs {
-  position: absolute;
-  top: 0px;
-  right: 30px;
-  z-index: 1;
-}
-
-.icsmTabsOpen {
-  right: 30px;
-  height: 0;
-}
-
-.panesMapContainer {
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.icsmPanesRow {
-  height: 100%;
-  margin-right: 0;
-}
-
-.icsmPanesCol {
-  height: 100%;
-}
-
-.icsmPanesColRight {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-}
-
-.paneTabsMain {
-  position: absolute;
-  top: 0px;
-  bottom: 0px;
-  padding-top: 8px;
-  right: 0px;
-  background: #FFF;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -o-user-select: none;
-  user-select: none;
-}
-
-.panesTabsContainer {
-  position: absolute;
-  width: 9999px;
-  z-index: inherit;
-  /* keeps ie happy for mousemove events */
-  background: rgba(255, 255, 255, 0);
-}
-
-.paneRotateTabs {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 100%;
-  -webkit-transform: rotate(-90deg);
-  -moz-transform: rotate(-90deg);
-  -o-transform: rotate(-90deg);
-  -ms-transform: rotate(-90deg);
-  -sand-transform: rotate(90deg);
-  transform-origin: bottom right;
-  -webkit-transform-origin: bottom right;
-  -ms-transform-origin: bottom right;
-  display: block;
-}
-
-.paneTabItem {
-  float: right;
-  padding: 5px 15px 0px 15px;
-  border: 1px solid #999;
-  background: #FFF;
-  cursor: pointer;
-  height: 30px;
-}
-
-.panesTabContentItem {
-  background: #FFF;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 .radCore {
   margin-right: 3px;
@@ -949,52 +949,6 @@ img.elvis-logo {
 i.fa.active {
   color: red;
 }
-.radCore {
-  margin-right: 3px;
-  display: inline-block;
-}
-
-.searchBar {
-  width: 27em;
-  opacity: 0.9;
-}
-
-@media only screen and (max-width:1100px) {
-  .searchBar {
-    width: 23em;
-  }
-}
-
-@media only screen and (max-width:1025px) {
-  .searchBar {
-    width: 20em;
-  }
-}
-
-@media only screen and (max-width:645px) {
-  .searchBar {
-    display: none;
-  }
-}
-
-@media only screen and (max-width:965px) {
-  .radCore,
-  .hideWhenSmall,
-  .steps-indicator,
-  .secondToolbarInfo {
-    display: none;
-  }
-}
-
-div.leaflet-control-scale-line {
-  text-align: center;
-}
-
-@media only screen and (max-width:965px) {
-  div.leaflet-control-scale-line {
-    display: none;
-  }
-}
 .icsm-icon {
   background: url("icsm/img/global-sprites.svg") no-repeat;
   display: inline-block;
@@ -1057,6 +1011,52 @@ div.leaflet-control-scale-line {
   color: #fff;
   background-color: #777;
 }
+.radCore {
+  margin-right: 3px;
+  display: inline-block;
+}
+
+.searchBar {
+  width: 27em;
+  opacity: 0.9;
+}
+
+@media only screen and (max-width:1100px) {
+  .searchBar {
+    width: 23em;
+  }
+}
+
+@media only screen and (max-width:1025px) {
+  .searchBar {
+    width: 20em;
+  }
+}
+
+@media only screen and (max-width:645px) {
+  .searchBar {
+    display: none;
+  }
+}
+
+@media only screen and (max-width:965px) {
+  .radCore,
+  .hideWhenSmall,
+  .steps-indicator,
+  .secondToolbarInfo {
+    display: none;
+  }
+}
+
+div.leaflet-control-scale-line {
+  text-align: center;
+}
+
+@media only screen and (max-width:965px) {
+  div.leaflet-control-scale-line {
+    display: none;
+  }
+}
 .downloadPane {
   padding-left: 0px !important;
   padding-right: 5px !important;
@@ -1073,6 +1073,15 @@ div.leaflet-control-scale-line {
   right: 0;
   bottom: 8px;
 }
+.regions-label {
+  border: 0;
+}
+
+.regions-label.over {
+  font-weight: bold;
+  color: red;
+  font-size: 120%;
+}
 .selectContainer {
   width: 100%;
 }
@@ -1087,15 +1096,6 @@ div.leaflet-control-scale-line {
 
 i.fa.active {
   color: red;
-}
-.regions-label {
-  border: 0;
-}
-
-.regions-label.over {
-  font-weight: bold;
-  color: red;
-  font-size: 120%;
 }
 .radCore {
   margin-right: 3px;

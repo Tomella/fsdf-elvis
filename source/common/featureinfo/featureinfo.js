@@ -133,7 +133,7 @@
                                        let contact = properties.contact;
                                        let mailto = contact.toLowerCase().indexOf("mailto:") === 0? "" : "mailto:";
 
-                                       buffer.push("<br/><strong>Contact:</strong><a href='"+ mailto + properties.contact +
+                                       buffer.push("<br/><strong>Contact:</strong> <a href='"+ mailto + properties.contact +
                                                    "'>" + properties.contact + "</a>")
                                     }
 
