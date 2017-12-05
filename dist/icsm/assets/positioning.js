@@ -70,6 +70,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       };
    });
 }
+'use strict';
+
+{
+   angular.module('positioning.download', [])
+   /**
+    *
+    * Override the original mars user.
+    *
+    */
+   .directive('posDownload', [function () {
+      return {
+         restrict: 'AE',
+         templateUrl: 'positioning/download/download.html',
+         link: function link(scope) {}
+      };
+   }]);
+}
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -134,74 +151,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          }
       };
    }]).service("csvService", CsvService);
-}
-'use strict';
-
-{
-   angular.module('positioning.download', [])
-   /**
-    *
-    * Override the original mars user.
-    *
-    */
-   .directive('posDownload', [function () {
-      return {
-         restrict: 'AE',
-         templateUrl: 'positioning/download/download.html',
-         link: function link(scope) {}
-      };
-   }]);
-}
-"use strict";
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-{
-   var EmailService = function () {
-      function EmailService(persistService) {
-         _classCallCheck(this, EmailService);
-
-         this.persistService = persistService;
-         this.key = "download_email";
-      }
-
-      _createClass(EmailService, [{
-         key: "setEmail",
-         value: function setEmail(email) {
-            this.persistService.setItem(this.key, email);
-         }
-      }, {
-         key: "getEmail",
-         value: function getEmail() {
-            return this.persistService.getItem(this.key);
-         }
-      }]);
-
-      return EmailService;
-   }();
-
-   EmailService.$invoke = ["persistService"];
-
-   angular.module("positioning.email", []).directive("email", ["emailService", function (emailService) {
-      return {
-         template: '<div class="input-group">' + '<span class="input-group-addon" id="pos-email">Email</span>' + '<input required="required" type="email" ng-change="changeEmail(state.email)" ng-model="state.email" class="form-control" placeholder="Email address to send download link" aria-describedby="nedf-email">' + '</div>',
-         restrict: "AE",
-         scope: {
-            state: "="
-         },
-         link: function link(scope, element) {
-            emailService.getEmail().then(function (email) {
-               scope.state.email = email;
-            });
-
-            scope.changeEmail = function (email) {
-               emailService.setEmail(email);
-            };
-         }
-      };
-   }]).service("emailService", EmailService);
 }
 "use strict";
 
@@ -268,6 +217,57 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          }
       };
    }]);
+}
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+{
+   var EmailService = function () {
+      function EmailService(persistService) {
+         _classCallCheck(this, EmailService);
+
+         this.persistService = persistService;
+         this.key = "download_email";
+      }
+
+      _createClass(EmailService, [{
+         key: "setEmail",
+         value: function setEmail(email) {
+            this.persistService.setItem(this.key, email);
+         }
+      }, {
+         key: "getEmail",
+         value: function getEmail() {
+            return this.persistService.getItem(this.key);
+         }
+      }]);
+
+      return EmailService;
+   }();
+
+   EmailService.$invoke = ["persistService"];
+
+   angular.module("positioning.email", []).directive("email", ["emailService", function (emailService) {
+      return {
+         template: '<div class="input-group">' + '<span class="input-group-addon" id="pos-email">Email</span>' + '<input required="required" type="email" ng-change="changeEmail(state.email)" ng-model="state.email" class="form-control" placeholder="Email address to send download link" aria-describedby="nedf-email">' + '</div>',
+         restrict: "AE",
+         scope: {
+            state: "="
+         },
+         link: function link(scope, element) {
+            emailService.getEmail().then(function (email) {
+               scope.state.email = email;
+            });
+
+            scope.changeEmail = function (email) {
+               emailService.setEmail(email);
+            };
+         }
+      };
+   }]).service("emailService", EmailService);
 }
 "use strict";
 
@@ -362,30 +362,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       };
    }]);
 }
-"use strict";
-
-{
-   angular.module("positioning.format", []).directive("inputFormat", function () {
-      return {
-         scope: {
-            list: "="
-         },
-         templateUrl: "positioning/formats/formats.html"
-      };
-   });
-}
-"use strict";
-
-{
-   angular.module("positioning.output", []).directive("outputFormat", function () {
-      return {
-         link: {
-            state: "="
-         },
-         templateUrl: 'positioning/output/output.html'
-      };
-   });
-}
 'use strict';
 
 {
@@ -435,6 +411,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			}
 		};
 	}]);
+}
+"use strict";
+
+{
+   angular.module("positioning.format", []).directive("inputFormat", function () {
+      return {
+         scope: {
+            list: "="
+         },
+         templateUrl: "positioning/formats/formats.html"
+      };
+   });
 }
 "use strict";
 
@@ -579,6 +567,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          }, 0);
       };
    }]).service("submitService", SubmitService);
+}
+"use strict";
+
+{
+   angular.module("positioning.output", []).directive("outputFormat", function () {
+      return {
+         link: {
+            state: "="
+         },
+         templateUrl: 'positioning/output/output.html'
+      };
+   });
 }
 "use strict";
 
@@ -963,9 +963,9 @@ $templateCache.put("positioning/dialog/transformationtarget.html","<div>\r\n   <
 $templateCache.put("positioning/file/file.html","<div class=\"container-fluid file-container\" ng-controller=\"RootCtrl as root\">\r\n   <div class=\"row\">\r\n      <div class=\"col-md-6\" style=\"border-right: 2px solid lightgray\">\r\n         <h3>Purpose</h3>\r\n         This Geoscience Australia FME Web Service is provided to give spatial data software users and developers a\r\n         system to check their datum transformations with a standard. It can be used to transform data that references\r\n         the Geocentric Datum of Australia 1994 (GDA94) to data referenced on the\r\n         Geocentric Datum of Australia 2020 (GDA2020).\r\n         <br/><br/>\r\n         <file-drop state=\"root.state\" />\r\n\r\n         <h3>Targets</h3>\r\n         The 7-parameter similarity transformation is currently available for GDA94 to GDA2020.\r\n         The NTv2 transformation grid or 7-parameter similarity transformation is available for AGD66/AGD84 to GDA94.\r\n         <br/>\r\n         <br/>\r\n         <input-format list=\"root.data.fileUploadFormats\" />\r\n      </div>\r\n      <div class=\"col-md-6\" >\r\n         <upload-dialog state=\"root.state\" settings=\"root.data\"/>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("positioning/filedrop/filedrop.html","<div id=\"fileDrop\" title=\"Drop the files you would like to reproject to GDA2020\">\r\n   <br/> Drop <br/> File(s) <br/> Here\r\n</div>");
 $templateCache.put("positioning/filename/filename.html","<div class=\"input-group\">\r\n   <span class=\"input-group-addon\" id=\"nedf-filename\">Filename</span>\r\n   <input type=\"text\" ng-maxlength=\"30\" ng-trim=\"true\" ng-keypress=\"restrict($event)\"\r\n         ng-model=\"state.outputName\" class=\"form-control\"\r\n         placeholder=\"Filename\" aria-describedby=\"pos-filename\" />\r\n   <span class=\"input-group-addon\" id=\"basic-addon2\">.zip</span>\r\n</div>");
-$templateCache.put("positioning/formats/formats.html","<div class=\"panel panel-default\">\r\n  <div class=\"panel-heading\"><h3 class=\"panel-title\">Allowed input file types</h3></div>\r\n  <div class=\"panel-body\">\r\n    <span class=\"label label-info input-format-pill\" ng-repeat=\"item in list\" title=\"{{item.description}} Extensions: {{item.extensions.join(\', \')}}\">\r\n       <a ng-href=\"{{item.url}}\" target=\"_blank\">{{item.name}}</a>\r\n    </span>\r\n  </div>\r\n</div>");
-$templateCache.put("positioning/output/output.html","<div class=\"row\">\r\n   <div class=\"col-md-3\">\r\n      <label for=\"geoprocessOutputFormat\">\r\n					Output Format<mandatory />\r\n				</label>\r\n   </div>\r\n   <div class=\"col-md-9\">\r\n      <select id=\"geoprocessOutputFormat\" style=\"width:95%\" ng-model=\"state.outFormat\" ng-options=\"opt.value for opt in settings.processing.outFormat\"></select>\r\n   </div>\r\n</div>");
 $templateCache.put("positioning/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-header\">\r\n\r\n        <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".ga-header-collapse\">\r\n            <span class=\"sr-only\">Toggle navigation</span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n            <span class=\"icon-bar\"></span>\r\n        </button>\r\n        <a href=\"/\" class=\"appTitle visible-xs\">\r\n            <h1 style=\"font-size:120%\">{{heading}}</h1>\r\n        </a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n        	<li common-navigation current=\"current\" role=\"menuitem\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");
+$templateCache.put("positioning/formats/formats.html","<div class=\"panel panel-default\">\r\n  <div class=\"panel-heading\"><h3 class=\"panel-title\">Allowed input file types</h3></div>\r\n  <div class=\"panel-body\">\r\n    <span class=\"label label-info input-format-pill\" ng-repeat=\"item in list\" title=\"{{item.description}} Extensions: {{item.extensions.join(\', \')}}\">\r\n       <a ng-href=\"{{item.url}}\" target=\"_blank\">{{item.name}}</a>\r\n    </span>\r\n  </div>\r\n</div>");
 $templateCache.put("positioning/progress/progresscsv.html","<div class=\"row\">\r\n      <div class=\"col-md-4\" style=\"padding-top:7px\">\r\n         <div class=\"progress\">\r\n            <div class=\"progress-bar\" role=\"progressbar\" aria-valuenow=\"{{state.percentage}}\"\r\n                     aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: {{state.percentage}}%;\">\r\n                <span class=\"sr-only\"></span>\r\n            </div>\r\n         </div>\r\n      </div>\r\n      <div class=\"col-md-5\" style=\"padding-top:7px\">\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Add information about your file.\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-file-text-o fa-lg\" ng-class=\"{\'ed-valid\': state.validFileInfo, \'ed-invalid\': !state.validFileInfo}\"></i>\r\n         </span>\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Select a transformation.\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-cogs fa-lg\" ng-class=\"{\'ed-valid\': state.transformation, \'ed-invalid\': !state.transformation}\"></i>\r\n         </span>\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Provide an email address.\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-envelope fa-lg\" ng-class=\"{\'ed-valid\': state.validEmail, \'ed-invalid\': !state.validEmail}\"></i>\r\n         </span>\r\n      </div>\r\n      <div class=\"col-md-3\">\r\n         <button type=\"button\" class=\"btn btn-primary\" ng-click=\"cancel()\">Cancel</button>\r\n         <button class=\"btn btn-primary pull-right\" ng-disabled=\"!state.validForm\" ng-click=\"submit()\" disabled=\"disabled\">Submit</button>\r\n      </div>\r\n\r\n   </div>");
 $templateCache.put("positioning/progress/progresshapefile.html","<div class=\"row\">\r\n      <div class=\"col-md-4\" style=\"padding-top:7px\">\r\n         <div class=\"progress\">\r\n            <div class=\"progress-bar\" role=\"progressbar\" aria-valuenow=\"{{state.percentage}}\"\r\n                     aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: {{state.percentage}}%;\">\r\n                <span class=\"sr-only\"></span>\r\n            </div>\r\n         </div>\r\n      </div>\r\n      <div class=\"col-md-5\" style=\"padding-top:7px\">\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Provide four files for reprojection\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-file-o fa-lg\" ng-class=\"{\'ed-valid\': state.full, \'ed-invalid\': !state.full}\"></i>\r\n         </span>\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Select a transformation.\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-cogs fa-lg\" ng-class=\"{\'ed-valid\': state.transformation, \'ed-invalid\': !state.transformation}\"></i>\r\n         </span>\r\n         <span style=\"padding-right:10px\" uib-tooltip=\"Provide an email address.\" tooltip-placement=\"left\">\r\n            <i class=\"fa fa-envelope fa-lg\" ng-class=\"{\'ed-valid\': state.validEmail, \'ed-invalid\': !state.validEmail}\"></i>\r\n         </span>\r\n      </div>\r\n      <div class=\"col-md-3\">\r\n         <button type=\"button\" class=\"btn btn-primary\" ng-click=\"cancel()\">Cancel</button>\r\n         <button class=\"btn btn-primary pull-right\" ng-disabled=\"!state.validForm\" ng-click=\"submit()\" disabled=\"disabled\">Submit</button>\r\n      </div>\r\n   </div>");
+$templateCache.put("positioning/output/output.html","<div class=\"row\">\r\n   <div class=\"col-md-3\">\r\n      <label for=\"geoprocessOutputFormat\">\r\n					Output Format<mandatory />\r\n				</label>\r\n   </div>\r\n   <div class=\"col-md-9\">\r\n      <select id=\"geoprocessOutputFormat\" style=\"width:95%\" ng-model=\"state.outFormat\" ng-options=\"opt.value for opt in settings.processing.outFormat\"></select>\r\n   </div>\r\n</div>");
 $templateCache.put("positioning/shapefile/shapefile.html","<div>\r\n  <h4>Selected Shapefiles</h4>\r\n  <div ng-repeat=\"(key, file) in state.file\">\r\n		<div class=\"row\" ng-if=\"!file\">\r\n			<div class=\"col-md-12\">\r\n            <i class=\"fa fa-warning\" style=\"color:#f4c842\"></i>\r\n            Please drag and drop a file named {{state.outputName}}.{{key}} extension to complete your set for upload.\r\n			</div>\r\n		</div>\r\n      <div class=\"row\" ng-if=\"file\">\r\n			<div class=\"col-md-12\" ng-if=\"file\">\r\n            <i class=\"fa fa-check-square\" style=\"color:#328737\"></i>\r\n            {{file.name}} ({{file.size | bytes}})\r\n			</div>\r\n		</div>\r\n  </div>\r\n</div>");}]);

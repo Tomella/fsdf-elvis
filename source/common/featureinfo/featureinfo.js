@@ -116,6 +116,7 @@
                                           object_url : "https://s3-ap-southeast-2.amazonaws.com/elvis.ga.gov.au/elevation/5m-dem/mdba/QG/middledarling2014_z55.tif",
                                           object_size : "5577755073",
                                           object_last_modified : "20161017",
+                                          captured: "20161010 - 20161023"
                                           area : "5560.00",
                                           status : "Available"
                                     */
@@ -124,21 +125,34 @@
                                        buffer.push("<strong>Project name:</strong> " + properties.project);
                                     }
 
-                                    if (properties.object_name) {
-                                       buffer.push("<strong>File name:</strong> " +properties.object_name);
+                                    if (properties.captured) {
+                                       buffer.push("<br/><strong>Capture date:</strong> " + captured(properties.captured));
                                     }
+
+                                    if (properties.object_name) {
+                                       buffer.push("<strong>File name:</strong> " + properties.object_name);
+                                    } else if (properties.object_name_ahd) {
+                                       buffer.push("<strong>File name:</strong> " + properties.object_name_ahd);
+                                    } else if (properties.object_name_ort) {
+                                       buffer.push("<strong>File name:</strong> " + properties.object_name_ort);
+                                    }
+
                                     buffer.push("</span><br/><strong>Status:</strong> " + feature.properties.status);
 
-                                    if(properties.contact) {
-                                       let contact = properties.contact;
-                                       let mailto = contact.toLowerCase().indexOf("mailto:") === 0? "" : "mailto:";
-
-                                       buffer.push("<br/><strong>Contact:</strong> <a href='"+ mailto + properties.contact +
-                                                   "'>" + properties.contact + "</a>")
+                                    if (properties.available_date) {
+                                       buffer.push("<br/><strong>Available date:</strong> " + formatDate(properties.available_date));
                                     }
 
-                                    if(properties.metadata_url) {
-                                       buffer.push("<br/><a href='"+ properties.metadata_url + "' target='_blank'>Metadata</a>")
+                                    if (properties.contact) {
+                                       let contact = properties.contact;
+                                       let mailto = contact.toLowerCase().indexOf("mailto:") === 0 ? "" : "mailto:";
+
+                                       buffer.push("<br/><strong>Contact:</strong> <a href='" + mailto + properties.contact +
+                                          "'>" + properties.contact + "</a>")
+                                    }
+
+                                    if (properties.metadata_url) {
+                                       buffer.push("<br/><a href='" + properties.metadata_url + "' target='_blank'>Metadata</a>")
                                     }
 
                                     popupText.push(buffer.join(" "));
@@ -184,4 +198,20 @@
          };
       }]);
 
+
+   function captured(twoDates) {
+      let dates = twoDates.split(" - ");
+      if (dates.length !== 2) {
+         return twoDates;
+      }
+
+      return formatDate(dates[0]) + " - " + formatDate(dates[1]);
+   }
+
+   function formatDate(data) {
+      if (data.length !== 8) {
+         return data;
+      }
+      return data.substr(0, 4) + "/" + data.substr(4, 2) + "/" + data.substr(6, 2);
+   }
 })(angular, L);
