@@ -201,7 +201,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                edDownloadService.setEmail(processing.email);
 
                // Assemble data
-               edDownloadService.submit(scope.item.processing.template, {
+               edDownloadService.submit(scope.item.template, {
                   id: scope.item.primaryId,
                   yMin: processing.clip.yMin,
                   yMax: processing.clip.yMax,

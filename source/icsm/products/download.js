@@ -110,7 +110,7 @@
                   productDownloadService.setEmail(processing.email);
 
                   // Assemble data
-                  productDownloadService.submit(scope.item.processing.template,
+                  productDownloadService.submit(scope.item.template,
                      {
                         id: scope.item.primaryId,
                         yMin: processing.clip.yMin,

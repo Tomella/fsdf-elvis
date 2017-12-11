@@ -76,7 +76,14 @@ version of this application. The latest Firefox, Chrome plus Microsoft Internet 
 <elevation-toolbar></elevation-toolbar>
 
 <!-- BEGIN: Page Content -->
-<icsm-panes data="root.data" default-item="download"></icsm-panes>
+<side-panel-left style="z-index: 2"></side-panel-left>
+
+<side-panel-right-oppose>
+   <icsm-panes data="root.data" default-item="download"></icsm-panes>
+</side-panel-right-oppose>
+
+<side-panel-right style="z-index: 2"></side-panel-right>
+
 
 <div icsm-contributors></div>
 <div path-elevation-plot class="noPrint elevationFixedBottom"></div>
