@@ -155,54 +155,6 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
     return 'common-accordion-header,' + 'data-common-accordion-header,' + 'x-common-accordion-header,' + 'common\\:accordion-header,' + '[common-accordion-header],' + '[data-common-accordion-header],' + '[x-common-accordion-header]';
   }
 });
-'use strict';
-
-{
-   /**
-    * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
-    */
-
-   angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider']).directive('commonBaselayerControl', ['$rootScope', 'mapHelper', 'mapService', function ($rootScope, mapHelper, mapService) {
-      var DEFAULTS = {
-         maxZoom: 12
-      };
-
-      return {
-         template: '<slider min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
-         scope: {
-            maxZoom: "="
-         },
-         link: function link(scope, element) {
-            if (typeof scope.maxZoom === "undefined") {
-               scope.maxZoom = DEFAULTS.maxZoom;
-            }
-            scope.slider = {
-               opacity: -1,
-               visibility: true,
-               lastOpacity: 1
-            };
-
-            // Get the initial value
-            mapHelper.getPseudoBaseLayer().then(function (layer) {
-               scope.layer = layer;
-               scope.slider.opacity = layer.options.opacity;
-            });
-
-            scope.$watch('slider.opacity', function (newValue, oldValue) {
-               if (oldValue < 0) return;
-
-               mapService.getMap().then(function (map) {
-                  map.eachLayer(function (layer) {
-                     if (layer.pseudoBaseLayer) {
-                        layer.setOpacity(scope.slider.opacity);
-                     }
-                  });
-               });
-            });
-         }
-      };
-   }]);
-}
 "use strict";
 
 {
@@ -302,6 +254,54 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
                bbox._map.removeLayer(bbox);
             }
             return null;
+         }
+      };
+   }]);
+}
+'use strict';
+
+{
+   /**
+    * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
+    */
+
+   angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider']).directive('commonBaselayerControl', ['$rootScope', 'mapHelper', 'mapService', function ($rootScope, mapHelper, mapService) {
+      var DEFAULTS = {
+         maxZoom: 12
+      };
+
+      return {
+         template: '<slider min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
+         scope: {
+            maxZoom: "="
+         },
+         link: function link(scope, element) {
+            if (typeof scope.maxZoom === "undefined") {
+               scope.maxZoom = DEFAULTS.maxZoom;
+            }
+            scope.slider = {
+               opacity: -1,
+               visibility: true,
+               lastOpacity: 1
+            };
+
+            // Get the initial value
+            mapHelper.getPseudoBaseLayer().then(function (layer) {
+               scope.layer = layer;
+               scope.slider.opacity = layer.options.opacity;
+            });
+
+            scope.$watch('slider.opacity', function (newValue, oldValue) {
+               if (oldValue < 0) return;
+
+               mapService.getMap().then(function (map) {
+                  map.eachLayer(function (layer) {
+                     if (layer.pseudoBaseLayer) {
+                        layer.setOpacity(scope.slider.opacity);
+                     }
+                  });
+               });
+            });
          }
       };
    }]);
@@ -619,6 +619,64 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
 })(angular, $);
 "use strict";
 
+(function (angular) {
+	'use strict';
+
+	angular.module("common.extent", ["explorer.switch"]).directive("commonExtent", ['extentService', function (extentService) {
+		return {
+			restrict: "AE",
+			templateUrl: "common/extent/extent.html",
+			controller: ['$scope', function ($scope) {
+				$scope.parameters = extentService.getParameters();
+			}],
+			link: function link(scope, element, attrs) {}
+		};
+	}]).factory("extentService", ExtentService);
+
+	ExtentService.$inject = ['mapService', 'searchService'];
+	function ExtentService(mapService, searchService) {
+		var bbox = searchService.getSearchCriteria().bbox;
+
+		if (bbox.fromMap) {
+			enableMapListeners();
+		}
+
+		return {
+			getParameters: function getParameters() {
+				return bbox;
+			}
+		};
+
+		function enableMapListeners() {
+			mapService.getMap().then(function (map) {
+				map.on("moveend", execute);
+				map.on("zoomend", execute);
+				execute();
+			});
+		}
+
+		function disableMapListeners() {
+			return mapService.getMap().then(function (map) {
+				map.off("moveend", execute);
+				map.off("zoomend", execute);
+				return map;
+			});
+		}
+
+		function execute() {
+			mapService.getMap().then(function (map) {
+				var bounds = map.getBounds();
+				bbox.yMin = bounds.getSouth();
+				bbox.xMin = bounds.getWest();
+				bbox.yMax = bounds.getNorth();
+				bbox.xMax = bounds.getEast();
+				searchService.refresh();
+			});
+		}
+	}
+})(angular);
+"use strict";
+
 {
    angular.module("common.draw", ['geo.map']).directive("commonDraw", ['$log', '$rootScope', 'commonDrawService', function ($log, $rootScope, commonDrawService) {
       var DEFAULTS = {
@@ -926,64 +984,6 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
       return data.substr(0, 4) + "/" + data.substr(4, 2) + "/" + data.substr(6, 2);
    }
 })(angular, L);
-"use strict";
-
-(function (angular) {
-	'use strict';
-
-	angular.module("common.extent", ["explorer.switch"]).directive("commonExtent", ['extentService', function (extentService) {
-		return {
-			restrict: "AE",
-			templateUrl: "common/extent/extent.html",
-			controller: ['$scope', function ($scope) {
-				$scope.parameters = extentService.getParameters();
-			}],
-			link: function link(scope, element, attrs) {}
-		};
-	}]).factory("extentService", ExtentService);
-
-	ExtentService.$inject = ['mapService', 'searchService'];
-	function ExtentService(mapService, searchService) {
-		var bbox = searchService.getSearchCriteria().bbox;
-
-		if (bbox.fromMap) {
-			enableMapListeners();
-		}
-
-		return {
-			getParameters: function getParameters() {
-				return bbox;
-			}
-		};
-
-		function enableMapListeners() {
-			mapService.getMap().then(function (map) {
-				map.on("moveend", execute);
-				map.on("zoomend", execute);
-				execute();
-			});
-		}
-
-		function disableMapListeners() {
-			return mapService.getMap().then(function (map) {
-				map.off("moveend", execute);
-				map.off("zoomend", execute);
-				return map;
-			});
-		}
-
-		function execute() {
-			mapService.getMap().then(function (map) {
-				var bounds = map.getBounds();
-				bbox.yMin = bounds.getSouth();
-				bbox.xMin = bounds.getWest();
-				bbox.yMax = bounds.getNorth();
-				bbox.xMax = bounds.getEast();
-				searchService.refresh();
-			});
-		}
-	}
-})(angular);
 "use strict";
 
 (function (angular, L) {
@@ -2174,220 +2174,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 })(angular);
 'use strict';
 
-(function (angular) {
-
-   'use strict';
-
-   angular.module("common.basin", ['geo.draw']).directive("commonBasinSearch", ['$log', '$timeout', 'basinService', function ($log, $timeout, basinService) {
-      return {
-         restrict: "AE",
-         transclude: true,
-         templateUrl: "common/search/basin.html",
-         link: function link(scope, element) {
-            var timeout;
-            basinService.load().then(function (data) {
-               scope.basinData = data;
-            });
-            scope.changing = function () {
-               $log.info("Cancel close");
-               $timeout.cancel(timeout);
-            };
-            scope.cancel = cancel;
-            scope.zoomToLocation = function (region) {
-               basinService.zoomToLocation(region);
-               cancel();
-            };
-            function cancel() {
-               $timeout.cancel(timeout);
-               timeout = $timeout(function () {
-                  $log.info("Clear filter");
-                  scope.nameFilter = "";
-               }, 7000);
-            }
-         }
-      };
-   }]).provider("basinService", BasinsearchServiceProvider).filter("basinFilterList", function () {
-      return function (list, filter, max) {
-         var response = [],
-             lowerFilter,
-             count;
-         if (!filter) {
-            return response;
-         }
-         if (!max) {
-            max = 50;
-         }
-         lowerFilter = filter.toLowerCase();
-         if (list) {
-            count = 0;
-            list.some(function (item) {
-               if (item.name.toLowerCase().indexOf(lowerFilter) > -1) {
-                  response.push(item);
-                  count++;
-               }
-               return count > max;
-            });
-         }
-         return response;
-      };
-   });
-   function BasinsearchServiceProvider() {
-      var basinsUrl = "icsm/resources/config/basins.json",
-          basinShapeUrl = "service/basinsearch/basin/",
-          baseUrl = '',
-          basinData = {};
-      this.setReferenceUrl = function (url) {
-         basinsUrl = url;
-      };
-      this.setShapeUrl = function (url) {
-         basinShapeUrl = url;
-      };
-      this.setBaseUrl = function (url) {
-         baseUrl = url;
-      };
-      this.$get = ['$q', '$rootScope', '$timeout', 'httpData', 'searchMapService', function basinServiceFactory($q, $rootScope, $timeout, httpData, searchMapService) {
-         var service = {
-            load: function load() {
-               return httpData.get(baseUrl + basinsUrl, { cache: true }).then(function (response) {
-                  basinData.basins = response.data.basins;
-                  return basinData;
-               });
-            },
-            zoomToLocation: function zoomToLocation(region) {
-               var bbox = region.bbox;
-               var polygon = {
-                  type: "Polygon",
-                  coordinates: [[[bbox.xMin, bbox.yMin], [bbox.xMin, bbox.yMax], [bbox.xMax, bbox.yMax], [bbox.xMax, bbox.yMin], [bbox.xMin, bbox.yMin]]]
-               };
-               var broadcastData = {
-                  from: "Basins search",
-                  type: "GeoJSONUrl",
-                  url: baseUrl + basinShapeUrl + region.id,
-                  pan: pan,
-                  show: true,
-                  name: region.name,
-                  polygon: polygon
-               };
-               $rootScope.$broadcast('search.performed', broadcastData);
-               pan();
-               function pan() {
-                  searchMapService.goTo(polygon);
-               }
-            }
-         };
-         return service;
-      }];
-   }
-})(angular);
-'use strict';
-
-(function (angular) {
-
-   'use strict';
-
-   angular.module("common.catchment", ['geo.draw']).directive("commonCatchmentSearch", ['$log', '$timeout', 'catchmentService', function ($log, $timeout, catchmentService) {
-      return {
-         restrict: "AE",
-         transclude: true,
-         templateUrl: "common/search/catchment.html",
-         link: function link(scope, element) {
-            var timeout;
-            catchmentService.load().then(function (data) {
-               scope.catchmentData = data;
-            });
-            scope.changing = function () {
-               $log.info("Cancel close");
-               $timeout.cancel(timeout);
-            };
-            scope.cancel = cancel;
-            scope.zoomToLocation = function (region) {
-               catchmentService.zoomToLocation(region);
-               cancel();
-            };
-            function cancel() {
-               $timeout.cancel(timeout);
-               timeout = $timeout(function () {
-                  $log.info("Clear filter");
-                  scope.nameFilter = "";
-               }, 7000);
-            }
-         }
-      };
-   }]).provider("catchmentService", CatchmentsearchServiceProvider).filter("catchmentFilterList", function () {
-      return function (list, filter, max) {
-         var response = [],
-             lowerFilter,
-             count;
-         if (!filter) {
-            return response;
-         }
-         if (!max) {
-            max = 50;
-         }
-         lowerFilter = filter.toLowerCase();
-         if (list) {
-            count = 0;
-            list.some(function (item) {
-               if (item.name.toLowerCase().indexOf(lowerFilter) > -1) {
-                  response.push(item);
-                  count++;
-               }
-               return count > max;
-            });
-         }
-         return response;
-      };
-   });
-   function CatchmentsearchServiceProvider() {
-      var catchmentsUrl = "icsm/resources/config/catchments.json",
-          catchmentShapeUrl = "service/catchmentsearch/catchment/",
-          baseUrl = '',
-          catchmentData = {};
-      this.setReferenceUrl = function (url) {
-         catchmentsUrl = url;
-      };
-      this.setShapeUrl = function (url) {
-         catchmentShapeUrl = url;
-      };
-      this.setBaseUrl = function (url) {
-         baseUrl = url;
-      };
-      this.$get = ['$q', '$rootScope', '$timeout', 'httpData', 'searchMapService', function catchmentServiceFactory($q, $rootScope, $timeout, httpData, searchMapService) {
-         var service = {
-            load: function load() {
-               return httpData.get(baseUrl + catchmentsUrl, { cache: true }).then(function (response) {
-                  catchmentData.catchments = response.data.catchments;
-                  return catchmentData;
-               });
-            },
-            zoomToLocation: function zoomToLocation(region) {
-               var bbox = region.bbox;
-               var polygon = {
-                  type: "Polygon",
-                  coordinates: [[[bbox.xMin, bbox.yMin], [bbox.xMin, bbox.yMax], [bbox.xMax, bbox.yMax], [bbox.xMax, bbox.yMin], [bbox.xMin, bbox.yMin]]]
-               };
-               var broadcastData = {
-                  from: "Catchments search",
-                  type: "GeoJSONUrl",
-                  url: baseUrl + catchmentShapeUrl + region.id,
-                  pan: pan,
-                  show: true,
-                  name: region.name,
-                  polygon: polygon
-               };
-               $rootScope.$broadcast('search.performed', broadcastData);
-               pan();
-               function pan() {
-                  searchMapService.goTo(polygon);
-               }
-            }
-         };
-         return service;
-      }];
-   }
-})(angular);
-'use strict';
-
 {
    angular.module("elevation.side-panel", []).factory('panelSideFactory', ['$rootScope', '$timeout', function ($rootScope, $timeout) {
       var state = {
@@ -2760,6 +2546,220 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
         };
     }]);
+})(angular);
+'use strict';
+
+(function (angular) {
+
+   'use strict';
+
+   angular.module("common.basin", ['geo.draw']).directive("commonBasinSearch", ['$log', '$timeout', 'basinService', function ($log, $timeout, basinService) {
+      return {
+         restrict: "AE",
+         transclude: true,
+         templateUrl: "common/search/basin.html",
+         link: function link(scope, element) {
+            var timeout;
+            basinService.load().then(function (data) {
+               scope.basinData = data;
+            });
+            scope.changing = function () {
+               $log.info("Cancel close");
+               $timeout.cancel(timeout);
+            };
+            scope.cancel = cancel;
+            scope.zoomToLocation = function (region) {
+               basinService.zoomToLocation(region);
+               cancel();
+            };
+            function cancel() {
+               $timeout.cancel(timeout);
+               timeout = $timeout(function () {
+                  $log.info("Clear filter");
+                  scope.nameFilter = "";
+               }, 7000);
+            }
+         }
+      };
+   }]).provider("basinService", BasinsearchServiceProvider).filter("basinFilterList", function () {
+      return function (list, filter, max) {
+         var response = [],
+             lowerFilter,
+             count;
+         if (!filter) {
+            return response;
+         }
+         if (!max) {
+            max = 50;
+         }
+         lowerFilter = filter.toLowerCase();
+         if (list) {
+            count = 0;
+            list.some(function (item) {
+               if (item.name.toLowerCase().indexOf(lowerFilter) > -1) {
+                  response.push(item);
+                  count++;
+               }
+               return count > max;
+            });
+         }
+         return response;
+      };
+   });
+   function BasinsearchServiceProvider() {
+      var basinsUrl = "icsm/resources/config/basins.json",
+          basinShapeUrl = "service/basinsearch/basin/",
+          baseUrl = '',
+          basinData = {};
+      this.setReferenceUrl = function (url) {
+         basinsUrl = url;
+      };
+      this.setShapeUrl = function (url) {
+         basinShapeUrl = url;
+      };
+      this.setBaseUrl = function (url) {
+         baseUrl = url;
+      };
+      this.$get = ['$q', '$rootScope', '$timeout', 'httpData', 'searchMapService', function basinServiceFactory($q, $rootScope, $timeout, httpData, searchMapService) {
+         var service = {
+            load: function load() {
+               return httpData.get(baseUrl + basinsUrl, { cache: true }).then(function (response) {
+                  basinData.basins = response.data.basins;
+                  return basinData;
+               });
+            },
+            zoomToLocation: function zoomToLocation(region) {
+               var bbox = region.bbox;
+               var polygon = {
+                  type: "Polygon",
+                  coordinates: [[[bbox.xMin, bbox.yMin], [bbox.xMin, bbox.yMax], [bbox.xMax, bbox.yMax], [bbox.xMax, bbox.yMin], [bbox.xMin, bbox.yMin]]]
+               };
+               var broadcastData = {
+                  from: "Basins search",
+                  type: "GeoJSONUrl",
+                  url: baseUrl + basinShapeUrl + region.id,
+                  pan: pan,
+                  show: true,
+                  name: region.name,
+                  polygon: polygon
+               };
+               $rootScope.$broadcast('search.performed', broadcastData);
+               pan();
+               function pan() {
+                  searchMapService.goTo(polygon);
+               }
+            }
+         };
+         return service;
+      }];
+   }
+})(angular);
+'use strict';
+
+(function (angular) {
+
+   'use strict';
+
+   angular.module("common.catchment", ['geo.draw']).directive("commonCatchmentSearch", ['$log', '$timeout', 'catchmentService', function ($log, $timeout, catchmentService) {
+      return {
+         restrict: "AE",
+         transclude: true,
+         templateUrl: "common/search/catchment.html",
+         link: function link(scope, element) {
+            var timeout;
+            catchmentService.load().then(function (data) {
+               scope.catchmentData = data;
+            });
+            scope.changing = function () {
+               $log.info("Cancel close");
+               $timeout.cancel(timeout);
+            };
+            scope.cancel = cancel;
+            scope.zoomToLocation = function (region) {
+               catchmentService.zoomToLocation(region);
+               cancel();
+            };
+            function cancel() {
+               $timeout.cancel(timeout);
+               timeout = $timeout(function () {
+                  $log.info("Clear filter");
+                  scope.nameFilter = "";
+               }, 7000);
+            }
+         }
+      };
+   }]).provider("catchmentService", CatchmentsearchServiceProvider).filter("catchmentFilterList", function () {
+      return function (list, filter, max) {
+         var response = [],
+             lowerFilter,
+             count;
+         if (!filter) {
+            return response;
+         }
+         if (!max) {
+            max = 50;
+         }
+         lowerFilter = filter.toLowerCase();
+         if (list) {
+            count = 0;
+            list.some(function (item) {
+               if (item.name.toLowerCase().indexOf(lowerFilter) > -1) {
+                  response.push(item);
+                  count++;
+               }
+               return count > max;
+            });
+         }
+         return response;
+      };
+   });
+   function CatchmentsearchServiceProvider() {
+      var catchmentsUrl = "icsm/resources/config/catchments.json",
+          catchmentShapeUrl = "service/catchmentsearch/catchment/",
+          baseUrl = '',
+          catchmentData = {};
+      this.setReferenceUrl = function (url) {
+         catchmentsUrl = url;
+      };
+      this.setShapeUrl = function (url) {
+         catchmentShapeUrl = url;
+      };
+      this.setBaseUrl = function (url) {
+         baseUrl = url;
+      };
+      this.$get = ['$q', '$rootScope', '$timeout', 'httpData', 'searchMapService', function catchmentServiceFactory($q, $rootScope, $timeout, httpData, searchMapService) {
+         var service = {
+            load: function load() {
+               return httpData.get(baseUrl + catchmentsUrl, { cache: true }).then(function (response) {
+                  catchmentData.catchments = response.data.catchments;
+                  return catchmentData;
+               });
+            },
+            zoomToLocation: function zoomToLocation(region) {
+               var bbox = region.bbox;
+               var polygon = {
+                  type: "Polygon",
+                  coordinates: [[[bbox.xMin, bbox.yMin], [bbox.xMin, bbox.yMax], [bbox.xMax, bbox.yMax], [bbox.xMax, bbox.yMin], [bbox.xMin, bbox.yMin]]]
+               };
+               var broadcastData = {
+                  from: "Catchments search",
+                  type: "GeoJSONUrl",
+                  url: baseUrl + catchmentShapeUrl + region.id,
+                  pan: pan,
+                  show: true,
+                  name: region.name,
+                  polygon: polygon
+               };
+               $rootScope.$broadcast('search.performed', broadcastData);
+               pan();
+               function pan() {
+                  searchMapService.goTo(polygon);
+               }
+            }
+         };
+         return service;
+      }];
+   }
 })(angular);
 'use strict';
 
@@ -3207,7 +3207,7 @@ $templateCache.put("common/metaview/metaview.html","<button type=\"button\" clas
 $templateCache.put("common/navigation/altthemes.html","<span class=\"altthemes-container\">\r\n	<span ng-repeat=\"item in themes | altthemesMatchCurrent : current\">\r\n       <a title=\"{{item.label}}\" ng-href=\"{{item.url}}\" class=\"altthemesItemCompact\" target=\"_blank\">\r\n         <span class=\"altthemes-icon\" ng-class=\"item.className\"></span>\r\n       </a>\r\n    </li>\r\n</span>");
 $templateCache.put("common/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"expToolbar row noPrint\" icsm-toolbar-row map=\"root.map\" overlaytitle=\"\'Change overlay opacity\'\"></div>\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n    		<div class=\"common-legend\" common-legend map=\"data.map\"></div>\r\n    		<div icsm-tabs class=\"icsmTabs\"  ng-class=\"{\'icsmTabsClosed\':!view, \'icsmTabsOpen\':view}\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'download\'\" icsm-view></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'maps\'\" icsm-maps></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" icsm-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" icsm-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n		<button class=\"undecorated\">Download</button>\r\n	</div>\r\n	<!-- \r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n	-->\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");
+$templateCache.put("common/side-panel/trigger.html","<button ng-click=\"toggle()\" type=\"button\" class=\"map-tool-toggle-btn\">\r\n   <span class=\"hidden-sm\">{{name}}</span>\r\n   <ng-transclude></ng-transclude>\r\n   <i class=\"fa fa-lg\" ng-class=\"iconClass\"></i>\r\n</button>");
 $templateCache.put("common/search/basin.html","<div class=\"btn-group pull-left radSearch\" style=\"position:relative;width:27em;opacity:0.9\">\r\n	<div class=\"input-group\" style=\"width:100%;\">\r\n		<input type=\"text\" size=\"32\" class=\"form-control\" style=\"border-top-right-radius:4px;border-bottom-right-radius:4px;\"\r\n				ng-keyup=\"keyup($event)\" ng-focus=\"changing()\" ng-model=\"nameFilter\" placeholder=\"Find a basin of interest\">\r\n		<div class=\"input-group-btn\"></div>\r\n	</div>\r\n	<div style=\"width:26em; position:absolute;left:15px\">\r\n		<div class=\"row\" ng-repeat=\"region in basinData.basins | basinFilterList : nameFilter : 10 | orderBy : \'name\'\"\r\n				style=\"background-color:white;\">\r\n			<div class=\"col-md-12 rw-sub-list-trigger\">\r\n				<button class=\"undecorated zoomButton\" ng-click=\"zoomToLocation(region);\">{{region.name}}</button>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/search/catchment.html","<div class=\"btn-group pull-left radSearch\" style=\"position:relative;width:27em;opacity:0.9\">\r\n	<div class=\"input-group\" style=\"width:100%;\">\r\n		<input type=\"text\" size=\"32\" class=\"form-control\" style=\"border-top-right-radius:4px;border-bottom-right-radius:4px;\"\r\n				ng-keyup=\"keyup($event)\" ng-focus=\"changing()\" ng-model=\"nameFilter\" placeholder=\"Find a catchment of interest\">\r\n		<div class=\"input-group-btn\"></div>\r\n	</div>\r\n	<div style=\"width:26em; position:absolute;left:15px\">\r\n		<div class=\"row\" ng-repeat=\"region in catchmentData.catchments | catchmentFilterList : nameFilter : 10 | orderBy : \'name\'\"\r\n				style=\"background-color:white;\">\r\n			<div class=\"col-md-12 rw-sub-list-trigger\">\r\n				<button class=\"undecorated zoomButton\" ng-click=\"zoomToLocation(region);\">{{region.name}}</button>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
-$templateCache.put("common/side-panel/trigger.html","<button ng-click=\"toggle()\" type=\"button\" class=\"map-tool-toggle-btn\">\r\n   <span class=\"hidden-sm\">{{name}}</span>\r\n   <ng-transclude></ng-transclude>\r\n   <i class=\"fa fa-lg\" ng-class=\"iconClass\"></i>\r\n</button>");
 $templateCache.put("common/toolbar/toolbar.html","<div icsm-toolbar>\r\n	<div class=\"row toolBarGroup\">\r\n		<div class=\"btn-group searchBar\" ng-show=\"root.whichSearch != \'region\'\">\r\n			<div class=\"input-group\" geo-search>\r\n				<input type=\"text\" ng-autocomplete ng-model=\"values.from.description\" options=\'{country:\"au\"}\'\r\n							size=\"32\" title=\"Select a locality to pan the map to.\" class=\"form-control\" aria-label=\"...\">\r\n				<div class=\"input-group-btn\">\r\n    				<button ng-click=\"zoom(false)\" exp-ga=\"[\'send\', \'event\', \'icsm\', \'click\', \'zoom to location\']\"\r\n						class=\"btn btn-default\"\r\n						title=\"Pan and potentially zoom to location.\"><i class=\"fa fa-search\"></i></button>\r\n				</div>\r\n			</div>\r\n		</div>\r\n\r\n		<div class=\"pull-right\">\r\n			<div class=\"btn-toolbar radCore\" role=\"toolbar\"  icsm-toolbar>\r\n				<div class=\"btn-group\">\r\n					<!-- < icsm-state-toggle></icsm-state-toggle> -->\r\n				</div>\r\n			</div>\r\n\r\n			<div class=\"btn-toolbar\" style=\"margin:right:10px;display:inline-block\">\r\n				<div class=\"btn-group\" title=\"{{overlaytitle}}\">\r\n					<span class=\"btn btn-default\" common-baselayer-control max-zoom=\"16\"></span>\r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");}]);

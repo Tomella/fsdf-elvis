@@ -1,8 +1,12 @@
 <div ng-repeat="(key, items) in types" ng-show="(items | countMatchedItems) != 0">
+   <div style="padding-left:20px">
+      <h5>
+         <span uib-tooltip="{{filter.types[key].description}}">{{key}} (Showing {{items | countMatchedItems | number:0}} of {{items.length}})</span>
+      </h5>
+   </div>
    <div ng-repeat="item in items" icsm-abstract-hover item="item">
       <div tooltip-append-to-body="true" uib-tooltip-template="'icsm/results/abstracttooltip.html'" tooltip-popup-delay="400" data-ng-mouseenter="show(item)"
-         data-ng-mouseleave="hide(item)">
-         <input type="checkbox" disabled="disabled" checked="checked" />
+         data-ng-mouseleave="hide(item)" style="padding-left:8px;">
          <icsm-abstract item="item"></icsm-abstract>
          <button type="button" class="undecorated" disabled="disabled" title="Licence details pending release.">
             <i class="fa fa-lg fa-gavel"></i>
