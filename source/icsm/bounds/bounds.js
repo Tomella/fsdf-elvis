@@ -170,6 +170,7 @@
                            if (!hasData) {
                               send("There is no data held in your selected area. Please try another area.", null, 4000);
                            }
+
                            $rootScope.$broadcast('site.selection', response.data);
                         }
                      }, function (err) { // If it falls over we don't want to crash.

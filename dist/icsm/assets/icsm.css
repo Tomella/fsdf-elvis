@@ -126,6 +126,11 @@
 .iso19115-head {
   font-weight: bold;
 }
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
+}
 .mvt,
 .mvt ul,
 .mvt li {
@@ -169,98 +174,6 @@
 .metaview-info {
   padding-left: 3px;
   padding-right: 3px;
-}
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
-}
-.icsmTabs {
-  position: absolute;
-  top: 0px;
-  right: 30px;
-  z-index: 1;
-}
-
-.icsmTabsOpen {
-  right: 30px;
-  height: 0;
-}
-
-.panesMapContainer {
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.icsmPanesRow {
-  height: 100%;
-  margin-right: 0;
-}
-
-.icsmPanesCol {
-  height: 100%;
-}
-
-.icsmPanesColRight {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-}
-
-.paneTabsMain {
-  position: absolute;
-  top: 0px;
-  bottom: 0px;
-  padding-top: 8px;
-  right: 0px;
-  background: #FFF;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -o-user-select: none;
-  user-select: none;
-}
-
-.panesTabsContainer {
-  position: absolute;
-  width: 9999px;
-  z-index: inherit;
-  /* keeps ie happy for mousemove events */
-  background: rgba(255, 255, 255, 0);
-}
-
-.paneRotateTabs {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 100%;
-  -webkit-transform: rotate(-90deg);
-  -moz-transform: rotate(-90deg);
-  -o-transform: rotate(-90deg);
-  -ms-transform: rotate(-90deg);
-  -sand-transform: rotate(90deg);
-  transform-origin: bottom right;
-  -webkit-transform-origin: bottom right;
-  -ms-transform-origin: bottom right;
-  display: block;
-}
-
-.paneTabItem {
-  float: right;
-  padding: 5px 15px 0px 15px;
-  border: 1px solid #999;
-  background: #FFF;
-  cursor: pointer;
-  height: 30px;
-}
-
-.panesTabContentItem {
-  background: #FFF;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
@@ -373,6 +286,192 @@
 .altthemesdropdown .altthemescurrent {
   color: #fff;
   background-color: #777;
+}
+.icsmTabs {
+  position: absolute;
+  top: 0px;
+  right: 30px;
+  z-index: 1;
+}
+
+.icsmTabsOpen {
+  right: 30px;
+  height: 0;
+}
+
+.panesMapContainer {
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.icsmPanesRow {
+  height: 100%;
+  margin-right: 0;
+}
+
+.icsmPanesCol {
+  height: 100%;
+}
+
+.icsmPanesColRight {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.paneTabsMain {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  padding-top: 8px;
+  right: 0px;
+  background: #FFF;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+.panesTabsContainer {
+  position: absolute;
+  width: 9999px;
+  z-index: inherit;
+  /* keeps ie happy for mousemove events */
+  background: rgba(255, 255, 255, 0);
+}
+
+.paneRotateTabs {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 100%;
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  -sand-transform: rotate(90deg);
+  transform-origin: bottom right;
+  -webkit-transform-origin: bottom right;
+  -ms-transform-origin: bottom right;
+  display: block;
+}
+
+.paneTabItem {
+  float: right;
+  padding: 5px 15px 0px 15px;
+  border: 1px solid #999;
+  background: #FFF;
+  cursor: pointer;
+  height: 30px;
+}
+
+.panesTabContentItem {
+  background: #FFF;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+/* Side Panel */
+
+/* General styles for all menus */
+
+.cbp-spmenu {
+  position: absolute;
+  top: 113px;
+  bottom: 8px;
+  background-color: white;
+  overflow-y: hidden;
+}
+
+/* Orientation-dependent styles for the content of the menu */
+
+.cbp-spmenu-vertical {
+  width: 0;
+  height: 100%;
+  z-index: 1010;
+}
+
+.cbp-spmenu-right-vertical {
+  height: 100%;
+  z-index: 1010;
+}
+
+.cbp-spmenu-right-small {
+  width: 300px;
+}
+
+.cbp-spmenu-right-med {
+  width: 500px;
+}
+
+.cbp-spmenu-right-large {
+  width: 50%;
+}
+
+.cbp-spmenu-horizontal {
+  width: 100%;
+  height: 150px;
+  left: 0;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.cbp-spmenu-horizontal h3 {
+  height: 100%;
+  width: 20%;
+  float: left;
+}
+
+/* Vertical menu that slides from the left or right */
+
+.cbp-spmenu-left {
+  left: -380px;
+}
+
+.cbp-spmenu-right {
+  right: 0px;
+}
+
+.cbp-spmenu-left.cbp-spmenu-open {
+  left: 0;
+  box-shadow: 3px 0px 8px #323232;
+  width: 0px;
+}
+
+.cbp-spmenu-right.cbp-spmenu-open {
+  right: 0;
+  box-shadow: -3px 0 8px #323232;
+  width: 0px;
+}
+
+/* Transitions */
+
+.cbp-spmenu,
+.cbp-spmenu-push {
+  transition: all 0.3s ease;
+}
+
+/* Transitions */
+
+.contentContainer {
+  transition: all 0.3s ease;
+}
+
+.left-side-menu-container,
+.right-side-menu-container {
+  position: absolute;
+  top: 15px;
+  bottom: 120px;
+  left: 0;
+  right: 0;
+}
+
+.cbp-spmenu-open .left-side-menu-container,
+.cbp-spmenu-open .right-side-menu-container {
+  overflow-y: auto;
 }
 .radCore {
   margin-right: 3px;
@@ -528,7 +627,7 @@ img.logo {
 
 .contentContainer {
   position: fixed;
-  top: 83px;
+  top: 112px;
   bottom: 8px;
   left: 0;
   right: 0px;
@@ -1011,51 +1110,87 @@ i.fa.active {
   color: #fff;
   background-color: #777;
 }
-.radCore {
-  margin-right: 3px;
+.common-baselayer-control {
+  width: 210px;
+  color: #333;
+  border-color: #ccc;
   display: inline-block;
-}
-
-.searchBar {
-  width: 27em;
-  opacity: 0.9;
-}
-
-@media only screen and (max-width:1100px) {
-  .searchBar {
-    width: 23em;
-  }
-}
-
-@media only screen and (max-width:1025px) {
-  .searchBar {
-    width: 20em;
-  }
-}
-
-@media only screen and (max-width:645px) {
-  .searchBar {
-    display: none;
-  }
-}
-
-@media only screen and (max-width:965px) {
-  .radCore,
-  .hideWhenSmall,
-  .steps-indicator,
-  .secondToolbarInfo {
-    display: none;
-  }
-}
-
-div.leaflet-control-scale-line {
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 1.42857143;
   text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+.elevation-toolbar {
+  position: fixed;
+  top: 82px;
+  background-color: #006983;
+  left: 0;
+  right: 0;
+  height: 30px;
 }
 
-@media only screen and (max-width:965px) {
-  div.leaflet-control-scale-line {
-    display: none;
-  }
+.map-tool-toggle-btn {
+  background-color: #006983;
+  border: none;
+  height: 30px;
+}
+
+.toolBarContainer>div>ul {
+  list-style: none;
+}
+
+.toolBarContainer>div>ul {
+  list-style: none;
+}
+
+.left-toolbar-items {
+  float: left;
+  padding-left: 0;
+  margin-left: 10px;
+  margin-bottom: 0;
+  color: #fff;
+  font-style: normal;
+  font-weight: 400;
+  height: 30px;
+  width: 25%;
+  white-space: nowrap;
+}
+
+.right-toolbar-items {
+  float: right;
+  padding-left: 0;
+  margin-left: 10px;
+  margin-bottom: 0;
+  color: #fff;
+  font-style: normal;
+  font-weight: 400;
+  height: 30px;
+}
+
+.right-toolbar-items>div,
+.right-toolbar-items li {
+  display: inline;
+}
+
+.toolbarButton {
+  background-color: #006983;
+  border: none;
+  height: 30px;
+  font-size: 13px;
 }
 .downloadPane {
   padding-left: 0px !important;

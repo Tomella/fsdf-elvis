@@ -1,47 +1,59 @@
-.radCore {
-	margin-right: 3px;
-	display:inline-block;
+.elevation-toolbar {
+   position: fixed;
+   top: 82px;
+   background-color: #006983;
+   left: 0;
+   right: 0;
+   height: 30px;
 }
 
-.searchBar {
-	width:27em;
-	opacity:0.9;
-}
-
-@media only screen and (max-width:1100px) {
-	.searchBar {
-		width:23em;
-	}
-}
-
-
-@media only screen and (max-width:1025px) {
-	.searchBar {
-		width:20em;
-	}
+.map-tool-toggle-btn {
+    background-color: #006983;
+    border: none;
+    height: 30px;
 }
 
 
-@media only screen and (max-width:645px) {
-	.searchBar {
-		display:none;
-	}
+.toolBarContainer>div>ul {
+    list-style: none;
 }
 
-@media only screen and (max-width:965px) {
-	.radCore, .hideWhenSmall, .steps-indicator, .secondToolbarInfo {
-		display:none;
-	}
+.toolBarContainer>div>ul {
+    list-style: none;
 }
 
-div.leaflet-control-scale-line {
-	text-align:center;
+.left-toolbar-items {
+    float: left;
+    padding-left: 0;
+    margin-left: 10px;
+    margin-bottom: 0;
+    color: #fff;
+    font-style: normal;
+    font-weight: 400;
+    height: 30px;
+    width: 25%;
+    white-space: nowrap;
 }
 
-
-
-@media only screen and (max-width:965px) {
-	div.leaflet-control-scale-line {
-		display:none;
-	}
+.right-toolbar-items {
+  float: right;
+  padding-left: 0;
+  margin-left: 10px;
+  margin-bottom: 0;
+  color: #fff;
+  font-style: normal;
+  font-weight: 400;
+  height: 30px;
 }
+
+.right-toolbar-items>div, .right-toolbar-items li {
+  display: inline;
+}
+
+.toolbarButton {
+  background-color: #006983;
+  border: none;
+  height: 30px;
+  font-size: 13px;
+}
+

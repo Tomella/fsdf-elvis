@@ -1,6 +1,6 @@
 {
 
-   angular.module("elvis.results", ['elvis.results.continue', 'icsm.subtype'])
+   angular.module("elvis.results", ['elvis.results.continue', 'icsm.subtype', 'icsm.unreleased'])
 
       .directive('icsmOrgHeading', [function () {
          return {
@@ -215,12 +215,22 @@
 
          return {
             restrict: 'AE',
-            template: "<a target='_blank' ng-if='url' ng-href='{{url}}'>{{item.file_name}}</a><span ng-if='!url' ng-bind='item.file_name'></span>",
+            template: "<a target='_blank' ng-if='url' ng-href='{{url}}'>{{item[name]}}</a><span ng-if='!url' ng-bind='item.file_name'></span>",
             scope: {
-               item: "="
+               item: "=",
+               name: "@?"
             },
             link: function (scope, element) {
-               scope.url = listService.getLink(scope.item);
+               if (!scope.name) {
+                  scope.name = "file_name";
+               }
+
+               let data = {
+                  file_name: scope.item[scope.name],
+                  metadata_url: scope.item.metadata_url,
+                  source: scope.item.source
+               };
+               scope.url = listService.getLink(data);
             }
          };
       }])
@@ -290,9 +300,11 @@
             } else {
                var count = 0;
                angular.forEach(downloadables, function (types, key) {
-                  angular.forEach(types, function (items) {
-                     count += items.filter(item => item.matched).length;
-                  });
+                  if (!Array.isArray(types)) {
+                     angular.forEach(types, function (items) {
+                        count += items.filter(item => item.matched).length;
+                     });
+                  }
                });
                return count;
             }
@@ -311,7 +323,7 @@
 
       .filter("hasTypeMatches", function () {
          return function (types) {
-            if(!types) {
+            if (!types) {
                return false;
             }
             var count = 0;
@@ -385,35 +397,35 @@
          return fileSize;
       });
 
-      function fileSize(size) {
-         var meg = 1000 * 1000;
-         var gig = meg * 1000;
-         var ter = gig * 1000;
+   function fileSize(size) {
+      var meg = 1000 * 1000;
+      var gig = meg * 1000;
+      var ter = gig * 1000;
 
-         if (!size) {
-            return "-";
-         }
-
-         if (("" + size).indexOf(" ") > -1) {
-            return size;
-         }
-
-         size = parseFloat(size);
-
-         if (size < 1000) {
-            return size + " bytes";
-         }
-         if (size < meg) {
-            return (size / 1000).toFixed(1) + " kB";
-         }
-         if (size < gig) {
-            return (size / meg).toFixed(1) + " MB";
-         }
-         if (size < ter) {
-            return (size / gig).toFixed(1) + " GB";
-         }
-         return (size / ter).toFixed(1) + " TB";
+      if (!size) {
+         return "-";
       }
+
+      if (("" + size).indexOf(" ") > -1) {
+         return size;
+      }
+
+      size = parseFloat(size);
+
+      if (size < 1000) {
+         return size + " bytes";
+      }
+      if (size < meg) {
+         return (size / 1000).toFixed(1) + " kB";
+      }
+      if (size < gig) {
+         return (size / meg).toFixed(1) + " MB";
+      }
+      if (size < ter) {
+         return (size / gig).toFixed(1) + " GB";
+      }
+      return (size / ter).toFixed(1) + " TB";
+   }
 
    ListCtrl.$inject = ['listService'];
    function ListCtrl(listService) {
@@ -422,7 +434,7 @@
       this.checkChildren = function (children) {
          var allChecked = this.childrenChecked(children);
          let filtered = children;
-         if(!allChecked) {
+         if (!allChecked) {
             filtered = children.filter(child => child.matched);
          }
          filtered.forEach(child => {

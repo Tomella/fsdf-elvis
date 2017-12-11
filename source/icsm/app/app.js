@@ -29,7 +29,6 @@
 		//'common.panes',
       'common.storage',
       'common.templates',
-		'common.toolbar',
 
       'explorer.config',
       'explorer.confirm',
@@ -83,6 +82,7 @@
 		'icsm.state',
       'icsm.layerswitch',
 		'icsm.templates',
+		'elevation.toolbar',
 		'icsm.view'
 	])
 

@@ -1,29 +1,25 @@
-<div icsm-toolbar>
-	<div class="row toolBarGroup">
-		<div class="btn-group searchBar" ng-show="root.whichSearch != 'region'">
-			<div class="input-group" geo-search>
-				<input type="text" ng-autocomplete ng-model="values.from.description" options='{country:"au"}'
-							size="32" title="Select a locality to pan the map to." class="form-control" aria-label="...">
-				<div class="input-group-btn">
-    				<button ng-click="zoom(false)" exp-ga="['send', 'event', 'icsm', 'click', 'zoom to location']"
-						class="btn btn-default"
-						title="Pan and potentially zoom to location."><i class="fa fa-search"></i></button>
-				</div>
-			</div>
-		</div>
-
-		<div class="pull-right">
-			<div class="btn-toolbar radCore" role="toolbar"  icsm-toolbar>
-				<div class="btn-group">
-					<!-- < icsm-state-toggle></icsm-state-toggle> -->
-				</div>
-			</div>
-
-			<div class="btn-toolbar" style="margin:right:10px;display:inline-block">
-				<div class="btn-group">
-					<span class="btn btn-default" common-baselayer-control max-zoom="16" title="Satellite to Topography bias on base map."></span>
-				</div>
-			</div>
-		</div>
-	</div>
+<div class="elevation-toolbar noPrint">
+   <div class="toolBarContainer">
+       <div>
+           <ul class="left-toolbar-items">
+              <li>
+                 <antarctic-view></antarctic-view>
+              </li>
+           </ul>
+           <ul class="right-toolbar-items">
+              <li>
+                    <div class="common-baselayer-control" common-baselayer-control="" max-zoom="18"></div>
+              </li>
+               <li>
+                   <panel-trigger panel-id="search" panel-width="540px" name="Search Results" icon-class="fa-list" title="When a search has completed this allows the showing and hiding of the results">
+                       <elevation-results-summary state="state"></elevation-results-summary>
+                   </panel-trigger>
+               </li>
+               <li>
+                 <panel-trigger panel-id="help" panel-width="540px" name="Help" icon-class="fa-question-circle-o" title="Show help"></panel-trigger>
+              </li>
+               <li reset-page></li>
+           </ul>
+       </div>
+   </div>
 </div>

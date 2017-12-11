@@ -35,7 +35,11 @@
             <span>
                <h5>{{typeKey}}</h5>
             </span>
-            <div>
+
+            <div ng-if="typeKey === 'Unreleased Data'">
+               <icsm-unreleased types="types">
+            </div>
+            <div ng-if="typeKey !== 'Unreleased Data'">
                <div ng-repeat="(key, items) in types" ng-show="(items | countMatchedItems) != 0">
                   <div>
                      <h5>

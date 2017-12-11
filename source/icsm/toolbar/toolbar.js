@@ -1,42 +1,27 @@
 {
-   angular.module("icsm.toolbar", [])
 
-      .directive("icsmToolbar", [function () {
-         return {
-            controller: 'toolbarLinksCtrl'
-         };
-      }])
+      angular.module("elevation.toolbar", [])
 
+         .directive("elevationToolbar", [function () {
+            return {
+               restrict: "AE",
+               templateUrl: "icsm/toolbar/toolbar.html",
+               controller: 'toolbarLinksCtrl',
+               transclude: true
+            };
+         }])
 
-      /**
-       * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
-       */
-      .directive('icsmToolbarRow', [function () {
-         return {
-            scope: {
-               map: "="
-            },
-            restrict: 'AE',
-            templateUrl: 'icsm/toolbar/toolbar.html'
-         };
-      }])
+         .controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
+            let self = this;
+            configService.getConfig().then(function (config) {
+               self.links = config.toolbarLinks;
+            });
 
-      .directive('icsmToolbarInfo', [function () {
-         return {
-            templateUrl: 'radwaste/toolbar/toolbarInfo.html'
-         };
-      }])
+            $scope.item = "";
+            $scope.toggleItem = function (item) {
+               $scope.item = ($scope.item === item) ? "" : item;
+            };
 
-      .controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
-         configService.getConfig().then(config => {
-            this.links = config.toolbarLinks;
-         });
+         }]);
 
-         $scope.item = "";
-         $scope.toggleItem = function (item) {
-            $scope.item = ($scope.item === item) ? "" : item;
-         };
-
-      }]);
-
-}
+   }
