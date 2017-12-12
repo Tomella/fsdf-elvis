@@ -47,7 +47,7 @@
                            <span ng-show="!list.childrenChecked(items)">Select all</span>
                            <span ng-show="list.childrenChecked(items)">Deselect all</span>
                         </button>
-                        <span uib-tooltip="{{filter.types[key].description}}">{{key}} (Showing {{items | countMatchedItems | number:0}} of {{items.length}})</span>
+                        <span uib-tooltip="{{filter.types[key].description}}">{{key}} (Showing {{items | countMatchedItems | number:0}} of {{items.length | number:0}})</span>
                         <button class="pull-right undecorated" ng-click="expansions[available.source + '_' + key] = !expansions[available.source + '_' + key]">
                            [{{expansions[available.source + '_' + key]?"collapse":"expand"}}]
                         </button>

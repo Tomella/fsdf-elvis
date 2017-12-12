@@ -844,6 +844,28 @@ img.elvis-logo {
   top: 10px;
   z-index: 3;
 }
+.product-valid {
+  color: green;
+}
+
+.product-invalid {
+  color: red;
+}
+
+.product-warning {
+  color: darkorange;
+}
+
+.product-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.product-restrict {
+  padding-bottom: 8px;
+}
 .continue-container {
   padding: 4px;
 }
@@ -981,28 +1003,6 @@ img.elvis-logo {
   bottom: 0;
   left: 0;
   right: 0;
-}
-.product-valid {
-  color: green;
-}
-
-.product-invalid {
-  color: red;
-}
-
-.product-warning {
-  color: darkorange;
-}
-
-.product-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.product-restrict {
-  padding-bottom: 8px;
 }
 .reviewing-odd {
   background-color: #eeeeee;
@@ -1235,6 +1235,20 @@ i.fa.active {
 i.fa.active {
   color: red;
 }
+.vector-tooltip {
+  min-width: 25em;
+}
+
+.vector-checkbox {
+  width: 18px;
+  height: 18px;
+  vertical-align: bottom;
+  margin-right: 7px !important;
+}
+
+.vector-add:disabled {
+  color: gray;
+}
 .radCore {
   margin-right: 3px;
   display: inline-block;
@@ -1280,20 +1294,6 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
-}
-.vector-tooltip {
-  min-width: 25em;
-}
-
-.vector-checkbox {
-  width: 18px;
-  height: 18px;
-  vertical-align: bottom;
-  margin-right: 7px !important;
-}
-
-.vector-add:disabled {
-  color: gray;
 }
 .start-content-container {
   position: fixed;
