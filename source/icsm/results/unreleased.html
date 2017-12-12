@@ -1,5 +1,5 @@
 <div ng-repeat="(key, items) in types" ng-show="(items | countMatchedItems) != 0">
-   <div style="padding-left:20px">
+   <div style="padding-left:4px">
       <h5>
          <span uib-tooltip="{{filter.types[key].description}}">{{key}} (Showing {{items | countMatchedItems | number:0}} of {{items.length}})</span>
       </h5>

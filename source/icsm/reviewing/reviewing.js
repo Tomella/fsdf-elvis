@@ -5,12 +5,17 @@
       .directive('icsmReview', ['$rootScope', '$uibModal', '$log', 'messageService', 'reviewService',
          function ($rootScope, $uibModal, $log, messageService, reviewService) {
             return {
-               controller: ['$scope', function ($scope, reviewService) {
-
-               }],
                link: function (scope, element) {
                   var modalInstance;
                   scope.data = reviewService.data;
+
+                  // TODO: Why is this here? What is trying to override data?
+                  scope.$watch("data", function (value, old) {
+                     if(old) {
+                        console.log("Why?", value);
+                        scope.data = reviewService.data;
+                     }
+                  });
 
                   scope.$watch("data.reviewing", function (value) {
                      if (value) {
@@ -96,7 +101,15 @@
          var key = "elvis_download_email";
          var data = listService.data;
          var service = {
-            data: listService.data,
+            get data() {
+               return data;
+            },
+
+            set data(data) {
+               console.log("What the hell!")
+               data;
+            },
+
             get products() {
                return listService.products;
             },

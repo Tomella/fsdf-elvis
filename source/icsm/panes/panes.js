@@ -12,6 +12,19 @@
             controller: ['$scope', function ($scope) {
                var changeSize = false;
 
+               $rootScope.$on('side.panel.change', (event) => {
+                  emitter();
+                  $timeout(emitter, 100);
+                  $timeout(emitter, 200);
+                  $timeout(emitter, 300);
+                  $timeout(emitter, 500);
+                  function emitter() {
+                     let evt = document.createEvent("HTMLEvents");
+                     evt.initEvent("resize", false, true);
+                     window.dispatchEvent(evt);
+                  }
+               });
+
                $scope.view = $scope.defaultItem;
 
                $rootScope.$broadcast("view.changed", $scope.view, null);

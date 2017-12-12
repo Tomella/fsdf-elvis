@@ -380,7 +380,7 @@
 
 .cbp-spmenu {
   position: absolute;
-  top: 113px;
+  top: 112px;
   bottom: 8px;
   background-color: white;
   overflow-y: hidden;
@@ -629,11 +629,8 @@ img.logo {
   position: fixed;
   top: 112px;
   bottom: 8px;
-  left: 0;
+  left: 0px;
   right: 0px;
-  width: 100%;
-  margin: 0;
-  padding: 0px;
 }
 
 .mapContainer {
@@ -757,7 +754,7 @@ body {
   top: 70px;
   right: 1px;
   opacity: 0.95;
-  z-index: 6;
+  z-index: 1200;
   background-color: white;
   white-space: nowrap;
   text-align: center;
@@ -840,6 +837,12 @@ img.elvis-logo {
 
 .mess-container {
   font-weight: bold;
+}
+.baselayer-slider {
+  position: absolute;
+  right: 20px;
+  top: 10px;
+  z-index: 3;
 }
 .product-valid {
   color: green;
@@ -1110,6 +1113,22 @@ i.fa.active {
   color: #fff;
   background-color: #777;
 }
+.downloadPane {
+  padding-left: 0px !important;
+  padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 10px;
+  overflow: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
+}
 .common-baselayer-control {
   width: 210px;
   color: #333;
@@ -1191,22 +1210,6 @@ i.fa.active {
   border: none;
   height: 30px;
   font-size: 13px;
-}
-.downloadPane {
-  padding-left: 0px !important;
-  padding-right: 5px !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 10px;
-  overflow: hidden;
-}
-
-.downloadCont {
-  position: fixed;
-  right: 0;
-  bottom: 8px;
 }
 .regions-label {
   border: 0;

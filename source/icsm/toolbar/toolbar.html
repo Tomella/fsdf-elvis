@@ -1,20 +1,20 @@
 <div class="elevation-toolbar noPrint">
    <div class="toolBarContainer">
        <div>
-           <ul class="left-toolbar-items">
-              <li>
-                 <antarctic-view></antarctic-view>
-              </li>
-           </ul>
+           <ul class="left-toolbar-items"></ul>
            <ul class="right-toolbar-items">
                <li>
-                   <panel-trigger panel-id="search" panel-width="540px" name="Search Results" icon-class="fa-list" title="When a search has completed this allows the showing and hiding of the results">
-                       <elevation-results-summary state="state"></elevation-results-summary>
-                   </panel-trigger>
+                   <panel-trigger panel-id="download" panel-width="590px" name="Datasets Download" default="default" icon-class="fa-list" title="Select an area of interest and select datasets for download"></panel-trigger>
                </li>
                <li>
-                 <panel-trigger panel-id="help" panel-width="540px" name="Help" icon-class="fa-question-circle-o" title="Show help"></panel-trigger>
+                   <panel-trigger panel-id="downloader" panel-width="590px" name="Products Download" icon-class="fa-scissors" title="Select an area of interest and select products to clip and download to the area"></panel-trigger>
+               </li>
+               <li>
+                 <panel-trigger panel-id="help" panel-width="590px" name="Help" icon-class="fa-question-circle-o" title="Show help"></panel-trigger>
               </li>
+              <li>
+                <panel-trigger panel-id="glossary" panel-width="590px" name="Glossary" icon-class="fa-book" title="Show glossary"></panel-trigger>
+             </li>
                <li reset-page></li>
            </ul>
        </div>

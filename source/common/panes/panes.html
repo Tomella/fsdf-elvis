@@ -1,13 +1,10 @@
 <div class="container contentContainer">
 	<div class="row icsmPanesRow" >
 		<div class="icsmPanesCol" ng-class="{'col-md-12':!view, 'col-md-7':view}" style="padding-right:0">
-			<div class="expToolbar row noPrint" icsm-toolbar-row map="root.map" overlaytitle="'Change overlay opacity'"></div>
 			<div class="panesMapContainer" geo-map configuration="data.map">
 			    <geo-extent></geo-extent>
 			</div>
     		<div geo-draw data="data.map.drawOptions" line-event="elevation.plot.data" rectangle-event="bounds.drawn"></div>
-    		<div class="common-legend" common-legend map="data.map"></div>
-    		<div icsm-tabs class="icsmTabs"  ng-class="{'icsmTabsClosed':!view, 'icsmTabsOpen':view}"></div>
 		</div>
 		<div class="icsmPanesColRight" ng-class="{'hidden':!view, 'col-md-5':view}" style="padding-left:0; padding-right:0">
 			<div class="panesTabContentItem" ng-show="view == 'download'" icsm-view></div>

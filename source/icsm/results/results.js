@@ -245,6 +245,7 @@
          var strategies = new Strategies($http);
 
          service.data = {
+            id:"listService_data",
             filter: "",
             types: [],
          };
@@ -335,8 +336,6 @@
       })
 
       .filter("matchedTypes", function () {
-         var data = listService.data;
-
          return function (obj) {
             var response = {};
             angular.forEach(obj, function (group, key) {
@@ -348,7 +347,7 @@
          };
       })
 
-      .filter("matchedGroups", ['listService', function (listService) {
+      .filter("matchedGroups", [function () {
          return function (obj) {
             var response = {};
             if (obj) {
@@ -362,11 +361,11 @@
          };
       }])
 
-      .filter("matchedItems", ['listService', function (listService) {
+      .filter("matchedItems", function () {
          return function (list) {
             return list.filter(item => item.matched);
          };
-      }])
+      })
 
       .filter("keysLength", [function () {
          return function (list) {

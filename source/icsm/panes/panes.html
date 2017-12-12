@@ -1,22 +1,12 @@
-<div class="container contentContainer">
-	<div class="row icsmPanesRow" >
-		<div class="icsmPanesCol" ng-class="{'col-md-12':!view, 'col-md-7':view}" style="padding-right:0">
-			<div class="expToolbar row noPrint" icsm-toolbar-row map="root.map"></div>
-			<div class="panesMapContainer" geo-map configuration="data.map">
-			    <geo-extent></geo-extent>
-			    <common-feature-info></common-feature-info>
-			    <icsm-layerswitch></icsm-layerswitch>
-			</div>
-    		<div geo-draw data="data.map.drawOptions" line-event="elevation.plot.data" rectangle-event="bounds.drawn"></div>
-    		<div class="common-legend" common-legend map="data.map"></div>
-    		<div icsm-tabs class="icsmTabs"  ng-class="{'icsmTabsClosed':!view, 'icsmTabsOpen':view}"></div>
-		</div>
-		<div class="icsmPanesColRight" ng-class="{'hidden':!view, 'col-md-5':view}" style="padding-left:0; padding-right:0">
-			<div class="panesTabContentItem" ng-show="view == 'downloader'" icsm-products></div>
-			<div class="panesTabContentItem" ng-show="view == 'download'" icsm-view></div>
-			<div class="panesTabContentItem" ng-show="view == 'maps'" icsm-maps></div>
-			<div class="panesTabContentItem" ng-show="view == 'glossary'" icsm-glossary></div>
-			<div class="panesTabContentItem" ng-show="view == 'help'" icsm-help></div>
-		</div>
-	</div>
+<div class="mapContainer" class="col-md-12" style="padding-right:0"  ng-attr-style="right:{{right.width}}">
+   <span common-baselayer-control class="baselayer-slider" max-zoom="16" title="Satellite to Topography bias on base map."></span>
+   <div class="panesMapContainer" geo-map configuration="data.map">
+      <geo-extent></geo-extent>
+      <common-feature-info></common-feature-info>
+      <icsm-layerswitch></icsm-layerswitch>
+   </div>
+   <div class="base-layer-controller">
+      <div geo-draw data="data.map.drawOptions" line-event="elevation.plot.data" rectangle-event="bounds.drawn"></div>
+   </div>
+   <restrict-pan bounds="data.map.position.bounds"></restrict-pan>
 </div>

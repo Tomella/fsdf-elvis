@@ -26,7 +26,9 @@
 		'common.header',
 		'common.legend',
       'common.navigation',
-		//'common.panes',
+      //'common.panes',
+
+      'common.reset',
       'common.storage',
       'common.templates',
 
@@ -70,7 +72,8 @@
 		'icsm.glossary',
 		'icsm.help',
 		'icsm.panes',
-		'icsm.products',
+      'icsm.products',
+      "icsm.side-panel",
 		// Alternate list
 		'elvis.header',
 		'elvis.results',
@@ -79,7 +82,6 @@
       'icsm.mapevents',
 		'icsm.select',
 		'icsm.splash',
-		'icsm.state',
       'icsm.layerswitch',
 		'icsm.templates',
 		'elevation.toolbar',

@@ -25,8 +25,8 @@
             };
          }])
 
-      .factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService',
-         function ($http, $q, $rootScope, $timeout, configService) {
+      .factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService', 'flashService',
+         function ($http, $q, $rootScope, $timeout, configService, flashService) {
             let clipTimeout, notify;
             return {
                init: function () {
@@ -54,6 +54,13 @@
             };
 
             function send(message, type, duration) {
+               flashService.remove(notify);
+
+               if(message) {
+                  notify = flashService.add( message, duration, true);
+               }
+               /*
+
                if (notify) {
                   notify.notify({
                      text: message,
@@ -61,6 +68,7 @@
                      duration: duration
                   });
                }
+               */
             }
 
             function checkSize(clip) {
