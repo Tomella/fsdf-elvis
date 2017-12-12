@@ -56,7 +56,8 @@
                      }
 
                      products.forEach(function (product) {
-                        product.matched = product.file_name.toUpperCase().indexOf(upperFilter) > -1;
+                        let name = product.file_name || product.project_name || "";
+                        product.matched = name.toUpperCase().indexOf(upperFilter) > -1;
                      });
                   }
                   scope.$broadcast("filter.changed")

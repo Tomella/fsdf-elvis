@@ -17,6 +17,7 @@
             };
 
             scope.$on("filter.changed", () => {
+               console.log("Filter changed - Subtype")
                scope.setPage(1, 20);
             });
 
