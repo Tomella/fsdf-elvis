@@ -263,6 +263,8 @@
             types: [],
          };
 
+         $rootScope.$on('icsm.clip.drawn', (event, clip) => service.data.clip = clip);
+
          $http.get('icsm/resources/config/filetypes.json').then(function (response) {
             service.data.typesMap = response.data;
             service.data.types = [];

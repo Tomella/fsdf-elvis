@@ -44,7 +44,7 @@
 
       function intersecting(collection, extent) {
          // The extent may have missing numbers so we don't restrict at that point.
-         if(!extent || !angular.isNumber(extent.xMin) ||
+         if(!extent || !collection || !angular.isNumber(extent.xMin) ||
                !angular.isNumber(extent.xMax) ||
                !angular.isNumber(extent.yMin) ||
                !angular.isNumber(extent.yMax)) {
