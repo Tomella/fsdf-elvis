@@ -17,78 +17,6 @@ specific language governing permissions and limitations
 under the License.
 */
 
-"use strict";
-
-{
-   var PaneCtrl = function PaneCtrl(paneService) {
-      paneService.data().then(function (data) {
-         this.data = data;
-      }.bind(this));
-   };
-
-   var PaneService = function PaneService() {
-      var data = {};
-
-      return {
-         add: function add(item) {},
-
-         remove: function remove(item) {}
-      };
-   };
-
-   angular.module("water.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
-      return {
-         templateUrl: "water/panes/panes.html",
-         transclude: true,
-         scope: {
-            defaultItem: "@",
-            data: "="
-         },
-         controller: ['$scope', function ($scope) {
-            var changeSize = false;
-
-            $scope.view = $scope.defaultItem;
-
-            $scope.setView = function (what) {
-               var oldView = $scope.view;
-
-               if ($scope.view === what) {
-                  if (what) {
-                     changeSize = true;
-                  }
-                  $scope.view = "";
-               } else {
-                  if (!what) {
-                     changeSize = true;
-                  }
-                  $scope.view = what;
-               }
-
-               $rootScope.$broadcast("view.changed", $scope.view, oldView);
-
-               if (changeSize) {
-                  mapService.getMap().then(function (map) {
-                     map._onResize();
-                  });
-               }
-            };
-            $timeout(function () {
-               $rootScope.$broadcast("view.changed", $scope.view, null);
-            }, 50);
-         }]
-      };
-   }]).directive("icsmTabs", [function () {
-      return {
-         templateUrl: "water/panes/tabs.html",
-         require: "^icsmPanes"
-      };
-   }]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
-
-   PaneCtrl.$inject = ["paneService"];
-
-
-   PaneService.$inject = [];
-}
 'use strict';
 
 {
@@ -185,6 +113,78 @@ under the License.
 	}]).controller("RootCtrl", RootCtrl);
 
 	RootCtrl.$invoke = ['$http', 'configService', 'mapService'];
+}
+"use strict";
+
+{
+   var PaneCtrl = function PaneCtrl(paneService) {
+      paneService.data().then(function (data) {
+         this.data = data;
+      }.bind(this));
+   };
+
+   var PaneService = function PaneService() {
+      var data = {};
+
+      return {
+         add: function add(item) {},
+
+         remove: function remove(item) {}
+      };
+   };
+
+   angular.module("water.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
+      return {
+         templateUrl: "water/panes/panes.html",
+         transclude: true,
+         scope: {
+            defaultItem: "@",
+            data: "="
+         },
+         controller: ['$scope', function ($scope) {
+            var changeSize = false;
+
+            $scope.view = $scope.defaultItem;
+
+            $scope.setView = function (what) {
+               var oldView = $scope.view;
+
+               if ($scope.view === what) {
+                  if (what) {
+                     changeSize = true;
+                  }
+                  $scope.view = "";
+               } else {
+                  if (!what) {
+                     changeSize = true;
+                  }
+                  $scope.view = what;
+               }
+
+               $rootScope.$broadcast("view.changed", $scope.view, oldView);
+
+               if (changeSize) {
+                  mapService.getMap().then(function (map) {
+                     map._onResize();
+                  });
+               }
+            };
+            $timeout(function () {
+               $rootScope.$broadcast("view.changed", $scope.view, null);
+            }, 50);
+         }]
+      };
+   }]).directive("icsmTabs", [function () {
+      return {
+         templateUrl: "water/panes/tabs.html",
+         require: "^icsmPanes"
+      };
+   }]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
+
+   PaneCtrl.$inject = ["paneService"];
+
+
+   PaneService.$inject = [];
 }
 "use strict";
 

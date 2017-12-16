@@ -38,7 +38,11 @@
             };
          }
       };
-   }]);
+   }])
+
+   .filter("hasProducts", function() {
+      return (items) => items.some(item => item.product);
+   });
 
 
 

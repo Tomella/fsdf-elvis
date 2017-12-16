@@ -1,7 +1,7 @@
 {
    angular.module("icsm.products", ["icsm.product"])
 
-      .directive("icsmProducts",  ['productsConfigService', function (productsConfigService) {
+      .directive("icsmProducts", ['productsConfigService', function (productsConfigService) {
          return {
             restrict: "AE",
             templateUrl: "icsm/products/products.html",
@@ -39,19 +39,27 @@
       }
 
       get processingTemplates() {
-         return child('processing');
+         return this.child('processing');
       }
 
       get outputFormat() {
-         return child('outFormat');
+         return this.child('outFormat');
+      }
+
+      get defaultOutputFormat() {
+         return this.outputFormat.then(list => list.find(item => item.default));
+      }
+
+      get defaultOutputCoordinateSystem() {
+         return this.outputCoordinateSystem.then(systems => systems.find(item => item.default));
       }
 
       get outputCoordinateSystem() {
-         return child('outCoordSys');
+         return this.child('outCoordSys');
       }
 
       get datasets() {
-         return child('datasets');
+         return this.child('datasets');
       }
 
       get config() {

@@ -1,7 +1,7 @@
 <div ng-show="(items | matchedItems).length > paging.pageSize"
-      paging page="paging.page" page-size="paging.pageSize"
-      total="(items | matchedItems).length"
-      paging-action="setPage(page, pageSize)">
+   paging page="paging.page" page-size="paging.pageSize"
+   total="(items | matchedItems).length"
+   paging-action="setPage(page, pageSize)">
 </div>
 <div>
    <div ng-repeat="item in data" icsm-abstract-hover item="item">

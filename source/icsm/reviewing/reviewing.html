@@ -1,47 +1,41 @@
 <div class="modal-header">
-   <h3 class="modal-title splash">Review datasets, provide email and continue</h3>
+   <h3 class="modal-title splash">Download datasets by providing email address and start extract</h3>
 </div>
-<div class="modal-body" id="accept" ng-form exp-enter="accept()" icsm-splash-modal style="width: 100%; margin-left: auto; margin-right: auto;">
+<div class="modal-body" id="accept" ng-form exp-enter="accept()"
+            icsm-splash-modal style="width: 100%; margin-left: auto; margin-right: auto;">
    <div class="row bg-warning" ng-show="noneSelected(products)">
-      <div class="col-md-10 center-block" style="padding:5px; text-align:center">
-         <strong>All datasets have been removed.</strong>
-      </div>
       <div class="col-md-2">
          <button type="button" style="float:right" class="btn btn-primary" ng-click="cancel()">Close</button>
       </div>
    </div>
-   <div ng-hide="noneSelected(products)" ng-controller="listCtrl as list">
+   <div ng-controller="listCtrl as list">
       <div class="row">
          <div class="col-md-12">
             <strong>
                {{list.selected.length}} Selected Datasets
                <span ng-show="list.selectedSize">(Approx: {{list.selectedSize | fileSize}})</span>
             </strong>
-            <span class="pull-right">Review and delete unwanted datasets.</span>
-         </div>
-      </div>
-      <span ng-show="(products | reviewProductsSelected).length > paging.pageSize" paging page="paging.page" page-size="paging.pageSize"
-         total="(products | reviewProductsSelected).length" paging-action="setPage(page, pageSize)">
-      </span>
-      <div class="reviewing-datasets">
-         <div class="row" ng-repeat="product in page" ng-class-odd="'reviewing-odd'">
-            <div class="col-md-7">
-               <button type="button" class="btn btn-default btn-xs" ng-click="product.removed = !product.removed">
-                  <i class="fa fa-2x" ng-class="{'fa-times-circle': product.removed, 'fa-check-circle': !product.removed}" aria-hidden="true"></i>
-               </button>
-               <span style="padding-left:7px" ng-class="{'exclude': product.removed}">{{product.file_name}}</span>
-            </div>
-            <div class="col-md-4" style="padding:6px">
-               ({{product.source}}
-               <i class="fa fa-arrow-right" aria-hidden="true"></i> {{product.type}}
-               <i class="fa fa-arrow-right" aria-hidden="true"></i> {{product.group}})
-            </div>
-            <div class="col-md-1" style="padding:6px">
-               {{product.fileSize}}
-            </div>
          </div>
       </div>
    </div>
+   <div ng-repeat="org in products">
+      <h5>
+         <img ng-src="{{mappings[org.source].image}}" ng-attr-style="height:{{mappings[org.source].height}}px"></img>
+         <strong>{{org.source}}</strong>
+      </h5>
+      <div style="padding-left:10px" ng-repeat="(key, subGroup) in org.downloadables">
+         <h5>{{key}}</h5>
+         <div style="padding-left:10px;" ng-repeat="(name, items) in subGroup">
+            <h5 title="Clipped product using coordinate System: {{data.outCoordSys.value}}, Output Format: {{data.outFormat.value}}">
+               {{name}}
+               <span style="padding-left:25px;font-size:90%">{{items.length | number :0}} items totalling {{items | reviewSumSize | fileSize}}</span>
+            </h5>
+         </div>
+      </div>
+
+   </div>
+
+
    <div class="row reviewing-divider">
       <div class="col-md-12">
          <div review-email></div>

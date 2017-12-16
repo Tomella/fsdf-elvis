@@ -25,8 +25,8 @@
             };
          }])
 
-      .factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService', 'flashService',
-         function ($http, $q, $rootScope, $timeout, configService, flashService) {
+      .factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService', 'flashService', 'messageService',
+         function ($http, $q, $rootScope, $timeout, configService, flashService, messageService) {
             let clipTimeout, notify;
             return {
                init: function () {
@@ -57,7 +57,11 @@
                flashService.remove(notify);
 
                if(message) {
-                  notify = flashService.add( message, duration, true);
+                  if(type === "error") {
+                     messageService.error(message);
+                  } else {
+                     notify = flashService.add( message, duration, true);
+                  }
                }
                /*
 

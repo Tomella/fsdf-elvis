@@ -5,6 +5,6 @@
                </label>
       </div>
       <div class="col-md-8">
-         <select id="geoprocessOutputFormat" style="width:95%" ng-model="processing.outFormat" ng-options="opt.value for opt in config.outFormat"></select>
+         <select id="geoprocessOutputFormat" style="width:95%" ng-model="processing.outFormat" ng-options="opt.value for opt in config.outFormat track by opt.code"></select>
       </div>
    </div>

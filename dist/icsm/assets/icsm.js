@@ -80,6 +80,234 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 "use strict";
 
 {
+   (function () {
+      var decorateDownloadables = function decorateDownloadables(downloadables) {
+         Object.keys(downloadables).forEach(function (groupname) {
+            var group = downloadables[groupname];
+            Object.keys(group).forEach(function (listName) {
+               var items = group[listName];
+
+               items.forEach(function (item) {
+                  return decorateItem(item);
+               });
+            });
+         });
+      };
+
+      var decorateItem = function decorateItem(item) {
+         item.fileSize = fileSize(item.file_size);
+      };
+
+      var fileSize = function fileSize(size) {
+         var meg = 1000 * 1000;
+         var gig = meg * 1000;
+         var ter = gig * 1000;
+
+         if (!size) {
+            return "-";
+         }
+
+         if (("" + size).indexOf(" ") > -1) {
+            return size;
+         }
+
+         size = parseFloat(size);
+
+         if (size < 1000) {
+            return size + " bytes";
+         }
+         if (size < meg) {
+            return (size / 1000).toFixed(1) + " kB";
+         }
+         if (size < gig) {
+            return (size / meg).toFixed(1) + " MB";
+         }
+         if (size < ter) {
+            return (size / gig).toFixed(1) + " GB";
+         }
+         return (size / ter).toFixed(1) + " TB";
+      };
+
+      angular.module("icsm.bounds", ["icsm.message"]).directive('icsmBounds', ['$rootScope', 'icsmMessageService', 'boundsService', function ($rootScope, icsmMessageService, boundsService) {
+         return {
+            restrict: 'AE',
+            link: function link() {
+               boundsService.init().then(null, null, function notify(message) {
+                  icsmMessageService.removeFlash();
+                  switch (message.type) {
+                     case "error":
+                     case "warn":
+                     case "info":
+                        icsmMessageService[message.type](message.text);
+                        break;
+                     case "wait":
+                        icsmMessageService.wait(message.text);
+                        break;
+                     default:
+                        icsmMessageService.flash(message.text, message.duration ? message.duration : 8000, message.type === "wait");
+                  }
+               });
+            }
+         };
+      }]).factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService', 'flashService', 'messageService', function ($http, $q, $rootScope, $timeout, configService, flashService, messageService) {
+         var clipTimeout = void 0,
+             notify = void 0;
+         return {
+            init: function init() {
+               notify = $q.defer();
+               $rootScope.$on('icsm.clip.drawn', function (event, clip) {
+                  send('Area drawn. Checking for data...');
+                  _checkSize(clip).then(function (message) {
+                     if (message.code === "success") {
+                        getList(clip);
+                     } else {
+                        // $rootScope.$broadcast('icsm.clip.draw', { message: "oversize" });
+                     }
+                  });
+               });
+               return notify.promise;
+            },
+
+            cancelDraw: function cancelDraw() {
+               drawService.cancelDrawRectangle();
+            },
+
+            checkSize: function checkSize(clip) {
+               return _checkSize(clip);
+            }
+         };
+
+         function send(message, type, duration) {
+            flashService.remove(notify);
+
+            if (message) {
+               if (type === "error") {
+                  messageService.error(message);
+               } else {
+                  notify = flashService.add(message, duration, true);
+               }
+            }
+            /*
+              if (notify) {
+               notify.notify({
+                  text: message,
+                  type: type,
+                  duration: duration
+               });
+            }
+            */
+         }
+
+         function _checkSize(clip) {
+            var deferred = $q.defer();
+            var result = drawn(clip);
+            if (result && result.code) {
+               switch (result.code) {
+                  case "oversize":
+                     $timeout(function () {
+                        send("", "clear");
+                        send("The selected area is too large to process. Please restrict to approximately " + "4 degrees square.", "error");
+                        deferred.resolve(result);
+                     });
+                     break;
+                  case "undersize":
+                     $timeout(function () {
+                        send("", "clear");
+                        send("X Min and Y Min should be smaller than X Max and Y Max, respectively. " + "Please update the drawn area.", "error");
+                        deferred.resolve(result);
+                     });
+                     break;
+                  default:
+                     return $q.when(result);
+               }
+            }
+            return deferred.promise;
+         }
+
+         function underSizeLimit(clip) {
+            var size = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
+            return size < 0.00000000001 || clip.xMax < clip.xMin;
+         }
+
+         function overSizeLimit(clip) {
+            // Shouldn't need abs but it doesn't hurt.
+            var size = Math.abs((clip.xMax - clip.xMin) * (clip.yMax - clip.yMin));
+            return size > 4;
+         }
+
+         function forceNumbers(clip) {
+            clip.xMax = clip.xMax === null ? null : +clip.xMax;
+            clip.xMin = clip.xMin === null ? null : +clip.xMin;
+            clip.yMax = clip.yMax === null ? null : +clip.yMax;
+            clip.yMin = clip.yMin === null ? null : +clip.yMin;
+         }
+
+         function drawn(clip) {
+            //geoprocessService.removeClip();
+            forceNumbers(clip);
+
+            if (overSizeLimit(clip)) {
+               return { code: "oversize" };
+            }
+
+            if (underSizeLimit(clip)) {
+               return { code: "undersize" };
+            }
+
+            if (clip.xMax === null) {
+               return { code: "incomplete" };
+            }
+
+            if (validClip(clip)) {
+               return { code: "success" };
+            }
+            return { code: "invalid" };
+         }
+
+         // The input validator takes care of order and min/max constraints. We just check valid existance.
+         function validClip(clip) {
+            return clip && angular.isNumber(clip.xMax) && angular.isNumber(clip.xMin) && angular.isNumber(clip.yMax) && angular.isNumber(clip.yMin) && !overSizeLimit(clip) && !underSizeLimit(clip);
+         }
+
+         function getList(clip) {
+            configService.getConfig("processing").then(function (conf) {
+               var url = conf.intersectsUrl;
+               if (url) {
+                  // Order matches the $watch signature so be careful
+                  var urlWithParms = url.replace("{maxx}", clip.xMax).replace("{minx}", clip.xMin).replace("{maxy}", clip.yMax).replace("{miny}", clip.yMin);
+
+                  send("Checking there is data in your selected area...", "wait", 180000);
+                  $http.get(urlWithParms).then(function (response) {
+                     if (response.data && response.data.available_data) {
+                        var hasData = false;
+                        send("", "clear");
+                        if (response.data.available_data) {
+                           response.data.available_data.forEach(function (group) {
+                              if (group.downloadables) {
+                                 decorateDownloadables(group.downloadables);
+                                 hasData = true;
+                              }
+                           });
+                        }
+                        if (!hasData) {
+                           send("There is no data held in your selected area. Please try another area.", null, 4000);
+                        }
+
+                        $rootScope.$broadcast('site.selection', response.data);
+                     }
+                  }, function (err) {
+                     // If it falls over we don't want to crash.
+                     send("The service that provides the list of datasets is currently unavailable. " + "Please try again later.", "error");
+                  });
+               }
+            });
+         }
+      }]);
+   })();
+}
+"use strict";
+
+{
    var ContributorsService = function ContributorsService($http) {
       var state = {
          show: false,
@@ -272,230 +500,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          return service.data;
       }
    }]);
-}
-"use strict";
-
-{
-   (function () {
-      var decorateDownloadables = function decorateDownloadables(downloadables) {
-         Object.keys(downloadables).forEach(function (groupname) {
-            var group = downloadables[groupname];
-            Object.keys(group).forEach(function (listName) {
-               var items = group[listName];
-
-               items.forEach(function (item) {
-                  return decorateItem(item);
-               });
-            });
-         });
-      };
-
-      var decorateItem = function decorateItem(item) {
-         item.fileSize = fileSize(item.file_size);
-      };
-
-      var fileSize = function fileSize(size) {
-         var meg = 1000 * 1000;
-         var gig = meg * 1000;
-         var ter = gig * 1000;
-
-         if (!size) {
-            return "-";
-         }
-
-         if (("" + size).indexOf(" ") > -1) {
-            return size;
-         }
-
-         size = parseFloat(size);
-
-         if (size < 1000) {
-            return size + " bytes";
-         }
-         if (size < meg) {
-            return (size / 1000).toFixed(1) + " kB";
-         }
-         if (size < gig) {
-            return (size / meg).toFixed(1) + " MB";
-         }
-         if (size < ter) {
-            return (size / gig).toFixed(1) + " GB";
-         }
-         return (size / ter).toFixed(1) + " TB";
-      };
-
-      angular.module("icsm.bounds", ["icsm.message"]).directive('icsmBounds', ['$rootScope', 'icsmMessageService', 'boundsService', function ($rootScope, icsmMessageService, boundsService) {
-         return {
-            restrict: 'AE',
-            link: function link() {
-               boundsService.init().then(null, null, function notify(message) {
-                  icsmMessageService.removeFlash();
-                  switch (message.type) {
-                     case "error":
-                     case "warn":
-                     case "info":
-                        icsmMessageService[message.type](message.text);
-                        break;
-                     case "wait":
-                        icsmMessageService.wait(message.text);
-                        break;
-                     default:
-                        icsmMessageService.flash(message.text, message.duration ? message.duration : 8000, message.type === "wait");
-                  }
-               });
-            }
-         };
-      }]).factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService', 'flashService', function ($http, $q, $rootScope, $timeout, configService, flashService) {
-         var clipTimeout = void 0,
-             notify = void 0;
-         return {
-            init: function init() {
-               notify = $q.defer();
-               $rootScope.$on('icsm.clip.drawn', function (event, clip) {
-                  send('Area drawn. Checking for data...');
-                  _checkSize(clip).then(function (message) {
-                     if (message.code === "success") {
-                        getList(clip);
-                     } else {
-                        // $rootScope.$broadcast('icsm.clip.draw', { message: "oversize" });
-                     }
-                  });
-               });
-               return notify.promise;
-            },
-
-            cancelDraw: function cancelDraw() {
-               drawService.cancelDrawRectangle();
-            },
-
-            checkSize: function checkSize(clip) {
-               return _checkSize(clip);
-            }
-         };
-
-         function send(message, type, duration) {
-            flashService.remove(notify);
-
-            if (message) {
-               notify = flashService.add(message, duration, true);
-            }
-            /*
-              if (notify) {
-               notify.notify({
-                  text: message,
-                  type: type,
-                  duration: duration
-               });
-            }
-            */
-         }
-
-         function _checkSize(clip) {
-            var deferred = $q.defer();
-            var result = drawn(clip);
-            if (result && result.code) {
-               switch (result.code) {
-                  case "oversize":
-                     $timeout(function () {
-                        send("", "clear");
-                        send("The selected area is too large to process. Please restrict to approximately " + "4 degrees square.", "error");
-                        deferred.resolve(result);
-                     });
-                     break;
-                  case "undersize":
-                     $timeout(function () {
-                        send("", "clear");
-                        send("X Min and Y Min should be smaller than X Max and Y Max, respectively. " + "Please update the drawn area.", "error");
-                        deferred.resolve(result);
-                     });
-                     break;
-                  default:
-                     return $q.when(result);
-               }
-            }
-            return deferred.promise;
-         }
-
-         function underSizeLimit(clip) {
-            var size = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
-            return size < 0.00000000001 || clip.xMax < clip.xMin;
-         }
-
-         function overSizeLimit(clip) {
-            // Shouldn't need abs but it doesn't hurt.
-            var size = Math.abs((clip.xMax - clip.xMin) * (clip.yMax - clip.yMin));
-            return size > 4;
-         }
-
-         function forceNumbers(clip) {
-            clip.xMax = clip.xMax === null ? null : +clip.xMax;
-            clip.xMin = clip.xMin === null ? null : +clip.xMin;
-            clip.yMax = clip.yMax === null ? null : +clip.yMax;
-            clip.yMin = clip.yMin === null ? null : +clip.yMin;
-         }
-
-         function drawn(clip) {
-            //geoprocessService.removeClip();
-            forceNumbers(clip);
-
-            if (overSizeLimit(clip)) {
-               return { code: "oversize" };
-            }
-
-            if (underSizeLimit(clip)) {
-               return { code: "undersize" };
-            }
-
-            if (clip.xMax === null) {
-               return { code: "incomplete" };
-            }
-
-            if (validClip(clip)) {
-               return { code: "success" };
-            }
-            return { code: "invalid" };
-         }
-
-         // The input validator takes care of order and min/max constraints. We just check valid existance.
-         function validClip(clip) {
-            return clip && angular.isNumber(clip.xMax) && angular.isNumber(clip.xMin) && angular.isNumber(clip.yMax) && angular.isNumber(clip.yMin) && !overSizeLimit(clip) && !underSizeLimit(clip);
-         }
-
-         function getList(clip) {
-            configService.getConfig("processing").then(function (conf) {
-               var url = conf.intersectsUrl;
-               if (url) {
-                  // Order matches the $watch signature so be careful
-                  var urlWithParms = url.replace("{maxx}", clip.xMax).replace("{minx}", clip.xMin).replace("{maxy}", clip.yMax).replace("{miny}", clip.yMin);
-
-                  send("Checking there is data in your selected area...", "wait", 180000);
-                  $http.get(urlWithParms).then(function (response) {
-                     if (response.data && response.data.available_data) {
-                        var hasData = false;
-                        send("", "clear");
-                        if (response.data.available_data) {
-                           response.data.available_data.forEach(function (group) {
-                              if (group.downloadables) {
-                                 decorateDownloadables(group.downloadables);
-                                 hasData = true;
-                              }
-                           });
-                        }
-                        if (!hasData) {
-                           send("There is no data held in your selected area. Please try another area.", null, 4000);
-                        }
-
-                        $rootScope.$broadcast('site.selection', response.data);
-                     }
-                  }, function (err) {
-                     // If it falls over we don't want to crash.
-                     send("The service that provides the list of datasets is currently unavailable. " + "Please try again later.", "error");
-                  });
-               }
-            });
-         }
-      }]);
-   })();
 }
 "use strict";
 
@@ -976,24 +980,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 "use strict";
 
 {
-
-   angular.module("icsm.plot", []).directive("icsmPlot", ['$log', function ($log) {
-      return {
-         restrict: "AE",
-         scope: {
-            line: "="
-         },
-         link: function link(scope, element, attrs, ctrl) {
-            scope.$watch("line", function (newValue, oldValue) {
-               $log.info(newValue);
-            });
-         }
-      };
-   }]);
-}
-"use strict";
-
-{
    var PaneCtrl = function PaneCtrl(paneService) {
       var _this = this;
 
@@ -1079,6 +1065,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 
    PaneService.$inject = [];
+}
+"use strict";
+
+{
+
+   angular.module("icsm.plot", []).directive("icsmPlot", ['$log', function ($log) {
+      return {
+         restrict: "AE",
+         scope: {
+            line: "="
+         },
+         link: function link(scope, element, attrs, ctrl) {
+            scope.$watch("line", function (newValue, oldValue) {
+               $log.info(newValue);
+            });
+         }
+      };
+   }]);
 }
 "use strict";
 
@@ -1556,22 +1560,40 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          }, {
             key: "processingTemplates",
             get: function get() {
-               return child('processing');
+               return this.child('processing');
             }
          }, {
             key: "outputFormat",
             get: function get() {
-               return child('outFormat');
+               return this.child('outFormat');
+            }
+         }, {
+            key: "defaultOutputFormat",
+            get: function get() {
+               return this.outputFormat.then(function (list) {
+                  return list.find(function (item) {
+                     return item.default;
+                  });
+               });
+            }
+         }, {
+            key: "defaultOutputCoordinateSystem",
+            get: function get() {
+               return this.outputCoordinateSystem.then(function (systems) {
+                  return systems.find(function (item) {
+                     return item.default;
+                  });
+               });
             }
          }, {
             key: "outputCoordinateSystem",
             get: function get() {
-               return child('outCoordSys');
+               return this.child('outCoordSys');
             }
          }, {
             key: "datasets",
             get: function get() {
-               return child('datasets');
+               return this.child('datasets');
             }
          }, {
             key: "config",
@@ -1584,6 +1606,315 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
          return DownloadConfig;
       }();
+   })();
+}
+'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+{
+   (function () {
+      var transformTemplate = function transformTemplate(template, data) {
+         var response = template;
+         angular.forEach(data, function (value, key) {
+            response = response.replace("{" + key + "}", encodeURIComponent(value));
+         });
+         return response;
+      };
+
+      var convertFlatToStructured = function convertFlatToStructured(flat) {
+         var fields = ["file_url", "file_name", "project_name", "product", "file_size", "bbox"]; // ["index_poly_name", "file_name", "file_url", "file_size", "file_last_modified", "bbox"]
+         var response = {
+            available_data: []
+         };
+         var available = response.available_data;
+         var sourceMap = {};
+
+         flat.forEach(function (dataset) {
+            var item = {};
+            fields.forEach(function (field) {
+               if (typeof dataset[field] !== "undefined") {
+                  item[field] = dataset[field];
+               }
+            });
+
+            var data = sourceMap[dataset.source];
+            if (!data) {
+               data = {
+                  source: dataset.source,
+                  downloadables: {}
+               };
+               sourceMap[dataset.source] = data;
+               available.push(data);
+            }
+
+            var downloadable = data.downloadables[dataset.type];
+            if (!downloadable) {
+               downloadable = {};
+               data.downloadables[dataset.type] = downloadable;
+            }
+
+            var group = downloadable[dataset.group];
+            if (!group) {
+               group = [];
+               downloadable[dataset.group] = group;
+            }
+
+            group.push(item);
+         });
+
+         return response;
+      };
+
+      angular.module("elvis.reviewing", []).directive('icsmReview', ['$rootScope', '$uibModal', '$log', 'messageService', 'reviewService', function ($rootScope, $uibModal, $log, messageService, reviewService) {
+         return {
+            link: function link(scope, element) {
+               var modalInstance;
+               scope.data = reviewService.data;
+
+               // TODO: Why is this here? What is trying to override data?
+               scope.$watch("data", function (value, old) {
+                  if (old) {
+                     console.log("Why?", value);
+                     scope.data = reviewService.data;
+                  }
+               });
+
+               scope.$watch("data.reviewing", function (value) {
+                  if (value) {
+                     modalInstance = $uibModal.open({
+                        templateUrl: 'icsm/reviewing/reviewing.html',
+                        size: "lg",
+                        backdrop: "static",
+                        keyboard: false,
+                        controller: ['$scope', '$uibModalInstance', 'listService', 'products', function ($scope, $uibModalInstance, listService, products) {
+
+                           listService.getMappings().then(function (response) {
+                              $scope.mappings = response;
+                           });
+
+                           $scope.products = convertFlatToStructured(products.filter(function (product) {
+                              return product.selected;
+                           })).available_data;
+
+                           $scope.accept = function () {
+                              $uibModalInstance.close(true, $scope.products);
+                           };
+
+                           $scope.cancel = function () {
+                              $uibModalInstance.close(false);
+                           };
+                        }],
+                        resolve: {
+                           products: function products() {
+                              return reviewService.products;
+                           }
+                        }
+                     });
+                     modalInstance.result.then(function (run) {
+                        if (run) {
+                           reviewService.startExtract().then(function (response) {
+                              messageService[response.status](response.message);
+                              reviewService.removeRemoved();
+                              scope.data.reviewing = false;
+                           });
+                        }
+                        reviewService.removeRemoved();
+                        scope.data.reviewing = false;
+                     }, function () {
+                        $log.info('Cancelled');
+                     });
+                  }
+               });
+            }
+         };
+      }]).directive("reviewEmail", ['reviewService', function (reviewService) {
+         return {
+            template: '<div class="input-group">' + '<span class="input-group-addon" id="nedf-email">Email</span>' + '<input required="required" type="email" ng-model="data.email" class="form-control" placeholder="Email address to send download link" aria-describedby="nedf-email">' + '</div>',
+            restrict: "AE",
+            link: function link(scope, element) {
+               scope.data = reviewService.data;
+               //console.log("data" + scope.data);
+            }
+         };
+      }]).filter('reviewProductsSelected', function () {
+         return function (products) {
+            return products.filter(function (product) {
+               return product.selected;
+            });
+         };
+      }).filter('reviewSumSize', function () {
+         return function (products) {
+            return products.reduce(function (sum, product) {
+               return sum + (product.file_size ? +product.file_size : product.product ? 500000000 : 0);
+            }, 0);
+         };
+      }).factory('reviewService', ['$http', '$q', 'clipService', 'configService', 'listService', 'persistService', function ($http, $q, clipService, configService, listService, persistService) {
+         var key = "elvis_download_email";
+         var data = listService.data;
+         var service = {
+            get data() {
+               return data;
+            },
+
+            set data(data) {
+               console.log("What the hell!");
+               data;
+            },
+
+            get products() {
+               return listService.products;
+            },
+
+            startExtract: function startExtract() {
+               var clip = clipService.data.clip;
+               this.setEmail(data.email);
+
+               return configService.getConfig("processing").then(function (config) {
+                  var selected = listService.products.filter(function (product) {
+                     return product.selected;
+                  });
+                  var products = selected.filter(function (product) {
+                     return product.product;
+                  });
+                  var files = selected.filter(function (product) {
+                     return !product.product;
+                  });
+                  var jobsCount = 0;
+
+                  var template = "https://elvis20161a-ga.fmecloud.com/fmejobsubmitter/elvis_prod/DEMClipZipShip_Master_S3Source.fmw?geocat_number=${id}&out_grid_name=${filename}&input_coord_sys=LL-WGS84&ymin=${yMin}&ymax=${yMax}&xmin=${xMin}&xmax=${xMax}&output_format=${outFormat}&out_coord_sys=${outCoordSys}&email_address=${email}&opt_showresult=false&opt_servicemode=async";
+
+                  if (products.length) {
+                     var _ret2 = function () {
+                        var submit = function submit() {
+                           jobsCount++;
+
+                           var product = products[index++];
+                           var parameters = Object.assign({}, clip, {
+                              id: product.metadata_id,
+                              filename: "",
+                              outFormat: data.outFormat.code,
+                              outCoordSys: data.outCoordSys.code,
+                              email: data.email
+                           });
+
+                           return postProduct(template, parameters).then(function (response) {
+                              if (index < products.length) {
+                                 return submit();
+                              } else {
+                                 // Clear selections
+                                 products.forEach(function (product) {
+                                    return product.selected = false;
+                                 });
+                                 if (files.length) {
+                                    return postFiles();
+                                 } else {
+                                    return finish();
+                                 }
+                              }
+                           });
+                        };
+
+                        console.log("We are processing products.");
+                        var index = 0;
+
+                        return {
+                           v: submit()
+                        };
+                     }();
+
+                     if ((typeof _ret2 === 'undefined' ? 'undefined' : _typeof(_ret2)) === "object") return _ret2.v;
+                  }
+
+                  if (!products.length && files.length) {
+                     console.log("We are processing files");
+                     return postFiles();
+                  }
+
+                  // That's the job done.
+
+                  function postProduct(template, parameters) {
+                     var workingString = template;
+
+                     angular.forEach(parameters, function (item, key) {
+                        workingString = workingString.replace("${" + key + "}", item);
+                     });
+
+                     return $http({
+                        method: 'GET',
+                        url: workingString
+                     }).then(function (response) {
+                        return finish();
+                     }, function (d) {
+                        return {
+                           status: "error",
+                           message: "Sorry but the service failed to respond. Try again later."
+                        };
+                     });
+                  }
+
+                  function finish() {
+                     return {
+                        status: "success",
+                        message: jobsCount > 1 ? "Your jobs have been submitted. You will receive " + jobsCount + " emails with the results soon." : "Your job has been submitted. You will receive an email with the results soon."
+                     };
+                  }
+
+                  function postFiles() {
+                     jobsCount++;
+                     var postData = convertFlatToStructured(listService.products.filter(function (product) {
+                        return product.selected && !product.product || product.type === "Unreleased Data";
+                     }));
+
+                     postData.parameters = {
+                        xmin: clip.xMin,
+                        xmax: clip.xMax,
+                        ymin: clip.yMin,
+                        ymax: clip.yMax,
+                        email: data.email
+                     };
+
+                     listService.products.forEach(function (product) {
+                        product.selected = product.removed = false;
+                     });
+
+                     return $http({
+                        method: 'POST',
+                        url: config.postProcessingUrl,
+                        data: postData,
+                        headers: { "Content-Type": "application/json" }
+                     }).then(function (response) {
+                        return finish();
+                     }, function (d) {
+                        return {
+                           status: "error",
+                           message: "Sorry but the service failed to respond. Try again later."
+                        };
+                     });
+                  }
+               });
+            },
+
+            removeRemoved: function removeRemoved() {
+               listService.products.forEach(function (product) {
+                  product.removed = false;
+               });
+            },
+
+            setEmail: function setEmail(email) {
+               this.data.email = email;
+               persistService.setItem(key, email);
+            },
+
+            clipProduct: function clipProduct() {}
+         };
+
+         persistService.getItem(key).then(function (value) {
+            service.data.email = value;
+         });
+
+         return service;
+      }]);
    })();
 }
 'use strict';
@@ -1710,7 +2041,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          };
       };
 
-      angular.module("elvis.results", ['elvis.results.continue', 'icsm.subtype', 'icsm.unreleased']).directive('icsmOrgHeading', [function () {
+      angular.module("elvis.results", ['elvis.results.continue', 'icsm.subtype', 'icsm.unreleased']).directive('productsDialog', ['productsConfigService', 'listService', function (productsConfigService, listService) {
+         return {
+            restrict: 'AE',
+            link: function link(scope) {
+               var data = scope.processing = listService.data;
+               productsConfigService.defaultOutputCoordinateSystem.then(function (item) {
+                  return data.outCoordSys = item;
+               });
+               productsConfigService.defaultOutputFormat.then(function (format) {
+                  return data.outFormat = format;
+               });
+            }
+         };
+      }]).directive('icsmOrgHeading', [function () {
          return {
             templateUrl: 'icsm/results/orgheading.html',
             restrict: 'AE',
@@ -2180,7 +2524,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                };
             }
          };
-      }]);
+      }]).filter("hasProducts", function () {
+         return function (items) {
+            return items.some(function (item) {
+               return item.product;
+            });
+         };
+      });
    })();
 }
 'use strict';
@@ -2267,227 +2617,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       }).filter("reverseDate", function () {
          return formatDate;
       });
-   })();
-}
-'use strict';
-
-{
-   (function () {
-      var transformTemplate = function transformTemplate(template, data) {
-         var response = template;
-         angular.forEach(data, function (value, key) {
-            response = response.replace("{" + key + "}", encodeURIComponent(value));
-         });
-         return response;
-      };
-
-      var convertFlatToStructured = function convertFlatToStructured(flat) {
-         var fields = ["file_url", "file_name", "project_name", "file_size", "bbox"]; // ["index_poly_name", "file_name", "file_url", "file_size", "file_last_modified", "bbox"]
-         var response = {
-            available_data: []
-         };
-         var available = response.available_data;
-         var sourceMap = {};
-
-         flat.forEach(function (dataset) {
-            var item = {};
-            fields.forEach(function (field) {
-               if (typeof dataset[field] !== "undefined") {
-                  item[field] = dataset[field];
-               }
-            });
-
-            var data = sourceMap[dataset.source];
-            if (!data) {
-               data = {
-                  source: dataset.source,
-                  downloadables: {}
-               };
-               sourceMap[dataset.source] = data;
-               available.push(data);
-            }
-
-            var downloadable = data.downloadables[dataset.type];
-            if (!downloadable) {
-               downloadable = {};
-               data.downloadables[dataset.type] = downloadable;
-            }
-
-            var group = downloadable[dataset.group];
-            if (!group) {
-               group = [];
-               downloadable[dataset.group] = group;
-            }
-
-            group.push(item);
-         });
-
-         return response;
-      };
-
-      angular.module("elvis.reviewing", []).directive('icsmReview', ['$rootScope', '$uibModal', '$log', 'messageService', 'reviewService', function ($rootScope, $uibModal, $log, messageService, reviewService) {
-         return {
-            link: function link(scope, element) {
-               var modalInstance;
-               scope.data = reviewService.data;
-
-               // TODO: Why is this here? What is trying to override data?
-               scope.$watch("data", function (value, old) {
-                  if (old) {
-                     console.log("Why?", value);
-                     scope.data = reviewService.data;
-                  }
-               });
-
-               scope.$watch("data.reviewing", function (value) {
-                  if (value) {
-                     modalInstance = $uibModal.open({
-                        templateUrl: 'icsm/reviewing/reviewing.html',
-                        size: "lg",
-                        backdrop: "static",
-                        keyboard: false,
-                        controller: ['$scope', '$uibModalInstance', 'products', function ($scope, $uibModalInstance, products) {
-                           $scope.products = products;
-                           $scope.paging = {
-                              page: 1,
-                              pageSize: 15
-                           };
-
-                           $scope.accept = function () {
-                              $uibModalInstance.close(true);
-                           };
-
-                           $scope.cancel = function () {
-                              $uibModalInstance.close(false);
-                           };
-
-                           $scope.noneSelected = function (products) {
-                              return !products.some(function (product) {
-                                 return product.selected;
-                              });
-                           };
-
-                           $scope.setPage = function (page, pagesize) {
-                              $scope.page = $scope.products ? $scope.products.filter(function (product) {
-                                 return product.selected;
-                              }).slice(pagesize * (page - 1), page * pagesize) : [];
-                           };
-
-                           $scope.setPage(1, 15);
-                        }],
-                        resolve: {
-                           products: function products() {
-                              return reviewService.products;
-                           }
-                        }
-                     });
-                     modalInstance.result.then(function (run) {
-                        if (run) {
-                           reviewService.startExtract().then(function (response) {
-                              messageService[response.status](response.message);
-                              reviewService.removeRemoved();
-                              scope.data.reviewing = false;
-                           });
-                        }
-                        reviewService.removeRemoved();
-                        scope.data.reviewing = false;
-                     }, function () {
-                        $log.info('Cancelled');
-                     });
-                  }
-               });
-            }
-         };
-      }]).directive("reviewEmail", ['reviewService', function (reviewService) {
-         return {
-            template: '<div class="input-group">' + '<span class="input-group-addon" id="nedf-email">Email</span>' + '<input required="required" type="email" ng-model="data.email" class="form-control" placeholder="Email address to send download link" aria-describedby="nedf-email">' + '</div>',
-            restrict: "AE",
-            link: function link(scope, element) {
-               scope.data = reviewService.data;
-               //console.log("data" + scope.data);
-            }
-         };
-      }]).filter('reviewProductsSelected', function () {
-         return function (products) {
-            return products.filter(function (product) {
-               return product.selected;
-            });
-         };
-      }).factory('reviewService', ['$http', 'clipService', 'configService', 'listService', 'persistService', function ($http, clipService, configService, listService, persistService) {
-         var key = "elvis_download_email";
-         var data = listService.data;
-         var service = {
-            get data() {
-               return data;
-            },
-
-            set data(data) {
-               console.log("What the hell!");
-               data;
-            },
-
-            get products() {
-               return listService.products;
-            },
-
-            startExtract: function startExtract() {
-               var clip = clipService.data.clip;
-               this.setEmail(data.email);
-
-               return configService.getConfig("processing").then(function (config) {
-                  var postData = convertFlatToStructured(listService.products.filter(function (product) {
-                     return product.selected && !product.removed || product.type === "Unreleased Data";
-                  }));
-
-                  postData.parameters = {
-                     xmin: clip.xMin,
-                     xmax: clip.xMax,
-                     ymin: clip.yMin,
-                     ymax: clip.yMax,
-                     email: data.email
-                  };
-
-                  listService.products.forEach(function (product) {
-                     product.selected = product.removed = false;
-                  });
-
-                  return $http({
-                     method: 'POST',
-                     url: config.postProcessingUrl,
-                     data: postData,
-                     headers: { "Content-Type": "application/json" }
-                  }).then(function (response) {
-                     return {
-                        status: "success",
-                        message: "Your job has been submitted. An email will be sent on job completion."
-                     };
-                  }, function (d) {
-                     return {
-                        status: "error",
-                        message: "Sorry but the service failed to respond. Try again later."
-                     };
-                  });
-               });
-            },
-
-            removeRemoved: function removeRemoved() {
-               listService.products.forEach(function (product) {
-                  product.removed = false;
-               });
-            },
-
-            setEmail: function setEmail(email) {
-               this.data.email = email;
-               persistService.setItem(key, email);
-            }
-         };
-
-         persistService.getItem(key).then(function (value) {
-            service.data.email = value;
-         });
-
-         return service;
-      }]);
    })();
 }
 "use strict";
@@ -3133,107 +3262,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 }
 'use strict';
 
-{
-
-   angular.module('icsm.themes', [])
-
-   /**
-      *
-      * Override the original mars user.
-      *
-        */
-   .directive('icsmThemes', ['themesService', function (themesService) {
-      return {
-         restrict: 'AE',
-         templateUrl: 'icsm/themes/themes.html',
-         link: function link(scope) {
-            themesService.getThemes().then(function (themes) {
-               scope.themes = themes;
-            });
-
-            themesService.getCurrentTheme().then(function (theme) {
-               scope.theme = theme;
-            });
-
-            scope.changeTheme = function (theme) {
-               scope.theme = theme;
-               themesService.setTheme(theme.key);
-            };
-         }
-      };
-   }]).controller('themesCtrl', ['themesService', function (themesService) {
-      this.service = themesService;
-   }]).filter('themesFilter', function () {
-      return function (features, theme) {
-         var response = [];
-         // Give 'em all if they haven't set a theme.
-         if (!theme) {
-            return features;
-         }
-
-         if (features) {
-            features.forEach(function (feature) {
-               if (feature.themes) {
-                  if (feature.themes.some(function (name) {
-                     return name == theme.key;
-                  })) {
-                     response.push(feature);
-                  }
-               }
-            });
-         }
-         return response;
-      };
-   }).factory('themesService', ['$q', 'configService', 'storageService', function ($q, configService, storageService) {
-      var THEME_PERSIST_KEY = 'icsm.current.theme';
-      var DEFAULT_THEME = "All";
-      var waiting = [];
-      var self = this;
-
-      this.themes = [];
-      this.theme = null;
-
-      storageService.getItem(THEME_PERSIST_KEY).then(function (value) {
-         if (!value) {
-            value = DEFAULT_THEME;
-         }
-         configService.getConfig('themes').then(function (themes) {
-            self.themes = themes;
-            self.theme = themes[value];
-            // Decorate the key
-            angular.forEach(themes, function (theme, key) {
-               theme.key = key;
-            });
-            waiting.forEach(function (wait) {
-               wait.resolve(self.theme);
-            });
-         });
-      });
-
-      this.getCurrentTheme = function () {
-         if (this.theme) {
-            return $q.when(self.theme);
-         } else {
-            var waiter = $q.defer();
-            waiting.push(waiter);
-            return waiter.promise;
-         }
-      };
-
-      this.getThemes = function () {
-         return configService.getConfig('themes');
-      };
-
-      this.setTheme = function (key) {
-         this.theme = this.themes[key];
-         storageService.setItem(THEME_PERSIST_KEY, key);
-      };
-
-      return this;
-   }]);
-}
-'use strict';
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
@@ -3610,6 +3638,107 @@ var Strategies = function () {
 
    return Strategies;
 }();
+'use strict';
+
+{
+
+   angular.module('icsm.themes', [])
+
+   /**
+      *
+      * Override the original mars user.
+      *
+        */
+   .directive('icsmThemes', ['themesService', function (themesService) {
+      return {
+         restrict: 'AE',
+         templateUrl: 'icsm/themes/themes.html',
+         link: function link(scope) {
+            themesService.getThemes().then(function (themes) {
+               scope.themes = themes;
+            });
+
+            themesService.getCurrentTheme().then(function (theme) {
+               scope.theme = theme;
+            });
+
+            scope.changeTheme = function (theme) {
+               scope.theme = theme;
+               themesService.setTheme(theme.key);
+            };
+         }
+      };
+   }]).controller('themesCtrl', ['themesService', function (themesService) {
+      this.service = themesService;
+   }]).filter('themesFilter', function () {
+      return function (features, theme) {
+         var response = [];
+         // Give 'em all if they haven't set a theme.
+         if (!theme) {
+            return features;
+         }
+
+         if (features) {
+            features.forEach(function (feature) {
+               if (feature.themes) {
+                  if (feature.themes.some(function (name) {
+                     return name == theme.key;
+                  })) {
+                     response.push(feature);
+                  }
+               }
+            });
+         }
+         return response;
+      };
+   }).factory('themesService', ['$q', 'configService', 'storageService', function ($q, configService, storageService) {
+      var THEME_PERSIST_KEY = 'icsm.current.theme';
+      var DEFAULT_THEME = "All";
+      var waiting = [];
+      var self = this;
+
+      this.themes = [];
+      this.theme = null;
+
+      storageService.getItem(THEME_PERSIST_KEY).then(function (value) {
+         if (!value) {
+            value = DEFAULT_THEME;
+         }
+         configService.getConfig('themes').then(function (themes) {
+            self.themes = themes;
+            self.theme = themes[value];
+            // Decorate the key
+            angular.forEach(themes, function (theme, key) {
+               theme.key = key;
+            });
+            waiting.forEach(function (wait) {
+               wait.resolve(self.theme);
+            });
+         });
+      });
+
+      this.getCurrentTheme = function () {
+         if (this.theme) {
+            return $q.when(self.theme);
+         } else {
+            var waiter = $q.defer();
+            waiting.push(waiter);
+            return waiter.promise;
+         }
+      };
+
+      this.getThemes = function () {
+         return configService.getConfig('themes');
+      };
+
+      this.setTheme = function (key) {
+         this.theme = this.themes[key];
+         storageService.setItem(THEME_PERSIST_KEY, key);
+      };
+
+      return this;
+   }]);
+}
 "use strict";
 
 {
@@ -3767,19 +3896,19 @@ $templateCache.put("icsm/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"pa
 $templateCache.put("icsm/products/bbox.html","<button type=\"button\" class=\"undecorated\" ng-click=\"toggle()\" title=\"Show data extent on the map.\">\r\n      <i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-eye active\':data.hasBbox,\'fa-eye-slash\':!data.hasBbox}\"></i>\r\n   </button>");
 $templateCache.put("icsm/products/download.html","<div class=\"well\" ng-show=\"item.showDownload\">\r\n\r\n   <div class=\"well\">\r\n      <div ng-show=\"processing.validClip\" class=\"product-restrict\">\r\n         <span class=\"product-label\">Bounds:</span> {{processing.clip.xMin|number : 4}}&deg; west, {{processing.clip.yMax|number : 4}}&deg; north, {{processing.clip.xMax|number\r\n         : 4}}&deg; east, {{processing.clip.yMin|number : 4}}&deg; south\r\n\r\n         <div ng-show=\"processing.message\" class=\"product-warning\">\r\n            {{processing.message}}\r\n         </div>\r\n      </div>\r\n      <product-projection processing=\"processing\"></product-projection>\r\n      <br/>\r\n      <product-formats processing=\"processing\"></product-formats>\r\n      <br/>\r\n      <product-email processing=\"processing\"></product-email>\r\n   </div>\r\n   <product-download-submit processing=\"processing\" item=\"item\"></product-download-submit>\r\n</div>");
 $templateCache.put("icsm/products/email.html","<div class=\"input-group\">\r\n      <span class=\"input-group-addon\" id=\"nedf-email\">Email</span>\r\n      <input required=\"required\" type=\"email\" ng-model=\"processing.email\" class=\"form-control\" placeholder=\"Email address to send download link\">\r\n   </div>\r\n");
-$templateCache.put("icsm/products/formats.html","<div class=\"row\">\r\n      <div class=\"col-md-4\">\r\n         <label for=\"geoprocessOutputFormat\">\r\n                  Output Format\r\n               </label>\r\n      </div>\r\n      <div class=\"col-md-8\">\r\n         <select id=\"geoprocessOutputFormat\" style=\"width:95%\" ng-model=\"processing.outFormat\" ng-options=\"opt.value for opt in config.outFormat\"></select>\r\n      </div>\r\n   </div>");
+$templateCache.put("icsm/products/formats.html","<div class=\"row\">\r\n      <div class=\"col-md-4\">\r\n         <label for=\"geoprocessOutputFormat\">\r\n                  Output Format\r\n               </label>\r\n      </div>\r\n      <div class=\"col-md-8\">\r\n         <select id=\"geoprocessOutputFormat\" style=\"width:95%\" ng-model=\"processing.outFormat\" ng-options=\"opt.value for opt in config.outFormat track by opt.code\"></select>\r\n      </div>\r\n   </div>");
 $templateCache.put("icsm/products/product.html","<div ng-class-odd=\"\'odd\'\" ng-class-even=\"\'even\'\" ng-mouseleave=\"select.lolight(dataset)\" ng-mouseenter=\"select.hilight(dataset)\">\r\n      <span ng-class=\"{ellipsis:!expanded}\" tooltip-enable=\"!expanded\" style=\"width:100%;display:inline-block;\"\r\n            tooltip-class=\"selectAbstractTooltip\" tooltip=\"{{dataset.abstract | truncate : 250}}\" tooltip-placement=\"bottom\">\r\n         <button type=\"button\" class=\"undecorated\" ng-click=\"expanded = !expanded\" title=\"Click to see more about this dataset\">\r\n            <i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-caret-down active\':expanded,\'fa-caret-right\':(!expanded)}\"></i>\r\n         </button>\r\n         <product-download-button item=\"dataset\" group=\"group\"></product-download-button>\r\n         <products-bbox-button data=\"dataset\"></products-bbox-button>\r\n         <a href=\"https://ecat.ga.gov.au/geonetwork/srv/eng/search#!{{dataset.primaryId}}\" target=\"_blank\" ><strong>{{dataset.title}}</strong></a>\r\n      </span>\r\n      <product-download-panel item=\"dataset\"></product-download-panel>\r\n      <span ng-class=\"{ellipsis:!expanded}\" style=\"width:100%;display:inline-block;padding-right:15px;\">\r\n         {{dataset.abstract}}\r\n      </span>\r\n      <div ng-show=\"expanded\" style=\"padding-bottom: 5px;\">\r\n         <h5>Keywords</h5>\r\n         <div>\r\n            <span class=\"badge\" ng-repeat=\"keyword in dataset.keywords track by $index\">{{keyword}}</span>\r\n         </div>\r\n      </div>\r\n   </div>");
 $templateCache.put("icsm/products/products.html","<div>\r\n   <icsm-clip data=\"data.item\"></icsm-clip>\r\n   <div style=\"position:relative;padding:5px;padding-left:10px;\" class=\"scrollPanel\">\r\n      <div class=\"panel panel-default\" style=\"margin-bottom:-5px\">\r\n         <div class=\"panel-heading\">\r\n            <h3 class=\"panel-title\">Available products</h3>\r\n         </div>\r\n\r\n         <div class=\"panel-body\">\r\n            <div ng-repeat=\"doc in config.datasets\" style=\"padding-bottom:7px\">\r\n               <icsm-product ng-if=\"doc.type == \'dataset\'\" dataset=\"doc\"></icsm-product>\r\n            </div>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
-$templateCache.put("icsm/products/projection.html","<div class=\"row\">\r\n   <div class=\"col-md-4\">\r\n      <label for=\"geoprocessOutCoordSys\">\r\n                  Coordinate System\r\n               </label>\r\n   </div>\r\n   <div class=\"col-md-8\">\r\n      <select id=\"geoprocessOutCoordSys\" style=\"width:95%\" ng-model=\"processing.outCoordSys\" ng-options=\"opt.value for opt in config.outCoordSys | productIntersect : processing.clip\"></select>\r\n   </div>\r\n</div>");
+$templateCache.put("icsm/products/projection.html","<div class=\"row\">\r\n   <div class=\"col-md-4\">\r\n      <label for=\"geoprocessOutCoordSys\">\r\n                  Coordinate System\r\n               </label>\r\n   </div>\r\n   <div class=\"col-md-8\">\r\n      <select id=\"geoprocessOutCoordSys\" style=\"width:95%\" ng-model=\"processing.outCoordSys\" ng-options=\"opt.value for opt in config.outCoordSys | productIntersect : processing.clip track by opt.code\"></select>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/products/submit.html","<div class=\"well\" style=\"padding-bottom:2px\">\r\n      <div class=\"row\">\r\n         <div class=\"col-md-6\" style=\"padding-top:7px\">\r\n            <div class=\"progress\">\r\n               <div class=\"progress-bar\" role=\"progressbar\" aria-valuenow=\"{{processing.percentComplete}}\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: {{processing.percentComplete}}%;\">\r\n                   <span class=\"sr-only\">60% Complete</span>\r\n               </div>\r\n            </div>\r\n         </div>\r\n         <div class=\"col-md-4\" style=\"padding-top:7px\">\r\n            <span style=\"padding-right:10px\" uib-tooltip=\"Draw a valid area to extract data.\" tooltip-placement=\"left\">\r\n               <i class=\"fa fa-scissors fa-2x\" ng-class=\"{\'product-valid\': processing.validClipSize, \'product-invalid\': !processing.validClipSize }\"></i>\r\n            </span>\r\n            <span style=\"padding-right:10px\" uib-tooltip=\"Select a valid coordinate system for area.\" tooltip-placement=\"left\">\r\n               <i class=\"fa fa-file-video-o fa-2x\" ng-class=\"{\'product-valid\': processing.validProjection, \'product-invalid\': !processing.validProjection}\"></i>\r\n            </span>\r\n            <span style=\"padding-right:10px\" uib-tooltip=\"Select a valid download format.\" tooltip-placement=\"left\">\r\n               <i class=\"fa fa-files-o fa-2x\" ng-class=\"{\'product-valid\': processing.validFormat, \'product-invalid\': !processing.validFormat}\"></i>\r\n            </span>\r\n            <span style=\"padding-right:10px\" uib-tooltip=\"Provide an email address.\" tooltip-placement=\"left\">\r\n               <i class=\"fa fa-envelope fa-2x\" ng-class=\"{\'product-valid\': processing.validEmail, \'product-invalid\': !processing.validEmail}\"></i>\r\n            </span>\r\n         </div>\r\n         <div class=\"col-md-2\">\r\n            <button class=\"btn btn-primary pull-right\" ng-disabled=\"!processing.valid\" ng-click=\"submit()\">Submit</button>\r\n         </div>\r\n      </div>\r\n   </div>");
+$templateCache.put("icsm/reviewing/reviewing.html","<div class=\"modal-header\">\r\n   <h3 class=\"modal-title splash\">Download datasets by providing email address and start extract</h3>\r\n</div>\r\n<div class=\"modal-body\" id=\"accept\" ng-form exp-enter=\"accept()\"\r\n            icsm-splash-modal style=\"width: 100%; margin-left: auto; margin-right: auto;\">\r\n   <div class=\"row bg-warning\" ng-show=\"noneSelected(products)\">\r\n      <div class=\"col-md-2\">\r\n         <button type=\"button\" style=\"float:right\" class=\"btn btn-primary\" ng-click=\"cancel()\">Close</button>\r\n      </div>\r\n   </div>\r\n   <div ng-controller=\"listCtrl as list\">\r\n      <div class=\"row\">\r\n         <div class=\"col-md-12\">\r\n            <strong>\r\n               {{list.selected.length}} Selected Datasets\r\n               <span ng-show=\"list.selectedSize\">(Approx: {{list.selectedSize | fileSize}})</span>\r\n            </strong>\r\n         </div>\r\n      </div>\r\n   </div>\r\n   <div ng-repeat=\"org in products\">\r\n      <h5>\r\n         <img ng-src=\"{{mappings[org.source].image}}\" ng-attr-style=\"height:{{mappings[org.source].height}}px\"></img>\r\n         <strong>{{org.source}}</strong>\r\n      </h5>\r\n      <div style=\"padding-left:10px\" ng-repeat=\"(key, subGroup) in org.downloadables\">\r\n         <h5>{{key}}</h5>\r\n         <div style=\"padding-left:10px;\" ng-repeat=\"(name, items) in subGroup\">\r\n            <h5 title=\"Clipped product using coordinate System: {{data.outCoordSys.value}}, Output Format: {{data.outFormat.value}}\">\r\n               {{name}}\r\n               <span style=\"padding-left:25px;font-size:90%\">{{items.length | number :0}} items totalling {{items | reviewSumSize | fileSize}}</span>\r\n            </h5>\r\n         </div>\r\n      </div>\r\n\r\n   </div>\r\n\r\n\r\n   <div class=\"row reviewing-divider\">\r\n      <div class=\"col-md-12\">\r\n         <div review-email></div>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\" ng-controller=\"listCtrl as list\">\r\n      <div class=\"col-md-8\">\r\n         <strong>Email notification</strong> The extract of data can take some time. By providing an email address we will be able\r\n         to notify you when the job is complete. The email will provide a link to the extracted data which will be packaged\r\n         up as a single compressed file.\r\n      </div>\r\n      <div class=\"col-md-4\">\r\n         <div class=\"pull-right\" style=\"padding:8px;\">\r\n            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"accept()\" ng-disabled=\"!data.email || !list.selected.length\">Start extract of datasets\r\n            </button>\r\n            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"cancel()\">Cancel</button>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/results/abstractbutton.html","<button ng-show=\"show\" type=\"button\" class=\"undecorated\" title=\"View full title and abstract of this dataset\" ng-click=\"toggle()\">\r\n	<i class=\"fa fa-lg\" ng-class=\"{\'fa-caret-down active\':item.showAbstract, \'fa-caret-right\':!item.showAbstract}\"></i>\r\n</button>");
 $templateCache.put("icsm/results/abstracttooltip.html","<div>\r\n{{item.metadata.title? item.metadata.title: \'Loading...\'}}\r\n</div>");
-$templateCache.put("icsm/results/continue.html","<div class=\"continue-container\" ng-show=\"ctrl.selected.length\">\r\n   <button class=\"btn btn-primary\" ng-click=\"ctrl.review()\">Review {{ctrl.selected.length}} selected datasets (Approx: {{ctrl.selectedSize | fileSize}})</button>\r\n</div>\r\n\r\n");
+$templateCache.put("icsm/results/continue.html","<div class=\"continue-container\" ng-show=\"ctrl.selected.length\">\r\n   <button class=\"btn btn-primary\" ng-click=\"ctrl.review()\">Download {{ctrl.selected.length | number}} selected datasets... (Approx: {{ctrl.selectedSize | fileSize}})</button>\r\n</div>\r\n\r\n");
 $templateCache.put("icsm/results/orgheading.html","<h5>\r\n   <img ng-src=\"{{mappings[org.source].image}}\" ng-attr-style=\"height:{{mappings[org.source].height}}px\"></img>\r\n      <strong>{{org.source}}</strong> (Showing {{org.downloadables | countMatchedDownloadables | number:0}} of {{org.downloadables	| countDownloadables | number:0}})\r\n</h5>");
-$templateCache.put("icsm/results/results.html","<div ng-show=\"!list || !list.length\">\r\n   <div class=\"alert alert-warning\" role=\"alert\">\r\n      <strong>Select an area</strong> to find datasets within.</div>\r\n</div>\r\n\r\n<div ng-show=\"list.length\" class=\"results-list\">\r\n   <div class=\"row\">\r\n      <div class=\"col-md-12\" uib-tooltip=\"Number of intersecting or very near datasets to your area of interest.\">\r\n         <h4 style=\"display:inline-block; padding-left:7px\">Found {{products.length | number:0}} datasets</h4>\r\n      </div>\r\n   </div>\r\n   <div class=\"panel panel-default\" style=\"margin-bottom: 5px; margin-top: 0;\">\r\n      <div class=\"panel-body\" style=\"float:clear\">\r\n         <span class=\"filter-text\" style=\"float:left;width:50%\">\r\n            <div class=\"input-group input-group-sm\">\r\n               <span class=\"input-group-addon\" id=\"names1\">Filter:</span>\r\n               <input type=\"text\" ng-model=\"filters.filter\" class=\"form-control\" ng-change=\"update()\" placeholder=\"Filter names\" aria-describedby=\"names1\">\r\n            </div>\r\n         </span>\r\n         <span class=\"filter-type\" style=\"padding:10px; float:right\">\r\n            <span class=\"listTypeLabel\">Filter by type:</span>\r\n            <span ng-repeat=\"type in filters.types\" class=\"listType\">\r\n               <input type=\"checkbox\" ng-model=\"type.selected\" ng-change=\"update()\" />\r\n               <span uib-tooltip=\"{{type.description}}\">{{type.label}}</span>\r\n            </span>\r\n         </span>\r\n      </div>\r\n   </div>\r\n\r\n   <div ng-repeat=\"available in list\" class=\"well\" style=\"padding-left:4px;padding-right:4px\" ng-show=\"list.someMatches(available)\"\r\n      ng-controller=\"listCtrl as list\">\r\n      <icsm-org-heading org=\"available\" mappings=\"mappings\"></icsm-org-heading>\r\n      <div>\r\n         <div class=\"listRow\" ng-class-odd=\"\'listEven\'\" ng-repeat=\"(typeKey, types) in available.downloadables | allowedTypes\" ng-show=\"types | hasTypeMatches\">\r\n            <span>\r\n               <h5>{{typeKey}}</h5>\r\n            </span>\r\n\r\n            <div ng-if=\"typeKey === \'Unreleased Data\'\">\r\n               <icsm-unreleased types=\"types\">\r\n            </div>\r\n            <div ng-if=\"typeKey !== \'Unreleased Data\'\">\r\n               <div ng-repeat=\"(key, items) in types\" ng-show=\"(items | countMatchedItems) != 0\">\r\n                  <div>\r\n                     <h5>\r\n                        <button ng-click=\"list.checkChildren(items)\" style=\"width:7em\" class=\"btn btn-xs btn-default\">\r\n                           <span ng-show=\"!list.childrenChecked(items)\">Select all</span>\r\n                           <span ng-show=\"list.childrenChecked(items)\">Deselect all</span>\r\n                        </button>\r\n                        <span uib-tooltip=\"{{filter.types[key].description}}\">{{key}} (Showing {{items | countMatchedItems | number:0}} of {{items.length | number:0}})</span>\r\n                        <button class=\"pull-right undecorated\" ng-click=\"expansions[available.source + \'_\' + key] = !expansions[available.source + \'_\' + key]\">\r\n                           [{{expansions[available.source + \'_\' + key]?\"collapse\":\"expand\"}}]\r\n                        </button>\r\n                     </h5>\r\n                  </div>\r\n                  <div ng-show=\"expansions[available.source + \'_\' + key]\">\r\n                     <subtype items=\"items\" mappings=\"mappings\" show=\"show\" hide=\"hide\"></subtype>\r\n                     <div style=\"text-align:right\">\r\n                        <button class=\"undecorated\" ng-click=\"visible = false\">[collapse]</button>\r\n                     </div>\r\n                  </div>\r\n               </div>\r\n            </div>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
-$templateCache.put("icsm/results/subtype.html","<div ng-show=\"(items | matchedItems).length > paging.pageSize\"\r\n      paging page=\"paging.page\" page-size=\"paging.pageSize\"\r\n      total=\"(items | matchedItems).length\"\r\n      paging-action=\"setPage(page, pageSize)\">\r\n</div>\r\n<div>\r\n   <div ng-repeat=\"item in data\" icsm-abstract-hover item=\"item\">\r\n      <div tooltip-append-to-body=\"true\" uib-tooltip-template=\"\'icsm/results/abstracttooltip.html\'\" tooltip-popup-delay=\"400\" data-ng-mouseenter=\"show(item)\"\r\n         data-ng-mouseleave=\"hide(item)\">\r\n         <input type=\"checkbox\" ng-model=\"item.selected\" />\r\n         <icsm-abstract item=\"item\"></icsm-abstract>\r\n         <common-cc version=\"mappings[item.source].ccLicence\"></common-cc>\r\n         <span class=\"listItem\" item=\"item\" icsm-abstract-link></span>\r\n         <span ng-show=\"item.file_size\" style=\"float:right;padding-top:3px\">({{item.file_size | fileSize}})</span>\r\n      </div>\r\n      <div ng-show=\"item.showAbstract\" class=\"well\">\r\n         <span ng-show=\"!item.metadata\">\r\n            <i class=\"fa fa-spinner fa-spin fa-lg fa-fw\"></i>\r\n            <span>Loading metadata...</span>\r\n         </span>\r\n         <div ng-show=\"item.metadata.abstract\">\r\n            <strong>{{item.metadata.title}}</strong> -\r\n            <span class=\"icsm-abstract-body\" ng-bind-html=\"item.metadata.abstractText\"></span>\r\n         </div>\r\n         <div ng-show=\"!item.metadata.abstract\">\r\n            <i class=\"fa fa-lg fa-exclamation-triangle\" style=\"color:orange\"></i>\r\n            There is no abstract available for this dataset.\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
+$templateCache.put("icsm/results/results.html","<div ng-show=\"!list || !list.length\">\r\n   <div class=\"alert alert-warning\" role=\"alert\">\r\n      <strong>Select an area</strong> to find datasets within.</div>\r\n</div>\r\n\r\n<div ng-show=\"list.length\" class=\"results-list\">\r\n   <div class=\"row\">\r\n      <div class=\"col-md-12\" uib-tooltip=\"Number of intersecting or very near datasets to your area of interest.\">\r\n         <h4 style=\"display:inline-block; padding-left:7px\">Found {{products.length | number:0}} datasets</h4>\r\n      </div>\r\n   </div>\r\n   <div class=\"panel panel-default\" style=\"margin-bottom: 5px; margin-top: 0;\">\r\n      <div class=\"panel-body\" style=\"float:clear\">\r\n         <span class=\"filter-text\" style=\"float:left;width:50%\">\r\n            <div class=\"input-group input-group-sm\">\r\n               <span class=\"input-group-addon\" id=\"names1\">Filter:</span>\r\n               <input type=\"text\" ng-model=\"filters.filter\" class=\"form-control\" ng-change=\"update()\" placeholder=\"Filter names\" aria-describedby=\"names1\">\r\n            </div>\r\n         </span>\r\n         <span class=\"filter-type\" style=\"padding:10px; float:right\">\r\n            <span class=\"listTypeLabel\">Filter by type:</span>\r\n            <span ng-repeat=\"type in filters.types\" class=\"listType\">\r\n               <input type=\"checkbox\" ng-model=\"type.selected\" ng-change=\"update()\" />\r\n               <span uib-tooltip=\"{{type.description}}\">{{type.label}}</span>\r\n            </span>\r\n         </span>\r\n      </div>\r\n   </div>\r\n\r\n   <div ng-repeat=\"available in list\" class=\"well\" style=\"padding-left:4px;padding-right:4px\" ng-show=\"list.someMatches(available)\"\r\n      ng-controller=\"listCtrl as list\">\r\n      <icsm-org-heading org=\"available\" mappings=\"mappings\"></icsm-org-heading>\r\n      <div>\r\n         <div class=\"listRow\" ng-class-odd=\"\'listEven\'\" ng-repeat=\"(typeKey, types) in available.downloadables | allowedTypes\" ng-show=\"types | hasTypeMatches\">\r\n            <span>\r\n               <h5>{{typeKey}}</h5>\r\n            </span>\r\n\r\n            <div ng-if=\"typeKey === \'Unreleased Data\'\">\r\n               <icsm-unreleased types=\"types\">\r\n            </div>\r\n            <div ng-if=\"typeKey !== \'Unreleased Data\'\">\r\n               <div ng-repeat=\"(key, items) in types\" ng-show=\"(items | countMatchedItems) != 0\">\r\n                  <div>\r\n                     <h5>\r\n                        <button ng-click=\"list.checkChildren(items)\" style=\"width:7em\" class=\"btn btn-xs btn-default\">\r\n                           <span ng-show=\"!list.childrenChecked(items)\">Select all</span>\r\n                           <span ng-show=\"list.childrenChecked(items)\">Deselect all</span>\r\n                        </button>\r\n                        <span uib-tooltip=\"{{filter.types[key].description}}\">{{key}} (Showing {{items | countMatchedItems | number:0}} of {{items.length | number:0}})</span>\r\n\r\n\r\n                        <button class=\"pull-right undecorated\" ng-click=\"expansions[available.source + \'_\' + key] = !expansions[available.source + \'_\' + key]\">\r\n                           [{{expansions[available.source + \'_\' + key]?\"hide files\":\"show files\"}}]\r\n                        </button>\r\n                     </h5>\r\n                     <span ng-show=\"items | hasProducts\" products-dialog>\r\n                        <product-projection processing=\"processing\"></product-projection>\r\n                        <product-formats processing=\"processing\"></product-formats>\r\n                     </span>\r\n                  </div>\r\n                  <div ng-show=\"expansions[available.source + \'_\' + key]\">\r\n                     <subtype items=\"items\" mappings=\"mappings\" show=\"show\" hide=\"hide\"></subtype>\r\n                     <div style=\"text-align:right\">\r\n                        <button class=\"undecorated\" ng-click=\"expansions[available.source + \'_\' + key] = false\">[hide files]</button>\r\n                     </div>\r\n                  </div>\r\n               </div>\r\n            </div>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
+$templateCache.put("icsm/results/subtype.html","<div ng-show=\"(items | matchedItems).length > paging.pageSize\"\r\n   paging page=\"paging.page\" page-size=\"paging.pageSize\"\r\n   total=\"(items | matchedItems).length\"\r\n   paging-action=\"setPage(page, pageSize)\">\r\n</div>\r\n<div>\r\n   <div ng-repeat=\"item in data\" icsm-abstract-hover item=\"item\">\r\n      <div tooltip-append-to-body=\"true\" uib-tooltip-template=\"\'icsm/results/abstracttooltip.html\'\" tooltip-popup-delay=\"400\" data-ng-mouseenter=\"show(item)\"\r\n         data-ng-mouseleave=\"hide(item)\">\r\n         <input type=\"checkbox\" ng-model=\"item.selected\" />\r\n         <icsm-abstract item=\"item\"></icsm-abstract>\r\n         <common-cc version=\"mappings[item.source].ccLicence\"></common-cc>\r\n         <span class=\"listItem\" item=\"item\" icsm-abstract-link></span>\r\n         <span ng-show=\"item.file_size\" style=\"float:right;padding-top:3px\">({{item.file_size | fileSize}})</span>\r\n      </div>\r\n      <div ng-show=\"item.showAbstract\" class=\"well\">\r\n         <span ng-show=\"!item.metadata\">\r\n            <i class=\"fa fa-spinner fa-spin fa-lg fa-fw\"></i>\r\n            <span>Loading metadata...</span>\r\n         </span>\r\n         <div ng-show=\"item.metadata.abstract\">\r\n            <strong>{{item.metadata.title}}</strong> -\r\n            <span class=\"icsm-abstract-body\" ng-bind-html=\"item.metadata.abstractText\"></span>\r\n         </div>\r\n         <div ng-show=\"!item.metadata.abstract\">\r\n            <i class=\"fa fa-lg fa-exclamation-triangle\" style=\"color:orange\"></i>\r\n            There is no abstract available for this dataset.\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/results/unreleased.html","<div ng-repeat=\"(key, items) in types\" ng-show=\"(items | countMatchedItems) != 0\">\r\n   <div style=\"padding-left:4px\">\r\n      <h5>\r\n         <span uib-tooltip=\"{{filter.types[key].description}}\">{{key}} (Showing {{items | countMatchedItems | number:0}} of {{items.length | number:0}})</span>\r\n      </h5>\r\n   </div>\r\n   <div ng-repeat=\"item in items\" icsm-abstract-hover item=\"item\">\r\n      <div tooltip-append-to-body=\"true\" uib-tooltip-template=\"\'icsm/results/abstracttooltip.html\'\" tooltip-popup-delay=\"400\" data-ng-mouseenter=\"show(item)\"\r\n         data-ng-mouseleave=\"hide(item)\" style=\"padding-left:8px;\">\r\n         <icsm-abstract item=\"item\"></icsm-abstract>\r\n         <button type=\"button\" class=\"undecorated\" disabled=\"disabled\" title=\"Licence details pending release.\">\r\n            <i class=\"fa fa-lg fa-gavel\"></i>\r\n         </button>\r\n         <span class=\"listItem\" name=\"project_name\" item=\"item\" icsm-abstract-link></span>\r\n         <span ng-show=\"item.file_size\" style=\"float:right;padding-top:3px\">({{item.file_size | fileSize}})</span>\r\n      </div>\r\n      <div ng-show=\"item.showAbstract\" class=\"well\" style=\"margin-bottom:0px\">\r\n         <span ng-show=\"!item.metadata\">\r\n            <i class=\"fa fa-spinner fa-spin fa-lg fa-fw\"></i>\r\n            <span>Loading metadata...</span>\r\n         </span>\r\n         <div ng-show=\"item.metadata.abstract\">\r\n            <strong>{{item.metadata.title}}</strong> -\r\n            <span class=\"icsm-abstract-body\" ng-bind-html=\"item.metadata.abstractText\"></span>\r\n         </div>\r\n         <div ng-show=\"!item.metadata.abstract\">\r\n            <i class=\"fa fa-lg fa-exclamation-triangle\" style=\"color:orange\"></i>\r\n            There is no abstract available for this dataset.\r\n         </div>\r\n      </div>\r\n      <div style=\"padding-left:12px\">\r\n         <div>\r\n            <strong style=\"width:7em\">Captured: </strong>{{item.captured | captured}}\r\n         </div>\r\n         <div ng-if=\"item.available_date\">\r\n            <strong style=\"width:7em\">Available: </strong>{{item.available_date | reverseDate}}\r\n         </div>\r\n         <div>\r\n            <strong style=\"width:7em\">Contact: </strong>\r\n            <a href=\"mailTo:{{item.contact}}\">{{item.contact}}</a>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
-$templateCache.put("icsm/reviewing/reviewing.html","<div class=\"modal-header\">\r\n   <h3 class=\"modal-title splash\">Review datasets, provide email and continue</h3>\r\n</div>\r\n<div class=\"modal-body\" id=\"accept\" ng-form exp-enter=\"accept()\" icsm-splash-modal style=\"width: 100%; margin-left: auto; margin-right: auto;\">\r\n   <div class=\"row bg-warning\" ng-show=\"noneSelected(products)\">\r\n      <div class=\"col-md-10 center-block\" style=\"padding:5px; text-align:center\">\r\n         <strong>All datasets have been removed.</strong>\r\n      </div>\r\n      <div class=\"col-md-2\">\r\n         <button type=\"button\" style=\"float:right\" class=\"btn btn-primary\" ng-click=\"cancel()\">Close</button>\r\n      </div>\r\n   </div>\r\n   <div ng-hide=\"noneSelected(products)\" ng-controller=\"listCtrl as list\">\r\n      <div class=\"row\">\r\n         <div class=\"col-md-12\">\r\n            <strong>\r\n               {{list.selected.length}} Selected Datasets\r\n               <span ng-show=\"list.selectedSize\">(Approx: {{list.selectedSize | fileSize}})</span>\r\n            </strong>\r\n            <span class=\"pull-right\">Review and delete unwanted datasets.</span>\r\n         </div>\r\n      </div>\r\n      <span ng-show=\"(products | reviewProductsSelected).length > paging.pageSize\" paging page=\"paging.page\" page-size=\"paging.pageSize\"\r\n         total=\"(products | reviewProductsSelected).length\" paging-action=\"setPage(page, pageSize)\">\r\n      </span>\r\n      <div class=\"reviewing-datasets\">\r\n         <div class=\"row\" ng-repeat=\"product in page\" ng-class-odd=\"\'reviewing-odd\'\">\r\n            <div class=\"col-md-7\">\r\n               <button type=\"button\" class=\"btn btn-default btn-xs\" ng-click=\"product.removed = !product.removed\">\r\n                  <i class=\"fa fa-2x\" ng-class=\"{\'fa-times-circle\': product.removed, \'fa-check-circle\': !product.removed}\" aria-hidden=\"true\"></i>\r\n               </button>\r\n               <span style=\"padding-left:7px\" ng-class=\"{\'exclude\': product.removed}\">{{product.file_name}}</span>\r\n            </div>\r\n            <div class=\"col-md-4\" style=\"padding:6px\">\r\n               ({{product.source}}\r\n               <i class=\"fa fa-arrow-right\" aria-hidden=\"true\"></i> {{product.type}}\r\n               <i class=\"fa fa-arrow-right\" aria-hidden=\"true\"></i> {{product.group}})\r\n            </div>\r\n            <div class=\"col-md-1\" style=\"padding:6px\">\r\n               {{product.fileSize}}\r\n            </div>\r\n         </div>\r\n      </div>\r\n   </div>\r\n   <div class=\"row reviewing-divider\">\r\n      <div class=\"col-md-12\">\r\n         <div review-email></div>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\" ng-controller=\"listCtrl as list\">\r\n      <div class=\"col-md-8\">\r\n         <strong>Email notification</strong> The extract of data can take some time. By providing an email address we will be able\r\n         to notify you when the job is complete. The email will provide a link to the extracted data which will be packaged\r\n         up as a single compressed file.\r\n      </div>\r\n      <div class=\"col-md-4\">\r\n         <div class=\"pull-right\" style=\"padding:8px;\">\r\n            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"accept()\" ng-disabled=\"!data.email || !list.selected.length\">Start extract of datasets\r\n            </button>\r\n            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"cancel()\">Cancel</button>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/select/doc.html","<div ng-class-odd=\"\'odd\'\" ng-class-even=\"\'even\'\" ng-mouseleave=\"select.lolight(doc)\" ng-mouseenter=\"select.hilight(doc)\">\r\n	<span ng-class=\"{ellipsis:!expanded}\" tooltip-enable=\"!expanded\" style=\"width:100%;display:inline-block;\"\r\n			tooltip-class=\"selectAbstractTooltip\" tooltip=\"{{doc.abstract | truncate : 250}}\" tooltip-placement=\"bottom\">\r\n		<button type=\"button\" class=\"undecorated\" ng-click=\"expanded = !expanded\" title=\"Click to see more about this dataset\">\r\n			<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-caret-down\':expanded,\'fa-caret-right\':(!expanded)}\"></i>\r\n		</button>\r\n		<download-add item=\"doc\" group=\"group\"></download-add>\r\n		<icsm-wms data=\"doc\"></icsm-wms>\r\n		<icsm-bbox data=\"doc\" ng-if=\"doc.showExtent\"></icsm-bbox>\r\n		<a href=\"https://ecat.ga.gov.au/geonetwork/srv/eng/search#!{{doc.primaryId}}\" target=\"_blank\" ><strong>{{doc.title}}</strong></a>\r\n	</span>\r\n	<span ng-class=\"{ellipsis:!expanded}\" style=\"width:100%;display:inline-block;padding-right:15px;\">\r\n		{{doc.abstract}}\r\n	</span>\r\n	<div ng-show=\"expanded\" style=\"padding-bottom: 5px;\">\r\n		<h5>Keywords</h5>\r\n		<div>\r\n			<span class=\"badge\" ng-repeat=\"keyword in doc.keywords track by $index\">{{keyword}}</span>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/select/group.html","<div class=\"panel panel-default\" style=\"margin-bottom:-5px;\" >\r\n	<div class=\"panel-heading\"><icsm-wms data=\"group\"></icsm-wms> <strong>{{group.title}}</strong></div>\r\n	<div class=\"panel-body\">\r\n   		<div ng-repeat=\"doc in group.docs\">\r\n   			<div select-doc doc=\"doc\" group=\"group\"></div>\r\n		</div>\r\n	</div>\r\n</div>\r\n");
 $templateCache.put("icsm/select/select.html","<div>\r\n	<div style=\"position:relative;padding:5px;padding-left:10px;\" ng-controller=\"SelectCtrl as select\" class=\"scrollPanel\">\r\n		<div class=\"panel panel-default\" style=\"margin-bottom:-5px\">\r\n  			<div class=\"panel-heading\">\r\n  				<h3 class=\"panel-title\">Available datasets</h3>\r\n  			</div>\r\n  			<div class=\"panel-body\">\r\n				<div ng-repeat=\"doc in select.data.response.docs\" style=\"padding-bottom:7px\">\r\n					<div select-doc ng-if=\"doc.type == \'dataset\'\" doc=\"doc\"></div>\r\n					<select-group ng-if=\"doc.type == \'group\'\" group=\"doc\"></select-group>\r\n				</div>\r\n  			</div>\r\n		</div>\r\n	</div>\r\n</div>");

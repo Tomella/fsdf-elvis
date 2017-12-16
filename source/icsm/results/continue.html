@@ -1,4 +1,4 @@
 <div class="continue-container" ng-show="ctrl.selected.length">
-   <button class="btn btn-primary" ng-click="ctrl.review()">Review {{ctrl.selected.length}} selected datasets (Approx: {{ctrl.selectedSize | fileSize}})</button>
+   <button class="btn btn-primary" ng-click="ctrl.review()">Download {{ctrl.selected.length | number}} selected datasets... (Approx: {{ctrl.selectedSize | fileSize}})</button>
 </div>
 

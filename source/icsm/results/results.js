@@ -2,6 +2,18 @@
 
    angular.module("elvis.results", ['elvis.results.continue', 'icsm.subtype', 'icsm.unreleased'])
 
+      .directive('productsDialog', ['productsConfigService', 'listService', function (productsConfigService, listService) {
+         return {
+            restrict: 'AE',
+            link: function(scope) {
+               let data = scope.processing = listService.data;
+               productsConfigService.defaultOutputCoordinateSystem.then(item => data.outCoordSys = item);
+               productsConfigService.defaultOutputFormat.then(format => data.outFormat = format);
+            }
+         };
+      }])
+
+
       .directive('icsmOrgHeading', [function () {
          return {
             templateUrl: 'icsm/results/orgheading.html',
@@ -246,7 +258,7 @@
          var strategies = new Strategies($http);
 
          service.data = {
-            id:"listService_data",
+            id: "listService_data",
             filter: "",
             types: [],
          };

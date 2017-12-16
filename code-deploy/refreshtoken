@@ -3,4 +3,4 @@
 # Add a cron line like:
 # 0 15 * * * /bin/bash $HOME/fsdf-elvis/code-deploy/refreshtoken
 
-/usr/bin/wget http://localhost:3000/refreshToken >/dev/null 2>&1
+/usr/bin/wget -O /dev/null -o /dev/null http://localhost:3000/refreshToken >/dev/null 2>&1
