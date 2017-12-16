@@ -191,23 +191,36 @@
                      });
                   }
                });
+
+
+               function decorateDownloadables(downloadables) {
+                  Object.keys(downloadables).forEach(groupname => {
+                     let group = downloadables[groupname];
+                     Object.keys(group).forEach(listName => {
+                        let items = group[listName];
+
+                        items.forEach(item => decorateItem(item));
+                     })
+                  });
+               }
+
+               function decorateItem(item) {
+                  item.fileSize = fileSize(item.file_size);
+                  if(item.product) {
+                     //  "bbox" : "113,-44,154,-10"
+                     var arr = item.bbox.split(",").map(num => +num);
+                     item.bbox = [
+                        Math.max(arr[0], clip.xMin),
+                        Math.max(arr[1], clip.yMin),
+                        Math.min(arr[2], clip.xMax),
+                        Math.min(arr[3], clip.yMax)
+                     ].join(",");
+                  }
+               }
+
             }
          }]);
 
-   function decorateDownloadables(downloadables) {
-      Object.keys(downloadables).forEach(groupname => {
-         let group = downloadables[groupname];
-         Object.keys(group).forEach(listName => {
-            let items = group[listName];
-
-            items.forEach(item => decorateItem(item));
-         })
-      });
-   }
-
-   function decorateItem(item) {
-      item.fileSize = fileSize(item.file_size);
-   }
 
    function fileSize(size) {
       var meg = 1000 * 1000;

@@ -1,15 +1,5 @@
 {
-   angular.module("icsm.product", ["products.bbox", "product.download"])
-
-      .directive("icsmProduct", [function () {
-         return {
-            scope: {
-               dataset: "="
-            },
-            templateUrl: "icsm/products/product.html"
-         };
-      }])
-
+   angular.module("icsm.product", ["product.download"])
       .directive("productProjection", ['productsConfigService', function(productsConfigService) {
          return {
             templateUrl : "icsm/products/projection.html",

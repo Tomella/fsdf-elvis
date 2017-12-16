@@ -1,16 +1,5 @@
 {
    angular.module("icsm.products", ["icsm.product"])
-
-      .directive("icsmProducts", ['productsConfigService', function (productsConfigService) {
-         return {
-            restrict: "AE",
-            templateUrl: "icsm/products/products.html",
-            link: function (scope) {
-               productsConfigService.config.then(config => scope.config = config);
-            }
-         }
-      }])
-
       .provider('productsConfigService', [function () {
          var location = "icsm/resources/config/download.json";
 

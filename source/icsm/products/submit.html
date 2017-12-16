@@ -1,28 +1,29 @@
 <div class="well" style="padding-bottom:2px">
-      <div class="row">
-         <div class="col-md-6" style="padding-top:7px">
-            <div class="progress">
-               <div class="progress-bar" role="progressbar" aria-valuenow="{{processing.percentComplete}}" aria-valuemin="0" aria-valuemax="100" style="width: {{processing.percentComplete}}%;">
-                   <span class="sr-only">60% Complete</span>
-               </div>
+   <div class="row">
+      <div class="col-md-6" style="padding-top:7px">
+         <div class="progress">
+            <div class="progress-bar" role="progressbar" aria-valuenow="{{processing.percentComplete}}" aria-valuemin="0" aria-valuemax="100"
+               style="width: {{processing.percentComplete}}%;">
+               <span class="sr-only">60% Complete</span>
             </div>
          </div>
-         <div class="col-md-4" style="padding-top:7px">
-            <span style="padding-right:10px" uib-tooltip="Draw a valid area to extract data." tooltip-placement="left">
-               <i class="fa fa-scissors fa-2x" ng-class="{'product-valid': processing.validClipSize, 'product-invalid': !processing.validClipSize }"></i>
-            </span>
-            <span style="padding-right:10px" uib-tooltip="Select a valid coordinate system for area." tooltip-placement="left">
-               <i class="fa fa-file-video-o fa-2x" ng-class="{'product-valid': processing.validProjection, 'product-invalid': !processing.validProjection}"></i>
-            </span>
-            <span style="padding-right:10px" uib-tooltip="Select a valid download format." tooltip-placement="left">
-               <i class="fa fa-files-o fa-2x" ng-class="{'product-valid': processing.validFormat, 'product-invalid': !processing.validFormat}"></i>
-            </span>
-            <span style="padding-right:10px" uib-tooltip="Provide an email address." tooltip-placement="left">
-               <i class="fa fa-envelope fa-2x" ng-class="{'product-valid': processing.validEmail, 'product-invalid': !processing.validEmail}"></i>
-            </span>
-         </div>
-         <div class="col-md-2">
-            <button class="btn btn-primary pull-right" ng-disabled="!processing.valid" ng-click="submit()">Submit</button>
-         </div>
+      </div>
+      <div class="col-md-4" style="padding-top:7px">
+         <span style="padding-right:10px" uib-tooltip="Draw a valid area to extract data." tooltip-placement="left">
+            <i class="fa fa-scissors fa-2x" ng-class="{'product-valid': processing.validClipSize, 'product-invalid': !processing.validClipSize }"></i>
+         </span>
+         <span style="padding-right:10px" uib-tooltip="Select a valid coordinate system for area." tooltip-placement="left">
+            <i class="fa fa-file-video-o fa-2x" ng-class="{'product-valid': processing.validProjection, 'product-invalid': !processing.validProjection}"></i>
+         </span>
+         <span style="padding-right:10px" uib-tooltip="Select a valid download format." tooltip-placement="left">
+            <i class="fa fa-files-o fa-2x" ng-class="{'product-valid': processing.validFormat, 'product-invalid': !processing.validFormat}"></i>
+         </span>
+         <span style="padding-right:10px" uib-tooltip="Provide an email address." tooltip-placement="left">
+            <i class="fa fa-envelope fa-2x" ng-class="{'product-valid': processing.validEmail, 'product-invalid': !processing.validEmail}"></i>
+         </span>
+      </div>
+      <div class="col-md-2">
+         <button class="btn btn-primary pull-right" ng-disabled="!processing.valid" ng-click="submit()">Submit</button>
       </div>
    </div>
+</div>

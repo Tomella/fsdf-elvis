@@ -251,7 +251,7 @@
 
       .controller('listCtrl', ListCtrl)
 
-      .factory('listService', ['$http', function ($http) {
+      .factory('listService', ['$http', '$rootScope', function ($http, $rootScope) {
          var service = {};
          var expansions = {};
 
