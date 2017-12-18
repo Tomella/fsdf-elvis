@@ -731,6 +731,63 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       }]);
    })();
 }
+"use strict";
+
+{
+   angular.module("icsm.message", []).directive("icsmMessage", ['icsmMessageService', function (icsmMessageService) {
+      return {
+         templateUrl: "icsm/message/message.html",
+         link: function link(scope, element) {
+            scope.message = icsmMessageService.data;
+         }
+      };
+   }]).factory("icsmMessageService", ['$timeout', function ($timeout) {
+      var data = {};
+      var service = {
+         get data() {
+            return data;
+         },
+
+         wait: function wait(text) {
+            return service.message("wait", text);
+         },
+
+         info: function info(text) {
+            return service.message("info", text);
+         },
+
+         warn: function warn(text) {
+            return service.message("warn", text);
+         },
+
+         error: function error(text) {
+            return service.message("error", text);
+         },
+
+         clear: function clear() {
+            return service.message(null, null);
+         },
+
+         message: function message(type, text) {
+            data.type = type;
+            data.text = text;
+            $timeout(function () {
+               service.removeFlash();
+            }, 100000);
+         },
+
+         flash: function flash(text) {
+            return service.message("flash", text);
+         },
+
+         removeFlash: function removeFlash() {
+            data.type = null;
+         }
+      };
+
+      return service;
+   }]);
+}
 'use strict';
 
 {
@@ -925,63 +982,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             });
          }
       };
-   }]);
-}
-"use strict";
-
-{
-   angular.module("icsm.message", []).directive("icsmMessage", ['icsmMessageService', function (icsmMessageService) {
-      return {
-         templateUrl: "icsm/message/message.html",
-         link: function link(scope, element) {
-            scope.message = icsmMessageService.data;
-         }
-      };
-   }]).factory("icsmMessageService", ['$timeout', function ($timeout) {
-      var data = {};
-      var service = {
-         get data() {
-            return data;
-         },
-
-         wait: function wait(text) {
-            return service.message("wait", text);
-         },
-
-         info: function info(text) {
-            return service.message("info", text);
-         },
-
-         warn: function warn(text) {
-            return service.message("warn", text);
-         },
-
-         error: function error(text) {
-            return service.message("error", text);
-         },
-
-         clear: function clear() {
-            return service.message(null, null);
-         },
-
-         message: function message(type, text) {
-            data.type = type;
-            data.text = text;
-            $timeout(function () {
-               service.removeFlash();
-            }, 100000);
-         },
-
-         flash: function flash(text) {
-            return service.message("flash", text);
-         },
-
-         removeFlash: function removeFlash() {
-            data.type = null;
-         }
-      };
-
-      return service;
    }]);
 }
 "use strict";
