@@ -117,86 +117,19 @@
                   this.setEmail(data.email);
 
                   return configService.getConfig("processing").then(function (config) {
-                     let selected = listService.products.filter(product => product.selected);
-                     let products = selected.filter(product => product.product);
-                     let files = selected.filter(product => !product.product);
-                     let jobsCount = 0;
-
-                     var template = "https://elvis20161a-ga.fmecloud.com/fmejobsubmitter/elvis_prod/DEMClipZipShip_Master_S3Source.fmw?geocat_number=${id}&out_grid_name=${filename}&input_coord_sys=LL-WGS84&ymin=${yMin}&ymax=${yMax}&xmin=${xMin}&xmax=${xMax}&output_format=${outFormat}&out_coord_sys=${outCoordSys}&email_address=${email}&opt_showresult=false&opt_servicemode=async";
-
-                     if (products.length) {
-                        console.log("We are processing products.");
-                        let index = 0;
-
-                        return submit();
-
-                        function submit() {
-                           jobsCount++;
-
-                           let product = products[index++];
-                           let parameters = Object.assign({}, clip, {
-                              id: product.metadata_id,
-                              filename: "",
-                              outFormat: data.outFormat.code,
-                              outCoordSys: data.outCoordSys.code,
-                              email: data.email
-                           });
-
-                           return postProduct(template, parameters).then(response => {
-                              if (index < products.length) {
-                                 return submit();
-                              } else {
-                                 // Clear selections
-                                 products.forEach(product => product.selected = false);
-                                 if (files.length) {
-                                    return postFiles();
-                                 } else {
-                                    return finish();
-                                 }
-                              }
-                           });
-                        }
-
-                     }
-
-                     if (!products.length && files.length) {
-                        console.log("We are processing files");
-                        return postFiles();
-                     }
-
-                     // That's the job done.
-
-                     function postProduct(template, parameters) {
-                        let workingString = template;
-
-                        angular.forEach(parameters, function (item, key) {
-                           workingString = workingString.replace("${" + key + "}", item);
-                        });
-
-                        return $http({
-                           method: 'GET',
-                           url: workingString
-                        }).then(function (response) {
-                           return finish();
-                        }, function (d) {
-                           return {
-                              status: "error",
-                              message: "Sorry but the service failed to respond. Try again later."
-                           };
-                        });
-                     }
+                     console.log("We are processing files");
+                     return postFiles();
 
                      function finish() {
                         return {
                            status: "success",
-                           message: jobsCount > 1 ? ("Your jobs have been submitted. You will receive " + jobsCount + " emails with the results soon.") : "Your job has been submitted. You will receive an email with the results soon."
+                           message: "Your job has been submitted. You will receive an email with the results soon."
                         };
                      }
 
                      function postFiles() {
-                        jobsCount++;
                         let postData = convertFlatToStructured(listService.products.filter(
-                           product => (product.selected && !product.product) || product.type === "Unreleased Data")
+                           product => product.selected || product.type === "Unreleased Data")
                         );
 
                         postData.parameters = {
@@ -206,6 +139,17 @@
                            ymax: clip.yMax,
                            email: data.email
                         };
+
+                        if (data.outCoordSys) {
+                           postData.parameters.outCoordSys = data.outCoordSys.code;
+                        }
+
+                        if (data.outFormat) {
+                           postData.parameters.outFormat = data.outFormat.code;
+                        }
+
+                        // console.log(JSON.stringify(postData, null, 3))
+                        // return finish();
 
                         listService.products.forEach(product => {
                            product.selected = product.removed = false;
@@ -260,7 +204,7 @@
    }
 
    function convertFlatToStructured(flat) {
-      var fields = ["file_url", "file_name", "project_name", "product", "file_size", "bbox"]; // ["index_poly_name", "file_name", "file_url", "file_size", "file_last_modified", "bbox"]
+      var fields = ["file_url", "file_name", "project_name", "product", "metadata_id", "file_size", "bbox"]; // ["index_poly_name", "file_name", "file_url", "file_size", "file_last_modified", "bbox"]
       var response = {
          available_data: []
       };
