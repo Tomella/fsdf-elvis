@@ -746,6 +746,19 @@ body {
 .ed-wms-button {
   display: none;
 }
+img.elvis-logo {
+  height: 75px;
+}
+
+.icsm-logo.last {
+  padding-right: 10px;
+}
+
+.contributorsLink {
+  position: absolute;
+  right: 7px;
+  bottom: 15px;
+}
 .contributors {
   margin: 2px;
   padding: 10px;
@@ -810,19 +823,6 @@ body {
   padding-left: 12px;
   padding-right: 12px;
 }
-img.elvis-logo {
-  height: 75px;
-}
-
-.icsm-logo.last {
-  padding-right: 10px;
-}
-
-.contributorsLink {
-  position: absolute;
-  right: 7px;
-  bottom: 15px;
-}
 .mess-error {
   background-color: lightcoral;
 }
@@ -843,28 +843,6 @@ img.elvis-logo {
   right: 20px;
   top: 10px;
   z-index: 3;
-}
-.product-valid {
-  color: green;
-}
-
-.product-invalid {
-  color: red;
-}
-
-.product-warning {
-  color: darkorange;
-}
-
-.product-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.product-restrict {
-  padding-bottom: 8px;
 }
 .continue-container {
   padding: 4px;
@@ -1003,6 +981,28 @@ img.elvis-logo {
   bottom: 0;
   left: 0;
   right: 0;
+}
+.product-valid {
+  color: green;
+}
+
+.product-invalid {
+  color: red;
+}
+
+.product-warning {
+  color: darkorange;
+}
+
+.product-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.product-restrict {
+  padding-bottom: 8px;
 }
 .reviewing-odd {
   background-color: #eeeeee;
@@ -1211,6 +1211,21 @@ i.fa.active {
   right: 0;
   bottom: 8px;
 }
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
+}
 .regions-label {
   border: 0;
 }
@@ -1219,6 +1234,20 @@ i.fa.active {
   font-weight: bold;
   color: red;
   font-size: 120%;
+}
+.vector-tooltip {
+  min-width: 25em;
+}
+
+.vector-checkbox {
+  width: 18px;
+  height: 18px;
+  vertical-align: bottom;
+  margin-right: 7px !important;
+}
+
+.vector-add:disabled {
+  color: gray;
 }
 .radCore {
   margin-right: 3px;
@@ -1265,35 +1294,6 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
-}
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
-.vector-tooltip {
-  min-width: 25em;
-}
-
-.vector-checkbox {
-  width: 18px;
-  height: 18px;
-  vertical-align: bottom;
-  margin-right: 7px !important;
-}
-
-.vector-add:disabled {
-  color: gray;
 }
 .start-content-container {
   position: fixed;

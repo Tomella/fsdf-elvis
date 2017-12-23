@@ -51,18 +51,14 @@
 
 
                         <button class="pull-right undecorated" ng-click="expansions[available.source + '_' + key] = !expansions[available.source + '_' + key]">
-                           [{{expansions[available.source + '_' + key]?"hide ":"show "}}{{(items | hasProducts) ? 'products': 'files'}}]
+                           [{{expansions[available.source + '_' + key]?"hide ":"show "}} list]
                         </button>
                      </h5>
-                     <span ng-show="items | hasProducts" products-dialog>
-                        <product-projection processing="processing"></product-projection>
-                        <product-formats processing="processing"></product-formats>
-                     </span>
                   </div>
                   <div ng-show="expansions[available.source + '_' + key]">
                      <subtype items="items" mappings="mappings" show="show" hide="hide"></subtype>
                      <div style="text-align:right">
-                        <button class="undecorated" ng-click="expansions[available.source + '_' + key] = false">[hide {{(items | hasProducts) ? 'products': 'files'}}]</button>
+                        <button class="undecorated" ng-click="expansions[available.source + '_' + key] = false">[hide list]</button>
                      </div>
                   </div>
                </div>

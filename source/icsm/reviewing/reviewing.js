@@ -26,13 +26,14 @@
                            keyboard: false,
                            controller: ['$scope', '$uibModalInstance', 'listService', 'products',
                               function ($scope, $uibModalInstance, listService, products) {
+                                 let selected = scope.selected = products.filter(product => product.selected)
+                                 scope.derived = selected.filter(selection => selection.product);
 
                                  listService.getMappings().then(function (response) {
                                     $scope.mappings = response;
                                  });
 
-                                 $scope.products = convertFlatToStructured(products.filter(
-                                    product => product.selected)).available_data;
+                                 $scope.products = convertFlatToStructured(selected).available_data;
 
                                  $scope.accept = function () {
                                     $uibModalInstance.close(true, $scope.products);
@@ -112,11 +113,129 @@
                   return listService.products;
                },
 
-               startExtract: function () {
+               startExtractUsingElvis: function (config) {
                   var clip = clipService.data.clip;
                   this.setEmail(data.email);
 
+                  let selected = listService.products.filter(product => product.selected);
+                  let products = selected.filter(product => product.product);
+                  let files = selected.filter(product => !product.product);
+                  let jobsCount = 0;
+
+                  var template = config.elvisTemplate;
+
+                  if (products.length) {
+                     console.log("We are processing products.");
+                     let index = 0;
+
+                     return submit();
+
+                     function submit() {
+                        jobsCount++;
+
+                        let product = products[index++];
+                        let parameters = Object.assign({}, clip, {
+                           id: product.metadata_id,
+                           filename: "",
+                           outFormat: data.outFormat.code,
+                           outCoordSys: data.outCoordSys.code,
+                           email: data.email
+                        });
+
+                        return postProduct(template, parameters).then(response => {
+                           if (index < products.length) {
+                              return submit();
+                           } else {
+                              // Clear selections
+                              products.forEach(product => product.selected = false);
+                              if (files.length) {
+                                 return postFiles();
+                              } else {
+                                 return finish();
+                              }
+                           }
+                        });
+                     }
+
+                  }
+
+                  if (!products.length && files.length) {
+                     console.log("We are processing files");
+                     return postFiles();
+                  }
+
+                  // That's the job done.
+
+                  function postProduct(template, parameters) {
+                     let workingString = template;
+
+                     angular.forEach(parameters, function (item, key) {
+                        workingString = workingString.replace("${" + key + "}", item);
+                     });
+
+                     return $http({
+                        method: 'GET',
+                        url: workingString
+                     }).then(function (response) {
+                        return finish();
+                     }, function (d) {
+                        return {
+                           status: "error",
+                           message: "Sorry but the service failed to respond. Try again later."
+                        };
+                     });
+                  }
+
+                  function finish() {
+                     return {
+                        status: "success",
+                        message: jobsCount > 1 ? ("Your jobs have been submitted. You will receive " + jobsCount + " emails with the results soon.") : "Your job has been submitted. You will receive an email with the results soon."
+                     };
+                  }
+
+                  function postFiles() {
+                     jobsCount++;
+                     let postData = convertFlatToStructured(listService.products.filter(
+                        product => (product.selected && !product.product) || product.type === "Unreleased Data")
+                     );
+
+                     postData.parameters = {
+                        xmin: clip.xMin,
+                        xmax: clip.xMax,
+                        ymin: clip.yMin,
+                        ymax: clip.yMax,
+                        email: data.email
+                     };
+
+                     listService.products.forEach(product => {
+                        product.selected = product.removed = false;
+                     });
+
+                     return $http({
+                        method: 'POST',
+                        url: config.postProcessingUrl,
+                        data: postData,
+                        headers: { "Content-Type": "application/json" }
+                     }).then(function (response) {
+                        return finish();
+                     }, function (d) {
+                        return {
+                           status: "error",
+                           message: "Sorry but the service failed to respond. Try again later."
+                        };
+                     });
+                  }
+               },
+
+               startExtract: function () {
                   return configService.getConfig("processing").then(function (config) {
+                     if (config.useElvis) {
+                        return service.startExtractUsingElvis(config);
+                     }
+
+                     var clip = clipService.data.clip;
+                     this.setEmail(data.email);
+
                      console.log("We are processing files");
                      return postFiles();
 

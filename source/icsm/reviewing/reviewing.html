@@ -1,8 +1,7 @@
 <div class="modal-header">
    <h3 class="modal-title splash">Download datasets by providing email address and start extract</h3>
 </div>
-<div class="modal-body" id="accept" ng-form exp-enter="accept()"
-            icsm-splash-modal style="width: 100%; margin-left: auto; margin-right: auto;">
+<div class="modal-body" id="accept" ng-form exp-enter="accept()" icsm-splash-modal style="width: 100%; margin-left: auto; margin-right: auto;">
    <div class="row bg-warning" ng-show="noneSelected(products)">
       <div class="col-md-2">
          <button type="button" style="float:right" class="btn btn-primary" ng-click="cancel()">Close</button>
@@ -28,13 +27,25 @@
          <div style="padding-left:10px;" ng-repeat="(name, items) in subGroup">
             <h5 title="Clipped product using coordinate System: {{data.outCoordSys.value}}, Output Format: {{data.outFormat.value}}">
                {{name}}
-               <span style="padding-left:25px;font-size:90%">{{items.length | number :0}} items totalling {{items | reviewSumSize | fileSize}}</span>
+               <span style="padding-left:25px;font-size:90%">
+                  {{items.length | number :0}} items
+                  <span ng-if="items | hasProducts">{{items | productsSummary}}</span>
+                  totalling {{items | reviewSumSize | fileSize}}</span>
             </h5>
          </div>
       </div>
 
    </div>
 
+   <div ng-controller="listCtrl as list">
+      <div ng-if="list.selected | hasProducts" class="well" style="padding:7px">
+         <h5 style="margin-top:4px">{{list.selected | productsCount}} items are products which you can elect to transform into a different coordinate system and file format</h5>
+         <span products-dialog>
+            <product-projection processing="data"></product-projection>
+            <product-formats processing="data"></product-formats>
+         </span>
+      </div>
+   </div>
 
    <div class="row reviewing-divider">
       <div class="col-md-12">
