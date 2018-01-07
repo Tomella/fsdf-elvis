@@ -86,7 +86,7 @@
          "description": "Positioning.",
          "className": "altthemes-crosshair",
          "url": "positioning.html",
-         "keys": ["satellite", "position", "shore"]
+         "keys": ["satellite", "position"]
       }
    ]
 }

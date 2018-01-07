@@ -131,6 +131,50 @@
   bottom: 45px;
   left: 12px;
 }
+.mvt,
+.mvt ul,
+.mvt li {
+  position: relative;
+}
+
+.mvt ul {
+  list-style: none;
+  padding-left: 32px;
+}
+
+.mvt li::before,
+.mvt li::after {
+  content: "";
+  position: absolute;
+  left: -12px;
+}
+
+.mvt li::before {
+  border-top: 1px solid #000;
+  top: 9px;
+  width: 8px;
+  height: 0;
+}
+
+.mvt li::after {
+  border-left: 1px solid #000;
+  height: 100%;
+  width: 0px;
+  top: 2px;
+}
+
+.mvt ul > li:last-child::after {
+  height: 8px;
+}
+
+.metaview-head {
+  font-weight: bold;
+}
+
+.metaview-info {
+  padding-left: 3px;
+  padding-right: 3px;
+}
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
   display: inline-block;
@@ -242,50 +286,6 @@
 .altthemesdropdown .altthemescurrent {
   color: #fff;
   background-color: #777;
-}
-.mvt,
-.mvt ul,
-.mvt li {
-  position: relative;
-}
-
-.mvt ul {
-  list-style: none;
-  padding-left: 32px;
-}
-
-.mvt li::before,
-.mvt li::after {
-  content: "";
-  position: absolute;
-  left: -12px;
-}
-
-.mvt li::before {
-  border-top: 1px solid #000;
-  top: 9px;
-  width: 8px;
-  height: 0;
-}
-
-.mvt li::after {
-  border-left: 1px solid #000;
-  height: 100%;
-  width: 0px;
-  top: 2px;
-}
-
-.mvt ul > li:last-child::after {
-  height: 8px;
-}
-
-.metaview-head {
-  font-weight: bold;
-}
-
-.metaview-info {
-  padding-left: 3px;
-  padding-right: 3px;
 }
 .icsmTabs {
   position: absolute;
@@ -746,19 +746,6 @@ body {
 .ed-wms-button {
   display: none;
 }
-img.elvis-logo {
-  height: 75px;
-}
-
-.icsm-logo.last {
-  padding-right: 10px;
-}
-
-.contributorsLink {
-  position: absolute;
-  right: 7px;
-  bottom: 15px;
-}
 .contributors {
   margin: 2px;
   padding: 10px;
@@ -823,6 +810,47 @@ img.elvis-logo {
   padding-left: 12px;
   padding-right: 12px;
 }
+img.elvis-logo {
+  height: 75px;
+}
+
+.icsm-logo.last {
+  padding-right: 10px;
+}
+
+.contributorsLink {
+  position: absolute;
+  right: 7px;
+  bottom: 15px;
+}
+.baselayer-slider {
+  position: absolute;
+  right: 20px;
+  top: 10px;
+  z-index: 3;
+}
+.product-valid {
+  color: green;
+}
+
+.product-invalid {
+  color: red;
+}
+
+.product-warning {
+  color: darkorange;
+}
+
+.product-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.product-restrict {
+  padding-bottom: 8px;
+}
 .mess-error {
   background-color: lightcoral;
 }
@@ -837,12 +865,6 @@ img.elvis-logo {
 
 .mess-container {
   font-weight: bold;
-}
-.baselayer-slider {
-  position: absolute;
-  right: 20px;
-  top: 10px;
-  z-index: 3;
 }
 .continue-container {
   padding: 4px;
@@ -982,28 +1004,6 @@ img.elvis-logo {
   left: 0;
   right: 0;
 }
-.product-valid {
-  color: green;
-}
-
-.product-invalid {
-  color: red;
-}
-
-.product-warning {
-  color: darkorange;
-}
-
-.product-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.product-restrict {
-  padding-bottom: 8px;
-}
 .reviewing-odd {
   background-color: #eeeeee;
 }
@@ -1113,6 +1113,22 @@ i.fa.active {
   color: #fff;
   background-color: #777;
 }
+.downloadPane {
+  padding-left: 0px !important;
+  padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 10px;
+  overflow: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
+}
 .common-baselayer-control {
   width: 210px;
   color: #333;
@@ -1195,21 +1211,14 @@ i.fa.active {
   height: 30px;
   font-size: 13px;
 }
-.downloadPane {
-  padding-left: 0px !important;
-  padding-right: 5px !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 10px;
-  overflow: hidden;
+.regions-label {
+  border: 0;
 }
 
-.downloadCont {
-  position: fixed;
-  right: 0;
-  bottom: 8px;
+.regions-label.over {
+  font-weight: bold;
+  color: red;
+  font-size: 120%;
 }
 .selectContainer {
   width: 100%;
@@ -1225,29 +1234,6 @@ i.fa.active {
 
 i.fa.active {
   color: red;
-}
-.regions-label {
-  border: 0;
-}
-
-.regions-label.over {
-  font-weight: bold;
-  color: red;
-  font-size: 120%;
-}
-.vector-tooltip {
-  min-width: 25em;
-}
-
-.vector-checkbox {
-  width: 18px;
-  height: 18px;
-  vertical-align: bottom;
-  margin-right: 7px !important;
-}
-
-.vector-add:disabled {
-  color: gray;
 }
 .radCore {
   margin-right: 3px;
@@ -1294,6 +1280,20 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
+}
+.vector-tooltip {
+  min-width: 25em;
+}
+
+.vector-checkbox {
+  width: 18px;
+  height: 18px;
+  vertical-align: bottom;
+  margin-right: 7px !important;
+}
+
+.vector-add:disabled {
+  color: gray;
 }
 .start-content-container {
   position: fixed;
