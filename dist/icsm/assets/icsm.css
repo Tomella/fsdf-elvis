@@ -126,11 +126,6 @@
 .iso19115-head {
   font-weight: bold;
 }
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
-}
 .mvt,
 .mvt ul,
 .mvt li {
@@ -174,6 +169,11 @@
 .metaview-info {
   padding-left: 3px;
   padding-right: 3px;
+}
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
 }
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
@@ -823,6 +823,21 @@ img.elvis-logo {
   right: 7px;
   bottom: 15px;
 }
+.mess-error {
+  background-color: lightcoral;
+}
+
+.mess-info {
+  background-color: lightblue;
+}
+
+.mess-warn {
+  background-color: #ffbc1e;
+}
+
+.mess-container {
+  font-weight: bold;
+}
 .baselayer-slider {
   position: absolute;
   right: 20px;
@@ -850,21 +865,6 @@ img.elvis-logo {
 
 .product-restrict {
   padding-bottom: 8px;
-}
-.mess-error {
-  background-color: lightcoral;
-}
-
-.mess-info {
-  background-color: lightblue;
-}
-
-.mess-warn {
-  background-color: #ffbc1e;
-}
-
-.mess-container {
-  font-weight: bold;
 }
 .continue-container {
   padding: 4px;
@@ -1113,22 +1113,6 @@ i.fa.active {
   color: #fff;
   background-color: #777;
 }
-.downloadPane {
-  padding-left: 0px !important;
-  padding-right: 5px !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 10px;
-  overflow: hidden;
-}
-
-.downloadCont {
-  position: fixed;
-  right: 0;
-  bottom: 8px;
-}
 .common-baselayer-control {
   width: 210px;
   color: #333;
@@ -1210,6 +1194,22 @@ i.fa.active {
   border: none;
   height: 30px;
   font-size: 13px;
+}
+.downloadPane {
+  padding-left: 0px !important;
+  padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 10px;
+  overflow: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
 }
 .regions-label {
   border: 0;
