@@ -8,7 +8,7 @@
       "systemCode":"nlig",
       "sysId":"nlig_1",
       "primaryId":"1",
-      "restrictSize": 16,
+      "restrictSize": 2.25,
       "showExtent": true,
       "rights":["Commonwealth of Australia (Geoscience Australia) ; Creative Commons Attribution 4.0 International Licence"],
       "keywords":["Web Service",
@@ -22,7 +22,7 @@
          "xMax": 154.0,
          "yMin": -44.0,
          "yMax":-10.0
-      },      
+      },
       "dcUris":[
       	"<dc:URI xmlns:dc='http://purl.org/dc/elements/1.1/' protocol='OGC:WMS' layerNames='Image' name='Image' description='Image'>http://services.ga.gov.au/gis/services/DEM_SRTM_1Second/MapServer/WMSServer?request=GetCapabilities&amp;service=WMS</dc:URI>"
       ],

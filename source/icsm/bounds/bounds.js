@@ -84,7 +84,7 @@
                         $timeout(function () {
                            send("", "clear");
                            send("The selected area is too large to process. Please restrict to approximately " +
-                              "4 degrees square.",
+                              "1.5 degrees square.",
                               "error");
                            deferred.resolve(result);
                         });
@@ -112,7 +112,7 @@
             function overSizeLimit(clip) {
                // Shouldn't need abs but it doesn't hurt.
                let size = Math.abs((clip.xMax - clip.xMin) * (clip.yMax - clip.yMin));
-               return size > 4;
+               return size > 2.25;
             }
 
             function forceNumbers(clip) {

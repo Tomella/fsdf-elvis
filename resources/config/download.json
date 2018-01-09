@@ -182,7 +182,7 @@
          "systemCode": "gcat",
          "sysId": "gcat_aac46307-fce8-449d-e044-00144fdd4fa6",
          "primaryId": "aac46307-fce8-449d-e044-00144fdd4fa6",
-         "restrictSize": 16,
+         "restrictSize": 2.25,
          "showExtent": true,
          "rights": [
             "Commonwealth of Australia (Geoscience Australia) ; Creative Commons Attribution 4.0 International Licence"
@@ -224,7 +224,7 @@
          "systemCode": "gcat",
          "sysId": "gcat_a05f7893-0050-7506-e044-00144fdd4fa6",
          "primaryId": "a05f7893-0050-7506-e044-00144fdd4fa6",
-         "restrictSize": 16,
+         "restrictSize": 2.25,
          "showExtent": true,
          "rights": [
             "Commonwealth of Australia (Geoscience Australia) ; Creative Commons Attribution 4.0 International Licence"
@@ -267,7 +267,7 @@
          "showExtent": true,
          "sysId": "gcat_22be4b55-2465-4320-e053-10a3070a5236",
          "primaryId": "22be4b55-2465-4320-e053-10a3070a5236",
-         "restrictSize": 16,
+         "restrictSize": 2.25,
          "rights": [
             "Commonwealth of Australia (Geoscience Australia) ; Creative Commons Attribution 4.0 International Licence"
          ],
@@ -303,7 +303,7 @@
          "systemCode": "gcat",
          "sysId": "gcat_22be4b55-2485-4320-e053-10a3070a5236",
          "primaryId": "22be4b55-2485-4320-e053-10a3070a5236",
-         "restrictSize": 16,
+         "restrictSize": 2.25,
          "showExtent": true,
          "rights": [
             "Commonwealth of Australia (Geoscience Australia) ; Creative Commons Attribution 4.0 International Licence"
