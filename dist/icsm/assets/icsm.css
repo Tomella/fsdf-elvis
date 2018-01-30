@@ -87,50 +87,6 @@
 .common-header {
   background-color: white;
 }
-.mvt,
-.mvt ul,
-.mvt li {
-  position: relative;
-}
-
-.mvt ul {
-  list-style: none;
-  padding-left: 32px;
-}
-
-.mvt li::before,
-.mvt li::after {
-  content: "";
-  position: absolute;
-  left: -12px;
-}
-
-.mvt li::before {
-  border-top: 1px solid #000;
-  top: 9px;
-  width: 8px;
-  height: 0;
-}
-
-.mvt li::after {
-  border-left: 1px solid #000;
-  height: 100%;
-  width: 0px;
-  top: 2px;
-}
-
-.mvt ul > li:last-child::after {
-  height: 8px;
-}
-
-.metaview-head {
-  font-weight: bold;
-}
-
-.metaview-info {
-  padding-left: 3px;
-  padding-right: 3px;
-}
 .common-legend {
   position: abssolute;
   bottom: 45px;
@@ -174,6 +130,50 @@
 
 .iso19115-head {
   font-weight: bold;
+}
+.mvt,
+.mvt ul,
+.mvt li {
+  position: relative;
+}
+
+.mvt ul {
+  list-style: none;
+  padding-left: 32px;
+}
+
+.mvt li::before,
+.mvt li::after {
+  content: "";
+  position: absolute;
+  left: -12px;
+}
+
+.mvt li::before {
+  border-top: 1px solid #000;
+  top: 9px;
+  width: 8px;
+  height: 0;
+}
+
+.mvt li::after {
+  border-left: 1px solid #000;
+  height: 100%;
+  width: 0px;
+  top: 2px;
+}
+
+.mvt ul > li:last-child::after {
+  height: 8px;
+}
+
+.metaview-head {
+  font-weight: bold;
+}
+
+.metaview-info {
+  padding-left: 3px;
+  padding-right: 3px;
 }
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
@@ -823,6 +823,12 @@ img.elvis-logo {
   right: 7px;
   bottom: 15px;
 }
+.baselayer-slider {
+  position: absolute;
+  right: 20px;
+  top: 10px;
+  z-index: 3;
+}
 .mess-error {
   background-color: lightcoral;
 }
@@ -837,12 +843,6 @@ img.elvis-logo {
 
 .mess-container {
   font-weight: bold;
-}
-.baselayer-slider {
-  position: absolute;
-  right: 20px;
-  top: 10px;
-  z-index: 3;
 }
 .product-valid {
   color: green;
@@ -1004,21 +1004,6 @@ img.elvis-logo {
   left: 0;
   right: 0;
 }
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
 .reviewing-odd {
   background-color: #eeeeee;
 }
@@ -1050,6 +1035,21 @@ i.fa.active {
 .exclude {
   color: #777777;
   text-decoration: line-through;
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
 }
 .icsm-icon {
   background: url("icsm/img/global-sprites.svg") no-repeat;
@@ -1211,20 +1211,14 @@ i.fa.active {
   right: 0;
   bottom: 8px;
 }
-.selectContainer {
-  width: 100%;
+.regions-label {
+  border: 0;
 }
 
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
+.regions-label.over {
+  font-weight: bold;
   color: red;
+  font-size: 120%;
 }
 .radCore {
   margin-right: 3px;
@@ -1272,14 +1266,20 @@ div.leaflet-control-scale-line {
     display: none;
   }
 }
-.regions-label {
-  border: 0;
+.selectContainer {
+  width: 100%;
 }
 
-.regions-label.over {
-  font-weight: bold;
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
   color: red;
-  font-size: 120%;
 }
 .vector-tooltip {
   min-width: 25em;
