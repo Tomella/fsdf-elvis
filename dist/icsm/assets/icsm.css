@@ -87,6 +87,55 @@
 .common-header {
   background-color: white;
 }
+.mvt,
+.mvt ul,
+.mvt li {
+  position: relative;
+}
+
+.mvt ul {
+  list-style: none;
+  padding-left: 32px;
+}
+
+.mvt li::before,
+.mvt li::after {
+  content: "";
+  position: absolute;
+  left: -12px;
+}
+
+.mvt li::before {
+  border-top: 1px solid #000;
+  top: 9px;
+  width: 8px;
+  height: 0;
+}
+
+.mvt li::after {
+  border-left: 1px solid #000;
+  height: 100%;
+  width: 0px;
+  top: 2px;
+}
+
+.mvt ul > li:last-child::after {
+  height: 8px;
+}
+
+.metaview-head {
+  font-weight: bold;
+}
+
+.metaview-info {
+  padding-left: 3px;
+  padding-right: 3px;
+}
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
+}
 .iso19115,
 .iso19115 ul,
 .iso19115 li {
@@ -125,11 +174,6 @@
 
 .iso19115-head {
   font-weight: bold;
-}
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
 }
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
@@ -242,50 +286,6 @@
 .altthemesdropdown .altthemescurrent {
   color: #fff;
   background-color: #777;
-}
-.mvt,
-.mvt ul,
-.mvt li {
-  position: relative;
-}
-
-.mvt ul {
-  list-style: none;
-  padding-left: 32px;
-}
-
-.mvt li::before,
-.mvt li::after {
-  content: "";
-  position: absolute;
-  left: -12px;
-}
-
-.mvt li::before {
-  border-top: 1px solid #000;
-  top: 9px;
-  width: 8px;
-  height: 0;
-}
-
-.mvt li::after {
-  border-left: 1px solid #000;
-  height: 100%;
-  width: 0px;
-  top: 2px;
-}
-
-.mvt ul > li:last-child::after {
-  height: 8px;
-}
-
-.metaview-head {
-  font-weight: bold;
-}
-
-.metaview-info {
-  padding-left: 3px;
-  padding-right: 3px;
 }
 .icsmTabs {
   position: absolute;
@@ -1004,6 +1004,21 @@ img.elvis-logo {
   left: 0;
   right: 0;
 }
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
+}
 .reviewing-odd {
   background-color: #eeeeee;
 }
@@ -1035,21 +1050,6 @@ img.elvis-logo {
 .exclude {
   color: #777777;
   text-decoration: line-through;
-}
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
 }
 .icsm-icon {
   background: url("icsm/img/global-sprites.svg") no-repeat;
@@ -1211,15 +1211,6 @@ i.fa.active {
   right: 0;
   bottom: 8px;
 }
-.regions-label {
-  border: 0;
-}
-
-.regions-label.over {
-  font-weight: bold;
-  color: red;
-  font-size: 120%;
-}
 .selectContainer {
   width: 100%;
 }
@@ -1280,6 +1271,15 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
+}
+.regions-label {
+  border: 0;
+}
+
+.regions-label.over {
+  font-weight: bold;
+  color: red;
+  font-size: 120%;
 }
 .vector-tooltip {
   min-width: 25em;
