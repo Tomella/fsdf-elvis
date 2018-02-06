@@ -131,6 +131,50 @@
   bottom: 45px;
   left: 12px;
 }
+.mvt,
+.mvt ul,
+.mvt li {
+  position: relative;
+}
+
+.mvt ul {
+  list-style: none;
+  padding-left: 32px;
+}
+
+.mvt li::before,
+.mvt li::after {
+  content: "";
+  position: absolute;
+  left: -12px;
+}
+
+.mvt li::before {
+  border-top: 1px solid #000;
+  top: 9px;
+  width: 8px;
+  height: 0;
+}
+
+.mvt li::after {
+  border-left: 1px solid #000;
+  height: 100%;
+  width: 0px;
+  top: 2px;
+}
+
+.mvt ul > li:last-child::after {
+  height: 8px;
+}
+
+.metaview-head {
+  font-weight: bold;
+}
+
+.metaview-info {
+  padding-left: 3px;
+  padding-right: 3px;
+}
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
   display: inline-block;
@@ -242,50 +286,6 @@
 .altthemesdropdown .altthemescurrent {
   color: #fff;
   background-color: #777;
-}
-.mvt,
-.mvt ul,
-.mvt li {
-  position: relative;
-}
-
-.mvt ul {
-  list-style: none;
-  padding-left: 32px;
-}
-
-.mvt li::before,
-.mvt li::after {
-  content: "";
-  position: absolute;
-  left: -12px;
-}
-
-.mvt li::before {
-  border-top: 1px solid #000;
-  top: 9px;
-  width: 8px;
-  height: 0;
-}
-
-.mvt li::after {
-  border-left: 1px solid #000;
-  height: 100%;
-  width: 0px;
-  top: 2px;
-}
-
-.mvt ul > li:last-child::after {
-  height: 8px;
-}
-
-.metaview-head {
-  font-weight: bold;
-}
-
-.metaview-info {
-  padding-left: 3px;
-  padding-right: 3px;
 }
 .icsmTabs {
   position: absolute;
@@ -519,6 +519,7 @@ div.leaflet-control-scale-line {
     display: none;
   }
 }
+
 /* Overrides */
 
 img.logo {
@@ -870,6 +871,13 @@ img.elvis-logo {
   padding: 4px;
 }
 
+.warn-limit {
+  padding: 15px;
+  margin-bottom: 5px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
 .listItemHeading {
   font-weight: bold;
 }
@@ -1211,6 +1219,69 @@ i.fa.active {
   right: 0;
   bottom: 8px;
 }
+.start-content-container {
+  position: fixed;
+  top: 95px;
+  bottom: 6px;
+  overflow-y: auto;
+  left: 0;
+  right: 0;
+}
+
+@media (min-width: 1200px) {
+  .start-content-container .panel {
+    margin-left: 150px;
+    margin-right: 150px;
+  }
+}
+
+.select-icon {
+  background: url("../resources/img/sprites.svg") no-repeat;
+  display: inline-block;
+  width: 75px;
+  height: 120px;
+  margin: 0 auto 0 auto;
+}
+
+.select-pin {
+  background-position: 0px;
+}
+
+.select-map {
+  background-position: -75px;
+}
+
+.select-crosshair {
+  background-position: -150px;
+}
+
+.select-sign {
+  background-position: -225px;
+}
+
+.select-parcel {
+  background-position: -300px;
+}
+
+.select-satellite {
+  background-position: -375px;
+}
+
+.select-ship {
+  background-position: -450px;
+}
+
+.select-water {
+  background-position: -525px;
+}
+
+.select-shore {
+  background-position: -600px;
+}
+
+.select-land {
+  background-position: -675px;
+}
 .regions-label {
   border: 0;
 }
@@ -1294,67 +1365,4 @@ div.leaflet-control-scale-line {
 
 .vector-add:disabled {
   color: gray;
-}
-.start-content-container {
-  position: fixed;
-  top: 95px;
-  bottom: 6px;
-  overflow-y: auto;
-  left: 0;
-  right: 0;
-}
-
-@media (min-width: 1200px) {
-  .start-content-container .panel {
-    margin-left: 150px;
-    margin-right: 150px;
-  }
-}
-
-.select-icon {
-  background: url("../resources/img/sprites.svg") no-repeat;
-  display: inline-block;
-  width: 75px;
-  height: 120px;
-  margin: 0 auto 0 auto;
-}
-
-.select-pin {
-  background-position: 0px;
-}
-
-.select-map {
-  background-position: -75px;
-}
-
-.select-crosshair {
-  background-position: -150px;
-}
-
-.select-sign {
-  background-position: -225px;
-}
-
-.select-parcel {
-  background-position: -300px;
-}
-
-.select-satellite {
-  background-position: -375px;
-}
-
-.select-ship {
-  background-position: -450px;
-}
-
-.select-water {
-  background-position: -525px;
-}
-
-.select-shore {
-  background-position: -600px;
-}
-
-.select-land {
-  background-position: -675px;
 }

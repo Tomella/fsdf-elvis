@@ -2,12 +2,15 @@
 
    angular.module("elvis.results.continue", [])
 
-      .directive('icsmSearchContinue', ['continueService', function (continueService) {
+      .directive('icsmSearchContinue', ['configService', 'continueService', function (configService, continueService) {
          return {
             templateUrl: 'icsm/results/continue.html',
             controller: 'listCtrl',
             controllerAs: 'ctrl',
             link: function (scope, element) {
+               configService.getConfig("downloadLimit").then(size => {
+                  scope.limit = size;
+               });
                scope.data = continueService.data;
             }
          };
