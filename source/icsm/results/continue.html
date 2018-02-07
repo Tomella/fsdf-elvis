@@ -1,5 +1,8 @@
 <div class="continue-container" ng-show="ctrl.selected.length">
-   <div class="warn-limit alert-danger" ng-show="ctrl.selectedSize > limit">There is a {{limit | fileSize}} limit per request. Remove some selections.</div>
+   <div class="warn-limit alert-danger" ng-show="ctrl.selectedSize > limit">
+      There is a {{limit | fileSize}} limit per request.<br/>
+      Remove some selections or decrease the size of the selected area.
+   </div>
    <button ng-disabled="ctrl.selectedSize > limit" class="btn btn-primary" ng-click="ctrl.review()">Download {{ctrl.selected.length | number}} selected datasets... (Approx: {{ctrl.selectedSize | fileSize}})</button>
 </div>
 
