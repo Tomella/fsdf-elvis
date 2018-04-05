@@ -11,6 +11,9 @@ var validHosts = [
        host: ".motogp.com"
    },
    {
+       host: "elvis-ga.fmecloud.com"
+   },
+   {
        host: "elvis20161a-ga.fmecloud.com"
    },
    {

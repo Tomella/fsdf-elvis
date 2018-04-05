@@ -37,7 +37,7 @@ Symonston ACT 2609
 From least to most complex the application can be described by these parts
 * Static web content served over Apache HTTP server as a numer of single page applications (SPA) using:
    * AngularJS for application framework
-   * Leaflet < 1 for map rendering
+   * Leaflet for map rendering
    * Bootstrap for look and feel
    * D3JS for graph plotting
    * Ahngular UI Bootstrap library for richer UI
