@@ -157,6 +157,6 @@
 
 	"processing": {
 		"intersectsUrl1": "icsm/resources/config/response.json",
-      "intersectsUrl": "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/dev_space/LPI_ReturnDownloadables.fmw?ymin={miny}&ymax={maxy}&xmin={minx}&xmax={maxx}"
+      "intersectsUrl": "https://elvis-ga.fmecloud.com/fmedatastreaming/dev_space/LPI_ReturnDownloadables.fmw?ymin={miny}&ymax={maxy}&xmin={minx}&xmax={maxx}"
 	}
 }

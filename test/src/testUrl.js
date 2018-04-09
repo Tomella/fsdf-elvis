@@ -14,7 +14,7 @@ var validHosts = [
        host: "elvis-ga.fmecloud.com"
    },
    {
-       host: "elvis20161a-ga.fmecloud.com"
+       host: "elvis-ga.fmecloud.com"
    },
    {
        host: "s3-ap-southeast-2.amazonaws.com"

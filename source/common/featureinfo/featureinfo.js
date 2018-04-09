@@ -5,7 +5,7 @@
 
       .directive("commonFeatureInfo", ['$http', '$log', '$q', '$timeout', 'featureInfoService', 'flashService', 'messageService',
          function ($http, $log, $q, $timeout, featureInfoService, flashService, messageService) {
-            var template = "https://elvis20161a-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetFeatureInfo_ElevationAvailableData.fmw?" +
+            var template = "https://elvis-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetFeatureInfo_ElevationAvailableData.fmw?" +
                "SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&SRS=EPSG%3A4326&BBOX=${bounds}&WIDTH=${width}&HEIGHT=${height}" +
                //"LAYERS=public.5dem_ProjectsIndex&" +
                "&LAYERS=public.QLD_Elevation_Metadata_Index,public.ACT2015-Tile_Index_55,public.5dem_ProjectsIndex,public.NSW_100k_Index_54,public.NSW_100k_Index_55," +
