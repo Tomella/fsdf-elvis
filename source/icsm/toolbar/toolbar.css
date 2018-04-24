@@ -1,3 +1,17 @@
+/* Style the search bar to fit the toolbar */
+.input-group-custom > .form-control {
+   padding: .25rem .5rem;
+   line-height: 1.2;
+   border-radius: .2rem;
+   height: 30px;
+}
+
+.input-group-custom > .input-group-btn > .btn {
+   padding: 5.5px 12px;
+   line-height: 1.2;
+   border-radius: .2rem;
+}
+
 .elevation-toolbar {
    position: fixed;
    top: 82px;
