@@ -196,7 +196,7 @@
                   function postFiles() {
                      jobsCount++;
                      let postData = convertFlatToStructured(listService.products.filter(
-                        product => (product.selected && !product.product) || product.type === "Unreleased Data")
+                        product => (product.selected && !product.product))
                      );
 
                      postData.parameters = {
@@ -248,7 +248,7 @@
 
                      function postFiles() {
                         let postData = convertFlatToStructured(listService.products.filter(
-                           product => product.selected || product.type === "Unreleased Data")
+                           product => product.selected)
                         );
 
                         postData.parameters = {
