@@ -26,7 +26,7 @@ request.gzip = false;
 
 //var httpProxy = require('http-proxy');
 var app = express();
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));
 
 var url = require('url');
 var X2JS = require('x2js');
