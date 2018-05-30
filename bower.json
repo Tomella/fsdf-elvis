@@ -1,6 +1,6 @@
 {
   "name": "icsm",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Elevation",
   "keywords": [
     "icsm",
@@ -31,7 +31,8 @@
     "x2js": "x2js#^1.2.0",
     "leaflet-draw": "^0.3.2",
     "ngInfiniteScroll": "1.0.0",
-    "babel-polyfill": "^0.0.1"
+    "babel-polyfill": "^0.0.1",
+    "angular-recaptcha": "^4.1.5"
   },
   "resolutions": {
     "angular": "~1.4.12",

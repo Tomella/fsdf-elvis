@@ -57,10 +57,18 @@
          <strong>Email notification</strong> The extract of data can take some time. By providing an email address we will be able
          to notify you when the job is complete. The email will provide a link to the extracted data which will be packaged
          up as a single compressed file.
+
+         <div
+            vc-recaptcha
+            theme="'light'"
+            key="recaptchaKey"
+            on-create="setWidgetId(widgetId)"
+            on-success="setResponse(response)"
+            on-expire="cbExpiration()"></div>
       </div>
       <div class="col-md-4">
          <div class="pull-right" style="padding:8px;">
-            <button type="button" class="btn btn-primary" ng-click="accept()" ng-disabled="!data.email || !list.selected.length">Start extract of datasets
+            <button type="button" class="btn btn-primary" ng-click="accept()" ng-disabled="!data.email || !list.selected.length || !recaptchaResponse">Start extract of datasets
             </button>
             <button type="button" class="btn btn-primary" ng-click="cancel()">Cancel</button>
          </div>

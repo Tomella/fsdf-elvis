@@ -24,8 +24,9 @@
                            size: "lg",
                            backdrop: "static",
                            keyboard: false,
-                           controller: ['$scope', '$uibModalInstance', 'listService', 'products',
-                              function ($scope, $uibModalInstance, listService, products) {
+                           controller: ['$scope', '$uibModalInstance', 'listService', 'products', 'vcRecaptchaService',
+                              function ($scope, $uibModalInstance, listService, products, vcRecaptchaService) {
+                                 $scope.recaptchaKey = "6LfUrFsUAAAAAKu4EJY_FSi3zFXvWm60RDVknRHf";
                                  let selected = scope.selected = products.filter(product => product.selected)
                                  scope.derived = selected.filter(selection => selection.product);
 
@@ -36,11 +37,24 @@
                                  $scope.products = convertFlatToStructured(selected).available_data;
 
                                  $scope.accept = function () {
-                                    $uibModalInstance.close(true, $scope.products);
+                                    $uibModalInstance.close($scope.recaptchaResponse, $scope.products);
                                  };
 
                                  $scope.cancel = function () {
-                                    $uibModalInstance.close(false);
+                                    $uibModalInstance.close(null);
+                                 };
+
+                                 $scope.setWidgetId = function(widgetId) {
+                                    $scope.recaptchaId = widgetId;
+                                 };
+
+                                 $scope.setResponse = function(response) {
+                                    $scope.recaptchaResponse = response;
+                                 };
+
+                                 $scope.cbExpiration = function() {
+                                    vcRecaptchaService.reload($scope.recaptchaId);
+                                    $scope.recaptchaResponse = null;
                                  };
 
                               }],
@@ -50,8 +64,10 @@
                               }
                            }
                         });
-                        modalInstance.result.then(function (run) {
-                           if (run) {
+                        modalInstance.result.then(function (recaptchaResponse) {
+                           delete scope.data.recaptchaResponse;
+                           if (recaptchaResponse) {
+                              scope.data.recaptchaResponse = recaptchaResponse;
                               reviewService.startExtract().then(response => {
                                  messageService[response.status](response.message);
                                  reviewService.removeRemoved();
@@ -113,138 +129,14 @@
                   return listService.products;
                },
 
-               startExtractUsingElvis: function (config) {
-                  var clip = clipService.data.clip;
-                  this.setEmail(data.email);
-
-                  let selected = listService.products.filter(product => product.selected);
-                  let products = selected.filter(product => product.product);
-                  let files = selected.filter(product => !product.product);
-                  let jobsCount = 0;
-
-                  var template = config.elvisTemplate;
-
-                  if (products.length) {
-                     console.log("We are processing products.");
-                     let index = 0;
-
-                     return submit();
-
-                     function submit() {
-                        jobsCount++;
-
-                        let product = products[index++];
-                        let parameters = Object.assign({}, clip, {
-                           id: product.metadata_id,
-                           filename: "",
-                           outFormat: data.outFormat.code,
-                           outCoordSys: data.outCoordSys.code,
-                           email: data.email
-                        });
-
-                        return postProduct(template, parameters).then(response => {
-                           if (index < products.length) {
-                              return submit();
-                           } else {
-                              // Clear selections
-                              products.forEach(product => product.selected = false);
-                              if (files.length) {
-                                 return postFiles();
-                              } else {
-                                 return finish();
-                              }
-                           }
-                        });
-                     }
-
-                  }
-
-                  if (!products.length && files.length) {
-                     console.log("We are processing files");
-                     return postFiles();
-                  }
-
-                  // That's the job done.
-
-                  function postProduct(template, parameters) {
-                     let workingString = template;
-
-                     angular.forEach(parameters, function (item, key) {
-                        workingString = workingString.replace("${" + key + "}", item);
-                     });
-
-                     return $http({
-                        method: 'GET',
-                        url: workingString
-                     }).then(function (response) {
-                        return finish();
-                     }, function (d) {
-                        return {
-                           status: "error",
-                           message: "Sorry but the service failed to respond. Try again later."
-                        };
-                     });
-                  }
-
-                  function finish() {
-                     return {
-                        status: "success",
-                        message: jobsCount > 1 ? ("Your jobs have been submitted. You will receive " + jobsCount + " emails with the results soon.") : "Your job has been submitted. You will receive an email with the results soon."
-                     };
-                  }
-
-                  function postFiles() {
-                     jobsCount++;
-                     let postData = convertFlatToStructured(listService.products.filter(
-                        product => (product.selected && !product.product))
-                     );
-
-                     postData.parameters = {
-                        xmin: clip.xMin,
-                        xmax: clip.xMax,
-                        ymin: clip.yMin,
-                        ymax: clip.yMax,
-                        email: data.email
-                     };
-
-                     listService.products.forEach(product => {
-                        product.selected = product.removed = false;
-                     });
-
-                     return $http({
-                        method: 'POST',
-                        url: config.postProcessingUrl,
-                        data: postData,
-                        headers: { "Content-Type": "application/json" }
-                     }).then(function (response) {
-                        return finish();
-                     }, function (d) {
-                        return {
-                           status: "error",
-                           message: "Sorry but the service failed to respond. Try again later."
-                        };
-                     });
-                  }
-               },
-
                startExtract: function () {
+                  this.setEmail(data.email);
                   return configService.getConfig("processing").then(function (config) {
-                     if (config.useElvis) {
-                        return service.startExtractUsingElvis(config);
-                     }
 
                      var clip = clipService.data.clip;
-                     this.setEmail(data.email);
 
                      console.log("We are processing files");
                      return postFiles();
-
-                     function finish() {
-                        return {
-                           status: "success",
-                           message: "Your job has been submitted. You will receive an email with the results soon."
-                        };
-                     }
 
                      function postFiles() {
                         let postData = convertFlatToStructured(listService.products.filter(
@@ -256,7 +148,8 @@
                            xmax: clip.xMax,
                            ymin: clip.yMin,
                            ymax: clip.yMax,
-                           email: data.email
+                           email: data.email,
+                           recaptcha: data.recaptchaResponse
                         };
 
                         if (data.outCoordSys) {
@@ -266,9 +159,6 @@
                         if (data.outFormat) {
                            postData.parameters.outFormat = data.outFormat.code;
                         }
-
-                        // console.log(JSON.stringify(postData, null, 3))
-                        // return finish();
 
                         listService.products.forEach(product => {
                            product.selected = product.removed = false;
@@ -280,7 +170,7 @@
                            data: postData,
                            headers: { "Content-Type": "application/json" }
                         }).then(function (response) {
-                           return finish();
+                           return response.data;
                         }, function (d) {
                            return {
                               status: "error",

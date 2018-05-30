@@ -56,7 +56,8 @@
       'ngAutocomplete',
 		'ngRoute',
 		'ngSanitize',
-		'page.footer',
+      'page.footer',
+      'vcRecaptcha',
 
 		//'geo.baselayer.control',
 		'geo.draw',

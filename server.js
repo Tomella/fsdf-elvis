@@ -10,6 +10,8 @@ var END_ABSTRACT_SENTINEL = "<p>";
 
 var config = require("./lib/config");
 var express = require("express");
+var bodyParser = require('body-parser');
+
 var fs = require("fs");
 var os = require('os');
 var request = require('request');
@@ -24,6 +26,8 @@ request.gzip = false;
 
 //var httpProxy = require('http-proxy');
 var app = express();
+app.use(bodyParser.json());
+
 var url = require('url');
 var X2JS = require('x2js');
 
@@ -113,6 +117,34 @@ app.all('/service/*', function (req, res, next) {
             return res.send("invalid method");
     }
     return req.pipe(r).pipe(res);
+});
+
+/*
+ * Initiate jobs on FME server.
+ *
+*/
+
+let NameValuePair = require("./lib/nameValuePair");
+let elevationNameValuePair = new NameValuePair(config.elevation.nameValuePair);
+let privateKey = config.elevation.recaptchaPrivateKey;
+let recaptcha = new (require("./lib/recaptcha"))(privateKey);
+let serviceBroker = new (require("./lib/serviceBroker"))(config.elevation);
+
+app.post('/elevation/initiateJob', function (req, res, next) {
+   let data = req.body;
+
+   //console.log("initiate job: " + JSON.stringify(data, null, 3));
+
+   recaptcha.verify(req.connection.remoteAddress, data.parameters.recaptcha, function(error, response, body) {
+      if(!error) {
+         delete data.parameters.recaptcha;
+         serviceBroker.execute(data).then(message => {
+            res.status(200).send(message);
+         });
+      } else {
+         res.status(403).send(body);
+      }
+   });
 });
 
 app.get('/refreshToken', function(req, res) {

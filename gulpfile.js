@@ -6,7 +6,6 @@ var fs            = require('fs');
 var header        = require('gulp-header');
 var eslint        = require('gulp-eslint');
 var babel         = require('gulp-babel');
-var sass          = require('gulp-sass');
 var concat        = require('gulp-concat');
 var concatCss     = require('gulp-concat-css');
 var insert        = require('gulp-insert');
@@ -158,7 +157,6 @@ gulp.task('watch', function() {
     gulp.watch(directories.assets + '/lt.js', ['squashLt']);
     gulp.watch(directories.views +  '/*', ['views']);
     gulp.watch(directories.resources + '/**/*', ['resources']);
-    //gulp.watch('scss/*.scss', ['sass']);
 });
 
 gulp.task('concatCss', function () {
