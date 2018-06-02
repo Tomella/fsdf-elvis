@@ -89,7 +89,22 @@
                    "layers" : "public.QLD_Elevation_Metadata_Index,public.5dem_ProjectsIndex,public.NSW_100k_Index_54,public.NSW_100k_Index_55,public.NSW_100k_Index_56,public.NSW_100k_Index_Forward_Program,public.ACT2015-Tile_Index_55,public.QLD_Project_Index_54,public.QLD_Project_Index_55,public.QLD_Project_Index_56,public.TAS_Project_Index_55,public.GA_Project_Index_47,public.GA_Project_Index_48,public.GA_Project_Index_54,public.GA_Project_Index_55,public.GA_Project_Index_56",
                    "format" : "image/png",
                    "transparent" : true,
-                   "opacity" : 0.7
+                   "opacity" : 0.7,
+                   "minZoom": 12
+                }
+            ],
+            "addLayerControl":false,
+            "visible":true
+         },
+         {
+            "name":"All",
+            "pseudoBaseLayer" : true,
+            "type":["TileLayer"],
+            "key":"indexesTile",
+            "parameters":[
+                "http://elevation.fsdf.org.au/tiles/elvis/{z}/{x}/{y}.png",
+                {
+                  "tms": false
                 }
             ],
             "addLayerControl":false,

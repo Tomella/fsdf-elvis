@@ -87,11 +87,6 @@
 .common-header {
   background-color: white;
 }
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
-}
 .iso19115,
 .iso19115 ul,
 .iso19115 li {
@@ -130,6 +125,11 @@
 
 .iso19115-head {
   font-weight: bold;
+}
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
 }
 .mvt,
 .mvt ul,
@@ -1011,6 +1011,21 @@ img.elvis-logo {
   left: 0;
   right: 0;
 }
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
+}
 .reviewing-odd {
   background-color: #eeeeee;
 }
@@ -1042,21 +1057,6 @@ img.elvis-logo {
 .exclude {
   color: #777777;
   text-decoration: line-through;
-}
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
 }
 .icsm-icon {
   background: url("icsm/img/global-sprites.svg") no-repeat;
@@ -1119,6 +1119,22 @@ i.fa.active {
 .themesdropdown .themescurrent {
   color: #fff;
   background-color: #777;
+}
+.downloadPane {
+  padding-left: 0px !important;
+  padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 10px;
+  overflow: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
 }
 .common-baselayer-control {
   width: 210px;
@@ -1217,22 +1233,6 @@ i.fa.active {
   height: 30px;
   font-size: 13px;
 }
-.downloadPane {
-  padding-left: 0px !important;
-  padding-right: 5px !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 10px;
-  overflow: hidden;
-}
-
-.downloadCont {
-  position: fixed;
-  right: 0;
-  bottom: 8px;
-}
 .regions-label {
   border: 0;
 }
@@ -1256,20 +1256,6 @@ i.fa.active {
 
 i.fa.active {
   color: red;
-}
-.vector-tooltip {
-  min-width: 25em;
-}
-
-.vector-checkbox {
-  width: 18px;
-  height: 18px;
-  vertical-align: bottom;
-  margin-right: 7px !important;
-}
-
-.vector-add:disabled {
-  color: gray;
 }
 .radCore {
   margin-right: 3px;
@@ -1379,4 +1365,18 @@ div.leaflet-control-scale-line {
 
 .select-land {
   background-position: -675px;
+}
+.vector-tooltip {
+  min-width: 25em;
+}
+
+.vector-checkbox {
+  width: 18px;
+  height: 18px;
+  vertical-align: bottom;
+  margin-right: 7px !important;
+}
+
+.vector-add:disabled {
+  color: gray;
 }
