@@ -215,5 +215,5 @@
       "intersectsUrl": "https://elvis-ga.fmecloud.com/fmedatastreaming/fsdf_elvis_prod/ReturnDownloadables.fmw?ymin={miny}&ymax={maxy}&xmin={minx}&xmax={maxx}",
       "recaptchaKey": "6LfUrFsUAAAAAKu4EJY_FSi3zFXvWm60RDVknRHf"
    },
-   "downloadLimit": 50000000000
+   "downloadLimit": 15000000000
 }
