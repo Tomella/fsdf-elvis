@@ -104,7 +104,8 @@
             "parameters":[
                 "http://elevation.fsdf.org.au/tiles/elvis/{z}/{x}/{y}.png",
                 {
-                  "tms": false
+                  "tms": false,
+                  "maxZoom": 11
                 }
             ],
             "addLayerControl":false,
