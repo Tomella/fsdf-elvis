@@ -126,11 +126,6 @@
 .iso19115-head {
   font-weight: bold;
 }
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
-}
 .mvt,
 .mvt ul,
 .mvt li {
@@ -174,6 +169,11 @@
 .metaview-info {
   padding-left: 3px;
   padding-right: 3px;
+}
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
 }
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
@@ -1233,21 +1233,6 @@ i.fa.active {
   right: 0;
   bottom: 8px;
 }
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
 .regions-label {
   border: 0;
 }
@@ -1302,6 +1287,21 @@ div.leaflet-control-scale-line {
   div.leaflet-control-scale-line {
     display: none;
   }
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
 }
 .vector-tooltip {
   min-width: 25em;

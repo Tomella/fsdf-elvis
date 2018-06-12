@@ -26,7 +26,17 @@ request.gzip = false;
 
 //var httpProxy = require('http-proxy');
 var app = express();
-app.use(bodyParser.json({limit: '50mb'}));
+//app.use(bodyParser.json({limit: '50mb'}));
+
+app.use(function(req, res, next) {
+   // service uses pipes and body parser reads the stream and closes it.
+   if(req.url.indexOf("/service/") === 0) {
+       return next();
+   } else {
+       bodyParser.json({limit: '30mb'})(req,res,next);
+   }
+});
+
 
 var url = require('url');
 var X2JS = require('x2js');
