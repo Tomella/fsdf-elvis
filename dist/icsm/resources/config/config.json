@@ -212,6 +212,7 @@
 	"processing": {
       "method": "POST",
       "postProcessingUrl": "/elevation/initiateJob",
+      "intersectsUrl": "https://elvis-ga.fmecloud.com/fmedatastreaming/elvis_indexes/ReturnDownloadables.fmw?ymin={miny}&ymax={maxy}&xmin={minx}&xmax={maxx}",
       "intersectsUrl": "https://elvis-ga.fmecloud.com/fmedatastreaming/fsdf_elvis_prod/ReturnDownloadables.fmw?ymin={miny}&ymax={maxy}&xmin={minx}&xmax={maxx}",
       "recaptchaKey": "6LfUrFsUAAAAAKu4EJY_FSi3zFXvWm60RDVknRHf"
    },
