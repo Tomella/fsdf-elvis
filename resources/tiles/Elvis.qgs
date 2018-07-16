@@ -1,0 +1,134 @@
+<!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
+<qgis projectname="" version="2.18.20">
+  <title></title>
+  <autotransaction active="0"/>
+  <evaluateDefaultValues active="0"/>
+  <layer-tree-group expanded="1" checked="Qt::Checked" name="">
+    <customproperties/>
+    <layer-tree-layer expanded="1" providerKey="wms" checked="Qt::Checked" id="public_TAS_Project_Index_55_public_QLD_Project_Index_56_public_QLD_Project_Index_55_public_QLD_Project_Index_54_public_QLD_Elevation_Metadata_Index_public_NSW_100k_Index_Forward_Program_public_NSW_100k_Index_56_public_NSW_100k_Index_55_public_NSW_100k_Index_54_public_GA_Project_Index_56_public_GA_Project_Index_55_public_GA_Project_Index_54_public_GA_Project_Index_48_public_GA_Project_Index_47_public_ACT2015_Tile_Index_55_public_5dem_ProjectsIndex20180601210053486" source="contextualWMSLegend=0&amp;crs=EPSG:3857&amp;dpiMode=7&amp;featureCount=10&amp;format=image/png&amp;layers=public.5dem_ProjectsIndex&amp;layers=public.ACT2015-Tile_Index_55&amp;layers=public.GA_Project_Index_47&amp;layers=public.GA_Project_Index_48&amp;layers=public.GA_Project_Index_54&amp;layers=public.GA_Project_Index_55&amp;layers=public.GA_Project_Index_56&amp;layers=public.NSW_100k_Index_54&amp;layers=public.NSW_100k_Index_55&amp;layers=public.NSW_100k_Index_56&amp;layers=public.NSW_100k_Index_Forward_Program&amp;layers=public.QLD_Elevation_Metadata_Index&amp;layers=public.QLD_Project_Index_54&amp;layers=public.QLD_Project_Index_55&amp;layers=public.QLD_Project_Index_56&amp;layers=public.TAS_Project_Index_55&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;url=https://elvis-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetCapabilities_ElevationAvailableData.fmw?VERSION%3D1.1.1" name="public.TAS_Project_Index_55/public.QLD_Project_Index_56/public.QLD_Project_Index_55/public.QLD_Project_Index_54/public.QLD_Elevation_Metadata_Index/public.NSW_100k_Index_Forward_Program/public.NSW_100k_Index_56/public.NSW_100k_Index_55/public.NSW_100k_Index_54/public.GA_Project_Index_56/public.GA_Project_Index_55/public.GA_Project_Index_54/public.GA_Project_Index_48/public.GA_Project_Index_47/public.ACT2015-Tile_Index_55/public.5dem_ProjectsIndex">
+      <customproperties/>
+    </layer-tree-layer>
+  </layer-tree-group>
+  <relations/>
+  <mapcanvas>
+    <units>meters</units>
+    <extent>
+      <xmin>10679748.3706049881875515</xmin>
+      <ymin>-1430934.98672733688727021</ymin>
+      <xmax>10895255.94731258973479271</xmax>
+      <ymax>-1284610.23120871232822537</ymax>
+    </extent>
+    <rotation>0</rotation>
+    <projections>0</projections>
+    <destinationsrs>
+      <spatialrefsys>
+        <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs</proj4>
+        <srsid>3857</srsid>
+        <srid>3857</srid>
+        <authid>EPSG:3857</authid>
+        <description>WGS 84 / Pseudo Mercator</description>
+        <projectionacronym>merc</projectionacronym>
+        <ellipsoidacronym>WGS84</ellipsoidacronym>
+        <geographicflag>false</geographicflag>
+      </spatialrefsys>
+    </destinationsrs>
+    <rendermaptile>0</rendermaptile>
+    <layer_coordinate_transform_info/>
+  </mapcanvas>
+  <layer-tree-canvas>
+    <custom-order enabled="0">
+      <item>public_TAS_Project_Index_55_public_QLD_Project_Index_56_public_QLD_Project_Index_55_public_QLD_Project_Index_54_public_QLD_Elevation_Metadata_Index_public_NSW_100k_Index_Forward_Program_public_NSW_100k_Index_56_public_NSW_100k_Index_55_public_NSW_100k_Index_54_public_GA_Project_Index_56_public_GA_Project_Index_55_public_GA_Project_Index_54_public_GA_Project_Index_48_public_GA_Project_Index_47_public_ACT2015_Tile_Index_55_public_5dem_ProjectsIndex20180601210053486</item>
+    </custom-order>
+  </layer-tree-canvas>
+  <legend updateDrawingOrder="true">
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="public.TAS_Project_Index_55/public.QLD_Project_Index_56/public.QLD_Project_Index_55/public.QLD_Project_Index_54/public.QLD_Elevation_Metadata_Index/public.NSW_100k_Index_Forward_Program/public.NSW_100k_Index_56/public.NSW_100k_Index_55/public.NSW_100k_Index_54/public.GA_Project_Index_56/public.GA_Project_Index_55/public.GA_Project_Index_54/public.GA_Project_Index_48/public.GA_Project_Index_47/public.ACT2015-Tile_Index_55/public.5dem_ProjectsIndex" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
+        <legendlayerfile isInOverview="0" layerid="public_TAS_Project_Index_55_public_QLD_Project_Index_56_public_QLD_Project_Index_55_public_QLD_Project_Index_54_public_QLD_Elevation_Metadata_Index_public_NSW_100k_Index_Forward_Program_public_NSW_100k_Index_56_public_NSW_100k_Index_55_public_NSW_100k_Index_54_public_GA_Project_Index_56_public_GA_Project_Index_55_public_GA_Project_Index_54_public_GA_Project_Index_48_public_GA_Project_Index_47_public_ACT2015_Tile_Index_55_public_5dem_ProjectsIndex20180601210053486" visible="1"/>
+      </filegroup>
+    </legendlayer>
+  </legend>
+  <projectlayers>
+    <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
+      <extent>
+        <xmin>10686671.11615426279604435</xmin>
+        <ymin>-5465442.18332275189459324</ymin>
+        <xmax>17254521.07295740395784378</xmax>
+        <ymax>-1006021.0627551336074248</ymax>
+      </extent>
+      <id>public_TAS_Project_Index_55_public_QLD_Project_Index_56_public_QLD_Project_Index_55_public_QLD_Project_Index_54_public_QLD_Elevation_Metadata_Index_public_NSW_100k_Index_Forward_Program_public_NSW_100k_Index_56_public_NSW_100k_Index_55_public_NSW_100k_Index_54_public_GA_Project_Index_56_public_GA_Project_Index_55_public_GA_Project_Index_54_public_GA_Project_Index_48_public_GA_Project_Index_47_public_ACT2015_Tile_Index_55_public_5dem_ProjectsIndex20180601210053486</id>
+      <datasource>contextualWMSLegend=0&amp;crs=EPSG:3857&amp;dpiMode=7&amp;featureCount=10&amp;format=image/png&amp;layers=public.5dem_ProjectsIndex&amp;layers=public.ACT2015-Tile_Index_55&amp;layers=public.GA_Project_Index_47&amp;layers=public.GA_Project_Index_48&amp;layers=public.GA_Project_Index_54&amp;layers=public.GA_Project_Index_55&amp;layers=public.GA_Project_Index_56&amp;layers=public.NSW_100k_Index_54&amp;layers=public.NSW_100k_Index_55&amp;layers=public.NSW_100k_Index_56&amp;layers=public.NSW_100k_Index_Forward_Program&amp;layers=public.QLD_Elevation_Metadata_Index&amp;layers=public.QLD_Project_Index_54&amp;layers=public.QLD_Project_Index_55&amp;layers=public.QLD_Project_Index_56&amp;layers=public.TAS_Project_Index_55&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;styles=&amp;url=https://elvis-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetCapabilities_ElevationAvailableData.fmw?VERSION%3D1.1.1</datasource>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <layername>public.TAS_Project_Index_55/public.QLD_Project_Index_56/public.QLD_Project_Index_55/public.QLD_Project_Index_54/public.QLD_Elevation_Metadata_Index/public.NSW_100k_Index_Forward_Program/public.NSW_100k_Index_56/public.NSW_100k_Index_55/public.NSW_100k_Index_54/public.GA_Project_Index_56/public.GA_Project_Index_55/public.GA_Project_Index_54/public.GA_Project_Index_48/public.GA_Project_Index_47/public.ACT2015-Tile_Index_55/public.5dem_ProjectsIndex</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs</proj4>
+          <srsid>3857</srsid>
+          <srid>3857</srid>
+          <authid>EPSG:3857</authid>
+          <description>WGS 84 / Pseudo Mercator</description>
+          <projectionacronym>merc</projectionacronym>
+          <ellipsoidacronym>WGS84</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <customproperties>
+        <property key="identify/format" value="Undefined"/>
+      </customproperties>
+      <provider>wms</provider>
+      <noData>
+        <noDataList bandNo="1" useSrcNoData="0"/>
+      </noData>
+      <map-layer-style-manager current="">
+        <map-layer-style name=""/>
+      </map-layer-style-manager>
+      <pipe>
+        <rasterrenderer opacity="1" alphaBand="-1" band="1" type="singlebandcolordata">
+          <rasterTransparency/>
+        </rasterrenderer>
+        <brightnesscontrast brightness="0" contrast="0"/>
+        <huesaturation colorizeGreen="128" colorizeOn="0" colorizeRed="255" colorizeBlue="128" grayscaleMode="0" saturation="0" colorizeStrength="100"/>
+        <rasterresampler maxOversampling="2"/>
+      </pipe>
+      <blendMode>0</blendMode>
+    </maplayer>
+  </projectlayers>
+  <properties>
+    <Measurement>
+      <DistanceUnits type="QString"></DistanceUnits>
+      <AreaUnits type="QString"></AreaUnits>
+    </Measurement>
+    <SpatialRefSys>
+      <ProjectCRSProj4String type="QString">+proj=longlat +datum=WGS84 +no_defs</ProjectCRSProj4String>
+      <ProjectCrs type="QString">EPSG:4326</ProjectCrs>
+      <ProjectCRSID type="int">3452</ProjectCRSID>
+    </SpatialRefSys>
+    <Paths>
+      <Absolute type="bool">false</Absolute>
+    </Paths>
+    <Gui>
+      <SelectionColorBluePart type="int">0</SelectionColorBluePart>
+      <CanvasColorGreenPart type="int">255</CanvasColorGreenPart>
+      <CanvasColorRedPart type="int">255</CanvasColorRedPart>
+      <SelectionColorRedPart type="int">255</SelectionColorRedPart>
+      <SelectionColorAlphaPart type="int">255</SelectionColorAlphaPart>
+      <SelectionColorGreenPart type="int">255</SelectionColorGreenPart>
+      <CanvasColorBluePart type="int">255</CanvasColorBluePart>
+    </Gui>
+    <Digitizing>
+      <DefaultSnapToleranceUnit type="int">2</DefaultSnapToleranceUnit>
+      <SnappingMode type="QString">current_layer</SnappingMode>
+      <DefaultSnapType type="QString">off</DefaultSnapType>
+      <DefaultSnapTolerance type="double">0</DefaultSnapTolerance>
+    </Digitizing>
+    <PositionPrecision>
+      <DecimalPlaces type="int">2</DecimalPlaces>
+      <Automatic type="bool">true</Automatic>
+    </PositionPrecision>
+    <Legend>
+      <filterByMap type="bool">false</filterByMap>
+    </Legend>
+  </properties>
+  <visibility-presets/>
+</qgis>
