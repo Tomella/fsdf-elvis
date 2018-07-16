@@ -1,6 +1,6 @@
-## Elevation
+## ELVIS - Elevation
 
-Elevation clip, zip and ship ICSM.
+ELVIS - Elevation clip, zip and ship ICSM.
 
 ### Getting started
 There are some things to do to get started. If you want to automate it more go ahead.

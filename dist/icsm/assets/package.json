@@ -1,11 +1,13 @@
 {
   "name": "Icsm",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "ICSM",
   "keywords": [
     "Explorer",
     "ICSM",
-    "elevation"
+    "elevation",
+    "ELVIS",
+    "FSDF"
   ],
   "author": {
     "name": "Geoscience Australia",

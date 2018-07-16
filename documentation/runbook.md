@@ -15,7 +15,7 @@ Provides a suite of simple web pages that seek to support [FSDF](http://www.anzl
 
 ### Technical overview
 
-Elevation is predominantly a static web application with microservices provided using NodeJS as the middleware platform. The static content is served via Apache HTTP and all content is routed through the same. The microservices run in user space under the ec2-user login. It's current deployment is in AWS using a single AWS EC2 instance but the code is not bound to any particular platorm.
+ELVIS - Elevation is predominantly a static web application with microservices provided using NodeJS as the middleware platform. The static content is served via Apache HTTP and all content is routed through the same. The microservices run in user space under the ec2-user login. It's current deployment is in AWS using a single AWS EC2 instance but the code is not bound to any particular platorm.
 
 Future capability will include a Solr instance to serve Gazetteer place names and it will also be described in this document. If it is currently within scope is a business decision.
 

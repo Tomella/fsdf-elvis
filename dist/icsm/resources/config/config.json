@@ -74,7 +74,7 @@
          },
          {
          	"description" : "placeholder for layers above the topography",
-         	"name" : "Elevation and Depth - Foundation Spatial Data Map Layers",
+         	"name" : "ELVIS - Elevation and Depth - Foundation Spatial Data Map Layers",
          	"type" : "LayerGroup",
          	"layers": []
          },
@@ -128,7 +128,7 @@
       "inside": "nswTopo"
    },
    "layersTab" : {
-   		"group" : "Elevation and Depth - Foundation Spatial Data Map Layers",
+   		"group" : "ELVIS - Elevation and Depth - Foundation Spatial Data Map Layers",
    		"title" : "Layers",
    		"layers" : [
    			{
