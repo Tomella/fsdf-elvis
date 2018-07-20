@@ -87,6 +87,11 @@
 .common-header {
   background-color: white;
 }
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
+}
 .iso19115,
 .iso19115 ul,
 .iso19115 li {
@@ -125,11 +130,6 @@
 
 .iso19115-head {
   font-weight: bold;
-}
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
 }
 .mvt,
 .mvt ul,
@@ -519,17 +519,6 @@ div.leaflet-control-scale-line {
     display: none;
   }
 }
-.pn-authorities-pills span.btn-primary {
-  background-color: red;
-}
-
-.pn-authorities-swathe {
-  display: inline-block;
-  background-color: red;
-  width: 14px;
-  height: 14px;
-  border: solid 1px black;
-}
 /* Base for label styling */
 
 .filters-check:not(:checked),
@@ -608,32 +597,6 @@ div.leaflet-control-scale-line {
 .filters-check:checked:focus + label:before,
 .filters-check:not(:checked):focus + label:before {
   border: 2px dotted blue;
-}
-.pn-pill {
-  padding: 0px 2px;
-  font-size: 12px;
-  line-height: 1.5;
-  border-radius: 3px;
-  margin: 0;
-}
-.quickSearch {
-  width: 33em;
-  color: black;
-}
-
-.placenames-filtered-summary {
-  position: fixed;
-  z-index: 4;
-  top: 123px;
-  left: 450px;
-  right: 20px;
-}
-
-.placenames-filtered-summary-child {
-  background-color: white;
-  opacity: 0.6;
-  border-radius: 3px;
-  display: inline-block;
 }
 /* Overrides */
 
@@ -1127,6 +1090,21 @@ img.elvis-logo {
   left: 0;
   right: 0;
 }
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
+}
 .reviewing-odd {
   background-color: #eeeeee;
 }
@@ -1159,20 +1137,67 @@ img.elvis-logo {
   color: #777777;
   text-decoration: line-through;
 }
-.selectContainer {
-  width: 100%;
+.icsm-icon {
+  background: url("icsm/img/global-sprites.svg") no-repeat;
+  display: inline-block;
+  width: 19px;
+  height: 30px;
+  margin: 0 auto 0 auto;
 }
 
-.selectAbstractTooltip {
-  /* width:450px; */
+.icsm-pin {
+  background-position: 0px;
 }
 
-.orange {
-  color: orange;
+.icsm-map {
+  background-position: -63px;
 }
 
-i.fa.active {
-  color: red;
+.icsm-crosshair {
+  background-position: -82px;
+}
+
+.icsm-sign {
+  background-position: -102px;
+}
+
+.icsm-parcel {
+  background-position: -121px;
+}
+
+.icsm-satellite {
+  background-position: -140px;
+}
+
+.icsm-ship {
+  background-position: -160px;
+}
+
+.icsm-water {
+  background-position: -179px;
+}
+
+.icsm-shore {
+  background-position: -199px;
+}
+
+.icsm-land {
+  background-position: -218px;
+}
+
+.themesItemCompact {
+  margin-top: 0px !important;
+}
+
+.themesdropdown {
+  margin-top: -8px;
+  padding-right: 20px;
+  z-index: 100000;
+}
+
+.themesdropdown .themescurrent {
+  color: #fff;
+  background-color: #777;
 }
 .common-baselayer-control {
   width: 210px;
@@ -1271,68 +1296,6 @@ i.fa.active {
   border: none;
   height: 30px;
   font-size: 13px;
-}
-.icsm-icon {
-  background: url("icsm/img/global-sprites.svg") no-repeat;
-  display: inline-block;
-  width: 19px;
-  height: 30px;
-  margin: 0 auto 0 auto;
-}
-
-.icsm-pin {
-  background-position: 0px;
-}
-
-.icsm-map {
-  background-position: -63px;
-}
-
-.icsm-crosshair {
-  background-position: -82px;
-}
-
-.icsm-sign {
-  background-position: -102px;
-}
-
-.icsm-parcel {
-  background-position: -121px;
-}
-
-.icsm-satellite {
-  background-position: -140px;
-}
-
-.icsm-ship {
-  background-position: -160px;
-}
-
-.icsm-water {
-  background-position: -179px;
-}
-
-.icsm-shore {
-  background-position: -199px;
-}
-
-.icsm-land {
-  background-position: -218px;
-}
-
-.themesItemCompact {
-  margin-top: 0px !important;
-}
-
-.themesdropdown {
-  margin-top: -8px;
-  padding-right: 20px;
-  z-index: 100000;
-}
-
-.themesdropdown .themescurrent {
-  color: #fff;
-  background-color: #777;
 }
 .downloadPane {
   padding-left: 0px !important;

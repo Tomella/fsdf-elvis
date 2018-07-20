@@ -1,17 +1,4 @@
 {
-   "clusters": {
-      "defaultQuery": "*:*",
-      "summaryZoom": 10,
-      "countField": "location",
-      "attribution": "Copyright of the Gazetteer data resides with the relevant State, Territory and Commonwealth Government agencies."
-   },
-   "groups": {
-      "referenceDataLocation": "icsm/resources/config/groupCatalogFeatures.json",
-      "referenceDataCountsUrl": "select?facet=true&facet.limit=-1&facet.field=group&facet.field=feature&facet.field=category&facet.field=authority&q=*:*&wt=json&rows=0"
-   },
-   "filters": {
-      "referenceDataUrl": "placenames/resources/config/groupCatalogFeatures.json"
-   },
    "authorities": [
       {
          "code": "AAD",
@@ -69,5 +56,5 @@
          "name": "Landgate"
       }
    ],
-   "zoneQueryTemplate": "select?rows=0&wt=json"
+   "queryTemplate": "/select?fq=location:%5B{yMin},{xMin}+TO+{yMax},{xMax}%5D&q={q}&rows=20&sort=geodist(ll,{y},{x})+asc&wt=json&q.op=AND"
 }

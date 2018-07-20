@@ -67,7 +67,7 @@
 		'geo.maphelper',
       'geo.measure',
 
-      'placenames.quicksearch',
+      'placenames.search',
       'placenames.config',
 
 		'icsm.bounds',

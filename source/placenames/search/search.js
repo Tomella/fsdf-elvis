@@ -1,21 +1,5 @@
 {
-   angular.module("placenames.search", ['placenames.authorities', 'placenames.templates', 'placenames.groups', 'placenames.tree'])
-
-      .directive('placenamesClear', ['searchService', function (searchService) {
-         return {
-            link: function (scope, element) {
-               searchService.onMapUpdate(listening);
-               function listening() {
-                  if (element.is(":focus")) {
-                     let e = $.Event("keydown");
-                     e.which = 27; // # Some key code value
-                     element.trigger(e);
-                     element.blur();
-                  }
-               }
-            }
-         };
-      }])
+   angular.module("placenames.search", ['placenames.search.service', 'placenames.templates', 'placenames.tree'])
 
       .directive('placenamesOnEnter', function () {
          return function (scope, element, attrs) {
@@ -30,16 +14,6 @@
             });
          };
       })
-
-      .directive('placenamesSearchFilters', ["searchService", function (searchService) {
-         return {
-            templateUrl: "placenames/search/searchfilters.html",
-            link: function (scope) {
-               scope.summary = searchService.summary;
-               scope.data = searchService.data;
-            }
-         };
-      }])
 
       .directive('placenamesOptions', ['searchService', function (searchService) {
          return {
@@ -83,13 +57,6 @@
                      });
                   };
 
-                  scope.clear = function () {
-                     scope.state.searched = null;
-                     $timeout(() => {
-                        $rootScope.$broadcast("clear.button.fired");
-                     }, 10);
-                  };
-
                   scope.search = function search(item) {
                      scope.showFilters = false;
                      searchService.goto(item);
@@ -101,44 +68,6 @@
             };
          }
       ])
-
-      .directive("placenamesSearch", ['$timeout', 'groupsService', 'searchService',
-         function ($timeout, groupsService, searchService) {
-            return {
-               templateUrl: 'placenames/search/search.html',
-               restrict: 'AE',
-               link: function (scope) {
-                  scope.state = searchService.data;
-                  scope.status = {};
-
-                  scope.$watch("state.searched", function (newVal, oldVal) {
-                     if (!newVal && oldVal) {
-                        searchService.filtered();
-                     }
-                  });
-
-                  searchService.filtered();
-                  scope.update = function () {
-                     searchService.filtered();
-                  };
-
-                  scope.loadOnEmpty = function () {
-                     if (!scope.state.filter) {
-                        searchService.filtered();
-                     }
-                  };
-
-                  scope.select = function (item) {
-                     scope.search(item);
-                  };
-
-                  scope.deselect = function (facet) {
-                     facet.selected = false;
-                     searchService.filtered();
-                  };
-               }
-            };
-         }])
 
       .filter('placenamesDocName', [function () {
          return function (docs) {

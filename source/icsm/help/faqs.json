@@ -27,6 +27,6 @@
 	{
 		"key" : "faq9",
 		"question" : "How do I use the search function?",
-		"answer" : "Start typing in the filter field. Up to the best fifty matches will be shown as you type with those that best match your criteria at the top of the list. The results are restricted to you map's field of view so zooming the map in or out will change the number of results."
+		"answer" : "Start typing in the filter field. Up to twenty matches will be shown as you type with those nearest your map center at the top of the list. The results are restricted to your map's field of view so zooming the map in or out will change the number of results."
 	}
 ]

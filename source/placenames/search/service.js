@@ -6,22 +6,14 @@
 
       .factory('searchService', SearchService);
 
-   SearchService.$inject = ['$http', '$rootScope', '$timeout', 'groupsService', 'mapService'];
+   SearchService.$inject = ['$http', '$rootScope', '$timeout', 'placenamesConfigService', 'mapService'];
 }
 
-function SearchService($http, $rootScope, $timeout, groupsService, mapService) {
+function SearchService($http, $rootScope, $timeout, placenamesConfigService, mapService) {
    let data = {
       searched: null // Search results
    };
 
-   let countsMapping = {
-      group: "groups",
-      authority: "authorities",
-      feature: "features",
-      category: "categories"
-   };
-
-   let summary = {};
    let mapListeners = [];
 
    let results;
@@ -46,57 +38,61 @@ function SearchService($http, $rootScope, $timeout, groupsService, mapService) {
       },
 
       filtered() {
-         return filtered().then(response => {
-            data.filtered = response;
-            let params = response.responseHeader.params;
-            filteredAuthorities(params);
-            filteredCurrent(params);
-            return response;
+         return placenamesConfigService.getConfig().then(({queryTemplate}) => {
+            return mapService.getMap().then(map => {
+               let template = queryTemplate;
+
+               let bounds = map.getBounds();
+               let center = map.getCenter();
+               let q = typeof data.filter === "object" ? data.filter.name : data.filter;
+               if (q && q.indexOf(" ") !== -1) {
+                  q = '"' + q + '"';
+               }
+               q = "*" + (q?q:"");
+
+               let yMin = Math.max(bounds.getSouth(), -90);
+               let xMin = Math.max(bounds.getWest(), -180);
+               let yMax = Math.min(bounds.getNorth(), 90);
+               let xMax = Math.min(bounds.getEast(), 180);
+
+               let x = center.lng;
+               let y = center.lat;
+
+               let params = {xMin, xMax, yMin, yMax, q, x, y};
+               Object.keys(params).forEach(key => {
+                  template = template.replace(new RegExp("\{" + key + "\}", "g"), params[key])
+               });
+               console.log(template)
+               return $http({
+                  url: template,
+                  method: "GET",
+                  cache: true
+               }).then(response => {
+                  return response.data;
+               });
+            });
          });
-      },
-
-      request(params) {
-         return request(params);
-      },
-
-      search(item) {
-         if (item) {
-            select(item.recordId).then(() => this.searched());
-         } else {
-            this.searched();
-         }
-      },
-
-      persist(params, response) {
-         data.persist = {
-            params,
-            data: response
-         };
-         return mapService.getMap().then(map => data.persist.bounds = map.getBounds());
-      },
-
-      searched() {
-         data.searched = data.persist;
-         data.searched.data.restrict = map.getBounds();
-         this.hide();
       },
 
       goto(what) {
          return mapService.getMap().then(map => {
-            return map.panTo(what.location.split(" ").reverse().map(str => +str));
+            map.panTo(what.location.split(" ").reverse().map(str => +str));
+            return this.show(what);
          });
       },
 
       show(what) {
-         this.hide().then(map => {
+         return this.hide().then(map => {
             // split lng/lat string seperated by space, reverse to lat/lng, cooerce to numbers
             let location = what.location.split(" ").reverse().map(str => +str);
             marker = L.popup()
                .setLatLng(location)
-               .setContent(what.name + "<br/>Lat/Lng: " +
-               location[0] + "&deg;" +
-               location[1] + "&deg;")
-               .openOn(map);
+               .setContent(what.name + " (" + what.authority + " - " + what.feature + ")" +
+                  "<br/>Lat/Lng: " +
+                  location[0] + "&deg;" +
+                  location[1] + "&deg;"
+               ).openOn(map);
+            return map;
          });
       },
 
@@ -134,280 +130,5 @@ function SearchService($http, $rootScope, $timeout, groupsService, mapService) {
          }
       }
    });
-
-   // We replace the search parameters like filters with a unique record ID.
-   function select(recordId) {
-      return createParams().then(params => {
-         params.q = "recordId:" + recordId;
-         return run(params).then(response => {
-            return service.persist(params, response).then(function () {
-               decorateCounts(response.facet_counts.facet_fields);
-               $rootScope.$broadcast('pn.search.complete', response);
-               return response;
-            });
-         });
-      });
-   }
-
-   function filtered() {
-      return createParams().then(params => {
-         return run(params).then(response => {
-            return service.persist(params, response).then(function () {
-               decorateCounts(response.facet_counts.facet_fields);
-               $rootScope.$broadcast('pn.search.complete', response);
-               return response;
-            });
-         });
-      });
-   }
-
-   function decorateCounts(facets) {
-      groupsService.getAll().then(response => {
-
-         summary.counts = arraysToMap(facets);
-
-         response.authorities.forEach(auth => {
-            auth.count = summary.counts.authorities[auth.code];
-            auth.count = auth.count ? auth.count : 0;
-         });
-
-         ["groups", "features", "categories"].forEach(key => {
-            response[key].forEach(item => {
-               item.count = summary.counts[key][item.name];
-               item.count = item.count ? item.count : 0;
-            });
-         });
-      });
-   }
-
-   function arrayToMap(facets) {
-      let lastElement;
-      let counts = {};
-
-      facets.forEach((value, index) => {
-         if (index % 2) {
-            counts[lastElement] = value;
-         } else {
-            lastElement = value;
-         }
-      });
-      return counts;
-   }
-
-
-   function arraysToMap(facets) {
-      let lastElement;
-      let counts = {};
-      Object.values(countsMapping).forEach(value => {
-         counts[value] = {};
-      });
-
-      Object.keys(facets).forEach(key => {
-         facets[key].forEach((value, index) => {
-            if (index % 2) {
-               counts[countsMapping[key]][lastElement] = value;
-            } else {
-               lastElement = value;
-            }
-         });
-      });
-      return counts;
-   }
-
-   function createSummary() {
-      return mapService.getMap().then(map => {
-         return groupsService.getAll().then(response => {
-            let filterIsObject = typeof data.filter === "object";
-            let summary = service.summary;
-            summary.filter = filterIsObject ? data.filter.name : data.filter;
-            summary.bounds = map.getBounds();
-            summary.authorities = response.authorities.filter(auth => auth.selected);
-            summary.current = [];
-            response.groups.forEach(group => summary.current = summary.current.concat(group.selections()));
-            return summary;
-         });
-      });
-   }
-
-   function createParams() {
-      return createSummary().then(summary => {
-         let params = baseParameters();
-         let bounds = summary.bounds;
-
-         params.fq = getBounds(bounds);
-         params["facet.heatmap.geom"] = getHeatmapBounds(bounds);
-         params.sort = getSort(bounds);
-         params.q = createQText(summary);
-
-         let qs = createCurrentParams();
-         let qas = createAuthorityParams();
-
-         if (qas.length) {
-            params.q += ' AND (' + qas.join(" ") + ')';
-         }
-
-         if (qs.length) {
-            params.q += ' AND (' + qs.join(" ") + ')';
-         }
-         return params;
-      });
-   }
-
-   function createQText(summary) {
-      let q = summary.filter;
-      return q ? '"' + q.toLowerCase() + '"' : "*:*";
-   }
-
-   function filteredAuthorities(params) {
-      return groupsService.getAuthorities().then(authorities => {
-         if (summary.authorities && summary.authorities.length) {
-            // We need get the facets as though no authorities are selected Select against Solr
-            let newParams = authBaseParameters();
-
-            let qs = createCurrentParams();
-            if (qs.length) {
-               newParams.q += ' AND (' + qs.join(" ") + ')';
-            }
-            newParams.q = createQText(summary);
-            newParams.fq = params.fq;
-
-            return request(newParams).then(data => {
-               let countMap = arrayToMap(data.facet_counts.facet_fields.authority);
-               authorities.forEach(auth => {
-                  auth.allCount = countMap[auth.code];
-               });
-
-               data.facetCounts = {};
-               console.log("auth counts", data, summary);
-               return data;
-            });
-
-         } else {
-            // Otherwise we can just use the normal counts to set the allCounts
-            authorities.forEach(auth => {
-               auth.allCount = summary.counts.authorities[auth.code];
-            });
-            return null;
-         }
-      });
-   }
-
-   function filteredCurrent(params) {
-      return groupsService.getGroups().then(groups => {
-
-         // We need get the facets as though no filters are selected. Select against Solr
-         let newParams = typeBaseParameters(["group", "category", "feature"]);
-         newParams.q = createQText(summary);
-         let qs = createAuthorityParams();
-         if (qs.length) {
-            newParams.q += ' AND (' + qs.join(" ") + ')';
-         }
-         newParams.fq = params.fq;
-
-         return request(newParams).then(data => {
-            let groupMap = arrayToMap(data.facet_counts.facet_fields.group);
-            let categoryMap = arrayToMap(data.facet_counts.facet_fields.category);
-            let featureMap = arrayToMap(data.facet_counts.facet_fields.feature);
-            groups.forEach(group => {
-               group.allCount = groupMap[group.name];
-               group.categories.forEach(category => {
-                  category.allCount = categoryMap[category.name];
-                  category.features.forEach(feature => {
-                     feature.allCount = featureMap[feature.name];
-                  });
-               });
-            });
-
-            data.facetCounts = {};
-            return data;
-         });
-      });
-   }
-
-   // We assume summary is already made.
-   function createAuthorityParams() {
-      return summary.authorities.map(auth => 'authority:' + auth.code);
-   }
-
-   // We assume
-   // Current is one of group category or feature, which ever panel is open.
-   function createCurrentParams() {
-      return summary.current.map(item => item.label + ':"' + item.name + '"');
-   }
-
-   function run(params) {
-      return request(params).then(data => {
-         let code;
-         data.facetCounts = {};
-         $rootScope.$broadcast("pn.facets.changed", data.facet_counts.facet_fields);
-
-         return data;
-      });
-   }
-
-   function request(params) {
-      return $http({
-         url: "/select?",
-         method: "GET",
-         params,
-         cache: true
-      }).then(response => {
-         return response.data;
-      });
-   }
-
-   function getSort(bounds) {
-      let dx = (bounds.getEast() - bounds.getWest()) / 2;
-      let dy = (bounds.getNorth() - bounds.getSouth()) / 2;
-      return "geodist(ll," +
-         (bounds.getSouth() + dy) +
-         "," +
-         (bounds.getWest() + dx) +
-         ") asc";
-   }
-
-   function getHeatmapBounds(bounds) {
-      return "[" +
-         Math.max(bounds.getSouth(), -90) + "," +
-         Math.max(bounds.getWest(), -180) + " TO " +
-         Math.min(bounds.getNorth(), 90) + "," +
-         Math.min(bounds.getEast(), 180) + "]";
-   }
-
-   function authBaseParameters() {
-      return {
-         facet: true,
-         "facet.field": ["authority"],
-         rows: 0,
-         wt: "json"
-      };
-   }
-
-   function typeBaseParameters(types) {
-      let response = {
-         "facet.limit": -1,
-         facet: true,
-         rows: 0,
-         wt: "json"
-      };
-      if (types) {
-         response["facet.field"] = types;
-      }
-      return response;
-   }
-
-   function baseParameters() {
-      return {
-         "facet.heatmap.format": "ints2D",
-         "facet.heatmap": "location",
-         "facet.limit": -1,
-         facet: true,
-         "facet.field": ["feature", "category", "authority", "group"],
-         rows: 50,
-         wt: "json"
-      };
-   }
-
    return service;
 }
-
