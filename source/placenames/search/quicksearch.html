@@ -1,0 +1,32 @@
+<div class="search-text" style="color:black; width: 26em">
+   <div class="input-group input-group-sm" style="width:100%">
+      <input class="hide"></input>
+      <input type="text" ng-model="state.filter" placeholder="Match by feature name..." placenames-on-enter="search()"
+         ng-model-options="{ debounce: 300}" typeahead-on-select="search($item, $model, $label)" typeahead-focus-first="false"
+         ng-disabled="state.searched" typeahead-template-url="placenames/search/typeahead.html" class="form-control" typeahead-min-length="0"
+         uib-typeahead="doc as doc.name for doc in loadDocs(state.filter)" typeahead-loading="loadingLocations" typeahead-no-results="noResults"
+         placenames-clear>
+   </div>
+</div>
+<div class="filters" ng-show="showFilters" style="background-color: white;white-space:normal;">
+   <div class="panel panel-default" style="margin-bottom:5px">
+      <div class="panel-heading">
+         <h4 class="panel-title">
+            Filter
+            <span ng-if="summary.current.length">ing</span> by groups/categories/features...
+         </h4>
+      </div>
+   </div>
+   <placenames-tree></placenames-tree>
+   <div class="panel panel-default" style="margin-bottom:5px">
+      <div class="panel-heading">
+         <h4 class="panel-title">
+            Filter
+            <span ng-if="summary.authorities.length">ing</span> by authority...
+         </h4>
+      </div>
+      <div class="panel-body" style="max-height: 200px; overflow-y: auto; padding:5px">
+         <placenames-authorities update="update()"></placenames-authorities>
+      </div>
+   </div>
+</div>

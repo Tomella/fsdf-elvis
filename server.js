@@ -310,23 +310,32 @@ app.get('/gazetteer/wfs', function (req, res, next) {
     });
 });
 
-app.get('/select', function (req, res, next) {
-    //var solrSelect = "http://localhost:8983/solr/placenames";
-    var solrSelect = "http://192.168.0.24:8983/solr/placenames";
+// This works on my local machine for development as I have a Solr instance on a Linux box
+// but it is to be expected that it will not be hit in production so doesn't need changing
+// as proxying via the apache proxy will intercept and route the request to the local Solr instance.
+app.get('/select', function(req, res, next) {
+   var remoteUrl = req.url;
+   // let wholeUrl = "http://web.geospeedster.com" +  remoteUrl;
+   // let wholeUrl = "http://192.168.0.24:8983/solr/placenames" + remoteUrl;
+   let wholeUrl = "http://placenames.fsdf.org.au" + remoteUrl;
+   console.log(wholeUrl);
 
-    // encoding : null means "body" passed to the callback will be raw bytes
-    request.get(solrSelect + req.url, function (error, response, body) {
-        var code = 500;
 
-        if (response) {
-            code = response.statusCode;
-            res.header(filterHeaders(req, response.headers));
-        }
+   request.get({
+       url: wholeUrl,
+       headers: filterHeaders(req, req.headers),
+       encoding: null
+   }, function (error, response, body) {
+       var code = 500;
 
-        res.status(code).send(body);
-    });
+       if (response) {
+           code = response.statusCode;
+           res.header(filterHeaders(req, response.headers));
+       }
+
+       res.status(code).send(body);
+   });
 });
-
 
 app.get('/proxy/*', function (req, res, next) {
     // look for request like http://localhost:8080/proxy/http://example.com/file?query=1

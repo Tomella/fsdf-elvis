@@ -43,7 +43,7 @@ gulp.task('views', function () {
 });
 
 //Concatenate & Minify JS
-gulp.task('scripts', ["commonScripts", "dashboardScripts", "icsmScripts", 'imageryScripts', 'startScripts']);
+gulp.task('scripts', ["commonScripts", "dashboardScripts", "placenamesScripts", "icsmScripts", 'startScripts']);
 
 //Concatenate & Minify JS
 gulp.task('commonScripts', function() {
@@ -60,13 +60,13 @@ gulp.task('startScripts', function() {
 });
 
 //Concatenate & Minify JS
-gulp.task('imageryScripts', function() {
-   return prepareScripts('imagery');
+gulp.task('dashboardScripts', function() {
+   return prepareScripts('dashboard');
 });
 
 //Concatenate & Minify JS
-gulp.task('dashboardScripts', function() {
-   return prepareScripts('dashboard');
+gulp.task('placenamesScripts', function() {
+   return prepareScripts('placenames');
 });
 
 function prepareScripts(name) {
@@ -85,7 +85,7 @@ function prepareScripts(name) {
 
 
 //Concatenate & Minify JS
-gulp.task('squash', []); // ['squashCommon','squashIcsm', 'squashStart', 'squashImagery']);
+gulp.task('squash', []); // ['squashCommon','squashIcsm', 'squashStart']);
 
 gulp.task('squashCommon', function() {
 	return gulp.src(directories.assets + '/common.js')
@@ -108,10 +108,6 @@ gulp.task('squashStart', function() {
 	return squashJs('start');
 });
 
-gulp.task('squashImagery', function() {
-	return squashJs('imagery');
-});
-
 function squashJs(name) {
 	return gulp.src(directories.assets + '/' + name + '.js')
 		.pipe(uglify())
@@ -126,13 +122,12 @@ gulp.task('watch', function() {
     gulp.watch(directories.source + '/common/**/*(*.js|*.html)', ['commonScripts']);
     gulp.watch(directories.source + '/icsm/**/*(*.js|*.html)', ['icsmScripts']);
     gulp.watch(directories.source + '/dashboard/**/*(*.js|*.html)', ['dashboardScripts']);
+    gulp.watch(directories.source + '/placenames/**/*(*.js|*.html)', ['placenamesScripts']);
     gulp.watch(directories.source + '/start/**/*(*.js|*.html)', ['startScripts']);
-    gulp.watch(directories.source + '/imagery/**/*(*.js|*.html)', ['imageryScripts']);
     gulp.watch(directories.source + '/**/*.css', ['concatCss']);
     gulp.watch(directories.assets + '/common.js', ['squashCommon']);
     gulp.watch(directories.assets + '/icsm.js', ['squashIcsm']);
     gulp.watch(directories.assets + '/start.js', ['squashStart']);
-    gulp.watch(directories.assets + '/imagery.js', ['squashImagery']);
     gulp.watch(directories.views +  '/*', ['views']);
     gulp.watch(directories.resources + '/**/*', ['resources']);
 });

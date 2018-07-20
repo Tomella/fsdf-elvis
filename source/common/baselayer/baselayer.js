@@ -5,13 +5,13 @@
 
    angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider'])
 
-      .directive('commonBaselayerControl', ['$rootScope', 'mapHelper', 'mapService', function ($rootScope, mapHelper, mapService) {
+      .directive('commonBaselayerControl', ['mapHelper', 'mapService', function (mapHelper, mapService) {
          var DEFAULTS = {
             maxZoom: 12
          };
 
          return {
-            template: '<slider min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
+            template: '<slider ui-tooltip="hide" min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
             scope: {
                maxZoom: "="
             },

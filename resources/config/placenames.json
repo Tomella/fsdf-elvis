@@ -1,0 +1,73 @@
+{
+   "clusters": {
+      "defaultQuery": "*:*",
+      "summaryZoom": 10,
+      "countField": "location",
+      "attribution": "Copyright of the Gazetteer data resides with the relevant State, Territory and Commonwealth Government agencies."
+   },
+   "groups": {
+      "referenceDataLocation": "icsm/resources/config/groupCatalogFeatures.json",
+      "referenceDataCountsUrl": "select?facet=true&facet.limit=-1&facet.field=group&facet.field=feature&facet.field=category&facet.field=authority&q=*:*&wt=json&rows=0"
+   },
+   "filters": {
+      "referenceDataUrl": "placenames/resources/config/groupCatalogFeatures.json"
+   },
+   "authorities": [
+      {
+         "code": "AAD",
+         "jurisdiction": "Australian Government",
+         "name": "Australian Antarctic Division"
+      },
+      {
+         "code": "AHO",
+         "jurisdiction": "Australian Government",
+         "name": "Australian Hydrographic Service"
+      },
+      {
+         "code": "GA",
+         "jurisdiction": "Australian Government",
+         "name": "Geoscience Australia"
+      },
+      {
+         "code": "ACT",
+         "jurisdiction": "Australian Capital Territory",
+         "name": "ACT Planning and Land Authority"
+      },
+      {
+         "code": "NSW",
+         "jurisdiction": "New South Wales",
+         "name": "Geographical Names Board"
+      },
+      {
+         "code": "NT",
+         "jurisdiction": "Northern Territory",
+         "name": "Department of Planning and Infrastructure"
+      },
+      {
+         "code": "QLD",
+         "jurisdiction": "Queensland",
+         "name": "Department of Natural Resources and Water"
+      },
+      {
+         "code": "SA",
+         "jurisdiction": "South Australia",
+         "name": "Department for Transport, Energy and Infrastructure Land Services Group"
+      },
+      {
+         "code": "TAS",
+         "jurisdiction": "Tasmania",
+         "name": "Department of Primary Industries and Water"
+      },
+      {
+         "code": "VIC",
+         "jurisdiction": "Victoria",
+         "name": "Department of Sustainability and Environment"
+      },
+      {
+         "code": "WA",
+         "jurisdiction": "Western Australia",
+         "name": "Landgate"
+      }
+   ],
+   "zoneQueryTemplate": "select?rows=0&wt=json"
+}

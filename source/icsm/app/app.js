@@ -65,7 +65,10 @@
 		'geo.geosearch',
 		'geo.map',
 		'geo.maphelper',
-		'geo.measure',
+      'geo.measure',
+
+      'placenames.quicksearch',
+      'placenames.config',
 
 		'icsm.bounds',
       'icsm.contributors',
@@ -90,9 +93,10 @@
 	])
 
 		// Set up all the service providers here.
-		.config(['configServiceProvider', 'projectsServiceProvider', 'persistServiceProvider', 'versionServiceProvider',
-         function (configServiceProvider, projectsServiceProvider, persistServiceProvider, versionServiceProvider) {
+		.config(['configServiceProvider', 'placenamesConfigServiceProvider', 'projectsServiceProvider', 'persistServiceProvider', 'versionServiceProvider',
+         function (configServiceProvider, placenamesConfigServiceProvider, projectsServiceProvider, persistServiceProvider, versionServiceProvider) {
 				configServiceProvider.location("icsm/resources/config/config.json");
+				placenamesConfigServiceProvider.location("icsm/resources/config/placenames.json");
             configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
 				versionServiceProvider.url("icsm/assets/package.json");
 				projectsServiceProvider.setProject("icsm");

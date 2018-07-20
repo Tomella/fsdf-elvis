@@ -519,6 +519,122 @@ div.leaflet-control-scale-line {
     display: none;
   }
 }
+.pn-authorities-pills span.btn-primary {
+  background-color: red;
+}
+
+.pn-authorities-swathe {
+  display: inline-block;
+  background-color: red;
+  width: 14px;
+  height: 14px;
+  border: solid 1px black;
+}
+/* Base for label styling */
+
+.filters-check:not(:checked),
+.filters-check:checked {
+  margin: 3px;
+}
+
+.filters-check:not(:checked) + label,
+.filters-check:checked + label {
+  position: relative;
+  padding-left: 1.95em;
+  cursor: pointer;
+}
+
+/* checkbox aspect */
+
+.filters-check:not(:checked) + label:before,
+.filters-check:checked + label:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.25em;
+  height: 1.25em;
+  border: 2px solid #ccc;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.1);
+}
+
+/* checked mark aspect */
+
+.filters-check:not(:checked) + label:after,
+.filters-check:checked + label:after {
+  content: '✔';
+  position: absolute;
+  top: .1em;
+  left: .3em;
+  font-size: 1.3em;
+  line-height: 0.8;
+  color: #09ad7e;
+  transition: all .2s;
+}
+
+/* checked mark aspect changes */
+
+.filters-check:not(:checked) + label:after {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.filters-check:checked + label:after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* disabled checkbox */
+
+.filters-check:disabled:not(:checked) + label:before,
+.filters-check:disabled:checked + label:before {
+  box-shadow: none;
+  border-color: #bbb;
+  background-color: #ddd;
+}
+
+.filters-check:disabled:checked + label:after {
+  color: #999;
+}
+
+.filters-check:disabled + label {
+  color: #aaa;
+}
+
+/* accessibility */
+
+.filters-check:checked:focus + label:before,
+.filters-check:not(:checked):focus + label:before {
+  border: 2px dotted blue;
+}
+.pn-pill {
+  padding: 0px 2px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 3px;
+  margin: 0;
+}
+.quickSearch {
+  width: 33em;
+  color: black;
+}
+
+.placenames-filtered-summary {
+  position: fixed;
+  z-index: 4;
+  top: 123px;
+  left: 450px;
+  right: 20px;
+}
+
+.placenames-filtered-summary-child {
+  background-color: white;
+  opacity: 0.6;
+  border-radius: 3px;
+  display: inline-block;
+}
 /* Overrides */
 
 img.logo {
@@ -746,19 +862,6 @@ body {
 .ed-wms-button {
   display: none;
 }
-img.elvis-logo {
-  height: 75px;
-}
-
-.icsm-logo.last {
-  padding-right: 10px;
-}
-
-.contributorsLink {
-  position: absolute;
-  right: 7px;
-  bottom: 15px;
-}
 .contributors {
   margin: 2px;
   padding: 10px;
@@ -822,6 +925,19 @@ img.elvis-logo {
 .elevation-and-depth {
   padding-left: 12px;
   padding-right: 12px;
+}
+img.elvis-logo {
+  height: 75px;
+}
+
+.icsm-logo.last {
+  padding-right: 10px;
+}
+
+.contributorsLink {
+  position: absolute;
+  right: 7px;
+  bottom: 15px;
 }
 .mess-error {
   background-color: lightcoral;
@@ -1098,6 +1214,7 @@ i.fa.active {
 }
 
 .elevation-toolbar {
+  z-index: 1;
   position: fixed;
   top: 82px;
   background-color: #006983;
