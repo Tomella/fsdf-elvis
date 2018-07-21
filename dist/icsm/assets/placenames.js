@@ -20,6 +20,27 @@ under the License.
 "use strict";
 
 {
+   angular.module("placenames.config", []).provider("placenamesConfigService", function () {
+      var baseUrl = "placenames.json";
+
+      this.location = function (where) {
+         baseUrl = where;
+      };
+
+      this.$get = ['$http', function configServiceFactory($http) {
+         return {
+            getConfig: function getConfig() {
+               return $http.get(baseUrl, { cache: true }).then(function (response) {
+                  return response.data;
+               });
+            }
+         };
+      }];
+   });
+}
+"use strict";
+
+{
    angular.module("placenames.categories", []).directive("placenamesCategories", ['groupsService', "searchService", function (groupsService, searchService) {
       return {
          templateUrl: "placenames/categories/categories.html",
@@ -57,27 +78,6 @@ under the License.
          }
       };
    }]);
-}
-"use strict";
-
-{
-   angular.module("placenames.config", []).provider("placenamesConfigService", function () {
-      var baseUrl = "placenames.json";
-
-      this.location = function (where) {
-         baseUrl = where;
-      };
-
-      this.$get = ['$http', function configServiceFactory($http) {
-         return {
-            getConfig: function getConfig() {
-               return $http.get(baseUrl, { cache: true }).then(function (response) {
-                  return response.data;
-               });
-            }
-         };
-      }];
-   });
 }
 "use strict";
 
@@ -433,6 +433,39 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       }]);
    })();
 }
+"use strict";
+
+{
+   angular.module("placenames.summary", []).directive("placenamesSummary", ["$rootScope", "mapService", function ($rootScope, mapService) {
+      return {
+         restrict: "AE",
+         templateUrl: "placenames/summary/summary.html",
+         link: function link(scope) {
+            $rootScope.$on("search.button.fired", function (event, item) {
+               console.log("item", item);
+               scope.remove();
+
+               scope.item = item;
+               scope.latLng = item.location.split(" ").map(function (num) {
+                  return +num;
+               }).reverse();
+               mapService.getMap().then(function (map) {
+                  scope.marker = L.marker(scope.latLng).addTo(map);
+               });
+            });
+
+            scope.remove = function () {
+               if (scope.marker) scope.marker.remove();
+               scope.item = scope.marker = null;
+            };
+
+            scope.close = function () {
+               scope.remove();
+            };
+         }
+      };
+   }]);
+}
 'use strict';
 
 {
@@ -492,58 +525,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                searchService.goto(item);
                $timeout(function () {
                   $rootScope.$broadcast("search.button.fired", item);
-               }, 100);
+               }, 10);
             };
          }
-      };
-   }]).filter('placenamesDocName', [function () {
-      return function (docs) {
-         return docs ? docs.map(function (doc) {
-            return doc.name + " (" + doc.authorityId + ")";
-         }) : [];
-      };
-   }]).filter('placenamesSomeSelected', [function () {
-      return function (facets) {
-         return facets ? Object.keys(facets).some(function (key) {
-            return facets[key].selected;
-         }) : false;
-      };
-   }]).filter('placenamesUnselectedFacets', [function () {
-      return function (facets) {
-         return !facets ? [] : facets.filter(function (facet) {
-            return !facet.selected;
-         });
-      };
-   }]).filter('placenamesSelectedFacets', [function () {
-      return function (facets) {
-         return !facets ? [] : facets.filter(function (facet) {
-            return facet.selected;
-         });
-      };
-   }]).filter('placenamesClean', [function () {
-      return function (str) {
-         return str.replace(/\s?[, ]\s?/g, " ");
-      };
-   }]).filter('placenamesTooltip', [function () {
-      return function (model) {
-         var buffer = "<div style='text-align:left'>";
-         if (model.variant) {
-            (function () {
-               var variants = model.variant.split("|");
-               variants.forEach(function (name, index) {
-                  buffer += index ? "" : "Also known as";
-                  buffer += (index && index < variants.length - 1 ? "," : "") + " ";
-                  if (index && index === variants.length - 1) {
-                     buffer += "or ";
-                  }
-                  buffer += name;
-               });
-               buffer += "<br/>";
-            })();
-         }
-         buffer += "Lat " + model.location.split(" ").reverse().join("&deg; Lng ") + "&deg;<br/>Feature type: " + model.feature + "</div>";
-
-         return buffer;
       };
    }]);
 }
@@ -632,23 +616,23 @@ function SearchService($http, $rootScope, $timeout, placenamesConfigService, map
             map.panTo(what.location.split(" ").reverse().map(function (str) {
                return +str;
             }));
-            return _this.show(what);
+            return _this.hide();
          });
       },
       show: function show(what) {
          return this.hide().then(function (map) {
             // split lng/lat string seperated by space, reverse to lat/lng, cooerce to numbers
-            var location = what.location.split(" ").reverse().map(function (str) {
-               return +str;
-            });
-            marker = L.popup().setLatLng(location).setContent(what.name + " (" + what.authority + " - " + what.feature + ")" + "<br/>Lat/Lng: " + location[0] + "&deg;" + location[1] + "&deg;").openOn(map);
+            marker = L.marker(what.location.split(" ").map(function (num) {
+               return +num;
+            }).reverse());
+            marker.addTo(map);
             return map;
          });
       },
-      hide: function hide(what) {
+      hide: function hide() {
          return mapService.getMap().then(function (map) {
             if (marker) {
-               map.removeLayer(marker);
+               marker.remove();
             }
             return map;
          });
@@ -705,5 +689,6 @@ $templateCache.put("placenames/features/features.html","<div>\r\n      <div ng-r
 $templateCache.put("placenames/filters/tree.html","<div style=\"max-height:300px; overflow-y:auto;padding-left:10px;\">\r\n   <div ng-repeat=\"group in groups | withTotals\">\r\n      <button class=\"undecorated\" ng-click=\"group.expanded = !group.expanded\" ng-style=\"{color:group.color}\">\r\n         <i class=\"fa\" ng-class=\"{\'fa-plus\':!group.expanded, \'fa-minus\':group.expanded}\"></i>\r\n      </button>\r\n      <input type=\"checkbox\" class=\"filters-check\" ng-model=\"group.selectExpand\" ng-change=\"change(group)\" ng-style=\"{color:group.color}\">\r\n      <span title=\"{{group.definition}}\">\r\n         {{group.name}} ({{(group.allCount | number) + (group.allCount || group.allCount == 0?\' of \':\'\')}}{{group.total | number}})\r\n      </span>\r\n      <div style=\"padding-left:10px\" ng-show=\"group.expanded\">\r\n         <div ng-repeat=\"category in group.categories | withTotals | orderBy: \'name\'\"  ng-attr-title=\"{{category.definition}}\">\r\n            <button class=\"undecorated\" ng-click=\"category.expanded = !category.expanded\" ng-style=\"{color:category.color}\">\r\n               <i class=\"fa\" ng-class=\"{\'fa-plus\':!category.expanded, \'fa-minus\':category.expanded}\"></i>\r\n            </button>\r\n            <input class=\"filters-check\" type=\"checkbox\" ng-model=\"category.selectExpand\" ng-change=\"change()\" ng-style=\"{color:category.color}\">\r\n            <span title=\"{{category.definition}}\">\r\n               {{category.name}}\r\n               ({{(category.allCount | number) + (category.allCount || category.allCount == 0?\' of \':\'\')}}{{category.total}})\r\n            </span>\r\n            <div ng-show=\"category.expanded\" style=\"padding-left:20px\">\r\n               <div ng-repeat=\"feature in category.features | withTotals | orderBy: \'name\'\"  ng-attr-title=\"{{feature.definition}}\">\r\n                  <i class=\"fa fa-hand-o-right\" aria-hidden=\"true\" ng-style=\"{color:feature.color}\"></i>\r\n                  <input class=\"filters-check\" type=\"checkbox\" ng-model=\"feature.selected\" ng-change=\"change()\" ng-style=\"{color:feature.color}\">\r\n                  <span>\r\n                     {{feature.name}}\r\n                     ({{(feature.allCount | number) + (feature.allCount || feature.allCount == 0?\' of \':\'\')}}{{feature.total}})\r\n                  </span>\r\n               </div>\r\n            </div>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("placenames/groups/category.html","\r\n<div style=\"padding-left:10px\">\r\n   - <span ng-attr-title=\"{{category.definition}}\">{{category.name}}</span>\r\n   <div ng-repeat=\"feature in category.features | orderBy:\'name\'\" style=\"padding-left:10px\">\r\n      - <span ng-attr-title=\"{{feature.definition}}\">{{feature.name}}</span>\r\n   </div>\r\n</div>\r\n");
 $templateCache.put("placenames/groups/groups.html","<div>\r\n   <div ng-repeat=\"group in data.groups\">\r\n      <input type=\"checkbox\" ng-model=\"group.selected\" ng-change=\"change()\"><span title=\"{{group.definition}}\">\r\n         {{group.name}} ({{(group.allCount | number) + (group.allCount || group.allCount == 0?\' of \':\'\')}}{{group.total | number}})\r\n      <button class=\"undecorated\" ng-click=\"group.showChildren = !group.showChildren\">\r\n         <i class=\"fa fa-lg\" ng-class=\"{\'fa-question-circle-o\':!group.showChildren, \'fa-minus-square-o\': group.showChildren}\"></i>\r\n      </button>\r\n      <div ng-show=\"group.showChildren\" style=\"padding-left:8px\">\r\n         {{group.definition}}<br/><br/>\r\n         This group is made up of the following categories and feature types:\r\n         <div ng-repeat=\"category in group.categories\" style=\"padding-left:8px\">\r\n            <placenames-group-children category=\"category\"></placenames-group-children>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
+$templateCache.put("placenames/summary/summary.html","<div class=\"placenames\" ng-show=\"item\">\r\n   <button class=\"undecorated placenames-unstick\" ng-click=\"close()\" style=\"float:right\">X</button>\r\n   <div class=\"container-fluid\">\r\n      <div class=\"row\">\r\n         <div class=\"col-md-12 pn-header placenames-title\">\r\n            {{item.name}}\r\n         </div>\r\n      </div>\r\n   </div>\r\n   <div class=\"container-fluid\">\r\n      <div class=\"row\">\r\n         <div class=\"col-md-4\" title=\"An authority can be a state department or other statutory authority\">Authority</div>\r\n         <div class=\"col-md-8\">{{item.authority}}</div>\r\n      </div>\r\n      <div class=\"row\">\r\n         <div class=\"col-md-4\" title=\"Features belong to a category and categories belong to a group\">Feature Type</div>\r\n         <div class=\"col-md-8\">{{item.feature}}</div>\r\n      </div>\r\n      <div class=\"row\" title=\"Features belong to a category and categories belong to a group\">\r\n         <div class=\"col-md-4\">Category</div>\r\n         <div class=\"col-md-8\">{{item.category}}</div>\r\n      </div>\r\n      <div class=\"row\" title=\"Features belong to a category and categories belong to a group\">\r\n         <div class=\"col-md-4\">Group</div>\r\n         <div class=\"col-md-8\">{{item.group}}</div>\r\n      </div>\r\n      <div class=\"row\">\r\n         <div class=\"col-md-4\">Lat / Lng</div>\r\n         <div class=\"col-md-8\">\r\n            <span class=\"pn-numeric\">\r\n               {{latLng[0]}}&deg; / {{latLng[1]}}&deg;\r\n            </span>\r\n         </div>\r\n      </div>\r\n\r\n   </div>\r\n</div>");
 $templateCache.put("placenames/search/quicksearch.html","<div class=\"search-text\" style=\"color:black; width: 26em\" title=\"Start typing in the filter field. Up to twenty matches will be shown as you type with those nearest your map center at the top of the list. The results are restricted to your map\'s field of view so zooming the map in or out will change the number of results.\">\r\n   <div class=\"input-group input-group-sm\" style=\"width:100%\">\r\n      <input class=\"hide\"></input>\r\n      <input type=\"text\" ng-model=\"state.filter\" placeholder=\"Match by feature name...\" placenames-on-enter=\"search($item, $model, $label)\"\r\n         ng-model-options=\"{ debounce: 300}\" typeahead-on-select=\"search($item, $model, $label)\" typeahead-focus-first=\"false\"\r\n         typeahead-template-url=\"placenames/search/typeahead.html\" class=\"form-control\" typeahead-min-length=\"1\"\r\n         uib-typeahead=\"doc as doc.name for doc in loadDocs(state.filter)\" typeahead-loading=\"loadingLocations\" typeahead-no-results=\"noResults\"\r\n         placenames-clear>\r\n   </div>\r\n</div>");
 $templateCache.put("placenames/search/typeahead.html","<a placenames-options ng-mouseenter=\"enter()\" ng-mouseleave=\"leave()\"  tooltip-append-to-body=\"true\"\r\n               tooltip-placement=\"bottom\" uib-tooltip-html=\"match.model | placenamesTooltip\">\r\n   <span ng-bind-html=\"match.model.name | uibTypeaheadHighlight:query\"></span>\r\n   (<span ng-bind-html=\"match.model.authority + \' - \' + match.model.feature\"></span>)\r\n</a>");}]);

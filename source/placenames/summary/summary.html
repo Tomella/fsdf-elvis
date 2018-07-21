@@ -1,0 +1,37 @@
+<div class="placenames" ng-show="item">
+   <button class="undecorated placenames-unstick" ng-click="close()" style="float:right">X</button>
+   <div class="container-fluid">
+      <div class="row">
+         <div class="col-md-12 pn-header placenames-title">
+            {{item.name}}
+         </div>
+      </div>
+   </div>
+   <div class="container-fluid">
+      <div class="row">
+         <div class="col-md-4" title="An authority can be a state department or other statutory authority">Authority</div>
+         <div class="col-md-8">{{item.authority}}</div>
+      </div>
+      <div class="row">
+         <div class="col-md-4" title="Features belong to a category and categories belong to a group">Feature Type</div>
+         <div class="col-md-8">{{item.feature}}</div>
+      </div>
+      <div class="row" title="Features belong to a category and categories belong to a group">
+         <div class="col-md-4">Category</div>
+         <div class="col-md-8">{{item.category}}</div>
+      </div>
+      <div class="row" title="Features belong to a category and categories belong to a group">
+         <div class="col-md-4">Group</div>
+         <div class="col-md-8">{{item.group}}</div>
+      </div>
+      <div class="row">
+         <div class="col-md-4">Lat / Lng</div>
+         <div class="col-md-8">
+            <span class="pn-numeric">
+               {{latLng[0]}}&deg; / {{latLng[1]}}&deg;
+            </span>
+         </div>
+      </div>
+
+   </div>
+</div>

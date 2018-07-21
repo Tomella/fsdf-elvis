@@ -62,62 +62,10 @@
                      searchService.goto(item);
                      $timeout(() => {
                         $rootScope.$broadcast("search.button.fired", item);
-                     }, 100);
+                     }, 10);
                   };
                }
             };
          }
-      ])
-
-      .filter('placenamesDocName', [function () {
-         return function (docs) {
-            return docs ? docs.map(doc => doc.name + " (" + doc.authorityId + ")") : [];
-         };
-      }])
-
-      .filter('placenamesSomeSelected', [function () {
-         return function (facets) {
-            return facets ? Object.keys(facets).some(key => facets[key].selected) : false;
-         };
-      }])
-
-      .filter('placenamesUnselectedFacets', [function () {
-         return function (facets) {
-            return !facets ? [] : facets.filter(facet => !facet.selected);
-         };
-      }])
-
-      .filter('placenamesSelectedFacets', [function () {
-         return function (facets) {
-            return !facets ? [] : facets.filter(facet => facet.selected);
-         };
-      }])
-
-      .filter('placenamesClean', [function () {
-         return function (str) {
-            return str.replace(/\s?[, ]\s?/g, " ");
-         };
-      }])
-
-      .filter('placenamesTooltip', [function () {
-         return function (model) {
-            let buffer = "<div style='text-align:left'>";
-            if (model.variant) {
-               let variants = model.variant.split("|");
-               variants.forEach((name, index) => {
-                  buffer += index ? "" : "Also known as";
-                  buffer += (index && index < variants.length - 1 ? "," : "") + " ";
-                  if (index && index === variants.length - 1) {
-                     buffer += "or ";
-                  }
-                  buffer += name;
-               });
-               buffer += "<br/>";
-            }
-            buffer += "Lat " + model.location.split(" ").reverse().join("&deg; Lng ") + "&deg;<br/>Feature type: " +
-               model.feature + "</div>";
-
-            return buffer;
-         };
-      }]);
+      ]);
 }

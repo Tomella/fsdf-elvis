@@ -19,54 +19,6 @@ under the License.
 
 'use strict';
 
-{
-   /**
-    * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
-    */
-
-   angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider']).directive('commonBaselayerControl', ['mapHelper', 'mapService', function (mapHelper, mapService) {
-      var DEFAULTS = {
-         maxZoom: 12
-      };
-
-      return {
-         template: '<slider ui-tooltip="hide" min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
-         scope: {
-            maxZoom: "="
-         },
-         link: function link(scope, element) {
-            if (typeof scope.maxZoom === "undefined") {
-               scope.maxZoom = DEFAULTS.maxZoom;
-            }
-            scope.slider = {
-               opacity: -1,
-               visibility: true,
-               lastOpacity: 1
-            };
-
-            // Get the initial value
-            mapHelper.getPseudoBaseLayer().then(function (layer) {
-               scope.layer = layer;
-               scope.slider.opacity = layer.options.opacity;
-            });
-
-            scope.$watch('slider.opacity', function (newValue, oldValue) {
-               if (oldValue < 0) return;
-
-               mapService.getMap().then(function (map) {
-                  map.eachLayer(function (layer) {
-                     if (layer.pseudoBaseLayer) {
-                        layer.setOpacity(scope.slider.opacity);
-                     }
-                  });
-               });
-            });
-         }
-      };
-   }]);
-}
-'use strict';
-
 angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAccordionConfig', {
   closeOthers: true
 }).controller('commonAccordionController', ['$scope', '$attrs', 'commonAccordionConfig', function ($scope, $attrs, accordionConfig) {
@@ -203,6 +155,54 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
     return 'common-accordion-header,' + 'data-common-accordion-header,' + 'x-common-accordion-header,' + 'common\\:accordion-header,' + '[common-accordion-header],' + '[data-common-accordion-header],' + '[x-common-accordion-header]';
   }
 });
+'use strict';
+
+{
+   /**
+    * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
+    */
+
+   angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider']).directive('commonBaselayerControl', ['mapHelper', 'mapService', function (mapHelper, mapService) {
+      var DEFAULTS = {
+         maxZoom: 12
+      };
+
+      return {
+         template: '<slider ui-tooltip="hide" min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
+         scope: {
+            maxZoom: "="
+         },
+         link: function link(scope, element) {
+            if (typeof scope.maxZoom === "undefined") {
+               scope.maxZoom = DEFAULTS.maxZoom;
+            }
+            scope.slider = {
+               opacity: -1,
+               visibility: true,
+               lastOpacity: 1
+            };
+
+            // Get the initial value
+            mapHelper.getPseudoBaseLayer().then(function (layer) {
+               scope.layer = layer;
+               scope.slider.opacity = layer.options.opacity;
+            });
+
+            scope.$watch('slider.opacity', function (newValue, oldValue) {
+               if (oldValue < 0) return;
+
+               mapService.getMap().then(function (map) {
+                  map.eachLayer(function (layer) {
+                     if (layer.pseudoBaseLayer) {
+                        layer.setOpacity(scope.slider.opacity);
+                     }
+                  });
+               });
+            });
+         }
+      };
+   }]);
+}
 "use strict";
 
 {
@@ -783,210 +783,6 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
 "use strict";
 
 (function (angular, L) {
-   'use strict';
-
-   angular.module("common.featureinfo", []).directive("commonFeatureInfo", ['$http', '$log', '$q', '$timeout', 'featureInfoService', 'flashService', 'messageService', function ($http, $log, $q, $timeout, featureInfoService, flashService, messageService) {
-      var template = "https://elvis-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetFeatureInfo_ElevationAvailableData.fmw?" + "SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&SRS=EPSG%3A4326&BBOX=${bounds}&WIDTH=${width}&HEIGHT=${height}" +
-      //"LAYERS=public.5dem_ProjectsIndex&" +
-      "&LAYERS=public.QLD_Elevation_Metadata_Index,public.ACT2015-Tile_Index_55,public.5dem_ProjectsIndex,public.NSW_100k_Index_54,public.NSW_100k_Index_55," + "public.NSW_100k_Index_56,public.NSW_100k_Index_Forward_Program,public.QLD_Project_Index_54," + "public.QLD_Project_Index_55,public.QLD_Project_Index_56,public.TAS_Project_Index_55," + "public.GA_Project_Index_47,public.GA_Project_Index_48,public.GA_Project_Index_54," + "public.GA_Project_Index_55,public.GA_Project_Index_56" + "&STYLES=&INFO_FORMAT=application%2Fjson&FEATURE_COUNT=100&X=${x}&Y=${y}";
-      var layers = ["public.5dem_ProjectsIndex", "public.NSW_100k_Index"];
-
-      return {
-         require: "^geoMap",
-         restrict: "AE",
-         link: function link(scope, element, attrs, ctrl) {
-            var flasher = null;
-            var paused = false;
-
-            if (typeof scope.options === "undefined") {
-               scope.options = {};
-            }
-
-            ctrl.getMap().then(function (map) {
-               map.on('popupclose', function (e) {
-                  featureInfoService.removeLastLayer(map);
-               });
-
-               map.on("draw:drawstart", function () {
-                  paused = true;
-                  $timeout(function () {
-                     paused = false;
-                  }, 60000);
-               });
-
-               map.on("draw:drawstop", function () {
-                  paused = false;
-               });
-
-               map.on("click", function (event) {
-                  var layer = null;
-                  var size = map.getSize();
-                  var point = map.latLngToContainerPoint(event.latlng, map.getZoom());
-                  var latlng = event.latlng;
-                  var data = {
-                     x: point.x,
-                     y: point.y,
-                     bounds: map.getBounds().toBBoxString(),
-                     height: size.y,
-                     width: size.x
-                  };
-                  var url = template;
-
-                  if (paused) {
-                     return;
-                  }
-
-                  flashService.remove(flasher);
-                  flasher = flashService.add("Checking available data at this point", 30000, true);
-
-                  angular.forEach(data, function (value, key) {
-                     url = url.replace("${" + key + "}", value);
-                  });
-
-                  $http.get(url).then(function (httpResponse) {
-                     var group = httpResponse.data;
-                     var response = void 0;
-                     var features = [];
-                     var popupText = [];
-
-                     console.log(group);
-
-                     map.closePopup();
-                     featureInfoService.removeLastLayer(map);
-                     flashService.remove(flasher);
-
-                     if (!group.length) {
-                        flasher = flashService.add("No status information available for this point.", 4000);
-                        response = httpResponse;
-                     } else {
-                        response = {
-                           data: {
-                              name: "public.AllIndexes",
-                              type: "FeatureCollection",
-                              crs: {
-                                 type: "name",
-                                 properties: {
-                                    name: "EPSG:4326"
-                                 }
-                              },
-                              features: []
-                           }
-                        };
-
-                        features = response.data.features;
-
-                        group.forEach(function (response) {
-                           response.features.forEach(function (feature) {
-                              features.push(feature);
-
-                              var buffer = ["<span>"];
-                              var properties = feature.properties;
-
-                              if (properties.maptitle) {
-                                 var title = properties.mapnumber ? "Map number: " + properties.mapnumber : "";
-                                 buffer.push("<strong>Map Title:</strong> <span title='" + title + "'>" + properties.maptitle);
-                              }
-
-                              /*
-                                    object_name : "middledarling2014_z55.tif",
-                                    object_url : "https://s3-ap-southeast-2.amazonaws.com/elvis.ga.gov.au/elevation/5m-dem/mdba/QG/middledarling2014_z55.tif",
-                                    object_size : "5577755073",
-                                    object_last_modified : "20161017",
-                                    captured: "20161010 - 20161023"
-                                    area : "5560.00",
-                                    status : "Available"
-                              */
-
-                              if (properties.project) {
-                                 buffer.push("<strong>Project name:</strong> " + properties.project);
-                              }
-
-                              if (properties.captured) {
-                                 buffer.push("<br/><strong>Capture date:</strong> " + captured(properties.captured));
-                              }
-
-                              if (properties.object_name) {
-                                 buffer.push("<strong>File name:</strong> " + properties.object_name);
-                              } else if (properties.object_name_ahd) {
-                                 buffer.push("<strong>File name:</strong> " + properties.object_name_ahd);
-                              } else if (properties.object_name_ort) {
-                                 buffer.push("<strong>File name:</strong> " + properties.object_name_ort);
-                              }
-
-                              buffer.push("</span><br/><strong>Status:</strong> " + feature.properties.status);
-
-                              if (properties.available_date) {
-                                 buffer.push("<br/><strong>Available date:</strong> " + formatDate(properties.available_date));
-                              }
-
-                              if (properties.contact) {
-                                 var contact = properties.contact;
-                                 var mailto = contact.toLowerCase().indexOf("mailto:") === 0 ? "" : "mailto:";
-
-                                 buffer.push("<br/><strong>Contact:</strong> <a href='" + mailto + properties.contact + "'>" + properties.contact + "</a>");
-                              }
-
-                              if (properties.metadata_url) {
-                                 buffer.push("<br/><a href='" + properties.metadata_url + "' target='_blank'>Metadata</a>");
-                              }
-
-                              popupText.push(buffer.join(" "));
-                           });
-                        });
-                     }
-
-                     if (features.length) {
-                        layer = L.geoJson(response.data, {
-                           style: function style(feature) {
-                              return {
-                                 fillOpacity: 0.1,
-                                 color: "red"
-                              };
-                           }
-                        }).addTo(map);
-                        featureInfoService.setLayer(layer);
-
-                        L.popup().setLatLng(latlng).setContent("<div class='fi-popup'>" + popupText.join("<hr/>") + "</div>").openOn(map);
-                     }
-                  });
-               });
-            });
-         }
-      };
-   }]).factory('featureInfoService', [function () {
-      var lastFeature = null;
-      return {
-         setLayer: function setLayer(layer) {
-            lastFeature = layer;
-         },
-         removeLastLayer: function removeLastLayer(map) {
-            if (lastFeature) {
-               map.removeLayer(lastFeature);
-               lastFeature = null;
-            }
-         }
-      };
-   }]);
-
-   function captured(twoDates) {
-      var dates = twoDates.split(" - ");
-      if (dates.length !== 2) {
-         return twoDates;
-      }
-
-      return formatDate(dates[0]) + " - " + formatDate(dates[1]);
-   }
-
-   function formatDate(data) {
-      if (data.length !== 8) {
-         return data;
-      }
-      return data.substr(0, 4) + "/" + data.substr(4, 2) + "/" + data.substr(6, 2);
-   }
-})(angular, L);
-"use strict";
-
-(function (angular, L) {
 	'use strict';
 
 	angular.module("common.geoprocess", []).directive("wizardGeoprocess", ['$http', '$q', '$timeout', 'geoprocessService', 'flashService', 'messageService', function ($http, $q, $timeout, geoprocessService, flashService, messageService) {
@@ -1425,6 +1221,210 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
 		};
 	}
 })(angular, L);
+"use strict";
+
+(function (angular, L) {
+   'use strict';
+
+   angular.module("common.featureinfo", []).directive("commonFeatureInfo", ['$http', '$log', '$q', '$timeout', 'featureInfoService', 'flashService', 'messageService', function ($http, $log, $q, $timeout, featureInfoService, flashService, messageService) {
+      var template = "https://elvis-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetFeatureInfo_ElevationAvailableData.fmw?" + "SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&SRS=EPSG%3A4326&BBOX=${bounds}&WIDTH=${width}&HEIGHT=${height}" +
+      //"LAYERS=public.5dem_ProjectsIndex&" +
+      "&LAYERS=public.QLD_Elevation_Metadata_Index,public.ACT2015-Tile_Index_55,public.5dem_ProjectsIndex,public.NSW_100k_Index_54,public.NSW_100k_Index_55," + "public.NSW_100k_Index_56,public.NSW_100k_Index_Forward_Program,public.QLD_Project_Index_54," + "public.QLD_Project_Index_55,public.QLD_Project_Index_56,public.TAS_Project_Index_55," + "public.GA_Project_Index_47,public.GA_Project_Index_48,public.GA_Project_Index_54," + "public.GA_Project_Index_55,public.GA_Project_Index_56" + "&STYLES=&INFO_FORMAT=application%2Fjson&FEATURE_COUNT=100&X=${x}&Y=${y}";
+      var layers = ["public.5dem_ProjectsIndex", "public.NSW_100k_Index"];
+
+      return {
+         require: "^geoMap",
+         restrict: "AE",
+         link: function link(scope, element, attrs, ctrl) {
+            var flasher = null;
+            var paused = false;
+
+            if (typeof scope.options === "undefined") {
+               scope.options = {};
+            }
+
+            ctrl.getMap().then(function (map) {
+               map.on('popupclose', function (e) {
+                  featureInfoService.removeLastLayer(map);
+               });
+
+               map.on("draw:drawstart", function () {
+                  paused = true;
+                  $timeout(function () {
+                     paused = false;
+                  }, 60000);
+               });
+
+               map.on("draw:drawstop", function () {
+                  paused = false;
+               });
+
+               map.on("click", function (event) {
+                  var layer = null;
+                  var size = map.getSize();
+                  var point = map.latLngToContainerPoint(event.latlng, map.getZoom());
+                  var latlng = event.latlng;
+                  var data = {
+                     x: point.x,
+                     y: point.y,
+                     bounds: map.getBounds().toBBoxString(),
+                     height: size.y,
+                     width: size.x
+                  };
+                  var url = template;
+
+                  if (paused) {
+                     return;
+                  }
+
+                  flashService.remove(flasher);
+                  flasher = flashService.add("Checking available data at this point", 30000, true);
+
+                  angular.forEach(data, function (value, key) {
+                     url = url.replace("${" + key + "}", value);
+                  });
+
+                  $http.get(url).then(function (httpResponse) {
+                     var group = httpResponse.data;
+                     var response = void 0;
+                     var features = [];
+                     var popupText = [];
+
+                     console.log(group);
+
+                     map.closePopup();
+                     featureInfoService.removeLastLayer(map);
+                     flashService.remove(flasher);
+
+                     if (!group.length) {
+                        flasher = flashService.add("No status information available for this point.", 4000);
+                        response = httpResponse;
+                     } else {
+                        response = {
+                           data: {
+                              name: "public.AllIndexes",
+                              type: "FeatureCollection",
+                              crs: {
+                                 type: "name",
+                                 properties: {
+                                    name: "EPSG:4326"
+                                 }
+                              },
+                              features: []
+                           }
+                        };
+
+                        features = response.data.features;
+
+                        group.forEach(function (response) {
+                           response.features.forEach(function (feature) {
+                              features.push(feature);
+
+                              var buffer = ["<span>"];
+                              var properties = feature.properties;
+
+                              if (properties.maptitle) {
+                                 var title = properties.mapnumber ? "Map number: " + properties.mapnumber : "";
+                                 buffer.push("<strong>Map Title:</strong> <span title='" + title + "'>" + properties.maptitle);
+                              }
+
+                              /*
+                                    object_name : "middledarling2014_z55.tif",
+                                    object_url : "https://s3-ap-southeast-2.amazonaws.com/elvis.ga.gov.au/elevation/5m-dem/mdba/QG/middledarling2014_z55.tif",
+                                    object_size : "5577755073",
+                                    object_last_modified : "20161017",
+                                    captured: "20161010 - 20161023"
+                                    area : "5560.00",
+                                    status : "Available"
+                              */
+
+                              if (properties.project) {
+                                 buffer.push("<strong>Project name:</strong> " + properties.project);
+                              }
+
+                              if (properties.captured) {
+                                 buffer.push("<br/><strong>Capture date:</strong> " + captured(properties.captured));
+                              }
+
+                              if (properties.object_name) {
+                                 buffer.push("<strong>File name:</strong> " + properties.object_name);
+                              } else if (properties.object_name_ahd) {
+                                 buffer.push("<strong>File name:</strong> " + properties.object_name_ahd);
+                              } else if (properties.object_name_ort) {
+                                 buffer.push("<strong>File name:</strong> " + properties.object_name_ort);
+                              }
+
+                              buffer.push("</span><br/><strong>Status:</strong> " + feature.properties.status);
+
+                              if (properties.available_date) {
+                                 buffer.push("<br/><strong>Available date:</strong> " + formatDate(properties.available_date));
+                              }
+
+                              if (properties.contact) {
+                                 var contact = properties.contact;
+                                 var mailto = contact.toLowerCase().indexOf("mailto:") === 0 ? "" : "mailto:";
+
+                                 buffer.push("<br/><strong>Contact:</strong> <a href='" + mailto + properties.contact + "'>" + properties.contact + "</a>");
+                              }
+
+                              if (properties.metadata_url) {
+                                 buffer.push("<br/><a href='" + properties.metadata_url + "' target='_blank'>Metadata</a>");
+                              }
+
+                              popupText.push(buffer.join(" "));
+                           });
+                        });
+                     }
+
+                     if (features.length) {
+                        layer = L.geoJson(response.data, {
+                           style: function style(feature) {
+                              return {
+                                 fillOpacity: 0.1,
+                                 color: "red"
+                              };
+                           }
+                        }).addTo(map);
+                        featureInfoService.setLayer(layer);
+
+                        L.popup().setLatLng(latlng).setContent("<div class='fi-popup'>" + popupText.join("<hr/>") + "</div>").openOn(map);
+                     }
+                  });
+               });
+            });
+         }
+      };
+   }]).factory('featureInfoService', [function () {
+      var lastFeature = null;
+      return {
+         setLayer: function setLayer(layer) {
+            lastFeature = layer;
+         },
+         removeLastLayer: function removeLastLayer(map) {
+            if (lastFeature) {
+               map.removeLayer(lastFeature);
+               lastFeature = null;
+            }
+         }
+      };
+   }]);
+
+   function captured(twoDates) {
+      var dates = twoDates.split(" - ");
+      if (dates.length !== 2) {
+         return twoDates;
+      }
+
+      return formatDate(dates[0]) + " - " + formatDate(dates[1]);
+   }
+
+   function formatDate(data) {
+      if (data.length !== 8) {
+         return data;
+      }
+      return data.substr(0, 4) + "/" + data.substr(4, 2) + "/" + data.substr(6, 2);
+   }
+})(angular, L);
 'use strict';
 
 (function (angular) {
@@ -1591,6 +1591,166 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
          return f.toUpperCase();
       }).replace(/([A-Z])/g, ' $1').trim();
    }
+})(angular);
+'use strict';
+
+(function (angular) {
+
+	'use strict';
+
+	angular.module('common.altthemes', [])
+
+	/**
+ 	*
+ 	* Override the original mars user.
+ 	*
+ 	  */
+	.directive('altThemes', ['altthemesService', function (themesService) {
+		return {
+			restrict: 'AE',
+			templateUrl: 'common/navigation/altthemes.html',
+			scope: {
+				current: "="
+			},
+			link: function link(scope) {
+				themesService.getThemes().then(function (themes) {
+					scope.themes = themes;
+				});
+
+				themesService.getCurrentTheme().then(function (theme) {
+					scope.theme = theme;
+				});
+
+				scope.changeTheme = function (theme) {
+					scope.theme = theme;
+					themesService.setTheme(theme.key);
+				};
+			}
+		};
+	}]).controller('altthemesCtrl', ['altthemesService', function (altthemesService) {
+		this.service = altthemesService;
+	}]).filter('altthemesFilter', function () {
+		return function (features, theme) {
+			var response = [];
+			// Give 'em all if they haven't set a theme.
+			if (!theme) {
+				return features;
+			}
+
+			if (features) {
+				features.forEach(function (feature) {
+					if (feature.themes) {
+						if (feature.themes.some(function (name) {
+							return name === theme.key;
+						})) {
+							response.push(feature);
+						}
+					}
+				});
+			}
+			return response;
+		};
+	}).factory('altthemesService', ['$q', '$http', 'storageService', function ($q, $http, storageService) {
+		var THEME_PERSIST_KEY = 'icsm.current.theme';
+		var THEMES_LOCATION = 'icsm/resources/config/themes.json';
+		var DEFAULT_THEME = "All";
+		var waiting = [];
+		var self = this;
+
+		this.themes = [];
+		this.theme = null;
+
+		storageService.getItem(THEME_PERSIST_KEY).then(function (value) {
+			if (!value) {
+				value = DEFAULT_THEME;
+			}
+			$http.get(THEMES_LOCATION, { cache: true }).then(function (response) {
+				var themes = response.data.themes;
+
+				self.themes = themes;
+				self.theme = themes[value];
+				// Decorate the key
+				angular.forEach(themes, function (theme, key) {
+					theme.key = key;
+				});
+				waiting.forEach(function (wait) {
+					wait.resolve(self.theme);
+				});
+			});
+		});
+
+		this.getCurrentTheme = function () {
+			if (this.theme) {
+				return $q.when(self.theme);
+			} else {
+				var waiter = $q.defer();
+				waiting.push(waiter);
+				return waiter.promise;
+			}
+		};
+
+		this.getThemes = function () {
+			return $http.get(THEMES_LOCATION, { cache: true }).then(function (response) {
+				return response.data.themes;
+			});
+		};
+
+		this.setTheme = function (key) {
+			this.theme = this.themes[key];
+			storageService.setItem(THEME_PERSIST_KEY, key);
+		};
+
+		return this;
+	}]).filter('altthemesEnabled', function () {
+		return function (headers) {
+			if (headers) {
+				return headers.filter(function (value) {
+					return !!value.enabled;
+				});
+			}
+			return headers;
+		};
+	}).filter('altthemesMatchCurrent', function () {
+		return function (headers, current) {
+			if (headers) {
+				return headers.filter(function (value) {
+					return !!value.keys.find(function (key) {
+						return key === current;
+					});
+				});
+			}
+			return headers;
+		};
+	});
+})(angular);
+'use strict';
+
+(function (angular) {
+  'use strict';
+
+  angular.module('common.navigation', [])
+  /**
+   *
+   * Override the original mars user.
+   *
+   */
+  .directive('commonNavigation', [function () {
+    return {
+      restrict: 'AE',
+      template: "<alt-themes current='current'></alt-themes>",
+      scope: {
+        current: "=?"
+      },
+      link: function link(scope) {
+        scope.username = "Anonymous";
+        if (!scope.current) {
+          scope.current = "none";
+        }
+      }
+    };
+  }]).factory('navigationService', [function () {
+    return {};
+  }]);
 })(angular);
 'use strict';
 
@@ -1824,166 +1984,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       return MetaviewService;
    }();
 })(angular);
-'use strict';
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module('common.altthemes', [])
-
-	/**
- 	*
- 	* Override the original mars user.
- 	*
- 	  */
-	.directive('altThemes', ['altthemesService', function (themesService) {
-		return {
-			restrict: 'AE',
-			templateUrl: 'common/navigation/altthemes.html',
-			scope: {
-				current: "="
-			},
-			link: function link(scope) {
-				themesService.getThemes().then(function (themes) {
-					scope.themes = themes;
-				});
-
-				themesService.getCurrentTheme().then(function (theme) {
-					scope.theme = theme;
-				});
-
-				scope.changeTheme = function (theme) {
-					scope.theme = theme;
-					themesService.setTheme(theme.key);
-				};
-			}
-		};
-	}]).controller('altthemesCtrl', ['altthemesService', function (altthemesService) {
-		this.service = altthemesService;
-	}]).filter('altthemesFilter', function () {
-		return function (features, theme) {
-			var response = [];
-			// Give 'em all if they haven't set a theme.
-			if (!theme) {
-				return features;
-			}
-
-			if (features) {
-				features.forEach(function (feature) {
-					if (feature.themes) {
-						if (feature.themes.some(function (name) {
-							return name === theme.key;
-						})) {
-							response.push(feature);
-						}
-					}
-				});
-			}
-			return response;
-		};
-	}).factory('altthemesService', ['$q', '$http', 'storageService', function ($q, $http, storageService) {
-		var THEME_PERSIST_KEY = 'icsm.current.theme';
-		var THEMES_LOCATION = 'icsm/resources/config/themes.json';
-		var DEFAULT_THEME = "All";
-		var waiting = [];
-		var self = this;
-
-		this.themes = [];
-		this.theme = null;
-
-		storageService.getItem(THEME_PERSIST_KEY).then(function (value) {
-			if (!value) {
-				value = DEFAULT_THEME;
-			}
-			$http.get(THEMES_LOCATION, { cache: true }).then(function (response) {
-				var themes = response.data.themes;
-
-				self.themes = themes;
-				self.theme = themes[value];
-				// Decorate the key
-				angular.forEach(themes, function (theme, key) {
-					theme.key = key;
-				});
-				waiting.forEach(function (wait) {
-					wait.resolve(self.theme);
-				});
-			});
-		});
-
-		this.getCurrentTheme = function () {
-			if (this.theme) {
-				return $q.when(self.theme);
-			} else {
-				var waiter = $q.defer();
-				waiting.push(waiter);
-				return waiter.promise;
-			}
-		};
-
-		this.getThemes = function () {
-			return $http.get(THEMES_LOCATION, { cache: true }).then(function (response) {
-				return response.data.themes;
-			});
-		};
-
-		this.setTheme = function (key) {
-			this.theme = this.themes[key];
-			storageService.setItem(THEME_PERSIST_KEY, key);
-		};
-
-		return this;
-	}]).filter('altthemesEnabled', function () {
-		return function (headers) {
-			if (headers) {
-				return headers.filter(function (value) {
-					return !!value.enabled;
-				});
-			}
-			return headers;
-		};
-	}).filter('altthemesMatchCurrent', function () {
-		return function (headers, current) {
-			if (headers) {
-				return headers.filter(function (value) {
-					return !!value.keys.find(function (key) {
-						return key === current;
-					});
-				});
-			}
-			return headers;
-		};
-	});
-})(angular);
-'use strict';
-
-(function (angular) {
-  'use strict';
-
-  angular.module('common.navigation', [])
-  /**
-   *
-   * Override the original mars user.
-   *
-   */
-  .directive('commonNavigation', [function () {
-    return {
-      restrict: 'AE',
-      template: "<alt-themes current='current'></alt-themes>",
-      scope: {
-        current: "=?"
-      },
-      link: function link(scope) {
-        scope.username = "Anonymous";
-        if (!scope.current) {
-          scope.current = "none";
-        }
-      }
-    };
-  }]).factory('navigationService', [function () {
-    return {};
-  }]);
-})(angular);
 "use strict";
 
 {
@@ -2188,381 +2188,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       };
    }]);
 })(angular);
-'use strict';
-
-(function (angular) {
-
-    angular.module('ui.bootstrap-slider', []).directive('slider', ['$parse', '$timeout', function ($parse, $timeout) {
-        return {
-            restrict: 'AE',
-            replace: true,
-            template: '<div><input class="slider-input" type="text" /></div>',
-            require: 'ngModel',
-            scope: {
-                max: "=",
-                min: "=",
-                step: "=",
-                value: "=",
-                ngModel: '=',
-                range: '=',
-                enabled: '=',
-                sliderid: '=',
-                formatter: '&',
-                onStartSlide: '&',
-                onStopSlide: '&',
-                onSlide: '&'
-            },
-            link: function link($scope, element, attrs, ngModelCtrl, $compile) {
-                var ngModelDeregisterFn, ngDisabledDeregisterFn;
-
-                initSlider();
-
-                function initSlider() {
-                    var options = {};
-
-                    function setOption(key, value, defaultValue) {
-                        options[key] = value || defaultValue;
-                    }
-
-                    function setFloatOption(key, value, defaultValue) {
-                        options[key] = value ? parseFloat(value) : defaultValue;
-                    }
-
-                    function setBooleanOption(key, value, defaultValue) {
-                        options[key] = value ? value + '' === 'true' : defaultValue;
-                    }
-
-                    function getArrayOrValue(value) {
-                        return angular.isString(value) && value.indexOf("[") === 0 ? angular.fromJson(value) : value;
-                    }
-
-                    setOption('id', $scope.sliderid);
-                    setOption('orientation', attrs.orientation, 'horizontal');
-                    setOption('selection', attrs.selection, 'before');
-                    setOption('handle', attrs.handle, 'round');
-                    setOption('tooltip', attrs.uiTooltip, 'show');
-                    setOption('tooltipseparator', attrs.tooltipseparator, ':');
-
-                    setFloatOption('min', $scope.min, 0);
-                    setFloatOption('max', $scope.max, 10);
-                    setFloatOption('step', $scope.step, 1);
-                    var strNbr = options.step + '';
-                    var decimals = strNbr.substring(strNbr.lastIndexOf('.') + 1);
-                    setFloatOption('precision', attrs.precision, decimals);
-
-                    setBooleanOption('tooltip_split', attrs.tooltipsplit, false);
-                    setBooleanOption('enabled', attrs.enabled, true);
-                    setBooleanOption('naturalarrowkeys', attrs.naturalarrowkeys, false);
-                    setBooleanOption('reversed', attrs.reversed, false);
-
-                    setBooleanOption('range', $scope.range, false);
-                    if (options.range) {
-                        if (angular.isArray($scope.value)) {
-                            options.value = $scope.value;
-                        } else if (angular.isString($scope.value)) {
-                            options.value = getArrayOrValue($scope.value);
-                            if (!angular.isArray(options.value)) {
-                                var value = parseFloat($scope.value);
-                                if (isNaN(value)) value = 5;
-
-                                if (value < $scope.min) {
-                                    value = $scope.min;
-                                    options.value = [value, options.max];
-                                } else if (value > $scope.max) {
-                                    value = $scope.max;
-                                    options.value = [options.min, value];
-                                } else {
-                                    options.value = [options.min, options.max];
-                                }
-                            }
-                        } else {
-                            options.value = [options.min, options.max]; // This is needed, because of value defined at $.fn.slider.defaults - default value 5 prevents creating range slider
-                        }
-                        $scope.ngModel = options.value; // needed, otherwise turns value into [null, ##]
-                    } else {
-                        setFloatOption('value', $scope.value, 5);
-                    }
-
-                    if ($scope.formatter) options.formatter = $scope.$eval($scope.formatter);
-
-                    var slider = $(element).find(".slider-input").eq(0);
-
-                    // check if slider jQuery plugin exists
-                    if ($.fn.slider) {
-                        // adding methods to jQuery slider plugin prototype
-                        $.fn.slider.constructor.prototype.disable = function () {
-                            this.picker.off();
-                        };
-                        $.fn.slider.constructor.prototype.enable = function () {
-                            this.picker.on();
-                        };
-
-                        // destroy previous slider to reset all options
-                        slider.slider(options);
-                        slider.slider('destroy');
-                        slider.slider(options);
-
-                        // everything that needs slider element
-                        var updateEvent = getArrayOrValue(attrs.updateevent);
-                        if (angular.isString(updateEvent)) {
-                            // if only single event name in string
-                            updateEvent = [updateEvent];
-                        } else {
-                            // default to slide event
-                            updateEvent = ['slide'];
-                        }
-                        angular.forEach(updateEvent, function (sliderEvent) {
-                            slider.on(sliderEvent, function (ev) {
-                                ngModelCtrl.$setViewValue(ev.value);
-                                $timeout(function () {
-                                    $scope.$apply();
-                                });
-                            });
-                        });
-                        slider.on('change', function (ev) {
-                            ngModelCtrl.$setViewValue(ev.value.newValue);
-                            $timeout(function () {
-                                $scope.$apply();
-                            });
-                        });
-
-                        // Event listeners
-                        var sliderEvents = {
-                            slideStart: 'onStartSlide',
-                            slide: 'onSlide',
-                            slideStop: 'onStopSlide'
-                        };
-                        angular.forEach(sliderEvents, function (sliderEventAttr, sliderEvent) {
-                            slider.on(sliderEvent, function (ev) {
-
-                                if ($scope[sliderEventAttr]) {
-                                    var invoker = $parse(attrs[sliderEventAttr]);
-                                    invoker($scope.$parent, { $event: ev, value: ev.value });
-
-                                    $timeout(function () {
-                                        $scope.$apply();
-                                    });
-                                }
-                            });
-                        });
-
-                        // deregister ngDisabled watcher to prevent memory leaks
-                        if (angular.isFunction(ngDisabledDeregisterFn)) {
-                            ngDisabledDeregisterFn();
-                            ngDisabledDeregisterFn = null;
-                        }
-                        if (angular.isDefined(attrs.ngDisabled)) {
-                            ngDisabledDeregisterFn = $scope.$watch(attrs.ngDisabled, function (value) {
-                                if (value) {
-                                    slider.slider('disable');
-                                } else {
-                                    slider.slider('enable');
-                                }
-                            });
-                        }
-                        // deregister ngModel watcher to prevent memory leaks
-                        if (angular.isFunction(ngModelDeregisterFn)) ngModelDeregisterFn();
-                        ngModelDeregisterFn = $scope.$watch('ngModel', function (value) {
-                            slider.slider('setValue', value);
-                        });
-                    }
-
-                    window.slip = slider;
-
-                    $scope.$watch("enabled", function (value) {
-                        if (value) {
-                            slider.slider('disable');
-                        } else {
-                            slider.slider('enable');
-                        }
-                    });
-                }
-
-                var watchers = ['min', 'max', 'step', 'range'];
-                angular.forEach(watchers, function (prop) {
-                    $scope.$watch(prop, function () {
-                        initSlider();
-                    });
-                });
-            }
-        };
-    }]);
-})(angular);
-'use strict';
-
-{
-   angular.module("icsm.side-panel", []).factory('panelSideFactory', ['$rootScope', '$timeout', function ($rootScope, $timeout) {
-      var state = {
-         left: {
-            active: null,
-            width: 0
-         },
-
-         right: {
-            active: null,
-            width: 0
-         }
-      };
-
-      function setSide(state, value) {
-         var response = state.active;
-
-         if (response === value) {
-            state.active = null;
-            state.width = 0;
-         } else {
-            state.active = value;
-         }
-         return !response;
-      }
-
-      return {
-         state: state,
-         setLeft: function setLeft(value) {
-            var result = setSide(state.left, value);
-            if (result) {
-               state.left.width = 320; // We have a hard coded width at the moment we will probably refactor to parameterize it.
-            }
-            return result;
-         },
-
-         setRight: function setRight(data) {
-            state.right.width = data.width;
-            var response = setSide(state.right, data.name);
-            $rootScope.$broadcast('side.panel.change', {
-               side: "right",
-               data: state.right,
-               width: data.width
-            });
-            return response;
-         }
-      };
-   }]).directive('sidePanelRightOppose', ["panelSideFactory", function (panelSideFactory) {
-      return {
-         restrict: 'E',
-         transclude: true,
-         template: '<div class="contentContainer" ng-attr-style="right:{{right.width}}">' + '<ng-transclude></ng-transclude>' + '</div>',
-         link: function link(scope) {
-            scope.right = panelSideFactory.state.right;
-         }
-      };
-   }]).directive('sidePanelRight', ["panelSideFactory", function (panelSideFactory) {
-      return {
-         restrict: 'E',
-         transclude: true,
-         templateUrl: 'icsm/side-panel/side-panel-right.html',
-         link: function link(scope) {
-            scope.right = panelSideFactory.state.right;
-
-            scope.closePanel = function () {
-               panelSideFactory.setRight({ name: null, width: 0 });
-            };
-         }
-      };
-   }]).directive('panelTrigger', ["panelSideFactory", function (panelSideFactory) {
-      return {
-         restrict: 'E',
-         transclude: true,
-         templateUrl: 'common/side-panel/trigger.html',
-         scope: {
-            default: "@?",
-            panelWidth: "@",
-            name: "@",
-            iconClass: "@",
-            panelId: "@"
-         },
-         link: function link(scope) {
-            scope.toggle = function () {
-               panelSideFactory.setRight({
-                  width: scope.panelWidth,
-                  name: scope.panelId
-               });
-            };
-            if (scope.default) {
-               panelSideFactory.setRight({
-                  width: scope.panelWidth,
-                  name: scope.panelId
-               });
-            }
-         }
-      };
-   }]).directive('panelOpenOnEvent', ["$rootScope", "panelSideFactory", function ($rootScope, panelSideFactory) {
-      return {
-         restrict: 'E',
-         scope: {
-            panelWidth: "@",
-            eventName: "@",
-            panelId: "@",
-            side: "@?"
-         },
-         link: function link(scope) {
-            if (!scope.side) {
-               scope.side = "right";
-            }
-            $rootScope.$on(scope.eventName, function (event, data) {
-               var state = panelSideFactory.state[scope.side];
-               if (state && (!state.active || scope.panelId !== state.active)) {
-                  var params = {
-                     width: scope.panelWidth,
-                     name: scope.panelId
-                  };
-
-                  if (scope.side === "right") {
-                     panelSideFactory.setRight(params);
-                  } else {
-                     panelSideFactory.setLeft(params);
-                  }
-               }
-            });
-         }
-      };
-   }]).directive('panelCloseOnEvent', ["$rootScope", "panelSideFactory", function ($rootScope, panelSideFactory) {
-      return {
-         restrict: 'E',
-         scope: {
-            eventName: "@",
-            side: "@?",
-            onlyOn: "@?"
-         },
-         link: function link(scope) {
-            if (!scope.side) {
-               scope.side = "right";
-            }
-            $rootScope.$on(scope.eventName, function (event, data) {
-               var state = panelSideFactory.state[scope.side];
-               if (scope.onlyOn && state.active !== scope.onlyOn) {
-                  return;
-               }
-
-               if (state && state.active) {
-                  var params = {
-                     name: null
-                  };
-
-                  if (scope.side === "right") {
-                     panelSideFactory.setRight(params);
-                  } else {
-                     panelSideFactory.setLeft(params);
-                  }
-               }
-            });
-         }
-      };
-   }]).directive('sidePanelLeft', ['panelSideFactory', function (panelSideFactory) {
-      return {
-         restrict: 'E',
-         transclude: true,
-         templateUrl: 'icsm/side-panel/side-panel-left.html',
-         link: function link(scope) {
-            scope.left = panelSideFactory.state.left;
-
-            scope.closeLeft = function () {
-               panelSideFactory.setLeft(null);
-            };
-         }
-      };
-   }]);
-}
 'use strict';
 
 (function (angular) {
@@ -2779,6 +2404,381 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 })(angular);
 'use strict';
 
+{
+   angular.module("icsm.side-panel", []).factory('panelSideFactory', ['$rootScope', '$timeout', function ($rootScope, $timeout) {
+      var state = {
+         left: {
+            active: null,
+            width: 0
+         },
+
+         right: {
+            active: null,
+            width: 0
+         }
+      };
+
+      function setSide(state, value) {
+         var response = state.active;
+
+         if (response === value) {
+            state.active = null;
+            state.width = 0;
+         } else {
+            state.active = value;
+         }
+         return !response;
+      }
+
+      return {
+         state: state,
+         setLeft: function setLeft(value) {
+            var result = setSide(state.left, value);
+            if (result) {
+               state.left.width = 320; // We have a hard coded width at the moment we will probably refactor to parameterize it.
+            }
+            return result;
+         },
+
+         setRight: function setRight(data) {
+            state.right.width = data.width;
+            var response = setSide(state.right, data.name);
+            $rootScope.$broadcast('side.panel.change', {
+               side: "right",
+               data: state.right,
+               width: data.width
+            });
+            return response;
+         }
+      };
+   }]).directive('sidePanelRightOppose', ["panelSideFactory", function (panelSideFactory) {
+      return {
+         restrict: 'E',
+         transclude: true,
+         template: '<div class="contentContainer" ng-attr-style="right:{{right.width}}">' + '<ng-transclude></ng-transclude>' + '</div>',
+         link: function link(scope) {
+            scope.right = panelSideFactory.state.right;
+         }
+      };
+   }]).directive('sidePanelRight', ["panelSideFactory", function (panelSideFactory) {
+      return {
+         restrict: 'E',
+         transclude: true,
+         templateUrl: 'icsm/side-panel/side-panel-right.html',
+         link: function link(scope) {
+            scope.right = panelSideFactory.state.right;
+
+            scope.closePanel = function () {
+               panelSideFactory.setRight({ name: null, width: 0 });
+            };
+         }
+      };
+   }]).directive('panelTrigger', ["panelSideFactory", function (panelSideFactory) {
+      return {
+         restrict: 'E',
+         transclude: true,
+         templateUrl: 'common/side-panel/trigger.html',
+         scope: {
+            default: "@?",
+            panelWidth: "@",
+            name: "@",
+            iconClass: "@",
+            panelId: "@"
+         },
+         link: function link(scope) {
+            scope.toggle = function () {
+               panelSideFactory.setRight({
+                  width: scope.panelWidth,
+                  name: scope.panelId
+               });
+            };
+            if (scope.default) {
+               panelSideFactory.setRight({
+                  width: scope.panelWidth,
+                  name: scope.panelId
+               });
+            }
+         }
+      };
+   }]).directive('panelOpenOnEvent', ["$rootScope", "panelSideFactory", function ($rootScope, panelSideFactory) {
+      return {
+         restrict: 'E',
+         scope: {
+            panelWidth: "@",
+            eventName: "@",
+            panelId: "@",
+            side: "@?"
+         },
+         link: function link(scope) {
+            if (!scope.side) {
+               scope.side = "right";
+            }
+            $rootScope.$on(scope.eventName, function (event, data) {
+               var state = panelSideFactory.state[scope.side];
+               if (state && (!state.active || scope.panelId !== state.active)) {
+                  var params = {
+                     width: scope.panelWidth,
+                     name: scope.panelId
+                  };
+
+                  if (scope.side === "right") {
+                     panelSideFactory.setRight(params);
+                  } else {
+                     panelSideFactory.setLeft(params);
+                  }
+               }
+            });
+         }
+      };
+   }]).directive('panelCloseOnEvent', ["$rootScope", "panelSideFactory", function ($rootScope, panelSideFactory) {
+      return {
+         restrict: 'E',
+         scope: {
+            eventName: "@",
+            side: "@?",
+            onlyOn: "@?"
+         },
+         link: function link(scope) {
+            if (!scope.side) {
+               scope.side = "right";
+            }
+            $rootScope.$on(scope.eventName, function (event, data) {
+               var state = panelSideFactory.state[scope.side];
+               if (scope.onlyOn && state.active !== scope.onlyOn) {
+                  return;
+               }
+
+               if (state && state.active) {
+                  var params = {
+                     name: null
+                  };
+
+                  if (scope.side === "right") {
+                     panelSideFactory.setRight(params);
+                  } else {
+                     panelSideFactory.setLeft(params);
+                  }
+               }
+            });
+         }
+      };
+   }]).directive('sidePanelLeft', ['panelSideFactory', function (panelSideFactory) {
+      return {
+         restrict: 'E',
+         transclude: true,
+         templateUrl: 'icsm/side-panel/side-panel-left.html',
+         link: function link(scope) {
+            scope.left = panelSideFactory.state.left;
+
+            scope.closeLeft = function () {
+               panelSideFactory.setLeft(null);
+            };
+         }
+      };
+   }]);
+}
+'use strict';
+
+(function (angular) {
+
+    angular.module('ui.bootstrap-slider', []).directive('slider', ['$parse', '$timeout', function ($parse, $timeout) {
+        return {
+            restrict: 'AE',
+            replace: true,
+            template: '<div><input class="slider-input" type="text" /></div>',
+            require: 'ngModel',
+            scope: {
+                max: "=",
+                min: "=",
+                step: "=",
+                value: "=",
+                ngModel: '=',
+                range: '=',
+                enabled: '=',
+                sliderid: '=',
+                formatter: '&',
+                onStartSlide: '&',
+                onStopSlide: '&',
+                onSlide: '&'
+            },
+            link: function link($scope, element, attrs, ngModelCtrl, $compile) {
+                var ngModelDeregisterFn, ngDisabledDeregisterFn;
+
+                initSlider();
+
+                function initSlider() {
+                    var options = {};
+
+                    function setOption(key, value, defaultValue) {
+                        options[key] = value || defaultValue;
+                    }
+
+                    function setFloatOption(key, value, defaultValue) {
+                        options[key] = value ? parseFloat(value) : defaultValue;
+                    }
+
+                    function setBooleanOption(key, value, defaultValue) {
+                        options[key] = value ? value + '' === 'true' : defaultValue;
+                    }
+
+                    function getArrayOrValue(value) {
+                        return angular.isString(value) && value.indexOf("[") === 0 ? angular.fromJson(value) : value;
+                    }
+
+                    setOption('id', $scope.sliderid);
+                    setOption('orientation', attrs.orientation, 'horizontal');
+                    setOption('selection', attrs.selection, 'before');
+                    setOption('handle', attrs.handle, 'round');
+                    setOption('tooltip', attrs.uiTooltip, 'show');
+                    setOption('tooltipseparator', attrs.tooltipseparator, ':');
+
+                    setFloatOption('min', $scope.min, 0);
+                    setFloatOption('max', $scope.max, 10);
+                    setFloatOption('step', $scope.step, 1);
+                    var strNbr = options.step + '';
+                    var decimals = strNbr.substring(strNbr.lastIndexOf('.') + 1);
+                    setFloatOption('precision', attrs.precision, decimals);
+
+                    setBooleanOption('tooltip_split', attrs.tooltipsplit, false);
+                    setBooleanOption('enabled', attrs.enabled, true);
+                    setBooleanOption('naturalarrowkeys', attrs.naturalarrowkeys, false);
+                    setBooleanOption('reversed', attrs.reversed, false);
+
+                    setBooleanOption('range', $scope.range, false);
+                    if (options.range) {
+                        if (angular.isArray($scope.value)) {
+                            options.value = $scope.value;
+                        } else if (angular.isString($scope.value)) {
+                            options.value = getArrayOrValue($scope.value);
+                            if (!angular.isArray(options.value)) {
+                                var value = parseFloat($scope.value);
+                                if (isNaN(value)) value = 5;
+
+                                if (value < $scope.min) {
+                                    value = $scope.min;
+                                    options.value = [value, options.max];
+                                } else if (value > $scope.max) {
+                                    value = $scope.max;
+                                    options.value = [options.min, value];
+                                } else {
+                                    options.value = [options.min, options.max];
+                                }
+                            }
+                        } else {
+                            options.value = [options.min, options.max]; // This is needed, because of value defined at $.fn.slider.defaults - default value 5 prevents creating range slider
+                        }
+                        $scope.ngModel = options.value; // needed, otherwise turns value into [null, ##]
+                    } else {
+                        setFloatOption('value', $scope.value, 5);
+                    }
+
+                    if ($scope.formatter) options.formatter = $scope.$eval($scope.formatter);
+
+                    var slider = $(element).find(".slider-input").eq(0);
+
+                    // check if slider jQuery plugin exists
+                    if ($.fn.slider) {
+                        // adding methods to jQuery slider plugin prototype
+                        $.fn.slider.constructor.prototype.disable = function () {
+                            this.picker.off();
+                        };
+                        $.fn.slider.constructor.prototype.enable = function () {
+                            this.picker.on();
+                        };
+
+                        // destroy previous slider to reset all options
+                        slider.slider(options);
+                        slider.slider('destroy');
+                        slider.slider(options);
+
+                        // everything that needs slider element
+                        var updateEvent = getArrayOrValue(attrs.updateevent);
+                        if (angular.isString(updateEvent)) {
+                            // if only single event name in string
+                            updateEvent = [updateEvent];
+                        } else {
+                            // default to slide event
+                            updateEvent = ['slide'];
+                        }
+                        angular.forEach(updateEvent, function (sliderEvent) {
+                            slider.on(sliderEvent, function (ev) {
+                                ngModelCtrl.$setViewValue(ev.value);
+                                $timeout(function () {
+                                    $scope.$apply();
+                                });
+                            });
+                        });
+                        slider.on('change', function (ev) {
+                            ngModelCtrl.$setViewValue(ev.value.newValue);
+                            $timeout(function () {
+                                $scope.$apply();
+                            });
+                        });
+
+                        // Event listeners
+                        var sliderEvents = {
+                            slideStart: 'onStartSlide',
+                            slide: 'onSlide',
+                            slideStop: 'onStopSlide'
+                        };
+                        angular.forEach(sliderEvents, function (sliderEventAttr, sliderEvent) {
+                            slider.on(sliderEvent, function (ev) {
+
+                                if ($scope[sliderEventAttr]) {
+                                    var invoker = $parse(attrs[sliderEventAttr]);
+                                    invoker($scope.$parent, { $event: ev, value: ev.value });
+
+                                    $timeout(function () {
+                                        $scope.$apply();
+                                    });
+                                }
+                            });
+                        });
+
+                        // deregister ngDisabled watcher to prevent memory leaks
+                        if (angular.isFunction(ngDisabledDeregisterFn)) {
+                            ngDisabledDeregisterFn();
+                            ngDisabledDeregisterFn = null;
+                        }
+                        if (angular.isDefined(attrs.ngDisabled)) {
+                            ngDisabledDeregisterFn = $scope.$watch(attrs.ngDisabled, function (value) {
+                                if (value) {
+                                    slider.slider('disable');
+                                } else {
+                                    slider.slider('enable');
+                                }
+                            });
+                        }
+                        // deregister ngModel watcher to prevent memory leaks
+                        if (angular.isFunction(ngModelDeregisterFn)) ngModelDeregisterFn();
+                        ngModelDeregisterFn = $scope.$watch('ngModel', function (value) {
+                            slider.slider('setValue', value);
+                        });
+                    }
+
+                    window.slip = slider;
+
+                    $scope.$watch("enabled", function (value) {
+                        if (value) {
+                            slider.slider('disable');
+                        } else {
+                            slider.slider('enable');
+                        }
+                    });
+                }
+
+                var watchers = ['min', 'max', 'step', 'range'];
+                angular.forEach(watchers, function (prop) {
+                    $scope.$watch(prop, function () {
+                        initSlider();
+                    });
+                });
+            }
+        };
+    }]);
+})(angular);
+'use strict';
+
 (function (angular) {
 	'use strict';
 
@@ -2825,48 +2825,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				}
 				return $q.when(item);
 			}
-		};
-	}]);
-})(angular);
-"use strict";
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module("common.toolbar", []).directive("icsmToolbar", [function () {
-		return {
-			controller: 'toolbarLinksCtrl'
-		};
-	}])
-
-	/**
-  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
-  */
-	.directive('icsmToolbarRow', [function () {
-		var DEFAULT_TITLE = "Satellite to Topography bias on base map.";
-
-		return {
-			scope: {
-				map: "=",
-				overlaytitle: "=?"
-			},
-			restrict: 'AE',
-			templateUrl: 'common/toolbar/toolbar.html',
-			link: function link(scope) {
-				scope.overlaytitle = scope.overlaytitle ? scope.overlaytitle : DEFAULT_TITLE;
-			}
-		};
-	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
-
-		var self = this;
-		configService.getConfig().then(function (config) {
-			self.links = config.toolbarLinks;
-		});
-
-		$scope.item = "";
-		$scope.toggleItem = function (item) {
-			$scope.item = $scope.item == item ? "" : item;
 		};
 	}]);
 })(angular);
@@ -3022,6 +2980,48 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          };
       }
    }]);
+})(angular);
+"use strict";
+
+(function (angular) {
+
+	'use strict';
+
+	angular.module("common.toolbar", []).directive("icsmToolbar", [function () {
+		return {
+			controller: 'toolbarLinksCtrl'
+		};
+	}])
+
+	/**
+  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
+  */
+	.directive('icsmToolbarRow', [function () {
+		var DEFAULT_TITLE = "Satellite to Topography bias on base map.";
+
+		return {
+			scope: {
+				map: "=",
+				overlaytitle: "=?"
+			},
+			restrict: 'AE',
+			templateUrl: 'common/toolbar/toolbar.html',
+			link: function link(scope) {
+				scope.overlaytitle = scope.overlaytitle ? scope.overlaytitle : DEFAULT_TITLE;
+			}
+		};
+	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
+
+		var self = this;
+		configService.getConfig().then(function (config) {
+			self.links = config.toolbarLinks;
+		});
+
+		$scope.item = "";
+		$scope.toggleItem = function (item) {
+			$scope.item = $scope.item == item ? "" : item;
+		};
+	}]);
 })(angular);
 "use strict";
 
@@ -3215,16 +3215,16 @@ $templateCache.put("common/header/header.html","<div class=\"container-full comm
 $templateCache.put("common/iso19115/contact.html","<ul ng-show=\"node.hierarchyLevel\">\r\n   <li>\r\n      <span class=\"iso19115-head\">Contact</span>\r\n      <iso19115-node name=\"MD_ScopeCode\" node=\"node.hierarchyLevel.MD_ScopeCode\" type=\"_codeListValue\"></iso19115-node>\r\n    </li>\r\n</ul>");
 $templateCache.put("common/iso19115/double.html","\r\n<ul ng-show=\"node\">\r\n   <li>\r\n      <span class=\"iso19115-head\">{{name | iso19115NodeName}}</span>\r\n      <iso19115-node name=\"name\" node=\"node[name]\" type=\"type\"></iso19115-node>\r\n   </li>\r\n</ul>\r\n");
 $templateCache.put("common/iso19115/metadata.html","<div class=\"iso19115\">\r\n   <ul>\r\n      <li>\r\n         <span class=\"iso19115-head\">Metadata</span>\r\n         <iso19115-node name=\"fileIdentifier\" node=\"node.fileIdentifier\" type=\"CharacterString\"></iso19115-node>\r\n         <iso19115-node name=\"language\" node=\"node.language\" type=\"LanguageCode\"></iso19115-node>\r\n         <ul ng-show=\"node.characterSet\">\r\n            <li>\r\n               <span class=\"iso19115-head\">Character Set</span>\r\n               <iso19115-node name=\"CharacterSetCode\" node=\"node.characterSet.MD_CharacterSetCode\" type=\"_codeListValue\"></iso19115-node>\r\n            </li>\r\n         </ul>\r\n\r\n         <ul ng-show=\"node.hierarchyLevel\">\r\n            <li>\r\n               <span class=\"iso19115-head\">Hierarchy Level</span>\r\n               <iso19115-node name=\"MD_ScopeCode\" node=\"node.hierarchyLevel.MD_ScopeCode\" type=\"_codeListValue\"></iso19115-node>\r\n            </li>\r\n         </ul>\r\n         <iso19115-node name=\"hierarchyLevelName\" node=\"node.hierarchyLevelName\" type=\"CharacterString\"></iso19115-node>\r\n         <iso19115-contact ng-if=\"node.contact\" node=\"node.contact\" key=\"\'contact\'\"></iso19115-contact>\r\n      </li>\r\n   </ul>\r\n</div>");
+$templateCache.put("common/navigation/altthemes.html","<span class=\"altthemes-container\">\r\n	<span ng-repeat=\"item in themes | altthemesMatchCurrent : current\">\r\n       <a title=\"{{item.label}}\" ng-href=\"{{item.url}}\" class=\"altthemesItemCompact\" target=\"_blank\">\r\n         <span class=\"altthemes-icon\" ng-class=\"item.className\"></span>\r\n       </a>\r\n    </li>\r\n</span>");
 $templateCache.put("common/metaview/dublincore.html","Dublin core");
 $templateCache.put("common/metaview/iso19115.html","<iso19115-metadata node=\"data.metadata.GetRecordByIdResponse.MD_Metadata\" key=\"\'MD_Metadata\'\"></iso19115-metadata>\r\n");
 $templateCache.put("common/metaview/iso19115node.html","<ul>\r\n   <li>\r\n      <span class=\"metaview-head\">{{key | metaviewNodeName}}</span>\r\n      <span>{{node | metaviewText}}</span>\r\n      <ng-repeat ng-if=\"isArray()\" ng-repeat=\"next in node\" node=\"next]\">\r\n         <metaview-iso19115-array ng-repeat=\"nextKey in getKeys() track by $index\" node=\"node[nextKey]\" key=\"nextKey\"></metaview-iso19115-array>\r\n      </ng-repeat>\r\n      <metaview-iso19115-node ng-if=\"!isArray()\" ng-repeat=\"nextKey in getKeys() track by $index\" node=\"node[nextKey]\" key=\"nextKey\"></metaview-iso19115-node>\r\n   </li>\r\n</ul>");
 $templateCache.put("common/metaview/item.html","<div>\r\n	<button class=\"btn btn-sm btn-outline-primary\" ng-click=\"container.selected = null\"><i class=\"fa fa-angle-double-left\"></i> Back</button>\r\n      <span style=\"font-weight: bold;padding-left:10px; font-size:130%\">{{container.selected.title}}</span>\r\n      <metaview-iso19115 data=\"container.selected\"></metaview-iso19115>\r\n</div>");
 $templateCache.put("common/metaview/metaview.html","<button type=\"button\" class=\"undecorated\" title=\"View metadata\" ng-click=\"select()\">\r\n	<i class=\"fa fa-lg fa-info metaview-info\"></i>\r\n</button>");
-$templateCache.put("common/navigation/altthemes.html","<span class=\"altthemes-container\">\r\n	<span ng-repeat=\"item in themes | altthemesMatchCurrent : current\">\r\n       <a title=\"{{item.label}}\" ng-href=\"{{item.url}}\" class=\"altthemesItemCompact\" target=\"_blank\">\r\n         <span class=\"altthemes-icon\" ng-class=\"item.className\"></span>\r\n       </a>\r\n    </li>\r\n</span>");
 $templateCache.put("common/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'download\'\" icsm-view></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'maps\'\" icsm-maps></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" icsm-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" icsm-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n		<button class=\"undecorated\">Download</button>\r\n	</div>\r\n	<!-- \r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n	-->\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");
 $templateCache.put("common/reset/reset.html","<button type=\"button\" class=\"map-tool-toggle-btn\" ng-click=\"reset()\" title=\"Reset page\">\r\n   <span class=\"hidden-sm\">Reset</span>\r\n   <i class=\"fa fa-lg fa-refresh\"></i>\r\n</button>");
-$templateCache.put("common/side-panel/trigger.html","<button ng-click=\"toggle()\" type=\"button\" class=\"map-tool-toggle-btn\">\r\n   <span class=\"hidden-sm\">{{name}}</span>\r\n   <ng-transclude></ng-transclude>\r\n   <i class=\"fa fa-lg\" ng-class=\"iconClass\"></i>\r\n</button>");
 $templateCache.put("common/search/basin.html","<div class=\"btn-group pull-left radSearch\" style=\"position:relative;width:27em;opacity:0.9\">\r\n	<div class=\"input-group\" style=\"width:100%;\">\r\n		<input type=\"text\" size=\"32\" class=\"form-control\" style=\"border-top-right-radius:4px;border-bottom-right-radius:4px;\"\r\n				ng-keyup=\"keyup($event)\" ng-focus=\"changing()\" ng-model=\"nameFilter\" placeholder=\"Find a basin of interest\">\r\n		<div class=\"input-group-btn\"></div>\r\n	</div>\r\n	<div style=\"width:26em; position:absolute;left:15px\">\r\n		<div class=\"row\" ng-repeat=\"region in basinData.basins | basinFilterList : nameFilter : 10 | orderBy : \'name\'\"\r\n				style=\"background-color:white;\">\r\n			<div class=\"col-md-12 rw-sub-list-trigger\">\r\n				<button class=\"undecorated zoomButton\" ng-click=\"zoomToLocation(region);\">{{region.name}}</button>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/search/catchment.html","<div class=\"btn-group pull-left radSearch\" style=\"position:relative;width:27em;opacity:0.9\">\r\n	<div class=\"input-group\" style=\"width:100%;\">\r\n		<input type=\"text\" size=\"32\" class=\"form-control\" style=\"border-top-right-radius:4px;border-bottom-right-radius:4px;\"\r\n				ng-keyup=\"keyup($event)\" ng-focus=\"changing()\" ng-model=\"nameFilter\" placeholder=\"Find a catchment of interest\">\r\n		<div class=\"input-group-btn\"></div>\r\n	</div>\r\n	<div style=\"width:26em; position:absolute;left:15px\">\r\n		<div class=\"row\" ng-repeat=\"region in catchmentData.catchments | catchmentFilterList : nameFilter : 10 | orderBy : \'name\'\"\r\n				style=\"background-color:white;\">\r\n			<div class=\"col-md-12 rw-sub-list-trigger\">\r\n				<button class=\"undecorated zoomButton\" ng-click=\"zoomToLocation(region);\">{{region.name}}</button>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
+$templateCache.put("common/side-panel/trigger.html","<button ng-click=\"toggle()\" type=\"button\" class=\"map-tool-toggle-btn\">\r\n   <span class=\"hidden-sm\">{{name}}</span>\r\n   <ng-transclude></ng-transclude>\r\n   <i class=\"fa fa-lg\" ng-class=\"iconClass\"></i>\r\n</button>");
 $templateCache.put("common/toolbar/toolbar.html","<div icsm-toolbar>\r\n	<div class=\"row toolBarGroup\">\r\n		<div class=\"btn-group searchBar\" ng-show=\"root.whichSearch != \'region\'\">\r\n			<div class=\"input-group\" geo-search>\r\n				<input type=\"text\" ng-autocomplete ng-model=\"values.from.description\" options=\'{country:\"au\"}\'\r\n							size=\"32\" title=\"Select a locality to pan the map to.\" class=\"form-control\" aria-label=\"...\">\r\n				<div class=\"input-group-btn\">\r\n    				<button ng-click=\"zoom(false)\" exp-ga=\"[\'send\', \'event\', \'icsm\', \'click\', \'zoom to location\']\"\r\n						class=\"btn btn-default\"\r\n						title=\"Pan and potentially zoom to location.\"><i class=\"fa fa-search\"></i></button>\r\n				</div>\r\n			</div>\r\n		</div>\r\n\r\n		<div class=\"pull-right\">\r\n			<div class=\"btn-toolbar radCore\" role=\"toolbar\"  icsm-toolbar>\r\n				<div class=\"btn-group\">\r\n				</div>\r\n			</div>\r\n\r\n			<div class=\"btn-toolbar\" style=\"margin:right:10px;display:inline-block\">\r\n				<div class=\"btn-group\" title=\"{{overlaytitle}}\">\r\n					<span class=\"btn btn-default\" common-baselayer-control max-zoom=\"16\"></span>\r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");}]);

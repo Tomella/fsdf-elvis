@@ -77,29 +77,23 @@ function SearchService($http, $rootScope, $timeout, placenamesConfigService, map
       goto(what) {
          return mapService.getMap().then(map => {
             map.panTo(what.location.split(" ").reverse().map(str => +str));
-            return this.show(what);
+            return this.hide();
          });
       },
 
       show(what) {
          return this.hide().then(map => {
             // split lng/lat string seperated by space, reverse to lat/lng, cooerce to numbers
-            let location = what.location.split(" ").reverse().map(str => +str);
-            marker = L.popup()
-               .setLatLng(location)
-               .setContent(what.name + " (" + what.authority + " - " + what.feature + ")" +
-                  "<br/>Lat/Lng: " +
-                  location[0] + "&deg;" +
-                  location[1] + "&deg;"
-               ).openOn(map);
+            marker = L.marker(what.location.split(" ").map(num => +num).reverse());
+            marker.addTo(map);
             return map;
          });
       },
 
-      hide(what) {
+      hide() {
          return mapService.getMap().then(map => {
             if (marker) {
-               map.removeLayer(marker);
+               marker.remove();
             }
             return map;
          });

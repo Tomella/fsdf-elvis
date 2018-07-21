@@ -69,6 +69,7 @@
 
       'placenames.search',
       'placenames.config',
+      'placenames.summary',
 
 		'icsm.bounds',
       'icsm.contributors',

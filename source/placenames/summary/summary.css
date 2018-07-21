@@ -1,0 +1,19 @@
+.placenames {
+   margin: 2px;
+   padding: 6px;
+   position: fixed;
+   bottom: 55px;
+   left: 5px;
+   opacity: 0.9;
+   z-index: 1200;
+   background-color:white;
+   white-space: nowrap;
+   text-align: left;
+   -webkit-transition: height 1s; /* Safari */
+   transition: height 1s;
+   border-radius: 3px;
+}
+
+.placenames-title {
+   font-weight: bold;
+}
