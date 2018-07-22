@@ -11,6 +11,7 @@
    text-align: left;
    -webkit-transition: height 1s; /* Safari */
    transition: height 1s;
+   border: 1px, solid;
    border-radius: 3px;
 }
 

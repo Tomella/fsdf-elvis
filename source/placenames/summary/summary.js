@@ -1,7 +1,7 @@
 {
    angular.module("placenames.summary", [])
 
-   .directive("placenamesSummary", ["$rootScope", "mapService", ($rootScope, mapService) => {
+   .directive("placenamesSummary", ['$document', "$rootScope", "mapService", ($document, $rootScope, mapService) => {
       return {
          restrict: "AE",
          templateUrl: "placenames/summary/summary.html",
@@ -13,9 +13,14 @@
                scope.item = item;
                scope.latLng = item.location.split(" ").map(num => +num).reverse();
                mapService.getMap().then(map => {
-                  scope.marker = L.marker(scope.latLng).addTo(map);
+                  scope.marker = L.marker(scope.latLng, {
+                     icon: L.icon({
+                        iconUrl: 'icsm/resources/img/marker-icon-red.png',
+                        iconSize: [25,41],
+                        iconAnchor: [13, 41]
+                     })}
+                  ).addTo(map);
                });
-
             });
 
             scope.remove = () => {
@@ -26,6 +31,14 @@
             scope.close = () => {
                scope.remove();
             };
+
+            $document.on('keydown', function keyupHandler(keyEvent) {
+               if (keyEvent.which === 27) {
+                  scope.$apply(function () {
+                     scope.remove();
+                  });
+               }
+            });
          }
       }
    }]);

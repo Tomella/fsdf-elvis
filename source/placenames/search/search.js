@@ -1,5 +1,5 @@
 {
-   angular.module("placenames.search", ['placenames.search.service', 'placenames.templates', 'placenames.tree'])
+   angular.module("placenames.search", ['placenames.search.service', 'placenames.templates'])
 
       .directive('placenamesOnEnter', function () {
          return function (scope, element, attrs) {
@@ -59,13 +59,35 @@
 
                   scope.search = function search(item) {
                      scope.showFilters = false;
-                     searchService.goto(item);
-                     $timeout(() => {
+                     searchService.goto(item).then(() => {
+                        scope.state.filter = "";
                         $rootScope.$broadcast("search.button.fired", item);
-                     }, 10);
+                     });
                   };
                }
             };
          }
-      ]);
+      ])
+
+      .filter('placenamesTooltip', [function () {
+         return function (model) {
+            let buffer = "<div style='text-align:left'>";
+            if (model.variant) {
+               let variants = model.variant.split("|");
+               variants.forEach((name, index) => {
+                  buffer += index ? "" : "Also known as";
+                  buffer += (index && index < variants.length - 1 ? "," : "") + " ";
+                  if (index && index === variants.length - 1) {
+                     buffer += "or ";
+                  }
+                  buffer += name;
+               });
+               buffer += "<br/>";
+            }
+            buffer += "Lat " + model.location.split(" ").reverse().join("&deg; Lng ") + "&deg;<br/>Feature type: " +
+               model.feature + "</div>";
+
+            return buffer;
+         };
+      }]);;
 }

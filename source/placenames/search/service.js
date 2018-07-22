@@ -84,7 +84,12 @@ function SearchService($http, $rootScope, $timeout, placenamesConfigService, map
       show(what) {
          return this.hide().then(map => {
             // split lng/lat string seperated by space, reverse to lat/lng, cooerce to numbers
-            marker = L.marker(what.location.split(" ").map(num => +num).reverse());
+            marker = L.marker(what.location.split(" ").map(num => +num).reverse(), {
+               icon: L.icon({
+                  iconUrl: 'icsm/resources/img/marker-icon-red.png',
+                  iconSize: [25,41],
+                  iconAnchor: [13, 41]
+               })});
             marker.addTo(map);
             return map;
          });
