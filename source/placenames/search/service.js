@@ -74,9 +74,10 @@ function SearchService($http, $rootScope, $timeout, placenamesConfigService, map
          });
       },
 
-      goto(what) {
+      goto(what, increment=3, zoom=11) {
          return mapService.getMap().then(map => {
-            map.panTo(what.location.split(" ").reverse().map(str => +str));
+            let current = map.getZoom();
+            map.setView(what.location.split(" ").reverse().map(str => +str), current + increment, {maxZoom: zoom});
             return this.hide();
          });
       },
