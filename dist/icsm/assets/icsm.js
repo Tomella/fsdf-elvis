@@ -81,242 +81,240 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 "use strict";
 
 {
-   (function () {
-      var fileSize = function fileSize(size) {
-         var meg = 1000 * 1000;
-         var gig = meg * 1000;
-         var ter = gig * 1000;
+   var fileSize = function fileSize(size) {
+      var meg = 1000 * 1000;
+      var gig = meg * 1000;
+      var ter = gig * 1000;
 
-         if (!size) {
-            return "-";
-         }
+      if (!size) {
+         return "-";
+      }
 
-         if (("" + size).indexOf(" ") > -1) {
-            return size;
-         }
+      if (("" + size).indexOf(" ") > -1) {
+         return size;
+      }
 
-         size = parseFloat(size);
+      size = parseFloat(size);
 
-         if (size < 1000) {
-            return size + " bytes";
-         }
-         if (size < meg) {
-            return (size / 1000).toFixed(1) + " kB";
-         }
-         if (size < gig) {
-            return (size / meg).toFixed(1) + " MB";
-         }
-         if (size < ter) {
-            return (size / gig).toFixed(1) + " GB";
-         }
-         return (size / ter).toFixed(1) + " TB";
-      };
+      if (size < 1000) {
+         return size + " bytes";
+      }
+      if (size < meg) {
+         return (size / 1000).toFixed(1) + " kB";
+      }
+      if (size < gig) {
+         return (size / meg).toFixed(1) + " MB";
+      }
+      if (size < ter) {
+         return (size / gig).toFixed(1) + " GB";
+      }
+      return (size / ter).toFixed(1) + " TB";
+   };
 
-      angular.module("icsm.bounds", ["icsm.message"]).directive('icsmBounds', ['$rootScope', 'icsmMessageService', 'boundsService', function ($rootScope, icsmMessageService, boundsService) {
-         return {
-            restrict: 'AE',
-            link: function link() {
-               boundsService.init().then(null, null, function notify(message) {
-                  icsmMessageService.removeFlash();
-                  switch (message.type) {
-                     case "error":
-                     case "warn":
-                     case "info":
-                        icsmMessageService[message.type](message.text);
-                        break;
-                     case "wait":
-                        icsmMessageService.wait(message.text);
-                        break;
-                     default:
-                        icsmMessageService.flash(message.text, message.duration ? message.duration : 8000, message.type === "wait");
-                  }
-               });
-            }
-         };
-      }]).factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService', 'flashService', 'messageService', function ($http, $q, $rootScope, $timeout, configService, flashService, messageService) {
-         var clipTimeout = void 0,
-             notify = void 0;
-         return {
-            init: function init() {
-               notify = $q.defer();
-               $rootScope.$on('icsm.clip.drawn', function (event, clip) {
-                  send('Area drawn. Checking for data...');
-                  _checkSize(clip).then(function (message) {
-                     if (message.code === "success") {
-                        getList(clip);
-                     } else {
-                        // $rootScope.$broadcast('icsm.clip.draw', { message: "oversize" });
-                     }
-                  });
-               });
-               return notify.promise;
-            },
-
-            cancelDraw: function cancelDraw() {
-               drawService.cancelDrawRectangle();
-            },
-
-            checkSize: function checkSize(clip) {
-               return _checkSize(clip);
-            }
-         };
-
-         function send(message, type, duration) {
-            flashService.remove(notify);
-
-            if (message) {
-               if (type === "error") {
-                  messageService.error(message);
-               } else {
-                  notify = flashService.add(message, duration, true);
-               }
-            }
-            /*
-              if (notify) {
-               notify.notify({
-                  text: message,
-                  type: type,
-                  duration: duration
-               });
-            }
-            */
-         }
-
-         function _checkSize(clip) {
-            var deferred = $q.defer();
-            var result = drawn(clip);
-            if (result && result.code) {
-               switch (result.code) {
-                  case "oversize":
-                     $timeout(function () {
-                        send("", "clear");
-                        send("The selected area is too large to process. Please restrict to approximately " + "1.5 degrees square.", "error");
-                        deferred.resolve(result);
-                     });
+   angular.module("icsm.bounds", ["icsm.message"]).directive('icsmBounds', ['$rootScope', 'icsmMessageService', 'boundsService', function ($rootScope, icsmMessageService, boundsService) {
+      return {
+         restrict: 'AE',
+         link: function link() {
+            boundsService.init().then(null, null, function notify(message) {
+               icsmMessageService.removeFlash();
+               switch (message.type) {
+                  case "error":
+                  case "warn":
+                  case "info":
+                     icsmMessageService[message.type](message.text);
                      break;
-                  case "undersize":
-                     $timeout(function () {
-                        send("", "clear");
-                        send("X Min and Y Min should be smaller than X Max and Y Max, respectively. " + "Please update the drawn area.", "error");
-                        deferred.resolve(result);
-                     });
+                  case "wait":
+                     icsmMessageService.wait(message.text);
                      break;
                   default:
-                     return $q.when(result);
-               }
-            }
-            return deferred.promise;
-         }
-
-         function underSizeLimit(clip) {
-            var size = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
-            return size < 0.00000000001 || clip.xMax < clip.xMin;
-         }
-
-         function overSizeLimit(clip) {
-            // Shouldn't need abs but it doesn't hurt.
-            var size = Math.abs((clip.xMax - clip.xMin) * (clip.yMax - clip.yMin));
-            return size > 2.25;
-         }
-
-         function forceNumbers(clip) {
-            clip.xMax = clip.xMax === null ? null : +clip.xMax;
-            clip.xMin = clip.xMin === null ? null : +clip.xMin;
-            clip.yMax = clip.yMax === null ? null : +clip.yMax;
-            clip.yMin = clip.yMin === null ? null : +clip.yMin;
-         }
-
-         function drawn(clip) {
-            //geoprocessService.removeClip();
-            forceNumbers(clip);
-
-            if (overSizeLimit(clip)) {
-               return { code: "oversize" };
-            }
-
-            if (underSizeLimit(clip)) {
-               return { code: "undersize" };
-            }
-
-            if (clip.xMax === null) {
-               return { code: "incomplete" };
-            }
-
-            if (validClip(clip)) {
-               return { code: "success" };
-            }
-            return { code: "invalid" };
-         }
-
-         // The input validator takes care of order and min/max constraints. We just check valid existance.
-         function validClip(clip) {
-            return clip && angular.isNumber(clip.xMax) && angular.isNumber(clip.xMin) && angular.isNumber(clip.yMax) && angular.isNumber(clip.yMin) && !overSizeLimit(clip) && !underSizeLimit(clip);
-         }
-
-         function getList(clip) {
-            configService.getConfig("processing").then(function (conf) {
-               var url = conf.intersectsUrl;
-               if (url) {
-                  // Order matches the $watch signature so be careful
-                  var urlWithParms = url.replace("{maxx}", clip.xMax).replace("{minx}", clip.xMin).replace("{maxy}", clip.yMax).replace("{miny}", clip.yMin);
-
-                  send("Checking there is data in your selected area...", "wait", 180000);
-                  $http.get(urlWithParms).then(function (response) {
-                     if (response.data && response.data.available_data) {
-                        var hasData = false;
-                        send("", "clear");
-                        if (response.data.available_data) {
-                           response.data.available_data.forEach(function (group) {
-                              if (group.downloadables) {
-                                 decorateDownloadables(group.downloadables);
-                                 hasData = true;
-                              }
-                           });
-                        }
-                        if (!hasData) {
-                           send("There is no data held in your selected area. Please try another area.", null, 4000);
-                        }
-
-                        $rootScope.$broadcast('site.selection', response.data);
-                     }
-                  }, function (err) {
-                     // If it falls over we don't want to crash.
-                     send("The service that provides the list of datasets is currently unavailable. " + "Please try again later.", "error");
-                  });
+                     icsmMessageService.flash(message.text, message.duration ? message.duration : 8000, message.type === "wait");
                }
             });
-
-            function decorateDownloadables(downloadables) {
-               Object.keys(downloadables).forEach(function (groupname) {
-                  var group = downloadables[groupname];
-                  Object.keys(group).forEach(function (listName) {
-                     var items = group[listName];
-
-                     items.forEach(function (item) {
-                        return decorateItem(item);
-                     });
-                  });
+         }
+      };
+   }]).factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService', 'flashService', 'messageService', function ($http, $q, $rootScope, $timeout, configService, flashService, messageService) {
+      var clipTimeout = void 0,
+          notify = void 0;
+      return {
+         init: function init() {
+            notify = $q.defer();
+            $rootScope.$on('icsm.clip.drawn', function (event, clip) {
+               send('Area drawn. Checking for data...');
+               _checkSize(clip).then(function (message) {
+                  if (message.code === "success") {
+                     getList(clip);
+                  } else {
+                     // $rootScope.$broadcast('icsm.clip.draw', { message: "oversize" });
+                  }
                });
-            }
+            });
+            return notify.promise;
+         },
 
-            function decorateItem(item) {
-               item.fileSize = fileSize(item.file_size);
-               if (item.product) {
-                  //  "bbox" : "113,-44,154,-10"
-                  var arr = item.bbox.split(",").map(function (num) {
-                     return +num;
-                  });
-                  item.bbox = [Math.max(arr[0], clip.xMin), Math.max(arr[1], clip.yMin), Math.min(arr[2], clip.xMax), Math.min(arr[3], clip.yMax)].join(",");
-               }
+         cancelDraw: function cancelDraw() {
+            drawService.cancelDrawRectangle();
+         },
+
+         checkSize: function checkSize(clip) {
+            return _checkSize(clip);
+         }
+      };
+
+      function send(message, type, duration) {
+         flashService.remove(notify);
+
+         if (message) {
+            if (type === "error") {
+               messageService.error(message);
+            } else {
+               notify = flashService.add(message, duration, true);
             }
          }
-      }]);
-   })();
+         /*
+           if (notify) {
+            notify.notify({
+               text: message,
+               type: type,
+               duration: duration
+            });
+         }
+         */
+      }
+
+      function _checkSize(clip) {
+         var deferred = $q.defer();
+         var result = drawn(clip);
+         if (result && result.code) {
+            switch (result.code) {
+               case "oversize":
+                  $timeout(function () {
+                     send("", "clear");
+                     send("The selected area is too large to process. Please restrict to approximately " + "1.5 degrees square.", "error");
+                     deferred.resolve(result);
+                  });
+                  break;
+               case "undersize":
+                  $timeout(function () {
+                     send("", "clear");
+                     send("X Min and Y Min should be smaller than X Max and Y Max, respectively. " + "Please update the drawn area.", "error");
+                     deferred.resolve(result);
+                  });
+                  break;
+               default:
+                  return $q.when(result);
+            }
+         }
+         return deferred.promise;
+      }
+
+      function underSizeLimit(clip) {
+         var size = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
+         return size < 0.00000000001 || clip.xMax < clip.xMin;
+      }
+
+      function overSizeLimit(clip) {
+         // Shouldn't need abs but it doesn't hurt.
+         var size = Math.abs((clip.xMax - clip.xMin) * (clip.yMax - clip.yMin));
+         return size > 2.25;
+      }
+
+      function forceNumbers(clip) {
+         clip.xMax = clip.xMax === null ? null : +clip.xMax;
+         clip.xMin = clip.xMin === null ? null : +clip.xMin;
+         clip.yMax = clip.yMax === null ? null : +clip.yMax;
+         clip.yMin = clip.yMin === null ? null : +clip.yMin;
+      }
+
+      function drawn(clip) {
+         //geoprocessService.removeClip();
+         forceNumbers(clip);
+
+         if (overSizeLimit(clip)) {
+            return { code: "oversize" };
+         }
+
+         if (underSizeLimit(clip)) {
+            return { code: "undersize" };
+         }
+
+         if (clip.xMax === null) {
+            return { code: "incomplete" };
+         }
+
+         if (validClip(clip)) {
+            return { code: "success" };
+         }
+         return { code: "invalid" };
+      }
+
+      // The input validator takes care of order and min/max constraints. We just check valid existance.
+      function validClip(clip) {
+         return clip && angular.isNumber(clip.xMax) && angular.isNumber(clip.xMin) && angular.isNumber(clip.yMax) && angular.isNumber(clip.yMin) && !overSizeLimit(clip) && !underSizeLimit(clip);
+      }
+
+      function getList(clip) {
+         configService.getConfig("processing").then(function (conf) {
+            var url = conf.intersectsUrl;
+            if (url) {
+               // Order matches the $watch signature so be careful
+               var urlWithParms = url.replace("{maxx}", clip.xMax).replace("{minx}", clip.xMin).replace("{maxy}", clip.yMax).replace("{miny}", clip.yMin);
+
+               send("Checking there is data in your selected area...", "wait", 180000);
+               $http.get(urlWithParms).then(function (response) {
+                  if (response.data && response.data.available_data) {
+                     var hasData = false;
+                     send("", "clear");
+                     if (response.data.available_data) {
+                        response.data.available_data.forEach(function (group) {
+                           if (group.downloadables) {
+                              decorateDownloadables(group.downloadables);
+                              hasData = true;
+                           }
+                        });
+                     }
+                     if (!hasData) {
+                        send("There is no data held in your selected area. Please try another area.", null, 4000);
+                     }
+
+                     $rootScope.$broadcast('site.selection', response.data);
+                  }
+               }, function (err) {
+                  // If it falls over we don't want to crash.
+                  send("The service that provides the list of datasets is currently unavailable. " + "Please try again later.", "error");
+               });
+            }
+         });
+
+         function decorateDownloadables(downloadables) {
+            Object.keys(downloadables).forEach(function (groupname) {
+               var group = downloadables[groupname];
+               Object.keys(group).forEach(function (listName) {
+                  var items = group[listName];
+
+                  items.forEach(function (item) {
+                     return decorateItem(item);
+                  });
+               });
+            });
+         }
+
+         function decorateItem(item) {
+            item.fileSize = fileSize(item.file_size);
+            if (item.product) {
+               //  "bbox" : "113,-44,154,-10"
+               var arr = item.bbox.split(",").map(function (num) {
+                  return +num;
+               });
+               item.bbox = [Math.max(arr[0], clip.xMin), Math.max(arr[1], clip.yMin), Math.min(arr[2], clip.xMax), Math.min(arr[3], clip.yMax)].join(",");
+            }
+         }
+      }
+   }]);
 }
 'use strict';
 
 {
-   angular.module("icsm.clip", ['geo.draw']).directive('icsmInfoBbox', function () {
+   angular.module("icsm.clip", ['geo.draw', 'explorer.clip.modal']).directive('icsmInfoBbox', function () {
       return {
          restrict: 'AE',
          templateUrl: 'icsm/clip/infobbox.html'
@@ -361,10 +359,51 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                   delete scope.oversize;
                }
             });
+            // Hide the manual drawing
+            $rootScope.$on('icsm.clip.drawn', function () {
+               return scope.typing = false;
+            });
 
             scope.initiateDraw = function () {
                messageService.info("Click on the map and drag to define your area of interest.");
                clipService.initiateDraw();
+            };
+         }
+      };
+   }]).directive('icsmManualClip', ["$rootScope", "clipService", function ($rootScope, clipService) {
+      return {
+         restrict: 'AE',
+         templateUrl: 'icsm/clip/manual.html',
+         scope: {},
+         link: function link(scope) {
+            // yMax, yMin, xMax,xMin
+
+            $rootScope.$on('icsm.clip.drawn', function (event, c) {
+               scope.xMin = c.xMin;
+               scope.yMin = c.yMin;
+               scope.xMax = c.xMax;
+               scope.yMax = c.yMax;
+            });
+
+            scope.allowSearch = function () {
+               return !isNan(scope.xMin) && !isNan(scope.xMax) && !isNan(scope.yMin) && !isNan(scope.yMax) && +scope.xMin !== +scope.xMax && +scope.yMin !== +scope.yMax;
+            };
+
+            scope.search = function () {
+               // Normalise coordinates
+               var min = scope.xMin;
+               var max = scope.xMax;
+               scope.xMin = Math.min(min, max);
+               scope.xMax = Math.max(min, max);
+
+               min = scope.yMin;
+               max = scope.yMax;
+               scope.yMin = Math.min(min, max);
+               scope.yMax = Math.max(min, max);
+
+               $rootScope.$broadcast("bounds.drawn", {
+                  bounds: L.latLngBounds(L.latLng(+scope.yMin, +scope.xMin), L.latLng(+scope.yMax, +scope.xMax))
+               });
             };
          }
       };
@@ -420,6 +459,48 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
          return service.data;
       }
+   }]);
+}
+"use strict";
+
+/*!
+ * Copyright 2015 Geoscience Australia (http://www.ga.gov.au/copyright.html)
+ */
+{
+   angular.module("explorer.clip.modal", []).directive("clipModal", ['$document', '$animate', function ($document, $animate) {
+      return {
+         restrict: 'EA',
+         transclude: true,
+         replace: true,
+         scope: {
+            title: '@',
+            isOpen: '=',
+            showClose: "="
+         },
+         templateUrl: 'icsm/clip/modal.html',
+         link: function link(scope, element) {
+            function keyupHandler(keyEvent) {
+               if (keyEvent.which === 27) {
+                  keyEvent.stopPropagation();
+                  keyEvent.preventDefault();
+                  scope.$apply(function () {
+                     scope.isOpen = false;
+                  });
+               }
+            }
+
+            scope.$watch("isOpen", function (newValue) {
+               if (newValue) {
+                  $document.on('keyup', keyupHandler);
+               } else {
+                  $document.off('keyup', keyupHandler);
+               }
+               scope.$on('$destroy', function () {
+                  $document.off('keyup', keyupHandler);
+               });
+            });
+         }
+      };
    }]);
 }
 "use strict";
@@ -544,142 +625,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
    GlossaryService.$inject = ['$http'];
 }
-"use strict";
-
-{
-	var HelpCtrl = function HelpCtrl($log, helpService) {
-		var self = this;
-		$log.info("HelpCtrl");
-		helpService.getFaqs().then(function (faqs) {
-			self.faqs = faqs;
-		});
-	};
-
-	var HelpService = function HelpService($http) {
-		var FAQS_SERVICE = "icsm/resources/config/faqs.json";
-
-		return {
-			getFaqs: function getFaqs() {
-				return $http.get(FAQS_SERVICE, { cache: true }).then(function (response) {
-					return response.data;
-				});
-			}
-		};
-	};
-
-	angular.module("icsm.help", []).directive("icsmHelp", [function () {
-		return {
-			templateUrl: "icsm/help/help.html"
-		};
-	}]).directive("icsmFaqs", [function () {
-		return {
-			restrict: "AE",
-			templateUrl: "icsm/help/faqs.html",
-			scope: {
-				faqs: "="
-			},
-			link: function link(scope) {
-				scope.focus = function (key) {
-					$("#faqs_" + key).focus();
-				};
-			}
-		};
-	}]).controller("HelpCtrl", HelpCtrl).factory("helpService", HelpService);
-
-	HelpCtrl.$inject = ['$log', 'helpService'];
-
-
-	HelpService.$inject = ['$http'];
-}
-'use strict';
-
-{
-   (function () {
-      var insidePolygon = function insidePolygon(latlng, polyPoints) {
-         var x = latlng.lat,
-             y = latlng.lng;
-
-         var inside = false;
-         for (var i = 0, j = polyPoints.length - 1; i < polyPoints.length; j = i++) {
-            var xi = polyPoints[i].lat,
-                yi = polyPoints[i].lng;
-            var xj = polyPoints[j].lat,
-                yj = polyPoints[j].lng;
-
-            var intersect = yi > y !== yj > y && x < (xj - xi) * (y - yi) / (yj - yi) + xi;
-            if (intersect) inside = !inside;
-         }
-
-         return inside;
-      };
-
-      angular.module("icsm.layerswitch", []).directive('icsmLayerswitch', ['$http', 'configService', 'mapService', function ($http, configService, mapService) {
-         return {
-            restrict: "AE",
-            link: function link(scope) {
-               var config;
-               var latlngs;
-
-               configService.getConfig("layerSwitch").then(function (response) {
-                  config = response;
-                  $http.get(config.extentUrl, { cache: true }).then(function (response) {
-                     var container = L.geoJson(response.data);
-                     var layer = container.getLayers()[0];
-                     if (layer) {
-                        latlngs = layer.getLatLngs();
-                     }
-
-                     mapService.getMap().then(function (map) {
-                        map.on("moveend", checkExtent);
-                        checkExtent();
-
-                        function checkExtent(event) {
-                           var bounds = map.getBounds();
-                           if (insidePolygon({ lng: bounds.getWest(), lat: bounds.getSouth() }, latlngs) && // ll
-                           insidePolygon({ lng: bounds.getWest(), lat: bounds.getNorth() }, latlngs) && // ul
-                           insidePolygon({ lng: bounds.getEast(), lat: bounds.getSouth() }, latlngs) && // lr
-                           insidePolygon({ lng: bounds.getEast(), lat: bounds.getNorth() }, latlngs) // ur
-                           ) {
-                                 inSpace();
-                              } else {
-                              outOfSpace();
-                           }
-                        }
-
-                        function outOfSpace() {
-                           setLayers({
-                              outside: true,
-                              inside: false
-                           });
-                        }
-
-                        function inSpace() {
-                           setLayers({
-                              outside: false,
-                              inside: true
-                           });
-                        }
-
-                        function setLayers(settings) {
-                           map.eachLayer(function (layer) {
-                              if (layer.options && layer.options.switch) {
-                                 if (layer.options.switch === config.inside) {
-                                    layer._container.style.display = settings.inside ? "block" : "none";
-                                 }
-                                 if (layer.options.switch === config.outside) {
-                                    layer._container.style.display = settings.outside ? "block" : "none";
-                                 }
-                              }
-                           });
-                        }
-                     });
-                  });
-               });
-            }
-         };
-      }]);
-   })();
-}
 'use strict';
 
 {
@@ -731,6 +676,140 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			}
 		};
 	}]).factory('headerService', ['$http', function () {}]);
+}
+'use strict';
+
+{
+   var insidePolygon = function insidePolygon(latlng, polyPoints) {
+      var x = latlng.lat,
+          y = latlng.lng;
+
+      var inside = false;
+      for (var i = 0, j = polyPoints.length - 1; i < polyPoints.length; j = i++) {
+         var xi = polyPoints[i].lat,
+             yi = polyPoints[i].lng;
+         var xj = polyPoints[j].lat,
+             yj = polyPoints[j].lng;
+
+         var intersect = yi > y !== yj > y && x < (xj - xi) * (y - yi) / (yj - yi) + xi;
+         if (intersect) inside = !inside;
+      }
+
+      return inside;
+   };
+
+   angular.module("icsm.layerswitch", []).directive('icsmLayerswitch', ['$http', 'configService', 'mapService', function ($http, configService, mapService) {
+      return {
+         restrict: "AE",
+         link: function link(scope) {
+            var config;
+            var latlngs;
+
+            configService.getConfig("layerSwitch").then(function (response) {
+               config = response;
+               $http.get(config.extentUrl, { cache: true }).then(function (response) {
+                  var container = L.geoJson(response.data);
+                  var layer = container.getLayers()[0];
+                  if (layer) {
+                     latlngs = layer.getLatLngs();
+                  }
+
+                  mapService.getMap().then(function (map) {
+                     map.on("moveend", checkExtent);
+                     checkExtent();
+
+                     function checkExtent(event) {
+                        var bounds = map.getBounds();
+                        if (insidePolygon({ lng: bounds.getWest(), lat: bounds.getSouth() }, latlngs) && // ll
+                        insidePolygon({ lng: bounds.getWest(), lat: bounds.getNorth() }, latlngs) && // ul
+                        insidePolygon({ lng: bounds.getEast(), lat: bounds.getSouth() }, latlngs) && // lr
+                        insidePolygon({ lng: bounds.getEast(), lat: bounds.getNorth() }, latlngs) // ur
+                        ) {
+                              inSpace();
+                           } else {
+                           outOfSpace();
+                        }
+                     }
+
+                     function outOfSpace() {
+                        setLayers({
+                           outside: true,
+                           inside: false
+                        });
+                     }
+
+                     function inSpace() {
+                        setLayers({
+                           outside: false,
+                           inside: true
+                        });
+                     }
+
+                     function setLayers(settings) {
+                        map.eachLayer(function (layer) {
+                           if (layer.options && layer.options.switch) {
+                              if (layer.options.switch === config.inside) {
+                                 layer._container.style.display = settings.inside ? "block" : "none";
+                              }
+                              if (layer.options.switch === config.outside) {
+                                 layer._container.style.display = settings.outside ? "block" : "none";
+                              }
+                           }
+                        });
+                     }
+                  });
+               });
+            });
+         }
+      };
+   }]);
+}
+"use strict";
+
+{
+	var HelpCtrl = function HelpCtrl($log, helpService) {
+		var self = this;
+		$log.info("HelpCtrl");
+		helpService.getFaqs().then(function (faqs) {
+			self.faqs = faqs;
+		});
+	};
+
+	var HelpService = function HelpService($http) {
+		var FAQS_SERVICE = "icsm/resources/config/faqs.json";
+
+		return {
+			getFaqs: function getFaqs() {
+				return $http.get(FAQS_SERVICE, { cache: true }).then(function (response) {
+					return response.data;
+				});
+			}
+		};
+	};
+
+	angular.module("icsm.help", []).directive("icsmHelp", [function () {
+		return {
+			templateUrl: "icsm/help/help.html"
+		};
+	}]).directive("icsmFaqs", [function () {
+		return {
+			restrict: "AE",
+			templateUrl: "icsm/help/faqs.html",
+			scope: {
+				faqs: "="
+			},
+			link: function link(scope) {
+				scope.focus = function (key) {
+					$("#faqs_" + key).focus();
+				};
+			}
+		};
+	}]).controller("HelpCtrl", HelpCtrl).factory("helpService", HelpService);
+
+	HelpCtrl.$inject = ['$log', 'helpService'];
+
+
+	HelpService.$inject = ['$http'];
 }
 'use strict';
 
@@ -1095,328 +1174,324 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 "use strict";
 
 {
-   (function () {
-      var validClip = function validClip(clip) {
-         var valid = isFinite(clip.yMax) && isFinite(clip.xMax) && isFinite(clip.yMin) && isFinite(clip.xMin);
-         valid = valid && clip.yMax < 90 && clip.yMin > -90 && clip.xMax <= 180 && clip.xMin >= -180;
-         valid = valid && clip.yMax > clip.yMin && clip.xMax > clip.xMin;
-         return valid;
+   var validClip = function validClip(clip) {
+      var valid = isFinite(clip.yMax) && isFinite(clip.xMax) && isFinite(clip.yMin) && isFinite(clip.xMin);
+      valid = valid && clip.yMax < 90 && clip.yMin > -90 && clip.xMax <= 180 && clip.xMin >= -180;
+      valid = valid && clip.yMax > clip.yMin && clip.xMax > clip.xMin;
+      return valid;
+   };
+
+   var DownloadService = function DownloadService(productsMapUtilsService, persistService) {
+      var key = "download_email";
+      var CLIPOPTIONS = {
+         weight: 2,
+         opacity: 0.9,
+         fill: false,
+         color: "#000000",
+         width: 3,
+         clickable: false
       };
 
-      var DownloadService = function DownloadService(productsMapUtilsService, persistService) {
-         var key = "download_email";
-         var CLIPOPTIONS = {
-            weight: 2,
-            opacity: 0.9,
-            fill: false,
-            color: "#000000",
-            width: 3,
-            clickable: false
-         };
+      return {
 
-         return {
+         showClip: function showClip(clip) {
+            this.removeClip(clip.layer);
 
-            showClip: function showClip(clip) {
-               this.removeClip(clip.layer);
+            var bounds = [[clip.yMin, clip.xMin], [clip.yMax, clip.xMax]];
 
-               var bounds = [[clip.yMin, clip.xMin], [clip.yMax, clip.xMax]];
+            clip.layer = productsMapUtilsService.createBounds(bounds, CLIPOPTIONS);
+            productsMapUtilsService.showLayer(clip.layer);
+         },
 
-               clip.layer = productsMapUtilsService.createBounds(bounds, CLIPOPTIONS);
-               productsMapUtilsService.showLayer(clip.layer);
-            },
+         removeClip: function removeClip(layer) {
+            if (layer) {
+               productsMapUtilsService.hideLayer(layer);
+            }
+         },
 
-            removeClip: function removeClip(layer) {
-               if (layer) {
-                  productsMapUtilsService.hideLayer(layer);
+         setEmail: function setEmail(email) {
+            persistService.setItem(key, email);
+         },
+
+         getEmail: function getEmail() {
+            return persistService.getItem(key).then(function (value) {
+               return value;
+            });
+         },
+         // https://elvis-ga.fmecloud.com/fmejobsubmitter/fsdf_elvis_prod/DEMClipZipShip_Master_S3Source.fmw?geocat_number=${id}&out_grid_name=${filename}&input_coord_sys=LL-WGS84&ymin=${yMin}&ymax=${yMax}&xmin=${xMin}&xmax=${xMax}&output_format=${outFormat}&out_coord_sys=${outCoordSys}&email_address=${email}&opt_showresult=false&opt_servicemode=async
+         submit: function submit(template, parameters) {
+            var workingString = template;
+
+            angular.forEach(parameters, function (item, key) {
+               workingString = workingString.replace("${" + key + "}", item);
+            });
+
+            $("#launcher")[0].src = workingString;
+         }
+      };
+   };
+
+   // The input validator takes care of order and min/max constraints. We just check valid existance.
+
+
+   var validSize = function validSize(clip) {
+      var size = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 16;
+
+      return clip && angular.isNumber(clip.xMax) && angular.isNumber(clip.xMin) && angular.isNumber(clip.yMax) && angular.isNumber(clip.yMin) && !overSizeLimit(clip, size) && !underSizeLimit(clip);
+   };
+
+   var underSizeLimit = function underSizeLimit(clip) {
+      var size = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
+      return size < 0.00000000001 || clip.xMax < clip.xMin;
+   };
+
+   var overSizeLimit = function overSizeLimit(clip, size) {
+      // Shouldn't need abs but it doesn't hurt.
+      var actual = Math.abs((clip.xMax - clip.xMin) * (clip.yMax - clip.yMin));
+      return size && actual > size;
+   };
+
+   var constrainBounds = function constrainBounds(c, p) {
+      var flag = false,
+          ret = false;
+
+      // Have we read the parameters yet?
+      if (!p || empty(c.xMax) || empty(c.xMin) || empty(c.yMax) || empty(c.yMin)) {
+         return false;
+      }
+
+      ret = flag = +c.xMax < +p.xMin;
+      if (flag) {
+         c.xMax = +p.xMin;
+      }
+
+      flag = +c.xMax > +p.xMax;
+      ret = ret || flag;
+
+      if (flag) {
+         c.xMax = +p.xMax;
+      }
+
+      flag = +c.xMin < +p.xMin;
+      ret = ret || flag;
+      if (flag) {
+         c.xMin = +p.xMin;
+      }
+
+      flag = +c.xMin > +c.xMax;
+      ret = ret || flag;
+      if (flag) {
+         c.xMin = c.xMax;
+      }
+
+      // Now for the Y's
+      flag = +c.yMax < +p.yMin;
+      ret = ret || flag;
+      if (flag) {
+         c.yMax = +p.yMin;
+      }
+
+      flag = +c.yMax > +p.yMax;
+      ret = ret || flag;
+      if (flag) {
+         c.yMax = +p.yMax;
+      }
+
+      flag = +c.yMin < +p.yMin;
+      ret = ret || flag;
+      if (flag) {
+         c.yMin = +p.yMin;
+      }
+
+      flag = +c.yMin > +c.yMax;
+      ret = ret || flag;
+      if (flag) {
+         c.yMin = +c.yMax;
+      }
+
+      return ret;
+
+      function empty(val) {
+         return angular.isUndefined(val) || val === "" || val === null;
+      }
+   };
+
+   angular.module("product.download", []).directive("productDownloadButton", ['configService', function (configService) {
+      return {
+         template: "<button ng-click='item.showDownload = !item.showDownload' type='button' class='undecorated' title='Click to start download'>" + "<i class='fa fa-lg fa-download' ng-class='{active:item.showDownload}'></i></button>",
+         scope: {
+            item: "="
+         },
+         link: function link(scope, element, attrs) {
+            console.log("What's up item!");
+         }
+      };
+   }]).directive("productDownloadPanel", ['$rootScope', 'productDownloadService', 'flashService', function ($rootScope, productDownloadService, flashService) {
+      return {
+         templateUrl: "icsm/products/download.html",
+         scope: {
+            item: "="
+         },
+         link: function link(scope, element, attrs) {
+            var clipMessage = void 0;
+
+            scope.processing = {
+               clip: {},
+
+               get valid() {
+                  return this.validClipSize && this.validEmail;
+               },
+
+               get validClip() {
+                  return validClip(this.clip);
+               },
+
+               get validClipSize() {
+                  return validClip(this.clip) && validSize(this.clip, scope.item.restrictSize);
+               },
+
+               get validEmail() {
+                  return this.email;
+               },
+
+               get validProjection() {
+                  return this.outCoordSys;
+               },
+
+               get validFormat() {
+                  return this.outFormat;
+               },
+
+               get percentComplete() {
+                  return (this.validClip ? 25 : 0) + (this.validEmail ? 25 : 0) + (this.validProjection ? 25 : 0) + (this.validFormat ? 25 : 0);
                }
-            },
+            };
 
-            setEmail: function setEmail(email) {
-               persistService.setItem(key, email);
-            },
+            scope.item.processing = scope.processing;
 
-            getEmail: function getEmail() {
-               return persistService.getItem(key).then(function (value) {
-                  return value;
-               });
-            },
-            // https://elvis-ga.fmecloud.com/fmejobsubmitter/fsdf_elvis_prod/DEMClipZipShip_Master_S3Source.fmw?geocat_number=${id}&out_grid_name=${filename}&input_coord_sys=LL-WGS84&ymin=${yMin}&ymax=${yMax}&xmin=${xMin}&xmax=${xMax}&output_format=${outFormat}&out_coord_sys=${outCoordSys}&email_address=${email}&opt_showresult=false&opt_servicemode=async
-            submit: function submit(template, parameters) {
-               var workingString = template;
+            scope.drawn = function () {
+               return draw();
+            };
 
-               angular.forEach(parameters, function (item, key) {
-                  workingString = workingString.replace("${" + key + "}", item);
-               });
-
-               $("#launcher")[0].src = workingString;
-            }
-         };
-      };
-
-      // The input validator takes care of order and min/max constraints. We just check valid existance.
-
-
-      var validSize = function validSize(clip) {
-         var size = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 16;
-
-         return clip && angular.isNumber(clip.xMax) && angular.isNumber(clip.xMin) && angular.isNumber(clip.yMax) && angular.isNumber(clip.yMin) && !overSizeLimit(clip, size) && !underSizeLimit(clip);
-      };
-
-      var underSizeLimit = function underSizeLimit(clip) {
-         var size = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
-         return size < 0.00000000001 || clip.xMax < clip.xMin;
-      };
-
-      var overSizeLimit = function overSizeLimit(clip, size) {
-         // Shouldn't need abs but it doesn't hurt.
-         var actual = Math.abs((clip.xMax - clip.xMin) * (clip.yMax - clip.yMin));
-         return size && actual > size;
-      };
-
-      var constrainBounds = function constrainBounds(c, p) {
-         var flag = false,
-             ret = false;
-
-         // Have we read the parameters yet?
-         if (!p || empty(c.xMax) || empty(c.xMin) || empty(c.yMax) || empty(c.yMin)) {
-            return false;
-         }
-
-         ret = flag = +c.xMax < +p.xMin;
-         if (flag) {
-            c.xMax = +p.xMin;
-         }
-
-         flag = +c.xMax > +p.xMax;
-         ret = ret || flag;
-
-         if (flag) {
-            c.xMax = +p.xMax;
-         }
-
-         flag = +c.xMin < +p.xMin;
-         ret = ret || flag;
-         if (flag) {
-            c.xMin = +p.xMin;
-         }
-
-         flag = +c.xMin > +c.xMax;
-         ret = ret || flag;
-         if (flag) {
-            c.xMin = c.xMax;
-         }
-
-         // Now for the Y's
-         flag = +c.yMax < +p.yMin;
-         ret = ret || flag;
-         if (flag) {
-            c.yMax = +p.yMin;
-         }
-
-         flag = +c.yMax > +p.yMax;
-         ret = ret || flag;
-         if (flag) {
-            c.yMax = +p.yMax;
-         }
-
-         flag = +c.yMin < +p.yMin;
-         ret = ret || flag;
-         if (flag) {
-            c.yMin = +p.yMin;
-         }
-
-         flag = +c.yMin > +c.yMax;
-         ret = ret || flag;
-         if (flag) {
-            c.yMin = +c.yMax;
-         }
-
-         return ret;
-
-         function empty(val) {
-            return angular.isUndefined(val) || val === "" || val === null;
-         }
-      };
-
-      angular.module("product.download", []).directive("productDownloadButton", ['configService', function (configService) {
-         return {
-            template: "<button ng-click='item.showDownload = !item.showDownload' type='button' class='undecorated' title='Click to start download'>" + "<i class='fa fa-lg fa-download' ng-class='{active:item.showDownload}'></i></button>",
-            scope: {
-               item: "="
-            },
-            link: function link(scope, element, attrs) {
-               console.log("What's up item!");
-            }
-         };
-      }]).directive("productDownloadPanel", ['$rootScope', 'productDownloadService', 'flashService', function ($rootScope, productDownloadService, flashService) {
-         return {
-            templateUrl: "icsm/products/download.html",
-            scope: {
-               item: "="
-            },
-            link: function link(scope, element, attrs) {
-               var clipMessage = void 0;
-
-               scope.processing = {
-                  clip: {},
-
-                  get valid() {
-                     return this.validClipSize && this.validEmail;
-                  },
-
-                  get validClip() {
-                     return validClip(this.clip);
-                  },
-
-                  get validClipSize() {
-                     return validClip(this.clip) && validSize(this.clip, scope.item.restrictSize);
-                  },
-
-                  get validEmail() {
-                     return this.email;
-                  },
-
-                  get validProjection() {
-                     return this.outCoordSys;
-                  },
-
-                  get validFormat() {
-                     return this.outFormat;
-                  },
-
-                  get percentComplete() {
-                     return (this.validClip ? 25 : 0) + (this.validEmail ? 25 : 0) + (this.validProjection ? 25 : 0) + (this.validFormat ? 25 : 0);
-                  }
+            $rootScope.$on('icsm.clip.drawn', function (event, clip) {
+               scope.processing.clip = {
+                  xMax: clip.xMax,
+                  xMin: clip.xMin,
+                  yMax: clip.yMax,
+                  yMin: clip.yMin
                };
-
-               scope.item.processing = scope.processing;
-
-               scope.drawn = function () {
-                  return draw();
-               };
-
-               $rootScope.$on('icsm.clip.drawn', function (event, clip) {
-                  scope.processing.clip = {
-                     xMax: clip.xMax,
-                     xMin: clip.xMin,
-                     yMax: clip.yMax,
-                     yMin: clip.yMin
-                  };
-                  scope.processing.message = "";
-                  if (!scope.processing.validClip) {
-                     scope.processing.message = "That is not a valid area for this dataset";
-                  } else {
-                     if (constrainBounds(scope.processing.clip, scope.item.bounds)) {
-                        scope.processing.message = "Bounds restricted to fit within product's extent";
-                     }
-
-                     if (!validSize(scope.processing.clip, scope.item.restrictSize)) {
-                        scope.processing.message = "That exceeds the area you can clip for this dataset. Restrict to " + scope.item.restrictSize + " square degrees.";
-                     }
+               scope.processing.message = "";
+               if (!scope.processing.validClip) {
+                  scope.processing.message = "That is not a valid area for this dataset";
+               } else {
+                  if (constrainBounds(scope.processing.clip, scope.item.bounds)) {
+                     scope.processing.message = "Bounds restricted to fit within product's extent";
                   }
-               });
 
-               scope.$watch('item.showDownload', function (value, oldValue) {
-                  if (value && !scope.processing.email) {
-                     productDownloadService.getEmail().then(function (email) {
-                        scope.processing.email = email;
-                     });
+                  if (!validSize(scope.processing.clip, scope.item.restrictSize)) {
+                     scope.processing.message = "That exceeds the area you can clip for this dataset. Restrict to " + scope.item.restrictSize + " square degrees.";
                   }
-               });
-            }
-         };
-      }]).directive("productDownloadSubmit", ['configService', 'productDownloadService', 'messageService', function (configService, productDownloadService, messageService) {
-         return {
-            templateUrl: "icsm/products/submit.html",
-            scope: {
-               item: "=",
-               processing: "="
-            },
-            link: function link(scope, element, attrs) {
-               scope.submit = function () {
-                  var processing = scope.processing;
+               }
+            });
 
-                  productDownloadService.setEmail(processing.email);
-
-                  // Assemble data
-                  productDownloadService.submit(scope.item.template, {
-                     id: scope.item.primaryId,
-                     yMin: processing.clip.yMin,
-                     yMax: processing.clip.yMax,
-                     xMin: processing.clip.xMin,
-                     xMax: processing.clip.xMax,
-                     outFormat: processing.outFormat.code,
-                     outCoordSys: processing.outCoordSys.code,
-                     email: processing.email,
-                     filename: ""
+            scope.$watch('item.showDownload', function (value, oldValue) {
+               if (value && !scope.processing.email) {
+                  productDownloadService.getEmail().then(function (email) {
+                     scope.processing.email = email;
                   });
-                  messageService.success("Submitted your job. An email will be delivered on completion.");
-               };
-            }
-         };
-      }]).factory("productDownloadService", DownloadService);
+               }
+            });
+         }
+      };
+   }]).directive("productDownloadSubmit", ['configService', 'productDownloadService', 'messageService', function (configService, productDownloadService, messageService) {
+      return {
+         templateUrl: "icsm/products/submit.html",
+         scope: {
+            item: "=",
+            processing: "="
+         },
+         link: function link(scope, element, attrs) {
+            scope.submit = function () {
+               var processing = scope.processing;
 
-      DownloadService.$invoke = ['productsMapUtilsService', 'persistService'];
-   })();
+               productDownloadService.setEmail(processing.email);
+
+               // Assemble data
+               productDownloadService.submit(scope.item.template, {
+                  id: scope.item.primaryId,
+                  yMin: processing.clip.yMin,
+                  yMax: processing.clip.yMax,
+                  xMin: processing.clip.xMin,
+                  xMax: processing.clip.xMax,
+                  outFormat: processing.outFormat.code,
+                  outCoordSys: processing.outCoordSys.code,
+                  email: processing.email,
+                  filename: ""
+               });
+               messageService.success("Submitted your job. An email will be delivered on completion.");
+            };
+         }
+      };
+   }]).factory("productDownloadService", DownloadService);
+
+   DownloadService.$invoke = ['productsMapUtilsService', 'persistService'];
 }
 "use strict";
 
 {
-   (function () {
-      var intersecting = function intersecting(collection, extent) {
-         // The extent may have missing numbers so we don't restrict at that point.
-         if (!extent || !collection || !angular.isNumber(extent.xMin) || !angular.isNumber(extent.xMax) || !angular.isNumber(extent.yMin) || !angular.isNumber(extent.yMax)) {
-            return collection;
+   var intersecting = function intersecting(collection, extent) {
+      // The extent may have missing numbers so we don't restrict at that point.
+      if (!extent || !collection || !angular.isNumber(extent.xMin) || !angular.isNumber(extent.xMax) || !angular.isNumber(extent.yMin) || !angular.isNumber(extent.yMax)) {
+         return collection;
+      }
+
+      return collection.filter(function (item) {
+         // We know these have valid numbers if it exists
+         if (!item.extent) {
+            return true;
          }
-
-         return collection.filter(function (item) {
-            // We know these have valid numbers if it exists
-            if (!item.extent) {
-               return true;
-            }
-            // We have a restriction
-            return item.extent.xMin <= extent.xMin && item.extent.xMax >= extent.xMax && item.extent.yMin <= extent.yMin && item.extent.yMax >= extent.yMax;
-         });
-      };
-
-      angular.module("icsm.product", ["product.download"]).directive("productProjection", ['productsConfigService', function (productsConfigService) {
-         return {
-            templateUrl: "icsm/products/projection.html",
-            scope: {
-               processing: "="
-            },
-            link: function link(scope) {
-               productsConfigService.config.then(function (config) {
-                  scope.config = config;
-               });
-            }
-         };
-      }]).directive("productFormats", ['productsConfigService', function (productsConfigService) {
-         return {
-            templateUrl: "icsm/products/formats.html",
-            scope: {
-               processing: "="
-            },
-            link: function link(scope) {
-               productsConfigService.config.then(function (config) {
-                  scope.config = config;
-               });
-               console.log("What's up doc!");
-            }
-         };
-      }]).directive('productEmail', [function () {
-         return {
-            templateUrl: 'icsm/products/email.html',
-            scope: {
-               processing: "="
-            }
-         };
-      }]).filter("productIntersect", function () {
-         return intersecting;
+         // We have a restriction
+         return item.extent.xMin <= extent.xMin && item.extent.xMax >= extent.xMax && item.extent.yMin <= extent.yMin && item.extent.yMax >= extent.yMax;
       });
+   };
 
-      ;
-   })();
+   angular.module("icsm.product", ["product.download"]).directive("productProjection", ['productsConfigService', function (productsConfigService) {
+      return {
+         templateUrl: "icsm/products/projection.html",
+         scope: {
+            processing: "="
+         },
+         link: function link(scope) {
+            productsConfigService.config.then(function (config) {
+               scope.config = config;
+            });
+         }
+      };
+   }]).directive("productFormats", ['productsConfigService', function (productsConfigService) {
+      return {
+         templateUrl: "icsm/products/formats.html",
+         scope: {
+            processing: "="
+         },
+         link: function link(scope) {
+            productsConfigService.config.then(function (config) {
+               scope.config = config;
+            });
+            console.log("What's up doc!");
+         }
+      };
+   }]).directive('productEmail', [function () {
+      return {
+         templateUrl: 'icsm/products/email.html',
+         scope: {
+            processing: "="
+         }
+      };
+   }]).filter("productIntersect", function () {
+      return intersecting;
+   });
+
+   ;
 }
 "use strict";
 
@@ -1425,89 +1500,87 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 {
-   (function () {
-      angular.module("icsm.products", ["icsm.product"]).provider('productsConfigService', [function () {
-         var location = "icsm/resources/config/download.json";
+   angular.module("icsm.products", ["icsm.product"]).provider('productsConfigService', [function () {
+      var location = "icsm/resources/config/download.json";
 
-         this.setLocation = function (newLocation) {
-            location = newLocation;
-         };
+      this.setLocation = function (newLocation) {
+         location = newLocation;
+      };
 
-         this.$get = ["$http", function factory($http) {
-            return new DownloadConfig(location, $http);
-         }];
+      this.$get = ["$http", function factory($http) {
+         return new DownloadConfig(location, $http);
+      }];
+   }]);
+
+   var DownloadConfig = function () {
+      function DownloadConfig(url, $http) {
+         _classCallCheck(this, DownloadConfig);
+
+         this.$http = $http;
+         this.location = url;
+      }
+
+      _createClass(DownloadConfig, [{
+         key: "child",
+         value: function child(name) {
+            return this.config.then(function (data) {
+               return data[name];
+            });
+         }
+      }, {
+         key: "initiateServiceTemplates",
+         get: function get() {
+            return child('initiateServiceTemplates');
+         }
+      }, {
+         key: "processingTemplates",
+         get: function get() {
+            return this.child('processing');
+         }
+      }, {
+         key: "outputFormat",
+         get: function get() {
+            return this.child('outFormat');
+         }
+      }, {
+         key: "defaultOutputFormat",
+         get: function get() {
+            return this.outputFormat.then(function (list) {
+               return list.find(function (item) {
+                  return item.default;
+               });
+            });
+         }
+      }, {
+         key: "defaultOutputCoordinateSystem",
+         get: function get() {
+            return this.outputCoordinateSystem.then(function (systems) {
+               return systems.find(function (item) {
+                  return item.default;
+               });
+            });
+         }
+      }, {
+         key: "outputCoordinateSystem",
+         get: function get() {
+            return this.child('outCoordSys');
+         }
+      }, {
+         key: "datasets",
+         get: function get() {
+            return this.child('datasets');
+         }
+      }, {
+         key: "config",
+         get: function get() {
+            return this.$http.get(this.location, { cache: true }).then(function (response) {
+               return response.data;
+            });
+         }
       }]);
 
-      var DownloadConfig = function () {
-         function DownloadConfig(url, $http) {
-            _classCallCheck(this, DownloadConfig);
-
-            this.$http = $http;
-            this.location = url;
-         }
-
-         _createClass(DownloadConfig, [{
-            key: "child",
-            value: function child(name) {
-               return this.config.then(function (data) {
-                  return data[name];
-               });
-            }
-         }, {
-            key: "initiateServiceTemplates",
-            get: function get() {
-               return child('initiateServiceTemplates');
-            }
-         }, {
-            key: "processingTemplates",
-            get: function get() {
-               return this.child('processing');
-            }
-         }, {
-            key: "outputFormat",
-            get: function get() {
-               return this.child('outFormat');
-            }
-         }, {
-            key: "defaultOutputFormat",
-            get: function get() {
-               return this.outputFormat.then(function (list) {
-                  return list.find(function (item) {
-                     return item.default;
-                  });
-               });
-            }
-         }, {
-            key: "defaultOutputCoordinateSystem",
-            get: function get() {
-               return this.outputCoordinateSystem.then(function (systems) {
-                  return systems.find(function (item) {
-                     return item.default;
-                  });
-               });
-            }
-         }, {
-            key: "outputCoordinateSystem",
-            get: function get() {
-               return this.child('outCoordSys');
-            }
-         }, {
-            key: "datasets",
-            get: function get() {
-               return this.child('datasets');
-            }
-         }, {
-            key: "config",
-            get: function get() {
-               return this.$http.get(this.location, { cache: true }).then(function (response) {
-                  return response.data;
-               });
-            }
-         }]);
-
-         return DownloadConfig;
-      }();
-   })();
+      return DownloadConfig;
+   }();
 }
 'use strict';
 
@@ -1546,446 +1619,458 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 'use strict';
 
 {
-   (function () {
-      var fileSize = function fileSize(size) {
-         var meg = 1000 * 1000;
-         var gig = meg * 1000;
-         var ter = gig * 1000;
+   var fileSize = function fileSize(size) {
+      var meg = 1000 * 1000;
+      var gig = meg * 1000;
+      var ter = gig * 1000;
 
-         if (!size) {
-            return "-";
-         }
+      if (!size) {
+         return "-";
+      }
 
-         if (("" + size).indexOf(" ") > -1) {
-            return size;
-         }
+      if (("" + size).indexOf(" ") > -1) {
+         return size;
+      }
 
-         size = parseFloat(size);
+      size = parseFloat(size);
 
-         if (size < 1000) {
-            return size + " bytes";
+      if (size < 1000) {
+         return size + " bytes";
+      }
+      if (size < meg) {
+         return (size / 1000).toFixed(1) + " kB";
+      }
+      if (size < gig) {
+         return (size / meg).toFixed(1) + " MB";
+      }
+      if (size < ter) {
+         return (size / gig).toFixed(1) + " GB";
+      }
+      return (size / ter).toFixed(1) + " TB";
+   };
+
+   var ListCtrl = function ListCtrl(listService) {
+      this.service = listService;
+
+      this.checkChildren = function (children) {
+         var allChecked = this.childrenChecked(children);
+         var filtered = children;
+         if (!allChecked) {
+            filtered = children.filter(function (child) {
+               return child.matched;
+            });
          }
-         if (size < meg) {
-            return (size / 1000).toFixed(1) + " kB";
-         }
-         if (size < gig) {
-            return (size / meg).toFixed(1) + " MB";
-         }
-         if (size < ter) {
-            return (size / gig).toFixed(1) + " GB";
-         }
-         return (size / ter).toFixed(1) + " TB";
+         filtered.forEach(function (child) {
+            if (allChecked) {
+               delete child.selected;
+            } else {
+               child.selected = true;
+            }
+         });
       };
 
-      var ListCtrl = function ListCtrl(listService) {
-         this.service = listService;
+      this.childrenChecked = function (children) {
+         return !children.filter(function (child) {
+            return child.matched;
+         }).some(function (child) {
+            return !child.selected;
+         });
+      };
 
-         this.checkChildren = function (children) {
-            var allChecked = this.childrenChecked(children);
-            var filtered = children;
-            if (!allChecked) {
-               filtered = children.filter(function (child) {
-                  return child.matched;
-               });
-            }
-            filtered.forEach(function (child) {
-               if (allChecked) {
-                  delete child.selected;
-               } else {
-                  child.selected = true;
-               }
-            });
-         };
-
-         this.childrenChecked = function (children) {
-            return !children.filter(function (child) {
-               return child.matched;
-            }).some(function (child) {
-               return !child.selected;
-            });
-         };
-
-         this.someMatches = function (products) {
-            var matches = false;
-            angular.forEach(products.downloadables, function (group) {
-               angular.forEach(group, function (subGroup) {
-                  matches |= subGroup.some(function (item) {
-                     return item.matched;
-                  });
-               });
-            });
-            return matches;
-         };
-
-         this.someChildMatches = function (downloadables) {
-            var matches = false;
+      this.someMatches = function (products) {
+         var matches = false;
+         angular.forEach(products.downloadables, function (group) {
             angular.forEach(group, function (subGroup) {
                matches |= subGroup.some(function (item) {
                   return item.matched;
                });
             });
-            return matches;
-         };
-
-         this.review = function () {
-            this.service.data.reviewing = true;
-         };
-
-         this.cancelReview = function () {
-            this.service.data.reviewing = false;
-         };
+         });
+         return matches;
       };
 
-      angular.module("elvis.results", ['elvis.results.continue', 'icsm.subtype', 'icsm.unreleased']).directive('productsDialog', ['productsConfigService', 'listService', function (productsConfigService, listService) {
-         return {
-            restrict: 'AE',
-            link: function link(scope) {
-               var data = scope.processing = listService.data;
-               productsConfigService.defaultOutputCoordinateSystem.then(function (item) {
-                  return data.outCoordSys = item;
+      this.someChildMatches = function (downloadables) {
+         var matches = false;
+         angular.forEach(group, function (subGroup) {
+            matches |= subGroup.some(function (item) {
+               return item.matched;
+            });
+         });
+         return matches;
+      };
+
+      this.review = function () {
+         this.service.data.reviewing = true;
+      };
+
+      this.cancelReview = function () {
+         this.service.data.reviewing = false;
+      };
+   };
+
+   angular.module("elvis.results", ['elvis.results.continue', 'icsm.subtype', 'icsm.unreleased']).directive('productsDialog', ['productsConfigService', 'listService', function (productsConfigService, listService) {
+      return {
+         restrict: 'AE',
+         link: function link(scope) {
+            var data = scope.processing = listService.data;
+            productsConfigService.defaultOutputCoordinateSystem.then(function (item) {
+               return data.outCoordSys = item;
+            });
+            productsConfigService.defaultOutputFormat.then(function (format) {
+               return data.outFormat = format;
+            });
+         }
+      };
+   }]).directive('icsmOrgHeading', [function () {
+      return {
+         templateUrl: 'icsm/results/orgheading.html',
+         restrict: 'AE',
+         scope: {
+            org: "=",
+            mappings: "="
+         }
+      };
+   }]).directive('icsmList', ['$rootScope', 'listService', function ($rootScope, listService) {
+      return {
+         templateUrl: 'icsm/results/results.html',
+         link: function link(scope) {
+            listService.getMappings().then(function (response) {
+               scope.mappings = response;
+            });
+
+            scope.filters = listService.data;
+
+            scope.update = function () {
+               var filterExists = !!scope.filters.filter;
+               var types = [];
+
+               var typesExists = scope.filters.types.some(function (type) {
+                  return type.selected;
+               }) && !scope.filters.types.every(function (type) {
+                  return type.selected;
                });
-               productsConfigService.defaultOutputFormat.then(function (format) {
-                  return data.outFormat = format;
-               });
-            }
-         };
-      }]).directive('icsmOrgHeading', [function () {
-         return {
-            templateUrl: 'icsm/results/orgheading.html',
-            restrict: 'AE',
-            scope: {
-               org: "=",
-               mappings: "="
-            }
-         };
-      }]).directive('icsmList', ['$rootScope', 'listService', function ($rootScope, listService) {
-         return {
-            templateUrl: 'icsm/results/results.html',
-            link: function link(scope) {
-               listService.getMappings().then(function (response) {
-                  scope.mappings = response;
+               // Set up the default
+               scope.products.forEach(function (product) {
+                  product.matched = !filterExists;
                });
 
-               scope.filters = listService.data;
-
-               scope.update = function () {
-                  var filterExists = !!scope.filters.filter;
-                  var types = [];
-
-                  var typesExists = scope.filters.types.some(function (type) {
-                     return type.selected;
-                  }) && !scope.filters.types.every(function (type) {
-                     return type.selected;
-                  });
-                  // Set up the default
+               // Do the types first
+               if (typesExists) {
                   scope.products.forEach(function (product) {
-                     product.matched = !filterExists;
+                     product.matched = false;
+                     scope.filters.types.filter(function (type) {
+                        return type.selected;
+                     }).forEach(function (type) {
+                        if (type.match && type.match[product.type]) {
+                           product.matched = true;
+                        } else if (type.noMatch && !type.noMatch[product.type]) {
+                           product.matched = true;
+                        }
+                     });
                   });
+               }
 
-                  // Do the types first
+               // Now do the filters
+               if (filterExists) {
+                  var upperFilter = scope.filters.filter.toUpperCase();
+                  var products = scope.products;
                   if (typesExists) {
-                     scope.products.forEach(function (product) {
-                        product.matched = false;
-                        scope.filters.types.filter(function (type) {
-                           return type.selected;
-                        }).forEach(function (type) {
-                           if (type.match && type.match[product.type]) {
-                              product.matched = true;
-                           } else if (type.noMatch && !type.noMatch[product.type]) {
-                              product.matched = true;
-                           }
-                        });
+                     products = products.filter(function (item) {
+                        return item.matched;
                      });
                   }
 
-                  // Now do the filters
-                  if (filterExists) {
-                     var upperFilter = scope.filters.filter.toUpperCase();
-                     var products = scope.products;
-                     if (typesExists) {
-                        products = products.filter(function (item) {
-                           return item.matched;
-                        });
-                     }
+                  products.forEach(function (product) {
+                     var name = product.file_name || product.project_name || "";
+                     product.matched = name.toUpperCase().indexOf(upperFilter) > -1;
+                  });
+               }
+               scope.$broadcast("filter.changed");
+            };
 
-                     products.forEach(function (product) {
-                        var name = product.file_name || product.project_name || "";
-                        product.matched = name.toUpperCase().indexOf(upperFilter) > -1;
-                     });
-                  }
-                  scope.$broadcast("filter.changed");
-               };
+            scope.show = function (data) {
+               var bbox = toNumberArray(data.bbox);
+               $rootScope.$broadcast('icsm.bbox.draw', bbox);
+            };
 
-               scope.show = function (data) {
-                  var bbox = toNumberArray(data.bbox);
-                  $rootScope.$broadcast('icsm.bbox.draw', bbox);
-               };
+            scope.hide = function (data) {
+               $rootScope.$broadcast('icsm.bbox.draw', null);
+            };
 
-               scope.hide = function (data) {
-                  $rootScope.$broadcast('icsm.bbox.draw', null);
-               };
+            $rootScope.$on("clip.initiate.draw", function (event, data) {
+               scope.list = null;
+               scope.products = [];
+               scope.productsMap = [];
+            });
 
-               $rootScope.$on("clip.initiate.draw", function (event, data) {
-                  scope.list = null;
-                  scope.products = [];
-                  scope.productsMap = [];
-               });
+            $rootScope.$on('site.selection', function (event, data) {
+               scope.list = null;
+               scope.products = [];
+               scope.productsMap = [];
 
-               $rootScope.$on('site.selection', function (event, data) {
-                  scope.list = null;
-                  scope.products = [];
-                  scope.productsMap = [];
+               if (data.available_data) {
+                  scope.list = data.available_data.filter(function (org) {
+                     return org.downloadables;
+                  });
 
-                  if (data.available_data) {
-                     scope.list = data.available_data.filter(function (org) {
-                        return org.downloadables;
-                     });
-
-                     scope.list.forEach(function (org) {
-                        angular.forEach(org.downloadables, function (types, type) {
-                           angular.forEach(types, function (group, groupType) {
-                              group.forEach(function (product) {
-                                 product.source = org.source;
-                                 product.group = groupType;
-                                 product.type = type;
-                                 scope.productsMap[product.file_url] = product;
-                                 scope.products.push(product);
-                              });
+                  scope.list.forEach(function (org) {
+                     angular.forEach(org.downloadables, function (types, type) {
+                        angular.forEach(types, function (group, groupType) {
+                           group.forEach(function (product) {
+                              product.source = org.source;
+                              product.group = groupType;
+                              product.type = type;
+                              scope.productsMap[product.file_url] = product;
+                              scope.products.push(product);
                            });
                         });
                      });
-                     listService.products = scope.products;
-                  }
-                  scope.update();
+                  });
+                  listService.products = scope.products;
+               }
+               scope.update();
+            });
+
+            scope.show = function (data) {
+               var bbox = toNumberArray(data.bbox);
+               $rootScope.$broadcast('icsm.bbox.draw', bbox);
+            };
+
+            scope.hide = function (data) {
+               $rootScope.$broadcast('icsm.bbox.draw', null);
+            };
+
+            function decorateCounts(list, types) {
+               // reset
+               var checks = [];
+               angular.forEach(types, function (type) {
+                  type.count = 0;
+                  checks.push(type);
                });
 
-               scope.show = function (data) {
-                  var bbox = toNumberArray(data.bbox);
-                  $rootScope.$broadcast('icsm.bbox.draw', bbox);
-               };
-
-               scope.hide = function (data) {
-                  $rootScope.$broadcast('icsm.bbox.draw', null);
-               };
-
-               function decorateCounts(list, types) {
-                  // reset
-                  var checks = [];
-                  angular.forEach(types, function (type) {
-                     type.count = 0;
-                     checks.push(type);
-                  });
-
-                  if (list) {
-                     list.forEach(function (item) {
-                        item.downloadables.forEach(function (downloadable) {
-                           checks.forEach(function (check) {
-                              check.count += downloadable[check.countField] ? 1 : 0;
-                           });
+               if (list) {
+                  list.forEach(function (item) {
+                     item.downloadables.forEach(function (downloadable) {
+                        checks.forEach(function (check) {
+                           check.count += downloadable[check.countField] ? 1 : 0;
                         });
                      });
-                  }
-               }
-
-               function toNumberArray(numbs) {
-                  if (angular.isArray(numbs) || !numbs) {
-                     return numbs;
-                  }
-                  return numbs.split(/,\s*/g).map(function (numb) {
-                     return +numb;
                   });
                }
             }
-         };
-      }]).directive('icsmAbstract', ['listService', function (listService) {
-         return {
-            templateUrl: "icsm/results/abstractbutton.html",
-            scope: {
-               item: "="
-            },
-            link: function link(scope) {
-               scope.show = listService.hasMetadata(scope.item);
 
-               scope.toggle = function () {
-                  scope.item.showAbstract = !scope.item.showAbstract;
-                  if (scope.item.showAbstract) {
-                     load();
-                  }
-               };
-
-               function load() {
-                  if (!scope.fetched) {
-                     scope.fetched = true;
-                     listService.getMetadata(scope.item).then(function (data) {
-                        scope.item.metadata = data;
-                     });
-                  }
+            function toNumberArray(numbs) {
+               if (angular.isArray(numbs) || !numbs) {
+                  return numbs;
                }
-            }
-         };
-      }])
-
-      // All this does is set up the data on mouse hover. The UI can do whatever it wants with the data when it arrives
-      .directive('icsmAbstractHover', ['$timeout', 'listService', function ($timeout, listService) {
-         var TIME_DELAY = 250; // ms
-         return {
-            restrict: 'AE',
-            scope: {
-               item: "="
-            },
-            link: function link(scope, element) {
-               var promise;
-
-               element.on('mouseenter', function () {
-                  if (promise) {
-                     $timeout.cancel(promise);
-                  }
-                  promise = $timeout(load, TIME_DELAY);
+               return numbs.split(/,\s*/g).map(function (numb) {
+                  return +numb;
                });
+            }
+         }
+      };
+   }]).directive('icsmAbstract', ['listService', function (listService) {
+      return {
+         templateUrl: "icsm/results/abstractbutton.html",
+         scope: {
+            item: "="
+         },
+         link: function link(scope) {
+            scope.show = listService.hasMetadata(scope.item);
 
-               element.on('mouseleave', function () {
-                  if (promise) {
-                     $timeout.cancel(promise);
-                     promise = null;
-                  }
-               });
+            scope.toggle = function () {
+               scope.item.showAbstract = !scope.item.showAbstract;
+               if (scope.item.showAbstract) {
+                  load();
+               }
+            };
 
-               function load() {
-                  if (!scope.fetched) {
-                     scope.fetched = true;
-                     listService.getMetadata(scope.item).then(function (data) {
-                        scope.item.metadata = data;
-                     });
-                  }
+            function load() {
+               if (!scope.fetched) {
+                  scope.fetched = true;
+                  listService.getMetadata(scope.item).then(function (data) {
+                     scope.item.metadata = data;
+                  });
                }
             }
-         };
-      }])
+         }
+      };
+   }])
 
-      // All this does is set up the data on mouse hover. The UI can do whatever it wants with the data when it arrives
-      .directive('icsmAbstractLink', ['$timeout', 'listService', function ($timeout, listService) {
+   // All this does is set up the data on mouse hover. The UI can do whatever it wants with the data when it arrives
+   .directive('icsmAbstractHover', ['$timeout', 'listService', function ($timeout, listService) {
+      var TIME_DELAY = 250; // ms
+      return {
+         restrict: 'AE',
+         scope: {
+            item: "="
+         },
+         link: function link(scope, element) {
+            var promise;
 
-         return {
-            restrict: 'AE',
-            template: "<a target='_blank' ng-if='url' ng-href='{{url}}'>{{item[name]}}</a><span ng-if='!url' ng-bind='item.file_name'></span>",
-            scope: {
-               item: "=",
-               name: "@?"
-            },
-            link: function link(scope, element) {
-               if (!scope.name) {
-                  scope.name = "file_name";
+            element.on('mouseenter', function () {
+               if (promise) {
+                  $timeout.cancel(promise);
                }
+               promise = $timeout(load, TIME_DELAY);
+            });
 
-               var data = {
-                  file_name: scope.item[scope.name],
-                  metadata_url: scope.item.metadata_url,
-                  source: scope.item.source
-               };
-               scope.url = listService.getLink(data);
+            element.on('mouseleave', function () {
+               if (promise) {
+                  $timeout.cancel(promise);
+                  promise = null;
+               }
+            });
+
+            function load() {
+               if (!scope.fetched) {
+                  scope.fetched = true;
+                  listService.getMetadata(scope.item).then(function (data) {
+                     scope.item.metadata = data;
+                  });
+               }
             }
-         };
-      }]).controller('listCtrl', ListCtrl).factory('listService', ['$http', '$rootScope', function ($http, $rootScope) {
-         var service = {};
-         var expansions = {};
+         }
+      };
+   }])
 
-         var strategies = new Strategies($http);
+   // All this does is set up the data on mouse hover. The UI can do whatever it wants with the data when it arrives
+   .directive('icsmAbstractLink', ['$timeout', 'listService', function ($timeout, listService) {
 
-         service.data = {
-            id: "listService_data",
-            filter: "",
-            types: []
-         };
+      return {
+         restrict: 'AE',
+         template: "<a target='_blank' ng-if='url' ng-href='{{url}}'>{{item[name]}}</a><span ng-if='!url' ng-bind='item.file_name'></span>",
+         scope: {
+            item: "=",
+            name: "@?"
+         },
+         link: function link(scope, element) {
+            if (!scope.name) {
+               scope.name = "file_name";
+            }
 
-         $rootScope.$on('icsm.clip.drawn', function (event, clip) {
-            return service.data.clip = clip;
+            var data = {
+               file_name: scope.item[scope.name],
+               metadata_url: scope.item.metadata_url,
+               source: scope.item.source
+            };
+            scope.url = listService.getLink(data);
+         }
+      };
+   }]).controller('listCtrl', ListCtrl).factory('listService', ['$http', '$rootScope', function ($http, $rootScope) {
+      var service = {};
+      var expansions = {};
+
+      var strategies = new Strategies($http);
+
+      service.data = {
+         id: "listService_data",
+         filter: "",
+         types: []
+      };
+
+      $rootScope.$on('icsm.clip.drawn', function (event, clip) {
+         return service.data.clip = clip;
+      });
+
+      $http.get('icsm/resources/config/filetypes.json').then(function (response) {
+         service.data.typesMap = response.data;
+         service.data.types = [];
+         angular.forEach(response.data, function (value, key) {
+            service.data.types.push(value);
          });
+      });
 
-         $http.get('icsm/resources/config/filetypes.json').then(function (response) {
-            service.data.typesMap = response.data;
-            service.data.types = [];
-            angular.forEach(response.data, function (value, key) {
-               service.data.types.push(value);
-            });
+      service.getMetadata = function (item) {
+         return strategies.strategy(item.source).requestMetadata(item);
+      };
+
+      service.hasMetadata = function (item) {
+         return strategies.strategy(item.source).hasMetadata(item);
+      };
+
+      service.getLink = function (item) {
+         return strategies.strategy(item.source).constructLink(item);
+      };
+
+      service.getMappings = function () {
+         return $http.get('icsm/resources/config/list.json').then(function (response) {
+            return response.data;
          });
-
-         service.getMetadata = function (item) {
-            return strategies.strategy(item.source).requestMetadata(item);
-         };
-
-         service.hasMetadata = function (item) {
-            return strategies.strategy(item.source).hasMetadata(item);
-         };
-
-         service.getLink = function (item) {
-            return strategies.strategy(item.source).constructLink(item);
-         };
-
-         service.getMappings = function () {
-            return $http.get('icsm/resources/config/list.json').then(function (response) {
-               return response.data;
-            });
-         };
-         return service;
-      }]).filter("allowedTypes", ['listService', function (listService) {
-         return function (types) {
-            if (!listService.data.types.some(function (type) {
-               return type.selected;
-            })) {
-               return types;
+      };
+      return service;
+   }]).filter("allowedTypes", ['listService', function (listService) {
+      return function (types) {
+         if (!listService.data.types.some(function (type) {
+            return type.selected;
+         })) {
+            return types;
+         }
+         var response = {};
+         angular.forEach(types, function (item, key) {
+            if (listService.data.typesMap && listService.data.typesMap[key] && listService.data.typesMap[key].selected) {
+               response[key] = item;
             }
-            var response = {};
-            angular.forEach(types, function (item, key) {
-               if (listService.data.typesMap && listService.data.typesMap[key] && listService.data.typesMap[key].selected) {
-                  response[key] = item;
-               }
-            });
-            return response;
-         };
-      }]).filter("countMatchedDownloadables", function () {
-         return function (downloadables) {
-            if (!downloadables) {
-               return "-";
-            } else {
-               var count = 0;
-               angular.forEach(downloadables, function (types, key) {
-                  if (!Array.isArray(types)) {
-                     angular.forEach(types, function (items) {
-                        count += items.filter(function (item) {
-                           return item.matched;
-                        }).length;
-                     });
-                  }
-               });
-               return count;
-            }
-         };
-      }).filter("countMatchedItems", function () {
-         return function (items) {
-            if (!items) {
-               return "";
-            } else {
-               return items.filter(function (item) {
-                  return item.matched;
-               }).length;
-            }
-         };
-      }).filter("hasTypeMatches", function () {
-         return function (types) {
-            if (!types) {
-               return false;
-            }
+         });
+         return response;
+      };
+   }]).filter("countMatchedDownloadables", function () {
+      return function (downloadables) {
+         if (!downloadables) {
+            return "-";
+         } else {
             var count = 0;
-            Object.keys(types).forEach(function (key) {
-               count += types[key].filter(function (item) {
-                  return item.matched;
-               }).length;
+            angular.forEach(downloadables, function (types, key) {
+               if (!Array.isArray(types)) {
+                  angular.forEach(types, function (items) {
+                     count += items.filter(function (item) {
+                        return item.matched;
+                     }).length;
+                  });
+               }
             });
-            return count > 0;
-         };
-      }).filter("matchedTypes", function () {
-         return function (obj) {
-            var response = {};
+            return count;
+         }
+      };
+   }).filter("countMatchedItems", function () {
+      return function (items) {
+         if (!items) {
+            return "";
+         } else {
+            return items.filter(function (item) {
+               return item.matched;
+            }).length;
+         }
+      };
+   }).filter("hasTypeMatches", function () {
+      return function (types) {
+         if (!types) {
+            return false;
+         }
+         var count = 0;
+         Object.keys(types).forEach(function (key) {
+            count += types[key].filter(function (item) {
+               return item.matched;
+            }).length;
+         });
+         return count > 0;
+      };
+   }).filter("matchedTypes", function () {
+      return function (obj) {
+         var response = {};
+         angular.forEach(obj, function (group, key) {
+            if (group.some(function (item) {
+               return item.matched;
+            })) {
+               response[key] = group;
+            }
+         });
+         return response;
+      };
+   }).filter("matchedGroups", [function () {
+      return function (obj) {
+         var response = {};
+         if (obj) {
             angular.forEach(obj, function (group, key) {
                if (group.some(function (item) {
                   return item.matched;
@@ -1993,860 +2078,838 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                   response[key] = group;
                }
             });
-            return response;
-         };
-      }).filter("matchedGroups", [function () {
-         return function (obj) {
-            var response = {};
-            if (obj) {
-               angular.forEach(obj, function (group, key) {
-                  if (group.some(function (item) {
-                     return item.matched;
-                  })) {
-                     response[key] = group;
-                  }
+         }
+         return response;
+      };
+   }]).filter("matchedItems", function () {
+      return function (list) {
+         return list.filter(function (item) {
+            return item.matched;
+         });
+      };
+   }).filter("keysLength", [function () {
+      return function (list) {
+         if (!list) {
+            return 0;
+         }
+         return Object.keys(list).reduce(function (sum, key) {
+            return sum + list[key].length;
+         }, 0);
+      };
+   }]).filter("countDownloadables", function () {
+      return function (downloadables) {
+         if (!downloadables) {
+            return "-";
+         } else {
+            var count = 0;
+            angular.forEach(downloadables, function (group, key) {
+               angular.forEach(group, function (value, key) {
+                  count += value.length;
                });
-            }
-            return response;
-         };
-      }]).filter("matchedItems", function () {
-         return function (list) {
-            return list.filter(function (item) {
-               return item.matched;
             });
-         };
-      }).filter("keysLength", [function () {
-         return function (list) {
-            if (!list) {
-               return 0;
-            }
-            return Object.keys(list).reduce(function (sum, key) {
-               return sum + list[key].length;
-            }, 0);
-         };
-      }]).filter("countDownloadables", function () {
-         return function (downloadables) {
-            if (!downloadables) {
-               return "-";
-            } else {
-               var count = 0;
-               angular.forEach(downloadables, function (group, key) {
-                  angular.forEach(group, function (value, key) {
-                     count += value.length;
-                  });
-               });
-               return count;
-            }
-         };
-      }).filter('fileSize', function () {
-         return fileSize;
-      });
-
-      ListCtrl.$inject = ['listService'];
-
-
-      ListCtrl.prototype = {
-         get products() {
-            return this.service.products;
-         },
-
-         get selectedSize() {
-            var products = this.service.products;
-
-            return (products ? products.filter(function (item) {
-               return item.selected && !item.removed;
-            }) : []).map(function (product) {
-               return product.file_size ? +product.file_size : 500000000;
-            }).reduce(function (prev, curr) {
-               return prev + curr;
-            }, 0);
-         },
-
-         get selected() {
-            var products = this.service.products;
-            return products ? products.filter(function (item) {
-               return item.selected && !item.removed;
-            }) : [];
+            return count;
          }
       };
-   })();
+   }).filter('fileSize', function () {
+      return fileSize;
+   });
+
+   ListCtrl.$inject = ['listService'];
+
+
+   ListCtrl.prototype = {
+      get products() {
+         return this.service.products;
+      },
+
+      get selectedSize() {
+         var products = this.service.products;
+
+         return (products ? products.filter(function (item) {
+            return item.selected && !item.removed;
+         }) : []).map(function (product) {
+            return product.file_size ? +product.file_size : 500000000;
+         }).reduce(function (prev, curr) {
+            return prev + curr;
+         }, 0);
+      },
+
+      get selected() {
+         var products = this.service.products;
+         return products ? products.filter(function (item) {
+            return item.selected && !item.removed;
+         }) : [];
+      }
+   };
 }
 "use strict";
 
 {
-   (function () {
-      var toNumberArray = function toNumberArray(numbs) {
-         if (angular.isArray(numbs) || !numbs) {
-            return numbs;
-         }
-         return numbs.split(/,\s*/g).map(function (numb) {
-            return +numb;
-         });
-      };
+   var toNumberArray = function toNumberArray(numbs) {
+      if (angular.isArray(numbs) || !numbs) {
+         return numbs;
+      }
+      return numbs.split(/,\s*/g).map(function (numb) {
+         return +numb;
+      });
+   };
 
-      angular.module("icsm.subtype", ['bw.paging']).directive("subtype", ['$rootScope', function ($rootScope) {
-         return {
-            templateUrl: "icsm/results/subtype.html",
-            scope: {
-               items: "=",
-               mappings: "="
-            },
-            link: function link(scope) {
-               var timer = null;
+   angular.module("icsm.subtype", ['bw.paging']).directive("subtype", ['$rootScope', function ($rootScope) {
+      return {
+         templateUrl: "icsm/results/subtype.html",
+         scope: {
+            items: "=",
+            mappings: "="
+         },
+         link: function link(scope) {
+            var timer = null;
 
-               scope.paging = {
-                  page: 1,
-                  pageSize: 20
-               };
+            scope.paging = {
+               page: 1,
+               pageSize: 20
+            };
 
-               scope.$on("filter.changed", function () {
-                  console.log("Filter changed - Subtype");
-                  scope.setPage(1, 20);
-               });
-
-               scope.setPage = function (page, pagesize) {
-                  var matchedItems = scope.items.filter(function (item) {
-                     return item.matched;
-                  });
-                  scope.data = matchedItems.slice(pagesize * (page - 1), page * pagesize);
-               };
-
+            scope.$on("filter.changed", function () {
+               console.log("Filter changed - Subtype");
                scope.setPage(1, 20);
-
-               scope.show = function (data) {
-                  var bbox = toNumberArray(data.bbox);
-                  $rootScope.$broadcast('icsm.bbox.draw', bbox);
-               };
-
-               scope.hide = function (data) {
-                  $rootScope.$broadcast('icsm.bbox.draw', null);
-               };
-            }
-         };
-      }]).filter("hasProducts", function () {
-         return function (items) {
-            return items.some(function (item) {
-               return item.product;
             });
-         };
-      }).filter("productsSummary", function () {
-         return function (items) {
-            var count = items.filter(function (item) {
-               return item.product;
-            }).length;
-            var response = " including ";
-            switch (count) {
-               case 1:
-                  response += "1 product";
-                  break;
-               default:
-                  response += count + " products";
-            }
-            return response;
-         };
-      }).filter("productsCount", function () {
-         return function (items) {
-            return items ? items.filter(function (item) {
-               return item.product;
-            }).length : 0;
-         };
-      });
-   })();
+
+            scope.setPage = function (page, pagesize) {
+               var matchedItems = scope.items.filter(function (item) {
+                  return item.matched;
+               });
+               scope.data = matchedItems.slice(pagesize * (page - 1), page * pagesize);
+            };
+
+            scope.setPage(1, 20);
+
+            scope.show = function (data) {
+               var bbox = toNumberArray(data.bbox);
+               $rootScope.$broadcast('icsm.bbox.draw', bbox);
+            };
+
+            scope.hide = function (data) {
+               $rootScope.$broadcast('icsm.bbox.draw', null);
+            };
+         }
+      };
+   }]).filter("hasProducts", function () {
+      return function (items) {
+         return items.some(function (item) {
+            return item.product;
+         });
+      };
+   }).filter("productsSummary", function () {
+      return function (items) {
+         var count = items.filter(function (item) {
+            return item.product;
+         }).length;
+         var response = " including ";
+         switch (count) {
+            case 1:
+               response += "1 product";
+               break;
+            default:
+               response += count + " products";
+         }
+         return response;
+      };
+   }).filter("productsCount", function () {
+      return function (items) {
+         return items ? items.filter(function (item) {
+            return item.product;
+         }).length : 0;
+      };
+   });
 }
 'use strict';
 
 {
-   (function () {
-      var captured = function captured(twoDates) {
-         if (!twoDates) {
-            return twoDates;
-         }
+   var captured = function captured(twoDates) {
+      if (!twoDates) {
+         return twoDates;
+      }
 
-         var dates = twoDates.split(" - ");
-         if (dates.length !== 2) {
-            return twoDates;
-         }
+      var dates = twoDates.split(" - ");
+      if (dates.length !== 2) {
+         return twoDates;
+      }
 
-         return formatDate(dates[0]) + " - " + formatDate(dates[1]);
-      };
+      return formatDate(dates[0]) + " - " + formatDate(dates[1]);
+   };
 
-      var formatDate = function formatDate(data) {
-         if (data.length !== 8) {
-            return data;
-         }
-         return data.substr(0, 4) + "/" + data.substr(4, 2) + "/" + data.substr(6, 2);
-      };
+   var formatDate = function formatDate(data) {
+      if (data.length !== 8) {
+         return data;
+      }
+      return data.substr(0, 4) + "/" + data.substr(4, 2) + "/" + data.substr(6, 2);
+   };
 
-      var toNumberArray = function toNumberArray(numbs) {
-         if (angular.isArray(numbs) || !numbs) {
-            return numbs;
-         }
-         return numbs.split(/,\s*/g).map(function (numb) {
-            return +numb;
-         });
-      };
-
-      angular.module('icsm.unreleased', []).directive('icsmUnreleased', ['$rootScope', function ($rootScope) {
-         return {
-            templateUrl: "icsm/results/unreleased.html",
-            scope: {
-               types: "="
-            },
-            link: function link(scope) {
-               console.log("Unrelease me!");
-               scope.show = function (data) {
-                  var bbox = toNumberArray(data.bbox);
-                  $rootScope.$broadcast('icsm.bbox.draw', bbox);
-               };
-
-               scope.hide = function (data) {
-                  $rootScope.$broadcast('icsm.bbox.draw', null);
-               };
-            }
-         };
-      }]).directive('icsmProjectAbstract', ['listService', function (listService) {
-         return {
-            templateUrl: "icsm/results/abstractbutton.html",
-            scope: {
-               project: "="
-            },
-            link: function link(scope) {
-               scope.item = {};
-
-               scope.show = listService.hasMetadata(scope.item);
-
-               scope.toggle = function () {
-                  scope.item.showAbstract = !scope.item.showAbstract;
-                  if (scope.item.showAbstract) {
-                     load();
-                  }
-               };
-
-               function load() {
-                  if (!scope.fetched) {
-                     scope.fetched = true;
-                     listService.getMetadata(scope.item).then(function (data) {
-                        scope.item.metadata = data;
-                     });
-                  }
-               }
-            }
-         };
-      }]).filter("captured", function () {
-         return captured;
-      }).filter("reverseDate", function () {
-         return formatDate;
+   var toNumberArray = function toNumberArray(numbs) {
+      if (angular.isArray(numbs) || !numbs) {
+         return numbs;
+      }
+      return numbs.split(/,\s*/g).map(function (numb) {
+         return +numb;
       });
-   })();
-}
-'use strict';
+   };
 
-{
-   (function () {
-      var transformTemplate = function transformTemplate(template, data) {
-         var response = template;
-         angular.forEach(data, function (value, key) {
-            response = response.replace("{" + key + "}", encodeURIComponent(value));
-         });
-         return response;
-      };
-
-      var convertFlatToStructured = function convertFlatToStructured(flat) {
-         var fields = ["file_url", "file_name", "project_name", "product", "metadata_id", "file_size", "bbox"]; // ["index_poly_name", "file_name", "file_url", "file_size", "file_last_modified", "bbox"]
-         var response = {
-            available_data: []
-         };
-         var available = response.available_data;
-         var sourceMap = {};
-
-         flat.forEach(function (dataset) {
-            var item = {};
-            fields.forEach(function (field) {
-               if (typeof dataset[field] !== "undefined") {
-                  item[field] = dataset[field];
-               }
-            });
-
-            var data = sourceMap[dataset.source];
-            if (!data) {
-               data = {
-                  source: dataset.source,
-                  downloadables: {}
-               };
-               sourceMap[dataset.source] = data;
-               available.push(data);
-            }
-
-            var downloadable = data.downloadables[dataset.type];
-            if (!downloadable) {
-               downloadable = {};
-               data.downloadables[dataset.type] = downloadable;
-            }
-
-            var group = downloadable[dataset.group];
-            if (!group) {
-               group = [];
-               downloadable[dataset.group] = group;
-            }
-
-            group.push(item);
-         });
-
-         return response;
-      };
-
-      angular.module("elvis.reviewing", []).directive('icsmReview', ['$rootScope', '$uibModal', '$log', 'messageService', 'reviewService', function ($rootScope, $uibModal, $log, messageService, reviewService) {
-         return {
-            link: function link(scope, element) {
-               var modalInstance;
-               scope.data = reviewService.data;
-
-               // TODO: Why is this here? What is trying to override data?
-               scope.$watch("data", function (value, old) {
-                  if (old) {
-                     console.log("Why?", value);
-                     scope.data = reviewService.data;
-                  }
-               });
-
-               scope.$watch("data.reviewing", function (value) {
-                  if (value) {
-                     modalInstance = $uibModal.open({
-                        templateUrl: 'icsm/reviewing/reviewing.html',
-                        size: "lg",
-                        backdrop: "static",
-                        keyboard: false,
-                        controller: ['$scope', '$uibModalInstance', 'listService', 'products', 'vcRecaptchaService', function ($scope, $uibModalInstance, listService, products, vcRecaptchaService) {
-                           $scope.recaptchaKey = "6LfUrFsUAAAAAKu4EJY_FSi3zFXvWm60RDVknRHf";
-                           var selected = scope.selected = products.filter(function (product) {
-                              return product.selected;
-                           });
-                           scope.derived = selected.filter(function (selection) {
-                              return selection.product;
-                           });
-
-                           listService.getMappings().then(function (response) {
-                              $scope.mappings = response;
-                           });
-
-                           $scope.products = convertFlatToStructured(selected).available_data;
-
-                           $scope.accept = function () {
-                              $uibModalInstance.close($scope.recaptchaResponse, $scope.products);
-                           };
-
-                           $scope.cancel = function () {
-                              $uibModalInstance.close(null);
-                           };
-
-                           $scope.setWidgetId = function (widgetId) {
-                              $scope.recaptchaId = widgetId;
-                           };
-
-                           $scope.setResponse = function (response) {
-                              $scope.recaptchaResponse = response;
-                           };
-
-                           $scope.cbExpiration = function () {
-                              vcRecaptchaService.reload($scope.recaptchaId);
-                              $scope.recaptchaResponse = null;
-                           };
-                        }],
-                        resolve: {
-                           products: function products() {
-                              return reviewService.products;
-                           }
-                        }
-                     });
-                     modalInstance.result.then(function (recaptchaResponse) {
-                        delete scope.data.recaptchaResponse;
-                        if (recaptchaResponse) {
-                           scope.data.recaptchaResponse = recaptchaResponse;
-                           reviewService.startExtract().then(function (response) {
-                              messageService[response.status](response.message);
-                              reviewService.removeRemoved();
-                              scope.data.reviewing = false;
-                           });
-                        }
-                        reviewService.removeRemoved();
-                        scope.data.reviewing = false;
-                     }, function () {
-                        $log.info('Cancelled');
-                     });
-                  }
-               });
-            }
-         };
-      }]).directive("reviewEmail", ['reviewService', function (reviewService) {
-         return {
-            template: '<div class="input-group">' + '<span class="input-group-addon" id="nedf-email">Email</span>' + '<input required="required" type="email" ng-model="data.email" class="form-control" placeholder="Email address to send download link" aria-describedby="nedf-email">' + '</div>',
-            restrict: "AE",
-            link: function link(scope, element) {
-               scope.data = reviewService.data;
-               //console.log("data" + scope.data);
-            }
-         };
-      }]).filter('reviewProductsSelected', function () {
-         return function (products) {
-            return products.filter(function (product) {
-               return product.selected;
-            });
-         };
-      }).filter('reviewSumSize', function () {
-         return function (products) {
-            return products.reduce(function (sum, product) {
-               return sum + (product.file_size ? +product.file_size : product.product ? 500000000 : 0);
-            }, 0);
-         };
-      }).factory('reviewService', ['$http', '$q', 'clipService', 'configService', 'listService', 'persistService', function ($http, $q, clipService, configService, listService, persistService) {
-         var key = "elvis_download_email";
-         var data = listService.data;
-         var service = {
-            get data() {
-               return data;
-            },
-
-            set data(data) {
-               console.log("What the hell!");
-               data;
-            },
-
-            get products() {
-               return listService.products;
-            },
-
-            startExtract: function startExtract() {
-               this.setEmail(data.email);
-               return configService.getConfig("processing").then(function (config) {
-
-                  var clip = clipService.data.clip;
-
-                  console.log("We are processing files");
-                  return postFiles();
-
-                  function postFiles() {
-                     var postData = convertFlatToStructured(listService.products.filter(function (product) {
-                        return product.selected;
-                     }));
-
-                     postData.parameters = {
-                        xmin: clip.xMin,
-                        xmax: clip.xMax,
-                        ymin: clip.yMin,
-                        ymax: clip.yMax,
-                        email: data.email,
-                        recaptcha: data.recaptchaResponse
-                     };
-
-                     if (data.outCoordSys) {
-                        postData.parameters.outCoordSys = data.outCoordSys.code;
-                     }
-
-                     if (data.outFormat) {
-                        postData.parameters.outFormat = data.outFormat.code;
-                     }
-
-                     listService.products.forEach(function (product) {
-                        product.selected = product.removed = false;
-                     });
-
-                     return $http({
-                        method: 'POST',
-                        url: config.postProcessingUrl,
-                        data: postData,
-                        headers: { "Content-Type": "application/json" }
-                     }).then(function (response) {
-                        return response.data;
-                     }, function (d) {
-                        return {
-                           status: "error",
-                           message: "Sorry but the service failed to respond. Try again later."
-                        };
-                     });
-                  }
-               });
-            },
-
-            removeRemoved: function removeRemoved() {
-               listService.products.forEach(function (product) {
-                  product.removed = false;
-               });
-            },
-
-            setEmail: function setEmail(email) {
-               this.data.email = email;
-               persistService.setItem(key, email);
-            },
-
-            clipProduct: function clipProduct() {}
-         };
-
-         persistService.getItem(key).then(function (value) {
-            service.data.email = value;
-         });
-
-         return service;
-      }]);
-   })();
-}
-"use strict";
-
-{
-   (function () {
-      var SelectService = function SelectService($http, $q, $rootScope, $timeout, mapService, configService) {
-         var LAYER_GROUP_KEY = "Search Layers",
-             baseUrl = "icsm/resources/config/select.json",
-             parameters = {
-            text: "",
-            daterange: {
-               enabled: false,
-               upper: null,
-               lower: null
-            },
-            bbox: {
-               fromMap: true,
-               intersects: true,
-               yMax: null,
-               yMin: null,
-               xMax: null,
-               xMin: null
-            },
-            defaultKeywords: [],
-            keywords: []
+   angular.module('icsm.unreleased', []).directive('icsmUnreleased', ['$rootScope', function ($rootScope) {
+      return {
+         templateUrl: "icsm/results/unreleased.html",
+         scope: {
+            types: "="
          },
-             timeout,
-             cache,
-             allDocs = {},
-             busy = false,
-             layers = {},
-             selectLayerGroup,
-             normalLayerColor = "#ff7800",
-             hilightLayerColor = 'darkblue',
-             service = {
+         link: function link(scope) {
+            console.log("Unrelease me!");
+            scope.show = function (data) {
+               var bbox = toNumberArray(data.bbox);
+               $rootScope.$broadcast('icsm.bbox.draw', bbox);
+            };
 
-            getSelectCriteria: function getSelectCriteria() {
-               return parameters;
-            },
+            scope.hide = function (data) {
+               $rootScope.$broadcast('icsm.bbox.draw', null);
+            };
+         }
+      };
+   }]).directive('icsmProjectAbstract', ['listService', function (listService) {
+      return {
+         templateUrl: "icsm/results/abstractbutton.html",
+         scope: {
+            project: "="
+         },
+         link: function link(scope) {
+            scope.item = {};
 
-            getLayerGroup: function getLayerGroup() {
-               // Prime the layer group
-               if (!selectLayerGroup) {
-                  selectLayerGroup = mapService.getGroup(LAYER_GROUP_KEY);
+            scope.show = listService.hasMetadata(scope.item);
+
+            scope.toggle = function () {
+               scope.item.showAbstract = !scope.item.showAbstract;
+               if (scope.item.showAbstract) {
+                  load();
                }
-               return selectLayerGroup;
-            },
+            };
 
-            setKeywords: function setKeywords(keywords) {},
+            function load() {
+               if (!scope.fetched) {
+                  scope.fetched = true;
+                  listService.getMetadata(scope.item).then(function (data) {
+                     scope.item.metadata = data;
+                  });
+               }
+            }
+         }
+      };
+   }]).filter("captured", function () {
+      return captured;
+   }).filter("reverseDate", function () {
+      return formatDate;
+   });
+}
+'use strict';
 
-            setFilter: function setFilter(filter) {},
+{
+   var transformTemplate = function transformTemplate(template, data) {
+      var response = template;
+      angular.forEach(data, function (value, key) {
+         response = response.replace("{" + key + "}", encodeURIComponent(value));
+      });
+      return response;
+   };
 
-            refresh: function refresh() {},
+   var convertFlatToStructured = function convertFlatToStructured(flat) {
+      var fields = ["file_url", "file_name", "project_name", "product", "metadata_id", "file_size", "bbox"]; // ["index_poly_name", "file_name", "file_url", "file_size", "file_last_modified", "bbox"]
+      var response = {
+         available_data: []
+      };
+      var available = response.available_data;
+      var sourceMap = {};
 
-            getDaterange: function getDaterange() {
-               return parameters.daterange;
-            },
+      flat.forEach(function (dataset) {
+         var item = {};
+         fields.forEach(function (field) {
+            if (typeof dataset[field] !== "undefined") {
+               item[field] = dataset[field];
+            }
+         });
 
-            more: function more() {},
+         var data = sourceMap[dataset.source];
+         if (!data) {
+            data = {
+               source: dataset.source,
+               downloadables: {}
+            };
+            sourceMap[dataset.source] = data;
+            available.push(data);
+         }
 
-            _executeQuery: function _executeQuery() {
-               // Give them the lot as they will want the criteria as well
-               $http.get(baseUrl, { cache: true }).then(function (response) {
-                  service.getLayerGroup();
+         var downloadable = data.downloadables[dataset.type];
+         if (!downloadable) {
+            downloadable = {};
+            data.downloadables[dataset.type] = downloadable;
+         }
 
-                  var data = response.data;
+         var group = downloadable[dataset.group];
+         if (!group) {
+            group = [];
+            downloadable[dataset.group] = group;
+         }
 
-                  data.response.docs.forEach(function (dataset) {
-                     service._decorateDataset(dataset);
-                     if (dataset.type == "group") {
-                        dataset.docs.forEach(function (data) {
-                           service._decorateDataset(data);
+         group.push(item);
+      });
+
+      return response;
+   };
+
+   angular.module("elvis.reviewing", []).directive('icsmReview', ['$rootScope', '$uibModal', '$log', 'messageService', 'reviewService', function ($rootScope, $uibModal, $log, messageService, reviewService) {
+      return {
+         link: function link(scope, element) {
+            var modalInstance;
+            scope.data = reviewService.data;
+
+            // TODO: Why is this here? What is trying to override data?
+            scope.$watch("data", function (value, old) {
+               if (old) {
+                  console.log("Why?", value);
+                  scope.data = reviewService.data;
+               }
+            });
+
+            scope.$watch("data.reviewing", function (value) {
+               if (value) {
+                  modalInstance = $uibModal.open({
+                     templateUrl: 'icsm/reviewing/reviewing.html',
+                     size: "lg",
+                     backdrop: "static",
+                     keyboard: false,
+                     controller: ['$scope', '$uibModalInstance', 'listService', 'products', 'vcRecaptchaService', function ($scope, $uibModalInstance, listService, products, vcRecaptchaService) {
+                        $scope.recaptchaKey = "6LfUrFsUAAAAAKu4EJY_FSi3zFXvWm60RDVknRHf";
+                        var selected = scope.selected = products.filter(function (product) {
+                           return product.selected;
+                        });
+                        scope.derived = selected.filter(function (selection) {
+                           return selection.product;
+                        });
+
+                        listService.getMappings().then(function (response) {
+                           $scope.mappings = response;
+                        });
+
+                        $scope.products = convertFlatToStructured(selected).available_data;
+
+                        $scope.accept = function () {
+                           $uibModalInstance.close($scope.recaptchaResponse, $scope.products);
+                        };
+
+                        $scope.cancel = function () {
+                           $uibModalInstance.close(null);
+                        };
+
+                        $scope.setWidgetId = function (widgetId) {
+                           $scope.recaptchaId = widgetId;
+                        };
+
+                        $scope.setResponse = function (response) {
+                           $scope.recaptchaResponse = response;
+                        };
+
+                        $scope.cbExpiration = function () {
+                           vcRecaptchaService.reload($scope.recaptchaId);
+                           $scope.recaptchaResponse = null;
+                        };
+                     }],
+                     resolve: {
+                        products: function products() {
+                           return reviewService.products;
+                        }
+                     }
+                  });
+                  modalInstance.result.then(function (recaptchaResponse) {
+                     delete scope.data.recaptchaResponse;
+                     if (recaptchaResponse) {
+                        scope.data.recaptchaResponse = recaptchaResponse;
+                        reviewService.startExtract().then(function (response) {
+                           messageService[response.status](response.message);
+                           reviewService.removeRemoved();
+                           scope.data.reviewing = false;
                         });
                      }
+                     reviewService.removeRemoved();
+                     scope.data.reviewing = false;
+                  }, function () {
+                     $log.info('Cancelled');
+                  });
+               }
+            });
+         }
+      };
+   }]).directive("reviewEmail", ['reviewService', function (reviewService) {
+      return {
+         template: '<div class="input-group">' + '<span class="input-group-addon" id="nedf-email">Email</span>' + '<input required="required" type="email" ng-model="data.email" class="form-control" placeholder="Email address to send download link" aria-describedby="nedf-email">' + '</div>',
+         restrict: "AE",
+         link: function link(scope, element) {
+            scope.data = reviewService.data;
+            //console.log("data" + scope.data);
+         }
+      };
+   }]).filter('reviewProductsSelected', function () {
+      return function (products) {
+         return products.filter(function (product) {
+            return product.selected;
+         });
+      };
+   }).filter('reviewSumSize', function () {
+      return function (products) {
+         return products.reduce(function (sum, product) {
+            return sum + (product.file_size ? +product.file_size : product.product ? 500000000 : 0);
+         }, 0);
+      };
+   }).factory('reviewService', ['$http', '$q', 'clipService', 'configService', 'listService', 'persistService', function ($http, $q, clipService, configService, listService, persistService) {
+      var key = "elvis_download_email";
+      var data = listService.data;
+      var service = {
+         get data() {
+            return data;
+         },
+
+         set data(data) {
+            console.log("What the hell!");
+            data;
+         },
+
+         get products() {
+            return listService.products;
+         },
+
+         startExtract: function startExtract() {
+            this.setEmail(data.email);
+            return configService.getConfig("processing").then(function (config) {
+
+               var clip = clipService.data.clip;
+
+               console.log("We are processing files");
+               return postFiles();
+
+               function postFiles() {
+                  var postData = convertFlatToStructured(listService.products.filter(function (product) {
+                     return product.selected;
+                  }));
+
+                  postData.parameters = {
+                     xmin: clip.xMin,
+                     xmax: clip.xMax,
+                     ymin: clip.yMin,
+                     ymax: clip.yMax,
+                     email: data.email,
+                     recaptcha: data.recaptchaResponse
+                  };
+
+                  if (data.outCoordSys) {
+                     postData.parameters.outCoordSys = data.outCoordSys.code;
+                  }
+
+                  if (data.outFormat) {
+                     postData.parameters.outFormat = data.outFormat.code;
+                  }
+
+                  listService.products.forEach(function (product) {
+                     product.selected = product.removed = false;
                   });
 
-                  $rootScope.$broadcast("select.facet.counts", data);
-                  $rootScope.$broadcast("select.results.received", data);
-               });
-            },
-
-            createLayer: function createLayer(dataset, color) {
-               var bbox = dataset.bbox,
-                   key = dataset.primaryId,
-                   parts,
-                   bounds,
-                   layer;
-
-               layer = layers[key];
-               if (!layer) {
-
-                  if (!bbox) {
-                     return null;
-                  }
-
-                  parts = bbox.split(" ");
-                  if (parts.length != 4) {
-                     return null;
-                  }
-
-                  if (!color) {
-                     color = normalLayerColor;
-                  }
-                  bounds = [[+parts[1], +parts[0]], [+parts[3], +parts[2]]];
-
-                  // create a black rectangle
-                  layer = L.rectangle(bounds, {
-                     fill: false,
-                     color: "#000000",
-                     width: 3,
-                     clickable: false
-                  });
-
-                  layers[key] = layer;
-               }
-               this._decorateDataset(dataset);
-               selectLayerGroup.addLayer(layer);
-               return layer;
-            },
-
-            _decorateDataset: function _decorateDataset(dataset) {
-               var layer = layers[dataset.primaryId];
-               if (layer) {
-                  dataset.layer = layer;
-                  dataset.showLayer = true;
-               } else {
-                  dataset.layer = null;
-                  dataset.showLayer = false;
-                  // Do we add the services to it?
-                  dataset.services = servicesFactory(dataset.dcUris);
-                  dataset.bounds = getBounds(dataset.bbox);
-               }
-
-               function getBounds(bbox) {
-                  var parts;
-                  if (!bbox) {
-                     return null;
-                  } else {
-                     parts = bbox.split(/\s/g);
+                  return $http({
+                     method: 'POST',
+                     url: config.postProcessingUrl,
+                     data: postData,
+                     headers: { "Content-Type": "application/json" }
+                  }).then(function (response) {
+                     return response.data;
+                  }, function (d) {
                      return {
-                        xMin: +parts[0],
-                        xMax: +parts[2],
-                        yMax: +parts[3],
-                        yMin: +parts[1]
+                        status: "error",
+                        message: "Sorry but the service failed to respond. Try again later."
                      };
-                  }
+                  });
                }
-            },
+            });
+         },
 
-            showWithin: function showWithin(datasets) {
-               datasets.forEach(function (dataset) {
-                  var box = dataset.bbox,
-                      coords,
-                      xmin,
-                      ymin,
-                      xmax,
-                      ymax;
+         removeRemoved: function removeRemoved() {
+            listService.products.forEach(function (product) {
+               product.removed = false;
+            });
+         },
 
-                  if (!box) {
-                     service.removeLayer(dataset);
-                  } else {
-                     coords = box.split(" ");
-                     if (coords.length == 4 && within(+coords[0], +coords[1], +coords[2], +coords[3])) {
-                        // show
-                        service.createLayer(dataset);
-                     } else {
-                        // hide
-                        service.removeLayer(dataset);
-                     }
-                  }
-               });
+         setEmail: function setEmail(email) {
+            this.data.email = email;
+            persistService.setItem(key, email);
+         },
 
-               function within(xmin, ymin, xmax, ymax) {
-                  var bbox = parameters.bbox;
-
-                  return xmin > bbox.xMin && xmax < bbox.xMax && ymin > bbox.yMin && ymax < bbox.yMax;
-               }
-            },
-
-            toggle: function toggle(dataset) {
-               if (dataset.showLayer) {
-                  this.removeLayer(dataset);
-               } else {
-                  this.createLayer(dataset);
-               }
-            },
-
-            toggleAll: function toggleAll(datasets) {
-               var self = this,
-                   someNotShowing = datasets.some(function (dataset) {
-                  return !dataset.showLayer;
-               });
-
-               datasets.forEach(function (dataset) {
-                  if (someNotShowing) {
-                     if (!dataset.showLayer) {
-                        self.createLayer(dataset);
-                     }
-                  } else {
-                     if (dataset.showLayer) {
-                        self.removeLayer(dataset);
-                     }
-                  }
-               });
-               return !someNotShowing;
-            },
-
-            hideAll: function hideAll(datasets) {
-               datasets.forEach(function (dataset) {
-                  if (dataset.showLayer) {
-                     service.removeLayer(dataset);
-                  }
-               });
-            },
-
-            hilight: function hilight(layer) {
-               layer.setStyle({ color: hilightLayerColor });
-            },
-
-            lolight: function lolight(layer) {
-               layer.setStyle({ color: normalLayerColor });
-            },
-
-            removeLayer: function removeLayer(dataset) {
-               var key = dataset.primaryId,
-                   layer = layers[key];
-
-               if (layer) {
-                  selectLayerGroup.removeLayer(layer);
-                  delete layers[key];
-               }
-               this._decorateDataset(dataset);
-            }
-         };
-
-         execute();
-         return service;
-
-         function execute() {
-            $timeout(function () {
-               service._executeQuery();
-            }, 100);
-         }
+         clipProduct: function clipProduct() {}
       };
 
-      var servicesFactory = function servicesFactory(uris) {
-         var protocols = {
-            WCS: "OGC:WCS",
-            WFS: "OGC:WFS",
-            WMS: "OGC:WMS"
-         };
+      persistService.getItem(key).then(function (value) {
+         service.data.email = value;
+      });
 
-         Service.prototype = {
-            getUrl: function getUrl() {
-               if (url) {
-                  if (url.indexOf("?") < 0) {
-                     return;
-                  } else {
-                     return url.substr(0, url.indexOf("?"));
-                  }
-               }
-               return null;
+      return service;
+   }]);
+}
+"use strict";
+
+{
+   var SelectService = function SelectService($http, $q, $rootScope, $timeout, mapService, configService) {
+      var LAYER_GROUP_KEY = "Search Layers",
+          baseUrl = "icsm/resources/config/select.json",
+          parameters = {
+         text: "",
+         daterange: {
+            enabled: false,
+            upper: null,
+            lower: null
+         },
+         bbox: {
+            fromMap: true,
+            intersects: true,
+            yMax: null,
+            yMin: null,
+            xMax: null,
+            xMin: null
+         },
+         defaultKeywords: [],
+         keywords: []
+      },
+          timeout,
+          cache,
+          allDocs = {},
+          busy = false,
+          layers = {},
+          selectLayerGroup,
+          normalLayerColor = "#ff7800",
+          hilightLayerColor = 'darkblue',
+          service = {
+
+         getSelectCriteria: function getSelectCriteria() {
+            return parameters;
+         },
+
+         getLayerGroup: function getLayerGroup() {
+            // Prime the layer group
+            if (!selectLayerGroup) {
+               selectLayerGroup = mapService.getGroup(LAYER_GROUP_KEY);
             }
-         };
+            return selectLayerGroup;
+         },
 
-         function Services(uris) {
-            this.uris = uris;
-            this.container = {
-               wcs: null,
-               wms: null
-            };
+         setKeywords: function setKeywords(keywords) {},
 
-            if (uris) {
-               this.services = uris.map(function (uri) {
-                  var service = new Service(uri);
+         setFilter: function setFilter(filter) {},
 
-                  this.container.wcs = service.isWcs() ? service : this.container.wcs;
-                  this.container.wms = service.isWms() ? service : this.container.wms;
-                  return service;
-               }.bind(this));
+         refresh: function refresh() {},
+
+         getDaterange: function getDaterange() {
+            return parameters.daterange;
+         },
+
+         more: function more() {},
+
+         _executeQuery: function _executeQuery() {
+            // Give them the lot as they will want the criteria as well
+            $http.get(baseUrl, { cache: true }).then(function (response) {
+               service.getLayerGroup();
+
+               var data = response.data;
+
+               data.response.docs.forEach(function (dataset) {
+                  service._decorateDataset(dataset);
+                  if (dataset.type == "group") {
+                     dataset.docs.forEach(function (data) {
+                        service._decorateDataset(data);
+                     });
+                  }
+               });
+
+               $rootScope.$broadcast("select.facet.counts", data);
+               $rootScope.$broadcast("select.results.received", data);
+            });
+         },
+
+         createLayer: function createLayer(dataset, color) {
+            var bbox = dataset.bbox,
+                key = dataset.primaryId,
+                parts,
+                bounds,
+                layer;
+
+            layer = layers[key];
+            if (!layer) {
+
+               if (!bbox) {
+                  return null;
+               }
+
+               parts = bbox.split(" ");
+               if (parts.length != 4) {
+                  return null;
+               }
+
+               if (!color) {
+                  color = normalLayerColor;
+               }
+               bounds = [[+parts[1], +parts[0]], [+parts[3], +parts[2]]];
+
+               // create a black rectangle
+               layer = L.rectangle(bounds, {
+                  fill: false,
+                  color: "#000000",
+                  width: 3,
+                  clickable: false
+               });
+
+               layers[key] = layer;
+            }
+            this._decorateDataset(dataset);
+            selectLayerGroup.addLayer(layer);
+            return layer;
+         },
+
+         _decorateDataset: function _decorateDataset(dataset) {
+            var layer = layers[dataset.primaryId];
+            if (layer) {
+               dataset.layer = layer;
+               dataset.showLayer = true;
             } else {
-               this.services = [];
+               dataset.layer = null;
+               dataset.showLayer = false;
+               // Do we add the services to it?
+               dataset.services = servicesFactory(dataset.dcUris);
+               dataset.bounds = getBounds(dataset.bbox);
             }
 
-            this.hasWcs = function () {
-               return this.container.wcs !== null;
-            };
+            function getBounds(bbox) {
+               var parts;
+               if (!bbox) {
+                  return null;
+               } else {
+                  parts = bbox.split(/\s/g);
+                  return {
+                     xMin: +parts[0],
+                     xMax: +parts[2],
+                     yMax: +parts[3],
+                     yMin: +parts[1]
+                  };
+               }
+            }
+         },
 
-            this.hasWms = function () {
-               return this.container.wms !== null;
-            };
+         showWithin: function showWithin(datasets) {
+            datasets.forEach(function (dataset) {
+               var box = dataset.bbox,
+                   coords,
+                   xmin,
+                   ymin,
+                   xmax,
+                   ymax;
 
-            this.getWcs = function () {
-               return this.container.wcs;
-            };
-
-            this.getWms = function () {
-               return this.container.wms;
-            };
-
-            this.remove = function () {
-               this.services.forEach(function (service) {
-                  service.remove();
-               });
-            };
-         }
-
-         function Service(doc) {
-            var xmlDoc = $(doc);
-
-            this.protocol = xmlDoc.attr("protocol");
-            this.url = xmlDoc.text();
-            this.layerNames = xmlDoc.attr("layerNames");
-            this.name = xmlDoc.attr("name");
-            this.description = xmlDoc.attr("description");
-            this.handlers = [];
-
-            this.isWcs = function () {
-               // console.log("Checking results:" + (this.protocol == protocols.WCS));
-               return this.protocol == protocols.WCS;
-            };
-
-            this.isWfs = function () {
-               return this.protocol == protocols.WFS;
-            };
-
-            this.isWms = function () {
-               return this.protocol == protocols.WMS;
-            };
-
-            this.isSupported = function () {
-               return typeof protocols[this.protocol] == "undefined";
-            };
-
-            this.addHandler = function (callback) {
-               this.handlers.push(callback);
-            };
-
-            this.removeHandler = function (callback) {
-               this.handlers.push(callback);
-            };
-
-            this.remove = function () {
-               this.handlers.forEach(function (callback) {
-                  // They should all have a remove but you never know.
-                  if (this.callback.remove) {
-                     callback.remove(this);
+               if (!box) {
+                  service.removeLayer(dataset);
+               } else {
+                  coords = box.split(" ");
+                  if (coords.length == 4 && within(+coords[0], +coords[1], +coords[2], +coords[3])) {
+                     // show
+                     service.createLayer(dataset);
+                  } else {
+                     // hide
+                     service.removeLayer(dataset);
                   }
-               }.bind(this));
-               this.handlers = [];
-            };
+               }
+            });
+
+            function within(xmin, ymin, xmax, ymax) {
+               var bbox = parameters.bbox;
+
+               return xmin > bbox.xMin && xmax < bbox.xMax && ymin > bbox.yMin && ymax < bbox.yMax;
+            }
+         },
+
+         toggle: function toggle(dataset) {
+            if (dataset.showLayer) {
+               this.removeLayer(dataset);
+            } else {
+               this.createLayer(dataset);
+            }
+         },
+
+         toggleAll: function toggleAll(datasets) {
+            var self = this,
+                someNotShowing = datasets.some(function (dataset) {
+               return !dataset.showLayer;
+            });
+
+            datasets.forEach(function (dataset) {
+               if (someNotShowing) {
+                  if (!dataset.showLayer) {
+                     self.createLayer(dataset);
+                  }
+               } else {
+                  if (dataset.showLayer) {
+                     self.removeLayer(dataset);
+                  }
+               }
+            });
+            return !someNotShowing;
+         },
+
+         hideAll: function hideAll(datasets) {
+            datasets.forEach(function (dataset) {
+               if (dataset.showLayer) {
+                  service.removeLayer(dataset);
+               }
+            });
+         },
+
+         hilight: function hilight(layer) {
+            layer.setStyle({ color: hilightLayerColor });
+         },
+
+         lolight: function lolight(layer) {
+            layer.setStyle({ color: normalLayerColor });
+         },
+
+         removeLayer: function removeLayer(dataset) {
+            var key = dataset.primaryId,
+                layer = layers[key];
+
+            if (layer) {
+               selectLayerGroup.removeLayer(layer);
+               delete layers[key];
+            }
+            this._decorateDataset(dataset);
          }
-         return new Services(uris);
       };
 
-      angular.module("icsm.select.service", []).factory("selectService", SelectService);
+      execute();
+      return service;
 
-      SelectService.$inject = ['$http', '$q', '$rootScope', '$timeout', 'mapService', 'configService'];
-   })();
+      function execute() {
+         $timeout(function () {
+            service._executeQuery();
+         }, 100);
+      }
+   };
+
+   var servicesFactory = function servicesFactory(uris) {
+      var protocols = {
+         WCS: "OGC:WCS",
+         WFS: "OGC:WFS",
+         WMS: "OGC:WMS"
+      };
+
+      Service.prototype = {
+         getUrl: function getUrl() {
+            if (url) {
+               if (url.indexOf("?") < 0) {
+                  return;
+               } else {
+                  return url.substr(0, url.indexOf("?"));
+               }
+            }
+            return null;
+         }
+      };
+
+      function Services(uris) {
+         this.uris = uris;
+         this.container = {
+            wcs: null,
+            wms: null
+         };
+
+         if (uris) {
+            this.services = uris.map(function (uri) {
+               var service = new Service(uri);
+
+               this.container.wcs = service.isWcs() ? service : this.container.wcs;
+               this.container.wms = service.isWms() ? service : this.container.wms;
+               return service;
+            }.bind(this));
+         } else {
+            this.services = [];
+         }
+
+         this.hasWcs = function () {
+            return this.container.wcs !== null;
+         };
+
+         this.hasWms = function () {
+            return this.container.wms !== null;
+         };
+
+         this.getWcs = function () {
+            return this.container.wcs;
+         };
+
+         this.getWms = function () {
+            return this.container.wms;
+         };
+
+         this.remove = function () {
+            this.services.forEach(function (service) {
+               service.remove();
+            });
+         };
+      }
+
+      function Service(doc) {
+         var xmlDoc = $(doc);
+
+         this.protocol = xmlDoc.attr("protocol");
+         this.url = xmlDoc.text();
+         this.layerNames = xmlDoc.attr("layerNames");
+         this.name = xmlDoc.attr("name");
+         this.description = xmlDoc.attr("description");
+         this.handlers = [];
+
+         this.isWcs = function () {
+            // console.log("Checking results:" + (this.protocol == protocols.WCS));
+            return this.protocol == protocols.WCS;
+         };
+
+         this.isWfs = function () {
+            return this.protocol == protocols.WFS;
+         };
+
+         this.isWms = function () {
+            return this.protocol == protocols.WMS;
+         };
+
+         this.isSupported = function () {
+            return typeof protocols[this.protocol] == "undefined";
+         };
+
+         this.addHandler = function (callback) {
+            this.handlers.push(callback);
+         };
+
+         this.removeHandler = function (callback) {
+            this.handlers.push(callback);
+         };
+
+         this.remove = function () {
+            this.handlers.forEach(function (callback) {
+               // They should all have a remove but you never know.
+               if (this.callback.remove) {
+                  callback.remove(this);
+               }
+            }.bind(this));
+            this.handlers = [];
+         };
+      }
+      return new Services(uris);
+   };
+
+   angular.module("icsm.select.service", []).factory("selectService", SelectService);
+
+   SelectService.$inject = ['$http', '$q', '$rootScope', '$timeout', 'mapService', 'configService'];
 }
 "use strict";
 
@@ -2998,25 +3061,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 'use strict';
 
 {
-   angular.module('icsm.state', []).directive("icsmStateToggle", ['downloadService', function (downloadService) {
-      return {
-         restrict: 'AE',
-         template: '<button ng-click="toggle(false)" ng-disabled="state.show" class="btn btn-default" title="Start downlaod selection."><i class="fa fa-lg fa-object-group"></i></button>',
-         link: function link(scope) {
-            downloadService.data().then(function (data) {
-               scope.state = data;
-            });
-
-            scope.toggle = function () {
-               scope.state.show = !scope.state.show;
-            };
-         }
-      };
-   }]);
-}
-'use strict';
-
-{
    angular.module("icsm.splash", []).directive('icsmSplash', ['$rootScope', '$uibModal', '$log', 'splashService', function ($rootScope, $uibModal, $log, splashService) {
       return {
          controller: ['$scope', 'splashService', function ($scope, splashService) {
@@ -3127,6 +3171,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
          });
          return response;
+      };
+   }]);
+}
+'use strict';
+
+{
+   angular.module('icsm.state', []).directive("icsmStateToggle", ['downloadService', function (downloadService) {
+      return {
+         restrict: 'AE',
+         template: '<button ng-click="toggle(false)" ng-disabled="state.show" class="btn btn-default" title="Start downlaod selection."><i class="fa fa-lg fa-object-group"></i></button>',
+         link: function link(scope) {
+            downloadService.data().then(function (data) {
+               scope.state = data;
+            });
+
+            scope.toggle = function () {
+               scope.state.show = !scope.state.show;
+            };
+         }
       };
    }]);
 }
@@ -3752,14 +3815,16 @@ var Strategies = function () {
    DownloadService.$inject = ['$http', '$q', '$rootScope', 'mapService', 'storageService'];
 }
 angular.module("icsm.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("icsm/app/app.html","<div>\r\n	<!-- BEGIN: Sticky Header -->\r\n	<div explorer-header style=\"z-index:1\"\r\n			class=\"navbar navbar-default navbar-fixed-top\"\r\n			heading=\"\'Elevation\'\"\r\n			headingtitle=\"\'ICSM\'\"\r\n			breadcrumbs=\"[{name:\'ICSM\', title: \'Reload Elevation\', url: \'.\'}]\"\r\n			helptitle=\"\'Get help about Elevation\'\"\r\n			helpalttext=\"\'Get help about Elevation\'\">\r\n	</div>\r\n	<!-- END: Sticky Header -->\r\n\r\n	<!-- Messages go here. They are fixed to the tab bar. -->\r\n	<div explorer-messages class=\"marsMessages noPrint\"></div>\r\n	<icsm-panes data=\"root.data\" default-item=\"download\"></icsm-panes>\r\n</div>");
-$templateCache.put("icsm/clip/clip.html","<div class=\"well well-sm\" style=\"margin-bottom:5px\">\r\n	<div class=\"container-fluid\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-12\" style=\"padding:0\">\r\n				<div class=\"\" role=\"group\" aria-label=\"...\">\r\n					<button ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\"\r\n                      tooltip-append-to-body=\"true\" tooltip-placement=\"bottom\" uib-tooltip=\"Enable drawing of a bounding box. On enabling, click on the map and drag diagonally\"\r\n						class=\"btn btn-primary btn-default\">Select an area...</button>\r\n					<button ng-click=\"showInfo = !showInfo\" tooltip-placement=\"bottom\" uib-tooltip=\"Information.\" style=\"float:right\" class=\"btn btn-primary btn-default\"><i class=\"fa fa-info\"></i></button>\r\n				</div>\r\n				<exp-info title=\"Selecting an area\" show-close=\"true\" style=\"width:450px;position:fixed;top:200px;right:40px\" is-open=\"showInfo\">\r\n					<icsm-info-bbox></icsm-info-bbox>\r\n            </exp-info>\r\n            <div class=\"row\" ng-hide=\"(!clip.xMin && clip.xMin !== 0) || oversize\" style=\"padding-top:7px;\">\r\n               <div class=\"col-md-12 ng-binding\">\r\n                  Selected bounds: {{clip.xMin | number : 4}}° west,\r\n                     {{clip.yMax | number : 4}}° north,\r\n                     {{clip.xMax | number : 4}}° east,\r\n                     {{clip.yMin | number : 4}}° south\r\n               </div>\r\n            </div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");
-$templateCache.put("icsm/clip/infobbox.html","<div class=\"\">\r\n	<strong style=\"font-size:120%\">Select an area of interest.</strong>\r\n   By hitting the \"Select an area...\" button an area on the map can be selected with the mouse by clicking a\r\n   corner and while holding the left mouse button\r\n	down drag diagonally across the map to the opposite corner.\r\n	<br/>\r\n	Clicking the \"Select an area...\" button again allows replacing a previous area selection. <br/>\r\n	<strong>Notes:</strong>\r\n   <ul>\r\n      <li>The data does not cover all of Australia.</li>\r\n      <li>Restrict a search area to below four square degrees. eg 2x2 or 1x4</li>\r\n   </ul>\r\n	<p style=\"padding-top:5px\"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n		You can zoom in and out using the mouse wheel or the \"+\" and \"-\" map control on the top left of the map. If you\r\n		don\'t like the position of your drawn area, hit the \"Draw\" button and draw a new bounding box.\r\n	</p>\r\n</div>");
+$templateCache.put("icsm/clip/clip.html","<div class=\"well well-sm\">\r\n	<div class=\"container-fluid\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-10\">\r\n				<strong style=\"font-size:120%\">Select area:</strong>\r\n				<button ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" tooltip-placement=\"right\" uib-tooltip=\"Enable drawing of a bounding box. On enabling, click on the map and drag diagonally\"\r\n					class=\"btn btn-primary btn-default\">Draw...</button>\r\n				<button ng-click=\"typing = !typing\"  tooltip-placement=\"right\" uib-tooltip=\"Type coordinates of a bounding box. Restricted to maximum of 2.25 square degrees.\"\r\n					class=\"btn btn-primary btn-default\">Manual entry...</button>\r\n			</div>\r\n			<div class=\"col-md-2\">\r\n				<button style=\"float:right\" ng-click=\"showInfo = !showInfo\" tooltip-placement=\"left\" uib-tooltip=\"Information.\" class=\"btn btn-primary btn-default\"><i class=\"fa fa-info\"></i></button>\r\n				<exp-info title=\"Selecting an area\" show-close=\"true\" style=\"width:450px;position:fixed;top:230px;right:40px\" is-open=\"showInfo\">\r\n					<icsm-info-bbox>\r\n			</div>\r\n			</exp-info>\r\n		</div>\r\n   </div>\r\n   <div class=\"row\" ng-hide=\"typing || (!clip.xMin && clip.xMin !== 0) || oversize\" style=\"padding-top:7px;\">\r\n      <div class=\"col-md-12 ng-binding\">Selected bounds:\r\n               {{clip.xMin | number : 4}}° west,\r\n               {{clip.yMax | number : 4}}° north,\r\n               {{clip.xMax | number : 4}}° east,\r\n               {{clip.yMin | number : 4}}° south\r\n      </div>\r\n  </div>\r\n  <clip-modal title=\"Define search area\" show-close=\"true\" style=\"width:480px;position:fixed;top:110px;right:80px\" is-open=\"typing\">\r\n      <icsm-manual-clip></icsm-manual-clip>\r\n   </clip-modal>\r\n</div>");
+$templateCache.put("icsm/clip/infobbox.html","<div class=\"\">\r\n	<strong style=\"font-size:120%\">Select an area of interest.</strong>\r\n   By hitting the \"Draw...\" button an area on the map can be selected with the mouse by clicking a\r\n   corner and while holding the left mouse button\r\n	down drag diagonally across the map to the opposite corner.\r\n	<br/>\r\n   Clicking the \"Draw...\" button again allows replacing a previous area selection. <br/>\r\n   Alternatively you can type in the minimum and maximum coordinates and search by using the \"Manual entry\" button.<br/>\r\n	<strong>Notes:</strong>\r\n   <ul>\r\n      <li>The data does not cover all of Australia.</li>\r\n      <li>Restrict a search area to below 1.5 degrees square. eg 2x0.75 or 1x1.5</li>\r\n   </ul>\r\n	<p style=\"padding-top:5px\"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n		You can zoom in and out using the mouse wheel or the \"+\" and \"-\" map control on the top left of the map. If you\r\n		don\'t like the position of your drawn area, hit the \"Draw\" button and draw a new bounding box.\r\n	</p>\r\n</div>");
+$templateCache.put("icsm/clip/manual.html","<div class=\"container-fluid\" style=\"padding-top:7px\">\r\n   <div class=\"row\">\r\n      <div class=\"col-md-3\"> </div>\r\n      <div class=\"col-md-8\">\r\n         <div style=\"font-weight:bold;width:3.5em;display:inline-block\">Y Max:</div>\r\n         <span>\r\n            <input type=\"text\" style=\"width:6em\" ng-model=\"yMax\" ng-change=\"check()\"></input>\r\n         </span>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-6\">\r\n         <div style=\"font-weight:bold;width:3.5em;display:inline-block\">X Min:</div>\r\n         <span>\r\n            <input type=\"text\" style=\"width:6em\" ng-model=\"xMin\" ng-change=\"check()\"></input>\r\n         </span>\r\n      </div>\r\n      <div class=\"col-md-6\">\r\n         <div style=\"font-weight:bold;width:3.5em;display:inline-block\">X Max:</div>\r\n         <span>\r\n            <input type=\"text\" style=\"width:6em\" ng-model=\"xMax\" ng-change=\"check()\"></input>\r\n         </span>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-offset-3 col-md-5\">\r\n         <div style=\"font-weight:bold;width:3.5em;display:inline-block\">Y Min:</div>\r\n         <span>\r\n            <input type=\"text\" style=\"width:6em\" ng-model=\"yMin\" ng-change=\"check()\"></input>\r\n         </span>\r\n      </div>\r\n      <div class=\"col-md-4\">\r\n         <button style=\"float:right\" ng-disabled=\"!xMin || !xMax || !yMin || !yMax || isNan(xMin) || isNan(xMax) || isNan(yMin) || isNan(yMax) || (+xMin) === (+xMax) || (+yMin) === (+yMax)\" class=\"btn btn-primary btn-default\" ng-click=\"search()\">Search</button>\r\n      </div>\r\n   </div>\r\n</div>");
+$templateCache.put("icsm/clip/modal.html","<div class=\"clipmodal\" ng-show=\"isOpen\">\r\n	<div class=\"clipmodal-inner\">\r\n      <h3 ng-show=\"title\" class=\"clipmodal-title\">\r\n		  	<span  ng-bind=\"title\"></span>\r\n		  	<span ng-show=\"showClose\" class=\"pull-right\">\r\n		 		<button type=\"button\" class=\"undecorated\" ng-click=\"isOpen = false\"><i class=\"fa fa-close\"></i></button>\r\n			</span>\r\n		</h3>\r\n      <div class=\"clipmodal-content\" ng-transclude></div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/contributors/contributors.html","<span class=\"contributors\" ng-mouseenter=\"over()\" ng-mouseleave=\"out()\"\r\n      ng-class=\"(contributors.show || contributors.ingroup || contributors.stick) ? \'transitioned-down\' : \'transitioned-up\'\">\r\n   <button class=\"undecorated contributors-unstick\" ng-click=\"unstick()\" style=\"float:right\">X</button>\r\n   <div ng-repeat=\"contributor in contributors.orgs | activeContributors\" style=\"text-align:cnter\">\r\n      <a ng-href=\"{{contributor.href}}\" name=\"contributors{{$index}}\" title=\"{{contributor.title}}\" target=\"_blank\">\r\n         <img ng-src=\"{{contributor.image}}\" alt=\"{{contributor.title}}\" class=\"elvis-logo\" ng-class=\"contributor.class\"></img>\r\n      </a>\r\n   </div>\r\n</span>");
 $templateCache.put("icsm/contributors/show.html","<a ng-mouseenter=\"over()\" ng-mouseleave=\"out()\" class=\"contributors-link\" title=\"Click to lock/unlock contributors list.\"\r\n      ng-click=\"toggleStick()\" href=\"#contributors0\">Contributors</a>");
 $templateCache.put("icsm/glossary/glossary.html","<div ng-controller=\"GlossaryCtrl as glossary\">\r\n   <div style=\"position:relative;padding:5px;padding-left:10px;\">\r\n      <div class=\"panel\" style=\"padding:5px;\">\r\n         <p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n	         <strong>Glossary</strong>\r\n         </p>\r\n\r\n         <div class=\"panel-body\">\r\n            <table class=\"table table-striped\">\r\n               <thead>\r\n                  <tr>\r\n                     <th>Term</th>\r\n                     <th>Definition</th>\r\n                  </tr>\r\n               </thead>\r\n               <tbody>\r\n                  <tr ng-repeat=\"term in glossary.terms\">\r\n                     <td>{{term.term}}</td>\r\n                     <td>{{term.definition}}</td>\r\n                  </tr>\r\n               </tbody>\r\n            </table>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
+$templateCache.put("icsm/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n        	<li role=\"menuitem\" style=\"padding-right:10px;position: relative;top: -3px;\">\r\n              <span class=\"altthemes-container\">\r\n	               <span>\r\n                     <a title=\"Location INformation Knowledge platform (LINK)\" href=\"http://fsdf.org.au/\" target=\"_blank\">\r\n                        <img alt=\"FSDF\" src=\"icsm/resources/img/FSDFimagev4.0.png\" style=\"height: 66px\">\r\n                     </a>\r\n                  </span>\r\n               </span>\r\n           </li>\r\n        	<li common-navigation role=\"menuitem\" current=\"current\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n<div class=\"contributorsLink\" style=\"position: absolute; right:7px; bottom:15px\">\r\n      <icsm-contributors-link></icsm-contributors-link>\r\n</div>\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");
 $templateCache.put("icsm/help/faqs.html","<p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n   <strong>FAQS</strong>\r\n</p>\r\n\r\n<h5 ng-repeat=\"faq in faqs\"><button type=\"button\" class=\"undecorated\" ng-click=\"focus(faq.key)\">{{faq.question}}</button></h5>\r\n<hr/>\r\n<div class=\"row\" ng-repeat=\"faq in faqs\">\r\n   <div class=\"col-md-12\">\r\n      <h5 tabindex=\"0\" id=\"faqs_{{faq.key}}\">{{faq.question}}</h5>\r\n      <span ng-bind-html=\"faq.answer\"></span>\r\n      <hr/>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/help/help.html","<p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n	<strong>Help</strong>\r\n</p>\r\n\r\n<div class=\"panel-body\" ng-controller=\"HelpCtrl as help\">\r\n	The steps to get data!\r\n	<ol>\r\n		<li>Define area of interest</li>\r\n		<li>Select datasets</li>\r\n		<li>Confirm selections</li>\r\n		<li>Enter email address</li>\r\n		<li>Start extract</li>\r\n	</ol>\r\n	An email will be sent to you on completion of the data extract with a link to your data.\r\n   <hr>\r\n	<icsm-faqs faqs=\"help.faqs\" ></icsm-faqs>\r\n</div>");
-$templateCache.put("icsm/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n        	<li role=\"menuitem\" style=\"padding-right:10px;position: relative;top: -3px;\">\r\n              <span class=\"altthemes-container\">\r\n	               <span>\r\n                     <a title=\"Location INformation Knowledge platform (LINK)\" href=\"http://fsdf.org.au/\" target=\"_blank\">\r\n                        <img alt=\"FSDF\" src=\"icsm/resources/img/FSDFimagev4.0.png\" style=\"height: 66px\">\r\n                     </a>\r\n                  </span>\r\n               </span>\r\n           </li>\r\n        	<li common-navigation role=\"menuitem\" current=\"current\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n<div class=\"contributorsLink\" style=\"position: absolute; right:7px; bottom:15px\">\r\n      <icsm-contributors-link></icsm-contributors-link>\r\n</div>\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");
 $templateCache.put("icsm/message/message.html","<div class=\"well well-sm mess-container\" ng-show=\"message.type && message.text\"\r\n   ng-class=\"{\'mess-error\': message.type == \'error\', \'mess-warn\': message.type == \'warn\', \'mess-info\': (message.type == \'info\' || message.type == \'wait\')}\">\r\n   <i class=\"fa fa-spinner fa-spin fa-fw\" aria-hidden=\"true\" ng-if=\"message.type == \'wait\'\"></i>\r\n   <span>{{message.text}}</span>\r\n</div>");
 $templateCache.put("icsm/panes/panes.html","<div class=\"mapContainer\" class=\"col-md-12\" style=\"padding-right:0\"  ng-attr-style=\"right:{{right.width}}\">\r\n   <span common-baselayer-control class=\"baselayer-slider\" max-zoom=\"16\" title=\"Satellite to Topography bias on base map.\"></span>\r\n   <div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n      <geo-extent></geo-extent>\r\n      <common-feature-info></common-feature-info>\r\n      <icsm-layerswitch></icsm-layerswitch>\r\n   </div>\r\n   <div class=\"base-layer-controller\">\r\n      <div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n   </div>\r\n   <restrict-pan bounds=\"data.map.position.bounds\"></restrict-pan>\r\n</div>");
 $templateCache.put("icsm/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n   <div class=\"paneTabItem\" style=\"width:60px; opacity:0\">\r\n\r\n   </div>\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n      <button class=\"undecorated\">Datasets Download</button>\r\n   </div>\r\n   <!--\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n   -->\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'downloader\'}\" ng-click=\"setView(\'downloader\')\">\r\n      <button class=\"undecorated\">Products Download</button>\r\n   </div>\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n      <button class=\"undecorated\">Glossary</button>\r\n   </div>\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n      <button class=\"undecorated\">Help</button>\r\n   </div>\r\n</div>");

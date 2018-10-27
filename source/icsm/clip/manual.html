@@ -1,0 +1,36 @@
+<div class="container-fluid" style="padding-top:7px">
+   <div class="row">
+      <div class="col-md-3"> </div>
+      <div class="col-md-8">
+         <div style="font-weight:bold;width:3.5em;display:inline-block">Y Max:</div>
+         <span>
+            <input type="text" style="width:6em" ng-model="yMax" ng-change="check()"></input>
+         </span>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-md-6">
+         <div style="font-weight:bold;width:3.5em;display:inline-block">X Min:</div>
+         <span>
+            <input type="text" style="width:6em" ng-model="xMin" ng-change="check()"></input>
+         </span>
+      </div>
+      <div class="col-md-6">
+         <div style="font-weight:bold;width:3.5em;display:inline-block">X Max:</div>
+         <span>
+            <input type="text" style="width:6em" ng-model="xMax" ng-change="check()"></input>
+         </span>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-md-offset-3 col-md-5">
+         <div style="font-weight:bold;width:3.5em;display:inline-block">Y Min:</div>
+         <span>
+            <input type="text" style="width:6em" ng-model="yMin" ng-change="check()"></input>
+         </span>
+      </div>
+      <div class="col-md-4">
+         <button style="float:right" ng-disabled="!xMin || !xMax || !yMin || !yMax || isNan(xMin) || isNan(xMax) || isNan(yMin) || isNan(yMax) || (+xMin) === (+xMax) || (+yMin) === (+yMax)" class="btn btn-primary btn-default" ng-click="search()">Search</button>
+      </div>
+   </div>
+</div>

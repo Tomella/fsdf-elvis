@@ -1,5 +1,5 @@
 {
-   angular.module("icsm.clip", ['geo.draw'])
+   angular.module("icsm.clip", ['geo.draw', 'explorer.clip.modal'])
 
       .directive('icsmInfoBbox', function () {
          return {
@@ -49,6 +49,8 @@
                         delete scope.oversize;
                      }
                   });
+                  // Hide the manual drawing
+                  $rootScope.$on('icsm.clip.drawn', () => scope.typing = false);
 
                   scope.initiateDraw = function () {
                      messageService.info("Click on the map and drag to define your area of interest.");
@@ -57,6 +59,44 @@
                }
             };
          }])
+
+      .directive('icsmManualClip', ["$rootScope", "clipService", function ($rootScope, clipService) {
+         return {
+            restrict: 'AE',
+            templateUrl: 'icsm/clip/manual.html',
+            scope:{},
+            link: function (scope) {
+               // yMax, yMin, xMax,xMin
+
+               $rootScope.$on('icsm.clip.drawn', function(event, c) {
+                  scope.xMin = c.xMin;
+                  scope.yMin = c.yMin;
+                  scope.xMax = c.xMax;
+                  scope.yMax = c.yMax;
+               });
+
+               scope.allowSearch = () => !isNan(scope.xMin) && !isNan(scope.xMax) && !isNan(scope.yMin) && !isNan(scope.yMax) &&
+                  (+scope.xMin) !== (+scope.xMax) && (+scope.yMin) !== (+scope.yMax);
+
+               scope.search = function() {
+                  // Normalise coordinates
+                  let min = scope.xMin;
+                  let max = scope.xMax;
+                  scope.xMin = Math.min(min, max);
+                  scope.xMax = Math.max(min, max);
+
+                  min = scope.yMin;
+                  max = scope.yMax;
+                  scope.yMin = Math.min(min, max);
+                  scope.yMax = Math.max(min, max);
+
+                  $rootScope.$broadcast("bounds.drawn", {
+                     bounds: L.latLngBounds(L.latLng(+scope.yMin, +scope.xMin), L.latLng(+scope.yMax, +scope.xMax))
+                  });
+               };
+            }
+         };
+      }])
 
 
       .factory("clipService", ['$q', '$rootScope', 'drawService', function ($q, $rootScope, drawService) {
@@ -89,19 +129,19 @@
                }
             };
 
-            $rootScope.$on("bounds.drawn", function (event, data) {
-               console.log("data", data);
-               service.setClip(data);
-               let c = service.data.clip;
+         $rootScope.$on("bounds.drawn", function (event, data) {
+            console.log("data", data);
+            service.setClip(data);
+            let c = service.data.clip;
 
-               $rootScope.$broadcast('icsm.clip.drawn', c);  // Let people know it is drawn
-               $rootScope.$broadcast('icsm.bounds.draw', [
-                     c.xMin,
-                     c.yMin,
-                     c.xMax,
-                     c.yMax
-                  ]);// Draw it
-            });
+            $rootScope.$broadcast('icsm.clip.drawn', c);  // Let people know it is drawn
+            $rootScope.$broadcast('icsm.bounds.draw', [
+               c.xMin,
+               c.yMin,
+               c.xMax,
+               c.yMax
+            ]);// Draw it
+         });
 
          return service;
 
