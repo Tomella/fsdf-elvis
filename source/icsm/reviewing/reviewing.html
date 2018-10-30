@@ -38,8 +38,8 @@
    </div>
 
    <div ng-controller="listCtrl as list">
-      <div ng-if="list.selected | hasProducts" class="well" style="padding:7px">
-         <h5 style="margin-top:4px">{{list.selected | productsCount}} items are products which you can elect to transform into a different coordinate system and file format</h5>
+      <div ng-if="list.selected | hasTransformables" class="well" style="padding:7px">
+         <h5 style="margin-top:4px">{{list.selected | transformablesCount}} item(s) are downloads which you can elect to transform into a different coordinate system and file format</h5>
          <span products-dialog>
             <product-projection processing="data"></product-projection>
             <product-formats processing="data"></product-formats>

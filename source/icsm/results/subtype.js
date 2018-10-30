@@ -44,6 +44,11 @@
          return (items) => items.some(item => item.product);
       })
 
+
+      .filter("hasTransformables", function () {
+         return (items) => items.some(item => item.transformable);
+      })
+
       .filter("productsSummary", function () {
          return (items) => {
             let count = items.filter(item => item.product).length;
@@ -59,6 +64,10 @@
 
       .filter("productsCount", function () {
          return (items) => items ? items.filter(item => item.product).length : 0;
+      })
+
+      .filter("transformablesCount", function () {
+         return (items) => items ? items.filter(item => item.transformable).length : 0;
       });
 
 
