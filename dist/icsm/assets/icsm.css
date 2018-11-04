@@ -48,6 +48,15 @@
     max-height: 350px;
   }
 }
+.leaflet-popup {
+  position: absolute;
+  text-align: center;
+}
+
+.fi-popup hr {
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
 .nav-icons {
   margin-top: 7px !important;
 }
@@ -77,15 +86,6 @@
 
 .common-header {
   background-color: white;
-}
-.leaflet-popup {
-  position: absolute;
-  text-align: center;
-}
-
-.fi-popup hr {
-  margin-top: 3px;
-  margin-bottom: 3px;
 }
 .iso19115,
 .iso19115 ul,
@@ -243,6 +243,50 @@
   color: #fff;
   background-color: #777;
 }
+.mvt,
+.mvt ul,
+.mvt li {
+  position: relative;
+}
+
+.mvt ul {
+  list-style: none;
+  padding-left: 32px;
+}
+
+.mvt li::before,
+.mvt li::after {
+  content: "";
+  position: absolute;
+  left: -12px;
+}
+
+.mvt li::before {
+  border-top: 1px solid #000;
+  top: 9px;
+  width: 8px;
+  height: 0;
+}
+
+.mvt li::after {
+  border-left: 1px solid #000;
+  height: 100%;
+  width: 0px;
+  top: 2px;
+}
+
+.mvt ul > li:last-child::after {
+  height: 8px;
+}
+
+.metaview-head {
+  font-weight: bold;
+}
+
+.metaview-info {
+  padding-left: 3px;
+  padding-right: 3px;
+}
 .icsmTabs {
   position: absolute;
   top: 0px;
@@ -329,50 +373,6 @@
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-}
-.mvt,
-.mvt ul,
-.mvt li {
-  position: relative;
-}
-
-.mvt ul {
-  list-style: none;
-  padding-left: 32px;
-}
-
-.mvt li::before,
-.mvt li::after {
-  content: "";
-  position: absolute;
-  left: -12px;
-}
-
-.mvt li::before {
-  border-top: 1px solid #000;
-  top: 9px;
-  width: 8px;
-  height: 0;
-}
-
-.mvt li::after {
-  border-left: 1px solid #000;
-  height: 100%;
-  width: 0px;
-  top: 2px;
-}
-
-.mvt ul > li:last-child::after {
-  height: 8px;
-}
-
-.metaview-head {
-  font-weight: bold;
-}
-
-.metaview-info {
-  padding-left: 3px;
-  padding-right: 3px;
 }
 /* Side Panel */
 
@@ -886,6 +886,12 @@ img.elvis-logo {
   right: 7px;
   bottom: 15px;
 }
+.baselayer-slider {
+  position: absolute;
+  right: 20px;
+  top: 10px;
+  z-index: 3;
+}
 .mess-error {
   background-color: lightcoral;
 }
@@ -900,12 +906,6 @@ img.elvis-logo {
 
 .mess-container {
   font-weight: bold;
-}
-.baselayer-slider {
-  position: absolute;
-  right: 20px;
-  top: 10px;
-  z-index: 3;
 }
 .product-valid {
   color: green;
@@ -1183,6 +1183,22 @@ i.fa.active {
   color: #fff;
   background-color: #777;
 }
+.downloadPane {
+  padding-left: 0px !important;
+  padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 10px;
+  overflow: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
+}
 .common-baselayer-control {
   width: 210px;
   color: #333;
@@ -1280,22 +1296,6 @@ i.fa.active {
   border: none;
   height: 30px;
   font-size: 13px;
-}
-.downloadPane {
-  padding-left: 0px !important;
-  padding-right: 5px !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 10px;
-  overflow: hidden;
-}
-
-.downloadCont {
-  position: fixed;
-  right: 0;
-  bottom: 8px;
 }
 .start-content-container {
   position: fixed;
