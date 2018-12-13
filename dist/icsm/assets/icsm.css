@@ -1,4 +1,3 @@
-
 .wizardPopup {
   position: fixed;
   top: 20px;
@@ -520,6 +519,27 @@ div.leaflet-control-scale-line {
     display: none;
   }
 }
+.placenames {
+  margin: 2px;
+  padding: 6px;
+  position: fixed;
+  bottom: 55px;
+  left: 5px;
+  opacity: 0.9;
+  z-index: 1200;
+  background-color: white;
+  white-space: nowrap;
+  text-align: left;
+  -webkit-transition: height 1s;
+  /* Safari */
+  transition: height 1s;
+  border: 1px, solid;
+  border-radius: 3px;
+}
+
+.placenames-title {
+  font-weight: bold;
+}
 /* Overrides */
 
 img.logo {
@@ -862,7 +882,7 @@ body {
   padding: 10px;
   padding-left: 8px;
   position: fixed;
-  top: 110px;
+  top: 109px;
   right: 300px;
   z-index: 1200;
   background-color: white;
@@ -871,6 +891,7 @@ body {
   -webkit-transition: all 1s ease;
   /* Safari */
   transition: all 1s ease;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
 }
 
 .coverage img {
@@ -881,10 +902,13 @@ body {
 
 .coverage.transitioned-up img {
   height: 0;
+  width: 0;
 }
 
 .coverage.transitioned-up {
   display: none;
+  width: 0;
+  height: 0;
 }
 
 .coverage.transitioned-down {
@@ -980,6 +1004,38 @@ img.elvis-logo {
 
 .product-restrict {
   padding-bottom: 8px;
+}
+.reviewing-odd {
+  background-color: #eeeeee;
+}
+
+.row.reviewing-divider {
+  border-top: 1px solid lightgray;
+  padding-top: 5px;
+  margin-top: 5px;
+}
+
+.reviewing-datasets {
+  max-height: 450px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-height: 750px) {
+  .reviewing-datasets {
+    max-height: 350px;
+  }
+}
+
+@media (max-height: 650px) {
+  .reviewing-datasets {
+    max-height: 250px;
+  }
+}
+
+.exclude {
+  color: #777777;
+  text-decoration: line-through;
 }
 .continue-container {
   padding: 4px;
@@ -1125,38 +1181,6 @@ img.elvis-logo {
   bottom: 0;
   left: 0;
   right: 0;
-}
-.reviewing-odd {
-  background-color: #eeeeee;
-}
-
-.row.reviewing-divider {
-  border-top: 1px solid lightgray;
-  padding-top: 5px;
-  margin-top: 5px;
-}
-
-.reviewing-datasets {
-  max-height: 450px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-@media (max-height: 750px) {
-  .reviewing-datasets {
-    max-height: 350px;
-  }
-}
-
-@media (max-height: 650px) {
-  .reviewing-datasets {
-    max-height: 250px;
-  }
-}
-
-.exclude {
-  color: #777777;
-  text-decoration: line-through;
 }
 .selectContainer {
   width: 100%;
@@ -1350,27 +1374,6 @@ i.fa.active {
   position: fixed;
   right: 0;
   bottom: 8px;
-}
-.placenames {
-  margin: 2px;
-  padding: 6px;
-  position: fixed;
-  bottom: 55px;
-  left: 5px;
-  opacity: 0.9;
-  z-index: 1200;
-  background-color: white;
-  white-space: nowrap;
-  text-align: left;
-  -webkit-transition: height 1s;
-  /* Safari */
-  transition: height 1s;
-  border: 1px, solid;
-  border-radius: 3px;
-}
-
-.placenames-title {
-  font-weight: bold;
 }
 .start-content-container {
   position: fixed;

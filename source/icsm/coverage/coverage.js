@@ -13,15 +13,35 @@
       }
    }])
 
-   .directive("icsmCoverageLayersSelector", ["coverageService", function (coverageService) {
+   .directive("icsmCoverageLayersSelector", ["$document", "coverageService", function ($document, coverageService) {
       return {
          templateUrl: "icsm/coverage/popup.html",
          scope: {
          },
          link: function (scope, element) {
-            let timer;
+
+            function keyupHandler(keyEvent) {
+               if(keyEvent.which === 27) {
+                  keyEvent.stopPropagation();
+                  keyEvent.preventDefault();
+                  scope.$apply(function() {
+                      coverageService.hide();
+                  });
+               }
+            }
 
             scope.state = coverageService.getState();
+
+            scope.$watch("state.show", function(newValue) {
+               if(newValue) {
+                  $document.on('keyup', keyupHandler);
+               } else {
+                  $document.off('keyup', keyupHandler);
+               }
+               scope.$on('$destroy', function () {
+                   $document.off('keyup', keyupHandler);
+               });
+            });
 
             scope.toggleVisibility = (layer) => {
                coverageService.toggleVisibility(layer);

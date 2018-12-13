@@ -7,7 +7,7 @@
       </span>
       <div class="pull-right">
          <div style="width: 110px" ng-repeat="type in layer.coverage.types">
-            <span class="coverage-legend-color" style="background-color:{{type.color}};"></span>
+            <span class="coverage-legend-color" ng-style="{'background-color':type.color}"></span>
             {{type.name}}
          </div>
       </div>

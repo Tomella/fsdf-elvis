@@ -3,7 +3,7 @@
    padding: 10px;
    padding-left:8px;
    position: fixed;
-   top: 110px;
+   top: 109px;
    right: 300px;
    z-index: 1200;
    background-color:white;
@@ -11,6 +11,7 @@
    text-align: left;
    -webkit-transition: all 1s ease; /* Safari */
    transition: all 1s ease;
+   box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
 }
 
 .coverage img {
@@ -20,10 +21,13 @@
 
 .coverage.transitioned-up img {
    height: 0;
+   width: 0;
 }
 
 .coverage.transitioned-up {
    display: none;
+   width: 0;
+   height: 0;
 }
 
 .coverage.transitioned-down {
