@@ -20,6 +20,7 @@
             125
          ],
          "minZoom": 4,
+         "maxZoom": 17,
          "zoom": 4
       },
       "position": {
@@ -56,7 +57,7 @@
             ],
             "legendUrl": "http://services.ga.gov.au/site_9/services/DEM_SRTM_1Second_Hydro_Enforced/MapServer/WmsServer?request=GetLegendGraphic&version=1.3.0&format=image/png&layer=iMAGE",
             "addLayerControl": false,
-            "visible": true
+            "visible": false
          },
          {
             "name": "Australian Topography",
@@ -76,7 +77,7 @@
                }
             ],
             "addLayerControl": false,
-            "visible": true
+            "visible": false
          },
          {
             "name": "NSW Topography",
@@ -95,7 +96,7 @@
                }
             ],
             "addLayerControl": false,
-            "visible": true
+            "visible": false
          },
          {
             "description": "placeholder for layers above the topography",
@@ -104,35 +105,35 @@
             "layers": []
          },
          {
-            "name": "All",
-            "pseudoBaseLayer": true,
-            "type": [
-               "TileLayer",
-               "WMS"
-            ],
-            "key": "indexes",
-            "parameters": [
-               "https://elvis-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetPNG_ElevationAvailableData.fmw",
-               {
-                  "layers": "public.QLD_Elevation_Metadata_Index,public.5dem_ProjectsIndex,public.NSW_100k_Index_54,public.NSW_100k_Index_55,public.NSW_100k_Index_56,public.NSW_100k_Index_Forward_Program,public.ACT2015-Tile_Index_55,public.QLD_Project_Index_54,public.QLD_Project_Index_55,public.QLD_Project_Index_56,public.TAS_Project_Index_55,public.GA_Project_Index_47,public.GA_Project_Index_48,public.GA_Project_Index_54,public.GA_Project_Index_55,public.GA_Project_Index_56",
-                  "format": "image/png",
-                  "transparent": true,
-                  "opacity": 0.7,
-                  "minZoom": 12
-               }
-            ],
-            "addLayerControl": false,
-            "visible": true
-         },
-         {
-            "name": "All",
+            "name": "DEM",
+            "coverage": {
+               "thumb": "icsm/resources/img/dem_thumb.png",
+               "types": [
+                  {
+                     "name": "1 Metre",
+                     "color": "#225ea8"
+                  },
+                  {
+                     "name": "2 Metre",
+                     "color": "#41b6c4"
+                  },
+                  {
+                     "name": "5 Metre",
+                     "color": "#a1dab4"
+                  },
+                  {
+                     "name": "1 Second",
+                     "color": "#ffffcc"
+                  }
+               ]
+            },
             "pseudoBaseLayer": true,
             "type": [
                "TileLayer"
             ],
             "key": "indexesTile",
             "parameters": [
-               "http://elevation.fsdf.org.au/tiles/elvis/{z}/{x}/{y}.png",
+               "https://s3-ap-southeast-2.amazonaws.com/fsdf.elevation.tile.cache/DEM/{z}/{x}/{y}.png",
                {
                   "tms": false,
                   "maxZoom": 11,
@@ -142,8 +143,69 @@
                  ]
                }
             ],
-            "addLayerControl": false,
-            "visible": true
+            "addLayerControl": false
+         },
+         {
+            "name": "Point Cloud",
+            "coverage": {
+               "thumb": "icsm/resources/img/point_cloud_thumb.png",
+               "types": [
+                  {
+                     "name": "Point Cloud",
+                     "color": "#225ea8"
+                  }
+               ]
+            },
+            "pseudoBaseLayer": true,
+            "type": [
+               "TileLayer"
+            ],
+            "key": "indexesTile",
+            "parameters": [
+               "https://s3-ap-southeast-2.amazonaws.com/fsdf.elevation.tile.cache/POINT_CLOUD/{z}/{x}/{y}.png",
+               {
+                  "tms": false,
+                  "maxZoom": 11,
+                  "bounds": [
+                     [-45, 92],
+                     [-9, 155]
+                 ]
+               }
+            ],
+            "addLayerControl": false
+         },
+         {
+            "name": "Bathymetry",
+            "coverage": {
+               "thumb": "icsm/resources/img/bathymetry_thumb.png",
+               "types": [
+                  {
+                     "name": "50 Metre",
+                     "color": "#d95f0e"
+                  },
+                  {
+                     "name": "100 Metre",
+                     "color": "#fec44f"
+                  }
+               ]
+            },
+            "pseudoBaseLayer": true,
+            "type": [
+               "TileLayer"
+            ],
+            "key": "indexesTile",
+            "parameters": [
+               "https://s3-ap-southeast-2.amazonaws.com/fsdf.elevation.tile.cache/BATHYMETRY/{z}/{x}/{y}.png",
+               {
+                  "tms": false,
+                  "maxZoom": 11,
+                  "bounds": [
+                     [-45, 92],
+                     [-9, 155]
+                 ]
+               }
+            ],
+            "addLayerControl": false
          }
       ],
       "drawOptions": {
@@ -160,76 +222,6 @@
       "extentUrl": "icsm/resources/data/NSWExtentGeoJSON.json",
       "outside": "topography",
       "inside": "nswTopo"
-   },
-   "layersTab": {
-      "group": "ELVIS - Elevation and Depth - Foundation Spatial Data Map Layers",
-      "title": "Layers",
-      "layers": [
-         {
-            "name": "Flow grid direction image",
-            "help": "Best viewed at state to local area zoom levels.",
-            "metadata": "http://www.ga.gov.au/thredds/wms/national_grids/d8-9s.nc?request=GetCapabilities&service=WMS",
-            "pseudoBaseLayer": true,
-            "type": [
-               "TileLayer",
-               "WMS"
-            ],
-            "key": "gravity",
-            "parameters": [
-               "http://www.ga.gov.au/thredds/wms/national_grids/d8-9s.nc",
-               {
-                  "layers": "Flow_Direction_Grid_to_accompany_9_Second_Digital_Elevation_Model_of_Australia_Version_3",
-                  "format": "image/png",
-                  "transparent": true,
-                  "opacity": 0.5
-               }
-            ],
-            "addLayerControl": false,
-            "visible": true
-         },
-         {
-            "name": "Elevation contours",
-            "help": "Detail improves as you zoom into an area but disappears when zoomed to tightly",
-            "metadata": "http://www.ga.gov.au/gis/rest/services/topography/Dynamic_National_Map_Elevation_Relief_and_Physiography/MapServer",
-            "pseudoBaseLayer": true,
-            "type": [
-               "TileLayer",
-               "WMS"
-            ],
-            "key": "gravity",
-            "parameters": [
-               "http://www.ga.gov.au/gis/services/topography/Dynamic_National_Map_Elevation_Relief_and_Physiography/MapServer/WMSServer",
-               {
-                  "layers": "Contours_Labels,Contours_250K_Scale,Contours_2_5Million_Scale,No_Data",
-                  "format": "image/png",
-                  "transparent": true
-               }
-            ],
-            "addLayerControl": false,
-            "visible": true
-         },
-         {
-            "name": "Spot elevations",
-            "help": "Detail improves as you zoom into an area but disappears when zoomed to tightly",
-            "metadata": "http://www.ga.gov.au/gis/rest/services/topography/Dynamic_National_Map_Elevation_Relief_and_Physiography/MapServer",
-            "pseudoBaseLayer": true,
-            "type": [
-               "TileLayer",
-               "WMS"
-            ],
-            "key": "gravity",
-            "parameters": [
-               "http://www.ga.gov.au/gis/services/topography/Dynamic_National_Map_Elevation_Relief_and_Physiography/MapServer/WMSServer",
-               {
-                  "layers": "Spot_Elevations_Labels,Spot_Elevations_250K_Scale,Spot_Elevations_2_5Million_Scale",
-                  "format": "image/png",
-                  "transparent": true
-               }
-            ],
-            "addLayerControl": false,
-            "visible": true
-         }
-      ]
    },
    "facets": {
       "defaultKeywords": [

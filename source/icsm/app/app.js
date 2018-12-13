@@ -73,6 +73,7 @@
 
 		'icsm.bounds',
       'icsm.contributors',
+      'icsm.coverage',
 		'icsm.clip',
 		'icsm.glossary',
 		'icsm.help',

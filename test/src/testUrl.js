@@ -11,10 +11,7 @@ var validHosts = [
        host: ".motogp.com"
    },
    {
-       host: "elvis-ga.fmecloud.com"
-   },
-   {
-       host: "elvis-ga.fmecloud.com"
+       host: "elvis2018-ga.fmecloud.com"
    },
    {
        host: "s3-ap-southeast-2.amazonaws.com"

@@ -1,0 +1,15 @@
+<span class="coverage" ng-class="state.show ? 'transitioned-down' : 'transitioned-up'">
+   <div ng-repeat="layer in state.layers" class="coverage-layer">
+      <input type="checkbox" ng-checked="layer.visible" ng-click="toggleVisibility(layer)"></input>
+      <span>
+         <span class="coverage-title">{{layer.name}}</span><br/>
+         <img style="width:100px" ng-src="{{layer.coverage.thumb}}"></img>
+      </span>
+      <div class="pull-right">
+         <div style="width: 110px" ng-repeat="type in layer.coverage.types">
+            <span class="coverage-legend-color" style="background-color:{{type.color}};"></span>
+            {{type.name}}
+         </div>
+      </div>
+   </div>
+</span>

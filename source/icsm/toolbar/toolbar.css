@@ -61,7 +61,7 @@
   height: 30px;
 }
 
-.right-toolbar-items>div, .right-toolbar-items li {
+.right-toolbar-items>div, .right-toolbar-items li, .left-toolbar-items>div, .left-toolbar-items li {
   display: inline;
 }
 
