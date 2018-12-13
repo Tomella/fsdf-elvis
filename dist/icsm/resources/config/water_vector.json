@@ -134,7 +134,7 @@
          }
       ]
    },
-   "serviceUrlTemplate": "https://elvis-ga.fmecloud.com/fmejobsubmitter/fsdf_water/ClipZipShip_Water_Master.fmw?geocat_number={id}&features_selected={features_selected}&division_name={division_name}&river_reg_name={river_reg_name}&ymin={ymin}&ymax={ymax}&xmin={xmin}&xmax={xmax}&file_name={filename}&file_format_vector={outFormat}&file_format_raster=null&coord_sys={outCoordSys}&email_address={email}&opt_showresult=false&opt_servicemode=async",
+   "serviceUrlTemplate": "https://elvis2018-ga.fmecloud.com/fmejobsubmitter/fsdf_water/ClipZipShip_Water_Master.fmw?geocat_number={id}&features_selected={features_selected}&division_name={division_name}&river_reg_name={river_reg_name}&ymin={ymin}&ymax={ymax}&xmin={xmin}&xmax={xmax}&file_name={filename}&file_format_vector={outFormat}&file_format_raster=null&coord_sys={outCoordSys}&email_address={email}&opt_showresult=false&opt_servicemode=async",
    "refData": {
       "rasterFileFormat": [
          {

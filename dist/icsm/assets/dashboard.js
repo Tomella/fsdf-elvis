@@ -42,7 +42,7 @@ under the License.
          select: "/FailuresByWorkspace",
          heading: "Failures By Workspace"
       }],
-      baseUrl: "https://elvis-ga.fmecloud.com/fmeserver/#/dashboards"
+      baseUrl: "https://elvis2018-ga.fmecloud.com/fmeserver/#/dashboards"
    };
 
    angular.module("DashboardApp", ['exp.ui.templates', 'common.header', 'common.templates', 'page.footer', 'ui.bootstrap']).controller('dashCtrl', function () {

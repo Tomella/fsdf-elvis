@@ -8,9 +8,6 @@ var validHosts = [
        host: ".ga.gov.au"
    },
    {
-       host: ".motogp.com"
-   },
-   {
        host: "elvis2018-ga.fmecloud.com"
    },
    {
