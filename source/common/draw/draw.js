@@ -33,7 +33,6 @@
          var callbackOptions,
             drawControl,
             drawer,
-            featureGroup,
             rectangleDeferred;
 
          return {
