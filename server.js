@@ -351,7 +351,7 @@ app.get('/proxy/*', function (req, res, next) {
     // We only want a very few requests to get through. Via the whitelist.
     var host = remoteUrl.host;
     if (!validHosts.some((valid) => {
-        return host.indexOf(valid) > -1;
+        return host && host.indexOf(valid) > -1;
     })) {
         return res.status(403).send('Not a white listed host. Go away!');
     }
