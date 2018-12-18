@@ -20,6 +20,30 @@ under the License.
 'use strict';
 
 (function (angular) {
+  'use strict';
+
+  angular.module('start.navigation', [])
+  /**
+   *
+   * Override the original mars user.
+   *
+   */
+  .directive('startNavigation', ['altthemesService', function (altthemesService) {
+    return {
+      restrict: 'AE',
+      templateUrl: 'start/navigation/navigation.html',
+      link: function link(scope) {
+        altthemesService.getThemes().then(function (themes) {
+          scope.themes = themes;
+        });
+        scope.username = "Anonymous";
+      }
+    };
+  }]);
+})(angular);
+'use strict';
+
+(function (angular) {
 
 	'use strict';
 
@@ -60,29 +84,5 @@ under the License.
 			}
 		});
 	}
-})(angular);
-'use strict';
-
-(function (angular) {
-  'use strict';
-
-  angular.module('start.navigation', [])
-  /**
-   *
-   * Override the original mars user.
-   *
-   */
-  .directive('startNavigation', ['altthemesService', function (altthemesService) {
-    return {
-      restrict: 'AE',
-      templateUrl: 'start/navigation/navigation.html',
-      link: function link(scope) {
-        altthemesService.getThemes().then(function (themes) {
-          scope.themes = themes;
-        });
-        scope.username = "Anonymous";
-      }
-    };
-  }]);
 })(angular);
 angular.module("start.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("start/navigation/navigation.html","<div class=\"container-fluid start-content-container\">\r\n   <div class=\"panel panel-default\" ng-repeat=\"item in themes\">\r\n      <div class=\"panel-body\">\r\n         <div class=\"row\">\r\n            <div class=\"col-md-2\">\r\n               <button ng-attr-title=\"{{item.title}}\"><span class=\"select-icon select-{{item.code}}\"></span></button>\r\n            </div>\r\n            <div class=\"col-md-8\">\r\n               <h3>{{item.label}}</h3>\r\n               {{item.description}}\r\n            </div>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");}]);

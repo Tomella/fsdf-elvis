@@ -48,15 +48,6 @@
     max-height: 350px;
   }
 }
-.leaflet-popup {
-  position: absolute;
-  text-align: center;
-}
-
-.fi-popup hr {
-  margin-top: 3px;
-  margin-bottom: 3px;
-}
 .nav-icons {
   margin-top: 7px !important;
 }
@@ -86,6 +77,15 @@
 
 .common-header {
   background-color: white;
+}
+.leaflet-popup {
+  position: absolute;
+  text-align: center;
+}
+
+.fi-popup hr {
+  margin-top: 3px;
+  margin-bottom: 3px;
 }
 .iso19115,
 .iso19115 ul,
@@ -125,11 +125,6 @@
 
 .iso19115-head {
   font-weight: bold;
-}
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
 }
 .mvt,
 .mvt ul,
@@ -286,6 +281,11 @@
 .altthemesdropdown .altthemescurrent {
   color: #fff;
   background-color: #777;
+}
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
 }
 .icsmTabs {
   position: absolute;
@@ -519,27 +519,6 @@ div.leaflet-control-scale-line {
     display: none;
   }
 }
-.placenames {
-  margin: 2px;
-  padding: 6px;
-  position: fixed;
-  bottom: 55px;
-  left: 5px;
-  opacity: 0.9;
-  z-index: 1200;
-  background-color: white;
-  white-space: nowrap;
-  text-align: left;
-  -webkit-transition: height 1s;
-  /* Safari */
-  transition: height 1s;
-  border: 1px, solid;
-  border-radius: 3px;
-}
-
-.placenames-title {
-  font-weight: bold;
-}
 /* Overrides */
 
 img.logo {
@@ -771,6 +750,27 @@ body {
 .leaflet-container {
   background-color: rgba(255,0,0,0.0);
 }
+.placenames {
+  margin: 2px;
+  padding: 6px;
+  position: fixed;
+  bottom: 55px;
+  left: 5px;
+  opacity: 0.9;
+  z-index: 1200;
+  background-color: white;
+  white-space: nowrap;
+  text-align: left;
+  -webkit-transition: height 1s;
+  /* Safari */
+  transition: height 1s;
+  border: 1px, solid;
+  border-radius: 3px;
+}
+
+.placenames-title {
+  font-weight: bold;
+}
 .clipmodal {
   z-index: 1010;
   padding: 1px;
@@ -812,6 +812,83 @@ body {
 .clipmodal.ng-hide-remove-active {
   /* the transition is defined in the active class */
   transition: 1s linear all;
+}
+.coverage {
+  margin: 2px;
+  padding: 10px;
+  padding-left: 8px;
+  position: fixed;
+  top: 109px;
+  right: 300px;
+  z-index: 1200;
+  background-color: white;
+  white-space: nowrap;
+  text-align: left;
+  -webkit-transition: all 1s ease;
+  /* Safari */
+  transition: all 1s ease;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+}
+
+.coverage-unstick {
+  vertical-align: top;
+  font-weight: bold;
+}
+
+.coverage img {
+  -webkit-transition: all 1s ease;
+  /* Safari */
+  transition: all 1s ease;
+}
+
+.coverage.transitioned-up img {
+  height: 0;
+  width: 0;
+}
+
+.coverage.transitioned-up {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.coverage.transitioned-down {
+  border: 1px solid gray;
+  border-radius: 1px;
+  width: 260px;
+}
+
+.transitioned-up {
+  height: 0px;
+  border: 0 none;
+  margin: 0;
+  padding: 0;
+}
+
+.coverage-link {
+  font-weight: bold;
+}
+
+.coverage-layer {
+  border-bottom: solid 1px gray;
+}
+
+.coverage-layer:last-child {
+  border-bottom: none;
+}
+
+.coverage-title {
+  font-weight: bold;
+  font-size: 110%;
+}
+
+.coverage-legend-color {
+  display: inline-block;
+  width: 18px;
+  height: 15px;
+  padding-left: 10px;
+  border: 1px solid gray;
+  border-radius: 2px;
 }
 .contributors {
   margin: 2px;
@@ -876,78 +953,6 @@ body {
 .elevation-and-depth {
   padding-left: 12px;
   padding-right: 12px;
-}
-.coverage {
-  margin: 2px;
-  padding: 10px;
-  padding-left: 8px;
-  position: fixed;
-  top: 109px;
-  right: 300px;
-  z-index: 1200;
-  background-color: white;
-  white-space: nowrap;
-  text-align: left;
-  -webkit-transition: all 1s ease;
-  /* Safari */
-  transition: all 1s ease;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
-}
-
-.coverage img {
-  -webkit-transition: all 1s ease;
-  /* Safari */
-  transition: all 1s ease;
-}
-
-.coverage.transitioned-up img {
-  height: 0;
-  width: 0;
-}
-
-.coverage.transitioned-up {
-  display: none;
-  width: 0;
-  height: 0;
-}
-
-.coverage.transitioned-down {
-  border: 1px solid gray;
-  border-radius: 1px;
-  width: 260px;
-}
-
-.transitioned-up {
-  height: 0px;
-  border: 0 none;
-  margin: 0;
-  padding: 0;
-}
-
-.coverage-link {
-  font-weight: bold;
-}
-
-.coverage-layer {
-  border-bottom: solid 1px gray;
-}
-
-.coverage-layer:last-child {
-  border-bottom: none;
-}
-
-.coverage-title {
-  font-weight: bold;
-  font-size: 110%;
-}
-
-.coverage-legend-color {
-  display: inline-block;
-  width: 18px;
-  height: 15px;
-  padding-left: 10px;
-  border: 1px solid gray;
-  border-radius: 2px;
 }
 img.elvis-logo {
   height: 75px;
@@ -1197,68 +1202,6 @@ img.elvis-logo {
 i.fa.active {
   color: red;
 }
-.icsm-icon {
-  background: url("icsm/img/global-sprites.svg") no-repeat;
-  display: inline-block;
-  width: 19px;
-  height: 30px;
-  margin: 0 auto 0 auto;
-}
-
-.icsm-pin {
-  background-position: 0px;
-}
-
-.icsm-map {
-  background-position: -63px;
-}
-
-.icsm-crosshair {
-  background-position: -82px;
-}
-
-.icsm-sign {
-  background-position: -102px;
-}
-
-.icsm-parcel {
-  background-position: -121px;
-}
-
-.icsm-satellite {
-  background-position: -140px;
-}
-
-.icsm-ship {
-  background-position: -160px;
-}
-
-.icsm-water {
-  background-position: -179px;
-}
-
-.icsm-shore {
-  background-position: -199px;
-}
-
-.icsm-land {
-  background-position: -218px;
-}
-
-.themesItemCompact {
-  margin-top: 0px !important;
-}
-
-.themesdropdown {
-  margin-top: -8px;
-  padding-right: 20px;
-  z-index: 100000;
-}
-
-.themesdropdown .themescurrent {
-  color: #fff;
-  background-color: #777;
-}
 .common-baselayer-control {
   width: 210px;
   color: #333;
@@ -1358,6 +1301,68 @@ i.fa.active {
   border: none;
   height: 30px;
   font-size: 13px;
+}
+.icsm-icon {
+  background: url("icsm/img/global-sprites.svg") no-repeat;
+  display: inline-block;
+  width: 19px;
+  height: 30px;
+  margin: 0 auto 0 auto;
+}
+
+.icsm-pin {
+  background-position: 0px;
+}
+
+.icsm-map {
+  background-position: -63px;
+}
+
+.icsm-crosshair {
+  background-position: -82px;
+}
+
+.icsm-sign {
+  background-position: -102px;
+}
+
+.icsm-parcel {
+  background-position: -121px;
+}
+
+.icsm-satellite {
+  background-position: -140px;
+}
+
+.icsm-ship {
+  background-position: -160px;
+}
+
+.icsm-water {
+  background-position: -179px;
+}
+
+.icsm-shore {
+  background-position: -199px;
+}
+
+.icsm-land {
+  background-position: -218px;
+}
+
+.themesItemCompact {
+  margin-top: 0px !important;
+}
+
+.themesdropdown {
+  margin-top: -8px;
+  padding-right: 20px;
+  z-index: 100000;
+}
+
+.themesdropdown .themescurrent {
+  color: #fff;
+  background-color: #777;
 }
 .downloadPane {
   padding-left: 0px !important;

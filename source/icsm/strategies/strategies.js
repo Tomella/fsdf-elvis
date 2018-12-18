@@ -1,7 +1,7 @@
 class BaseStrategy {
    constructor($http) {
       this.http = $http;
-      this.NO_METADATA = "No metadata found for this dataset.";
+      this.NO_METADATA = "Can't show metadata for this dataset.";
    }
 
    constructLink(item) {
@@ -87,6 +87,9 @@ class GaStrategy extends BaseStrategy {
    }
 
    constructLink(item) {
+      if (item.metadata_url) {
+         return item.metadata_url;
+      }
       var uuid = item.metadata_id;
       return uuid ? this.GA_LINK_METADATA_TEMPLATE.replace("${uuid}", uuid) : null;
    }

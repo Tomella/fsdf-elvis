@@ -13,7 +13,7 @@
       }
    }])
 
-   .directive("icsmCoverageLayersSelector", ["$document", "coverageService", function ($document, coverageService) {
+   .directive("icsmCoverageLayersSelector", ["$document", "$timeout", "coverageService", function ($document, $timeout, coverageService) {
       return {
          templateUrl: "icsm/coverage/popup.html",
          scope: {
@@ -35,6 +35,7 @@
             scope.$watch("state.show", function(newValue) {
                if(newValue) {
                   $document.on('keyup', keyupHandler);
+                  $timeout(() => element.find("button").focus(), 50);
                } else {
                   $document.off('keyup', keyupHandler);
                }
@@ -42,6 +43,10 @@
                    $document.off('keyup', keyupHandler);
                });
             });
+
+            scope.hide = () => {
+               coverageService.hide();
+            }
 
             scope.toggleVisibility = (layer) => {
                coverageService.toggleVisibility(layer);

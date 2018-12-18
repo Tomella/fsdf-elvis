@@ -14,6 +14,11 @@
    box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
 }
 
+.coverage-unstick {
+   vertical-align: top;
+   font-weight: bold;
+}
+
 .coverage img {
    -webkit-transition: all 1s ease; /* Safari */
    transition: all 1s ease;

@@ -1,4 +1,7 @@
 <span class="coverage" ng-class="state.show ? 'transitioned-down' : 'transitioned-up'">
+   <div style="padding-bottom:15px">
+      <button class="undecorated coverage-unstick" ng-click="hide()" style="float:right" title="Hide layer selections">X</button>
+   </div>
    <div ng-repeat="layer in state.layers" class="coverage-layer">
       <input type="checkbox" ng-checked="layer.visible" ng-click="toggleVisibility(layer)"></input>
       <span>
