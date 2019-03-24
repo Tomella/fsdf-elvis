@@ -87,11 +87,6 @@
 .common-header {
   background-color: white;
 }
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
-}
 .iso19115,
 .iso19115 ul,
 .iso19115 li {
@@ -130,6 +125,11 @@
 
 .iso19115-head {
   font-weight: bold;
+}
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
 }
 .mvt,
 .mvt ul,
@@ -1010,38 +1010,6 @@ img.elvis-logo {
 .product-restrict {
   padding-bottom: 8px;
 }
-.reviewing-odd {
-  background-color: #eeeeee;
-}
-
-.row.reviewing-divider {
-  border-top: 1px solid lightgray;
-  padding-top: 5px;
-  margin-top: 5px;
-}
-
-.reviewing-datasets {
-  max-height: 450px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-@media (max-height: 750px) {
-  .reviewing-datasets {
-    max-height: 350px;
-  }
-}
-
-@media (max-height: 650px) {
-  .reviewing-datasets {
-    max-height: 250px;
-  }
-}
-
-.exclude {
-  color: #777777;
-  text-decoration: line-through;
-}
 .continue-container {
   padding: 4px;
 }
@@ -1187,6 +1155,38 @@ img.elvis-logo {
   left: 0;
   right: 0;
 }
+.reviewing-odd {
+  background-color: #eeeeee;
+}
+
+.row.reviewing-divider {
+  border-top: 1px solid lightgray;
+  padding-top: 5px;
+  margin-top: 5px;
+}
+
+.reviewing-datasets {
+  max-height: 450px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-height: 750px) {
+  .reviewing-datasets {
+    max-height: 350px;
+  }
+}
+
+@media (max-height: 650px) {
+  .reviewing-datasets {
+    max-height: 250px;
+  }
+}
+
+.exclude {
+  color: #777777;
+  text-decoration: line-through;
+}
 .selectContainer {
   width: 100%;
 }
@@ -1263,22 +1263,6 @@ i.fa.active {
 .themesdropdown .themescurrent {
   color: #fff;
   background-color: #777;
-}
-.downloadPane {
-  padding-left: 0px !important;
-  padding-right: 5px !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 10px;
-  overflow: hidden;
-}
-
-.downloadCont {
-  position: fixed;
-  right: 0;
-  bottom: 8px;
 }
 .common-baselayer-control {
   width: 210px;
@@ -1379,6 +1363,22 @@ i.fa.active {
   border: none;
   height: 30px;
   font-size: 13px;
+}
+.downloadPane {
+  padding-left: 0px !important;
+  padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 10px;
+  overflow: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
 }
 .start-content-container {
   position: fixed;
