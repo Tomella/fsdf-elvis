@@ -130,5 +130,15 @@
       "image": "icsm/resources/img/ElevationAndDepth.png",
       "height": 42,
       "showText": false
+   },
+   {
+      "name": "Department of Defence",
+      "title": "Department of Defence",
+      "href": "http://www.defence.gov.au/",
+      "enabled": true,
+      "code": "defence",
+      "image": "icsm/resources/img/Defence_stacked_black_jpg.jpg",
+      "height": 42,
+      "showText": false
    }
 ]
