@@ -14,6 +14,10 @@
    transition: height 1s;
 }
 
+img.contributor-logo {
+   height: 70px;
+}
+
 .contributors img {
    -webkit-transition: height 1s; /* Safari */
    transition: height 1s;

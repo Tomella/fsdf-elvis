@@ -11,7 +11,7 @@
    },
    {
       "name": "NSW Government",
-      "title": "NSW Land $amp;Property Information",
+      "title": "NSW Land & Property Information",
       "href": "http://spatialservices.finance.nsw.gov.au/",
       "enabled": true,
       "code": "lpi",
@@ -91,8 +91,8 @@
       "showText": false
    },
    {
-      "name": "ICSM - ANZLIC Committee on Surveying &amp; Mapping",
-      "title": "ICSM - ANZLIC Committee on Surveying &amp; Mapping",
+      "name": "ICSM - ANZLIC Committee on Surveying & Mapping",
+      "title": "ICSM - ANZLIC Committee on Surveying & Mapping",
       "href": "http://www.ga.gov.au",
       "enabled": true,
       "code": "icsm",
@@ -121,8 +121,8 @@
       "showText": false
    },
    {
-      "name": "ELVIS - Elevation &amp; Depth",
-      "title": "ELVIS - Elevation &amp; Depth",
+      "name": "ELVIS - Elevation & Depth",
+      "title": "ELVIS - Elevation & Depth",
       "href": "http://fsdf.org.au/LINK/fsdf-theme/2427",
       "enabled": false,
       "class": "elevation-and-depth",
@@ -138,6 +138,16 @@
       "enabled": true,
       "code": "defence",
       "image": "icsm/resources/img/Defence_stacked_black_jpg.jpg",
+      "height": 42,
+      "showText": false
+   },
+   {
+      "name": "Digital Earth Australia",
+      "title": "Digital Earth Australia",
+      "href": "http://www.ga.gov.au/",
+      "enabled": true,
+      "code": "dea",
+      "image": "icsm/resources/img/PP-705 DEA Logo Inline.png",
       "height": 42,
       "showText": false
    }
