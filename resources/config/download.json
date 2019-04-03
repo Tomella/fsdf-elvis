@@ -23,11 +23,6 @@
          "description": "GeoTIFF is a public domain metadata standard which allows georeferencing information to be embedded within a TIFF file."
       },
       {
-         "code": "ECW",
-         "value": "ECW (Enhanced Compression Wavelet)",
-         "description": "ECW is a proprietary wavelet compression image format optimized for aerial and satellite imagery."
-      },
-      {
          "code": "NGRID",
          "value": "MapInfo Vertical Mapper Grid (NGrid)",
          "description": "NGrid is a binary raster format with header information. For each raster, there is only a single feature returned, since this feature will contain the entire raster. A single feature is stored in a single file, with header information in an associated MapInfo TAB file."
@@ -159,8 +154,8 @@
          }
       },
       {
-         "code": "GDA2020",
-         "value": "GDA2020 / Geodetic Datum of Australia 2020 (EPSG:7844)",
+         "code": "EPSG:7844",
+         "value": "Geocentric Datum of Australia 2020, Latitude-Longitude, Degrees (EPSG:7844)",
          "extent": {
             "xMax": 173.35,
             "xMin": 93.41,
@@ -171,7 +166,7 @@
       {
          "code": "LL-GDA94",
          "default": true,
-         "value": "Geodetic Datum of Australia 1994 (EPSG:4283)",
+         "value": "Geocentric Datum of Australia 1994, Latitude-Longitude; Degrees (EPSG:4283)",
          "extent": {
             "xMax": 155,
             "xMin": 108,

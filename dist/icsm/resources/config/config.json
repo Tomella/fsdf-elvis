@@ -46,7 +46,7 @@
             "defaultLayer": true,
             "isBaselayer": true,
             "parameters": [
-               "http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+               "//services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
                {
                   "layers": "Image",
                   "format": "image/png",
@@ -65,7 +65,7 @@
             ],
             "key": "topography",
             "parameters": [
-               "http://services.ga.gov.au/gis/rest/services/NationalMap_Colour_Topographic_Base_World_WM/MapServer/tile/{z}/{y}/{x}",
+               "//services.ga.gov.au/gis/rest/services/NationalMap_Colour_Topographic_Base_World_WM/MapServer/tile/{z}/{y}/{x}",
                {
                   "layers": "Image",
                   "format": "image/png",
@@ -85,7 +85,7 @@
             ],
             "key": "nswTopo",
             "parameters": [
-               "http://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_Base_Map/MapServer/tile/{z}/{y}/{x}",
+               "//maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_Base_Map/MapServer/tile/{z}/{y}/{x}",
                {
                   "format": "image/png",
                   "transparent": true,
