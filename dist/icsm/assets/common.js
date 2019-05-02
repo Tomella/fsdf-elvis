@@ -17,109 +17,6 @@ specific language governing permissions and limitations
 under the License.
 */
 
-"use strict";
-
-{
-
-   angular.module("common.bbox", ['geo.draw']).directive("commonBboxShowAll", ['$rootScope', '$timeout', function ($rootScope, $timeout) {
-      return {
-         link: function link(scope, element) {
-            element.on("click", function () {
-               $timeout(function () {
-                  $rootScope.$broadcast("commonbboxshowall");
-               });
-            });
-         }
-      };
-   }]).directive("commonBboxHideAll", ['$rootScope', function ($rootScope) {
-      return {
-         link: function link(scope, element) {
-            element.on("click", function () {
-               $rootScope.$broadcast("commonbboxhideall");
-            });
-         }
-      };
-   }]).directive("commonBboxShowVisible", ['$rootScope', 'mapService', function ($rootScope, mapService) {
-      return {
-         link: function link(scope, element) {
-            element.on("click", function () {
-               mapService.getMap().then(function (map) {
-                  $rootScope.$broadcast("commonbboxshowvisible", map.getBounds());
-               });
-            });
-         }
-      };
-   }]).directive("commonBbox", ['$rootScope', 'bboxService', function ($rootScope, bboxService) {
-      return {
-         templateUrl: "common/bbox/bbox.html",
-         scope: {
-            data: "="
-         },
-         link: function link(scope, element) {
-
-            $rootScope.$on("commonbboxshowall", function () {
-               scope.data.hasBbox = true;
-            });
-
-            $rootScope.$on("commonbboxhideall", function () {
-               scope.data.hasBbox = false;
-            });
-
-            $rootScope.$on("commonbboxshowvisible", function (event, bounds) {
-               var myBounds = scope.data.bounds,
-                   draw = bounds.getWest() < myBounds.xMin && bounds.getEast() > myBounds.xMax && bounds.getNorth() > myBounds.yMax && bounds.getSouth() < myBounds.yMin;
-
-               scope.data.hasBbox = draw;
-            });
-
-            scope.$watch("data.hasBbox", function (newValue) {
-               if (newValue) {
-                  bboxService.draw(scope.data).then(function (bbox) {
-                     scope.bbox = bbox;
-                  });
-               } else {
-                  scope.bbox = bboxService.remove(scope.bbox);
-               }
-            });
-
-            scope.toggle = function () {
-               var draw = scope.data.hasBbox = !scope.data.hasBbox;
-            };
-
-            scope.$on("$destroy", function () {
-               if (scope.data.hasBbox) {
-                  scope.bbox = bboxService.remove(scope.bbox);
-               }
-            });
-         }
-      };
-   }]).factory("bboxService", ['mapService', function (mapService) {
-      var normalLayerColor = "#ff7800",
-          hilightLayerColor = 'darkblue';
-
-      return {
-         draw: function draw(data) {
-            var parts = data.bbox.split(" "),
-                bounds = [[+parts[1], +parts[0]], [+parts[3], +parts[2]]];
-
-            return mapService.getMap().then(function (map) {
-               // create an orange rectangle
-               var layer = L.rectangle(bounds, { fill: false, color: normalLayerColor, weight: 2, opacity: 0.8 });
-               layer.addTo(map);
-               map.fitBounds(bounds);
-               return layer;
-            });
-         },
-
-         remove: function remove(bbox) {
-            if (bbox) {
-               bbox._map.removeLayer(bbox);
-            }
-            return null;
-         }
-      };
-   }]);
-}
 'use strict';
 
 angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAccordionConfig', {
@@ -310,6 +207,141 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
 
 {
 
+   angular.module("common.bbox", ['geo.draw']).directive("commonBboxShowAll", ['$rootScope', '$timeout', function ($rootScope, $timeout) {
+      return {
+         link: function link(scope, element) {
+            element.on("click", function () {
+               $timeout(function () {
+                  $rootScope.$broadcast("commonbboxshowall");
+               });
+            });
+         }
+      };
+   }]).directive("commonBboxHideAll", ['$rootScope', function ($rootScope) {
+      return {
+         link: function link(scope, element) {
+            element.on("click", function () {
+               $rootScope.$broadcast("commonbboxhideall");
+            });
+         }
+      };
+   }]).directive("commonBboxShowVisible", ['$rootScope', 'mapService', function ($rootScope, mapService) {
+      return {
+         link: function link(scope, element) {
+            element.on("click", function () {
+               mapService.getMap().then(function (map) {
+                  $rootScope.$broadcast("commonbboxshowvisible", map.getBounds());
+               });
+            });
+         }
+      };
+   }]).directive("commonBbox", ['$rootScope', 'bboxService', function ($rootScope, bboxService) {
+      return {
+         templateUrl: "common/bbox/bbox.html",
+         scope: {
+            data: "="
+         },
+         link: function link(scope, element) {
+
+            $rootScope.$on("commonbboxshowall", function () {
+               scope.data.hasBbox = true;
+            });
+
+            $rootScope.$on("commonbboxhideall", function () {
+               scope.data.hasBbox = false;
+            });
+
+            $rootScope.$on("commonbboxshowvisible", function (event, bounds) {
+               var myBounds = scope.data.bounds,
+                   draw = bounds.getWest() < myBounds.xMin && bounds.getEast() > myBounds.xMax && bounds.getNorth() > myBounds.yMax && bounds.getSouth() < myBounds.yMin;
+
+               scope.data.hasBbox = draw;
+            });
+
+            scope.$watch("data.hasBbox", function (newValue) {
+               if (newValue) {
+                  bboxService.draw(scope.data).then(function (bbox) {
+                     scope.bbox = bbox;
+                  });
+               } else {
+                  scope.bbox = bboxService.remove(scope.bbox);
+               }
+            });
+
+            scope.toggle = function () {
+               var draw = scope.data.hasBbox = !scope.data.hasBbox;
+            };
+
+            scope.$on("$destroy", function () {
+               if (scope.data.hasBbox) {
+                  scope.bbox = bboxService.remove(scope.bbox);
+               }
+            });
+         }
+      };
+   }]).factory("bboxService", ['mapService', function (mapService) {
+      var normalLayerColor = "#ff7800",
+          hilightLayerColor = 'darkblue';
+
+      return {
+         draw: function draw(data) {
+            var parts = data.bbox.split(" "),
+                bounds = [[+parts[1], +parts[0]], [+parts[3], +parts[2]]];
+
+            return mapService.getMap().then(function (map) {
+               // create an orange rectangle
+               var layer = L.rectangle(bounds, { fill: false, color: normalLayerColor, weight: 2, opacity: 0.8 });
+               layer.addTo(map);
+               map.fitBounds(bounds);
+               return layer;
+            });
+         },
+
+         remove: function remove(bbox) {
+            if (bbox) {
+               bbox._map.removeLayer(bbox);
+            }
+            return null;
+         }
+      };
+   }]);
+}
+"use strict";
+
+{
+
+   var versions = {
+      3: {
+         version: "3.0",
+         link: "https://creativecommons.org/licenses/by/3.0/au/"
+      },
+      4: {
+         version: "4.0",
+         link: "https://creativecommons.org/licenses/by/4.0/"
+      }
+   };
+
+   angular.module("common.cc", []).directive('commonCc', [function () {
+      return {
+         templateUrl: 'common/cc/cc.html',
+         scope: {
+            version: "=?"
+         },
+         link: function link(scope) {
+            if (!scope.version) {
+               scope.details = versions[4];
+            } else {
+               scope.details = versions[scope.version];
+            }
+            scope.template = 'common/cc/cctemplate.html';
+         }
+      };
+   }]);
+}
+"use strict";
+
+{
+
 	angular.module("common.clip", ['geo.draw']).directive("wizardClip", ['$timeout', 'clipService', 'flashService', function ($timeout, clipService, flashService) {
 		return {
 			templateUrl: "common/clip/clip.html",
@@ -374,38 +406,6 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
 				} };
 		}
 	}]);
-}
-"use strict";
-
-{
-
-   var versions = {
-      3: {
-         version: "3.0",
-         link: "https://creativecommons.org/licenses/by/3.0/au/"
-      },
-      4: {
-         version: "4.0",
-         link: "https://creativecommons.org/licenses/by/4.0/"
-      }
-   };
-
-   angular.module("common.cc", []).directive('commonCc', [function () {
-      return {
-         templateUrl: 'common/cc/cc.html',
-         scope: {
-            version: "=?"
-         },
-         link: function link(scope) {
-            if (!scope.version) {
-               scope.details = versions[4];
-            } else {
-               scope.details = versions[scope.version];
-            }
-            scope.template = 'common/cc/cctemplate.html';
-         }
-      };
-   }]);
 }
 'use strict';
 
@@ -2148,6 +2148,36 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       };
    });
 }
+"use strict";
+
+(function (angular) {
+   'use strict';
+
+   angular.module("common.scroll", []).directive("commonScroller", ['$timeout', function ($timeout) {
+      return {
+         scope: {
+            more: "&",
+            buffer: "=?"
+         },
+         link: function link(scope, element, attrs) {
+            var fetching;
+            if (!scope.buffer) scope.buffer = 100;
+
+            element.on("scroll", function (event) {
+               var target = event.currentTarget;
+               $timeout.cancel(fetching);
+               fetching = $timeout(bouncer, 120);
+
+               function bouncer() {
+                  if (scope.more && target.scrollHeight - target.scrollTop <= target.clientHeight + scope.buffer) {
+                     scope.more();
+                  }
+               }
+            });
+         }
+      };
+   }]);
+})(angular);
 'use strict';
 
 (function (angular) {
@@ -2537,36 +2567,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       };
    }]);
 }
-"use strict";
-
-(function (angular) {
-   'use strict';
-
-   angular.module("common.scroll", []).directive("commonScroller", ['$timeout', function ($timeout) {
-      return {
-         scope: {
-            more: "&",
-            buffer: "=?"
-         },
-         link: function link(scope, element, attrs) {
-            var fetching;
-            if (!scope.buffer) scope.buffer = 100;
-
-            element.on("scroll", function (event) {
-               var target = event.currentTarget;
-               $timeout.cancel(fetching);
-               fetching = $timeout(bouncer, 120);
-
-               function bouncer() {
-                  if (scope.more && target.scrollHeight - target.scrollTop <= target.clientHeight + scope.buffer) {
-                     scope.more();
-                  }
-               }
-            });
-         }
-      };
-   }]);
-})(angular);
 'use strict';
 
 (function (angular) {
@@ -2977,6 +2977,48 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 	'use strict';
 
+	angular.module("common.toolbar", []).directive("icsmToolbar", [function () {
+		return {
+			controller: 'toolbarLinksCtrl'
+		};
+	}])
+
+	/**
+  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
+  */
+	.directive('icsmToolbarRow', [function () {
+		var DEFAULT_TITLE = "Satellite to Topography bias on base map.";
+
+		return {
+			scope: {
+				map: "=",
+				overlaytitle: "=?"
+			},
+			restrict: 'AE',
+			templateUrl: 'common/toolbar/toolbar.html',
+			link: function link(scope) {
+				scope.overlaytitle = scope.overlaytitle ? scope.overlaytitle : DEFAULT_TITLE;
+			}
+		};
+	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
+
+		var self = this;
+		configService.getConfig().then(function (config) {
+			self.links = config.toolbarLinks;
+		});
+
+		$scope.item = "";
+		$scope.toggleItem = function (item) {
+			$scope.item = $scope.item == item ? "" : item;
+		};
+	}]);
+})(angular);
+"use strict";
+
+(function (angular) {
+
+	'use strict';
+
 	angular.module("common.wms", []).directive("commonWms", ['$rootScope', '$timeout', 'flashService', 'wmsService', function ($rootScope, $timeout, flashService, wmsService) {
 		return {
 			scope: {
@@ -3149,54 +3191,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}
 	}]);
 })(angular);
-"use strict";
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module("common.toolbar", []).directive("icsmToolbar", [function () {
-		return {
-			controller: 'toolbarLinksCtrl'
-		};
-	}])
-
-	/**
-  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
-  */
-	.directive('icsmToolbarRow', [function () {
-		var DEFAULT_TITLE = "Satellite to Topography bias on base map.";
-
-		return {
-			scope: {
-				map: "=",
-				overlaytitle: "=?"
-			},
-			restrict: 'AE',
-			templateUrl: 'common/toolbar/toolbar.html',
-			link: function link(scope) {
-				scope.overlaytitle = scope.overlaytitle ? scope.overlaytitle : DEFAULT_TITLE;
-			}
-		};
-	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
-
-		var self = this;
-		configService.getConfig().then(function (config) {
-			self.links = config.toolbarLinks;
-		});
-
-		$scope.item = "";
-		$scope.toggleItem = function (item) {
-			$scope.item = $scope.item == item ? "" : item;
-		};
-	}]);
-})(angular);
-angular.module("common.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("common/bbox/bbox.html","<button type=\"button\" class=\"undecorated\" ng-click=\"toggle()\" tooltip-placement=\"right\" title=\"Show data extent on the map.\">\r\n	<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-eye orange\':data.hasBbox,\'fa-eye-slash\':!data.hasBbox}\"></i>\r\n</button>");
-$templateCache.put("common/accordion/accordion.html","<div role=\"tablist\" class=\"panel-group\" ng-transclude></div>");
+angular.module("common.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("common/accordion/accordion.html","<div role=\"tablist\" class=\"panel-group\" ng-transclude></div>");
 $templateCache.put("common/accordion/accordionGroup.html","<div role=\"tab\" id=\"{{::headingId}}\" aria-selected=\"{{isOpen}}\" class=\"panel-heading\" ng-keypress=\"toggleOpen($event)\">\r\n  <h4 class=\"panel-title\">\r\n    <a role=\"button\" data-toggle=\"collapse\" href aria-expanded=\"{{isOpen}}\"\r\n            aria-controls=\"{{::panelId}}\" tabindex=\"0\" class=\"accordion-toggle\" ng-click=\"toggleOpen()\"\r\n            common-accordion-transclude=\"heading\" ng-disabled=\"isDisabled\" uib-tabindex-toggle>\r\n      <span common-accordion-header ng-class=\"{\'text-muted\': isDisabled}\">{{heading}}</span>\r\n   </a>\r\n  </h4>\r\n</div>\r\n<div id=\"{{::panelId}}\" aria-labelledby=\"{{::headingId}}\" aria-hidden=\"{{!isOpen}}\" role=\"tabpanel\"\r\n            class=\"panel-collapse collapse\" uib-collapse=\"!isOpen\">\r\n  <div class=\"panel-body\" ng-transclude></div>\r\n</div>");
-$templateCache.put("common/clip/clip.html","<div class=\"well well-sm\">\r\n<div class=\"container-fluid\">\r\n	<div class=\"row\">\r\n		<div class=\"col-md-12\">\r\n			<button style=\"margin-top:0px;\" ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" class=\"btn btn-primary btn-xs\">Draw</button>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-3\"> </div>\r\n		<div class=\"col-md-8\">\r\n			<strong>Y Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-6\">\r\n			<strong>X Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMin|number : 4}} min)</span></span>\r\n		</div>\r\n		<div class=\"col-md-6\">\r\n			<strong>X Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-offset-3 col-md-8\">\r\n			<strong>Y Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMin|number : 4}} min)</span></span>\r\n		</div>\r\n	</div>\r\n</div>\r\n</div>");
+$templateCache.put("common/bbox/bbox.html","<button type=\"button\" class=\"undecorated\" ng-click=\"toggle()\" tooltip-placement=\"right\" title=\"Show data extent on the map.\">\r\n	<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-eye orange\':data.hasBbox,\'fa-eye-slash\':!data.hasBbox}\"></i>\r\n</button>");
 $templateCache.put("common/cc/cc.html","<button type=\"button\" class=\"undecorated\" title=\"View CCBy {{details.version}} licence details\"\r\n      popover-trigger=\"outsideClick\"\r\n      uib-popover-template=\"template\" popover-placement=\"bottom\" popover-append-to-body=\"true\">\r\n	<i ng-class=\"{active:data.isWmsShowing}\" class=\"fa fa-lg fa-gavel\"></i>\r\n</button>");
 $templateCache.put("common/cc/cctemplate.html","<div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-12\">\r\n         <a target=\"_blank\" ng-href=\"{{details.link}}\">Creative Commons Attribution {{details.version}} </a>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-2\">\r\n         <span class=\"fa-stack\" aria-hidden=\"true\">\r\n         <i class=\"fa fa-check-circle-o fa-stack-2x\" aria-hidden=\"true\"></i>\r\n      </span>\r\n      </div>\r\n      <div class=\"col-md-10\">\r\n         You may use this work for commercial purposes.\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-2\">\r\n         <span class=\"fa-stack\" aria-hidden=\"true\">\r\n         <i class=\"fa fa-circle-o fa-stack-2x\"></i>\r\n         <i class=\"fa fa-female fa-stack-1x\"></i>\r\n      </span>\r\n      </div>\r\n      <div class=\"col-md-10\">\r\n         You must attribute the creator in your own works.\r\n      </div>\r\n   </div>\r\n</div>");
+$templateCache.put("common/clip/clip.html","<div class=\"well well-sm\">\r\n<div class=\"container-fluid\">\r\n	<div class=\"row\">\r\n		<div class=\"col-md-12\">\r\n			<button style=\"margin-top:0px;\" ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" class=\"btn btn-primary btn-xs\">Draw</button>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-3\"> </div>\r\n		<div class=\"col-md-8\">\r\n			<strong>Y Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-6\">\r\n			<strong>X Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMin|number : 4}} min)</span></span>\r\n		</div>\r\n		<div class=\"col-md-6\">\r\n			<strong>X Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-offset-3 col-md-8\">\r\n			<strong>Y Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMin|number : 4}} min)</span></span>\r\n		</div>\r\n	</div>\r\n</div>\r\n</div>");
 $templateCache.put("common/download/download.html","<exp-modal ng-controller=\"DownloadCtrl as dl\" icon-class=\"fa-download\" is-open=\"dl.data.item.download\" title=\"Download data\" on-close=\"dl.remove()\" is-modal=\"true\">\r\n	<div style=\"padding:5px;\">\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><common-wms data=\"dl.data.item\"></common-wms><common-tile data=\"dl.data.item\"></common-tile>{{dl.data.item.title}}</h4>\r\n				{{dl.data.item.abstract}}\r\n   			</div>\r\n		</div>\r\n		<nedf-geoprocess data=\"dl.data.item\"></nedf-geoprocess>\r\n	</div>\r\n</exp-modal>");
 $templateCache.put("common/download/popup.html","<exp-modal icon-class=\"fa-download\"  is-open=\"data.item.download\" title=\"Download wizard\" on-close=\"dl.remove()\">\r\n	<div class=\"container-fluid downloadInner\" >\r\n		<div class=\"row\">\r\n  			<div class=\"col-md-12\">\r\n				<h4><common-wms data=\"dl.data.item\"></common-wms>\r\n					<a href=\"https://ecat.ga.gov.au/geonetwork/srv/eng/search#!{{dl.data.item.primaryId}}\" target=\"_blank\"><strong class=\"ng-binding\">{{dl.data.item.title}}</strong></a>\r\n				</h4>\r\n   			</div>\r\n		</div>\r\n		<wizard-geoprocess data=\"dl.data.item\"></wizard-geoprocess>\r\n	</div>\r\n</exp-modal>");
 $templateCache.put("common/extent/extent.html","<div class=\"row\" style=\"border-top: 1px solid gray; padding-top:5px\">\r\n	<div class=\"col-md-5\">\r\n		<div class=\"form-inline\">\r\n			<label>\r\n				<input id=\"extentEnable\" type=\"checkbox\" ng-model=\"parameters.fromMap\" ng-click=\"change()\"></input> \r\n				Restrict area to map\r\n			</label>\r\n		</div>\r\n	</div>\r\n	 \r\n	<div class=\"col-md-7\" ng-show=\"parameters.fromMap\">\r\n		<div class=\"container-fluid\">\r\n			<div class=\"row\">\r\n				<div class=\"col-md-offset-3 col-md-8\">\r\n					<strong>Y Max:</strong> \r\n					<span>{{parameters.yMax | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n			<div class=\"row\">\r\n				<div class=\"col-md-6\">\r\n					<strong>X Min:</strong>\r\n					<span>{{parameters.xMin | number : 4}}</span> \r\n				</div>\r\n				<div class=\"col-md-6\">\r\n					<strong>X Max:</strong>\r\n					<span>{{parameters.xMax | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n			<div class=\"row\">\r\n				<div class=\"col-md-offset-3 col-md-8\">\r\n					<strong>Y Min:</strong>\r\n					<span>{{parameters.yMin | number : 4}}</span> \r\n				</div>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>");

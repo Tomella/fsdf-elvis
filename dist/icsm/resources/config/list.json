@@ -54,5 +54,12 @@
       "image": "icsm/resources/img/logo-WA.jpg",
       "height": 42,
       "showText": false
+   },
+
+   "Digital Earth Australia": {
+      "code": "dea",
+      "image": "icsm/resources/img/PP-705 DEA Logo Inline.png",
+      "height": 42,
+      "showText": false
    }
 }
