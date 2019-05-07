@@ -74,7 +74,8 @@
 		'icsm.bounds',
       'icsm.contributors',
       'icsm.coverage',
-		'icsm.clip',
+      'icsm.clip',
+      'icsm.elevation.point',
 		'icsm.glossary',
 		'icsm.help',
 		'icsm.panes',
@@ -95,8 +96,8 @@
 	])
 
 		// Set up all the service providers here.
-		.config(['configServiceProvider', 'placenamesConfigServiceProvider', 'projectsServiceProvider', 'persistServiceProvider', 'versionServiceProvider',
-         function (configServiceProvider, placenamesConfigServiceProvider, projectsServiceProvider, persistServiceProvider, versionServiceProvider) {
+		.config(['configServiceProvider', 'placenamesConfigServiceProvider', 'projectsServiceProvider', 'persistServiceProvider', 'versionServiceProvider', 'elevationPointServiceProvider',
+         function (configServiceProvider, placenamesConfigServiceProvider, projectsServiceProvider, persistServiceProvider, versionServiceProvider, elevationPointServiceProvider) {
 				configServiceProvider.location("icsm/resources/config/config.json");
 				placenamesConfigServiceProvider.location("icsm/resources/config/placenames.json");
             configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
@@ -115,7 +116,7 @@
 				}
 			};
 			function noop() { return true; }
-		}])
+      }])
 
 		.controller("RootCtrl", RootCtrl);
 }
