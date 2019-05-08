@@ -250,6 +250,6 @@
    },
    "downloadLimit": 15000000000,
    "elevation": {
-      "elevationTemplate": "//gaservices.ga.gov.au/site_9/services/DEM_SRTM_1Second_over_Bathymetry_Topography/MapServer/WCSServer?SERVICE=WCS&VERSION=1.0.0&REQUEST=GetCoverage&coverage=1&CRS=EPSG:4326&BBOX={bbox}&FORMAT=GeoTIFF&RESX=1&RESY=1&RESPONSE_CRS=EPSG:4326&HEIGHT=1&WIDTH=1"
+      "elevationTemplate": "//services.ga.gov.au/gis/services/DEM_SRTM_1Second_over_Bathymetry_Topography/MapServer/WCSServer?SERVICE=WCS&VERSION=1.0.0&REQUEST=GetCoverage&coverage=1&CRS=EPSG:4326&BBOX={bbox}&FORMAT=GeoTIFF&RESX=1&RESY=1&RESPONSE_CRS=EPSG:4326&HEIGHT=1&WIDTH=1"
    }
 }
