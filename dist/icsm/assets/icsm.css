@@ -87,11 +87,6 @@
 .common-header {
   background-color: white;
 }
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
-}
 .iso19115,
 .iso19115 ul,
 .iso19115 li {
@@ -131,49 +126,10 @@
 .iso19115-head {
   font-weight: bold;
 }
-.mvt,
-.mvt ul,
-.mvt li {
-  position: relative;
-}
-
-.mvt ul {
-  list-style: none;
-  padding-left: 32px;
-}
-
-.mvt li::before,
-.mvt li::after {
-  content: "";
-  position: absolute;
-  left: -12px;
-}
-
-.mvt li::before {
-  border-top: 1px solid #000;
-  top: 9px;
-  width: 8px;
-  height: 0;
-}
-
-.mvt li::after {
-  border-left: 1px solid #000;
-  height: 100%;
-  width: 0px;
-  top: 2px;
-}
-
-.mvt ul > li:last-child::after {
-  height: 8px;
-}
-
-.metaview-head {
-  font-weight: bold;
-}
-
-.metaview-info {
-  padding-left: 3px;
-  padding-right: 3px;
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
 }
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
@@ -286,6 +242,50 @@
 .altthemesdropdown .altthemescurrent {
   color: #fff;
   background-color: #777;
+}
+.mvt,
+.mvt ul,
+.mvt li {
+  position: relative;
+}
+
+.mvt ul {
+  list-style: none;
+  padding-left: 32px;
+}
+
+.mvt li::before,
+.mvt li::after {
+  content: "";
+  position: absolute;
+  left: -12px;
+}
+
+.mvt li::before {
+  border-top: 1px solid #000;
+  top: 9px;
+  width: 8px;
+  height: 0;
+}
+
+.mvt li::after {
+  border-left: 1px solid #000;
+  height: 100%;
+  width: 0px;
+  top: 2px;
+}
+
+.mvt ul > li:last-child::after {
+  height: 8px;
+}
+
+.metaview-head {
+  font-weight: bold;
+}
+
+.metaview-info {
+  padding-left: 3px;
+  padding-right: 3px;
 }
 .icsmTabs {
   position: absolute;
@@ -971,12 +971,6 @@ img.elvis-logo {
   right: 7px;
   bottom: 15px;
 }
-.baselayer-slider {
-  position: absolute;
-  right: 20px;
-  top: 10px;
-  z-index: 3;
-}
 .mess-error {
   background-color: lightcoral;
 }
@@ -991,6 +985,12 @@ img.elvis-logo {
 
 .mess-container {
   font-weight: bold;
+}
+.baselayer-slider {
+  position: absolute;
+  right: 20px;
+  top: 10px;
+  z-index: 3;
 }
 .continue-container {
   padding: 4px;
@@ -1268,6 +1268,22 @@ i.fa.active {
   color: #fff;
   background-color: #777;
 }
+.downloadPane {
+  padding-left: 0px !important;
+  padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 10px;
+  overflow: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
+}
 .common-baselayer-control {
   width: 210px;
   color: #333;
@@ -1367,22 +1383,6 @@ i.fa.active {
   border: none;
   height: 30px;
   font-size: 13px;
-}
-.downloadPane {
-  padding-left: 0px !important;
-  padding-right: 5px !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 10px;
-  overflow: hidden;
-}
-
-.downloadCont {
-  position: fixed;
-  right: 0;
-  bottom: 8px;
 }
 .start-content-container {
   position: fixed;

@@ -407,6 +407,111 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
 		}
 	}]);
 }
+"use strict";
+
+{
+   angular.module("common.draw", ['geo.map']).directive("commonDraw", ['$log', '$rootScope', 'commonDrawService', function ($log, $rootScope, commonDrawService) {
+      var DEFAULTS = {
+         rectangleEvent: "geo.draw.rectangle.created",
+         lineEvent: "geo.draw.line.created"
+      };
+
+      return {
+         restrict: "AE",
+         scope: {
+            data: "=",
+            rectangleEvent: "@",
+            lineEvent: "@"
+         },
+         link: function link(scope, element, attrs, ctrl) {
+
+            angular.forEach(DEFAULTS, function (value, key) {
+               if (!scope[key]) {
+                  scope[key] = value;
+               }
+            });
+
+            commonDrawService.createControl(scope);
+         }
+      };
+   }]).factory("commonDrawService", ['$q', '$rootScope', 'mapService', function ($q, $rootScope, mapService) {
+      var callbackOptions, drawControl, drawer, rectangleDeferred;
+
+      return {
+         createControl: function createControl(parameters) {
+            if (drawControl) {
+               $q.when(drawControl);
+            }
+
+            return mapService.getMap().then(function (map) {
+               var drawnItems = new L.FeatureGroup(),
+                   options = {
+                  edit: {
+                     featureGroup: drawnItems
+                  }
+               };
+
+               if (parameters.data) {
+                  angular.extend(options, parameters.data);
+               }
+
+               featureGroup = parameters.drawnItems = drawnItems;
+
+               map.addLayer(drawnItems);
+               // Initialise the draw control and pass it the FeatureGroup of editable layers
+               drawControl = new L.Control.Draw(options);
+               map.addControl(drawControl);
+               map.on("draw:created", function (event) {
+                  ({
+                     polyline: function polyline() {
+                        var data = { length: event.layer.getLength(), geometry: event.layer.getLatLngs() };
+                        $rootScope.$broadcast(parameters.lineEvent, data);
+                     },
+                     // With rectangles only one can be drawn at a time.
+                     rectangle: function rectangle() {
+                        var data = {
+                           bounds: event.layer.getBounds(),
+                           options: callbackOptions
+                        };
+                        rectangleDeferred.resolve(data);
+                        rectangleDeferred = null;
+                        $rootScope.$broadcast(parameters.rectangleEvent, data);
+                     }
+                  })[event.layerType]();
+               });
+
+               return drawControl;
+            });
+         },
+
+         cancelDrawRectangle: function cancelDrawRectangle() {
+            this.options = {};
+            if (rectangleDeferred) {
+               rectangleDeferred.reject();
+               rectangleDeferred = null;
+               if (drawer) {
+                  drawer.disable();
+               }
+            }
+         },
+
+         drawRectangle: function drawRectangle(options) {
+            this.cancelDrawRectangle();
+            callbackOptions = options;
+            rectangleDeferred = $q.defer();
+            if (drawer) {
+               drawer.enable();
+            } else {
+               mapService.getMap().then(function (map) {
+                  drawer = new L.Draw.Rectangle(map, drawControl.options.polyline);
+                  drawer.enable();
+               });
+            }
+            return rectangleDeferred.promise;
+         }
+      };
+   }]);
+}
 'use strict';
 
 (function (angular, $) {
@@ -615,111 +720,6 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
 		return service;
 	}
 })(angular, $);
-"use strict";
-
-{
-   angular.module("common.draw", ['geo.map']).directive("commonDraw", ['$log', '$rootScope', 'commonDrawService', function ($log, $rootScope, commonDrawService) {
-      var DEFAULTS = {
-         rectangleEvent: "geo.draw.rectangle.created",
-         lineEvent: "geo.draw.line.created"
-      };
-
-      return {
-         restrict: "AE",
-         scope: {
-            data: "=",
-            rectangleEvent: "@",
-            lineEvent: "@"
-         },
-         link: function link(scope, element, attrs, ctrl) {
-
-            angular.forEach(DEFAULTS, function (value, key) {
-               if (!scope[key]) {
-                  scope[key] = value;
-               }
-            });
-
-            commonDrawService.createControl(scope);
-         }
-      };
-   }]).factory("commonDrawService", ['$q', '$rootScope', 'mapService', function ($q, $rootScope, mapService) {
-      var callbackOptions, drawControl, drawer, rectangleDeferred;
-
-      return {
-         createControl: function createControl(parameters) {
-            if (drawControl) {
-               $q.when(drawControl);
-            }
-
-            return mapService.getMap().then(function (map) {
-               var drawnItems = new L.FeatureGroup(),
-                   options = {
-                  edit: {
-                     featureGroup: drawnItems
-                  }
-               };
-
-               if (parameters.data) {
-                  angular.extend(options, parameters.data);
-               }
-
-               featureGroup = parameters.drawnItems = drawnItems;
-
-               map.addLayer(drawnItems);
-               // Initialise the draw control and pass it the FeatureGroup of editable layers
-               drawControl = new L.Control.Draw(options);
-               map.addControl(drawControl);
-               map.on("draw:created", function (event) {
-                  ({
-                     polyline: function polyline() {
-                        var data = { length: event.layer.getLength(), geometry: event.layer.getLatLngs() };
-                        $rootScope.$broadcast(parameters.lineEvent, data);
-                     },
-                     // With rectangles only one can be drawn at a time.
-                     rectangle: function rectangle() {
-                        var data = {
-                           bounds: event.layer.getBounds(),
-                           options: callbackOptions
-                        };
-                        rectangleDeferred.resolve(data);
-                        rectangleDeferred = null;
-                        $rootScope.$broadcast(parameters.rectangleEvent, data);
-                     }
-                  })[event.layerType]();
-               });
-
-               return drawControl;
-            });
-         },
-
-         cancelDrawRectangle: function cancelDrawRectangle() {
-            this.options = {};
-            if (rectangleDeferred) {
-               rectangleDeferred.reject();
-               rectangleDeferred = null;
-               if (drawer) {
-                  drawer.disable();
-               }
-            }
-         },
-
-         drawRectangle: function drawRectangle(options) {
-            this.cancelDrawRectangle();
-            callbackOptions = options;
-            rectangleDeferred = $q.defer();
-            if (drawer) {
-               drawer.enable();
-            } else {
-               mapService.getMap().then(function (map) {
-                  drawer = new L.Draw.Rectangle(map, drawControl.options.polyline);
-                  drawer.enable();
-               });
-            }
-            return rectangleDeferred.promise;
-         }
-      };
-   }]);
-}
 "use strict";
 
 (function (angular) {
@@ -1480,25 +1480,6 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
 'use strict';
 
 (function (angular) {
-
-   'use strict';
-
-   angular.module('common.legend', []).directive('commonLegend', [function () {
-      return {
-         template: "<img ng-href='url' ng-if='url'></img>",
-         scope: {
-            map: "="
-         },
-         restrict: "AE",
-         link: function link(scope) {
-            if (scope.map) {}
-         }
-      };
-   }]);
-})(angular);
-'use strict';
-
-(function (angular) {
    'use strict';
 
    angular.module('common.iso19115', ['common.recursionhelper']).directive('iso19115Metadata', [function () {
@@ -1589,6 +1570,185 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
          return f.toUpperCase();
       }).replace(/([A-Z])/g, ' $1').trim();
    }
+})(angular);
+'use strict';
+
+(function (angular) {
+
+   'use strict';
+
+   angular.module('common.legend', []).directive('commonLegend', [function () {
+      return {
+         template: "<img ng-href='url' ng-if='url'></img>",
+         scope: {
+            map: "="
+         },
+         restrict: "AE",
+         link: function link(scope) {
+            if (scope.map) {}
+         }
+      };
+   }]);
+})(angular);
+'use strict';
+
+(function (angular) {
+
+	'use strict';
+
+	angular.module('common.altthemes', [])
+
+	/**
+ 	*
+ 	* Override the original mars user.
+ 	*
+ 	  */
+	.directive('altThemes', ['altthemesService', function (themesService) {
+		return {
+			restrict: 'AE',
+			templateUrl: 'common/navigation/altthemes.html',
+			scope: {
+				current: "="
+			},
+			link: function link(scope) {
+				themesService.getThemes().then(function (themes) {
+					scope.themes = themes;
+				});
+
+				themesService.getCurrentTheme().then(function (theme) {
+					scope.theme = theme;
+				});
+
+				scope.changeTheme = function (theme) {
+					scope.theme = theme;
+					themesService.setTheme(theme.key);
+				};
+			}
+		};
+	}]).controller('altthemesCtrl', ['altthemesService', function (altthemesService) {
+		this.service = altthemesService;
+	}]).filter('altthemesFilter', function () {
+		return function (features, theme) {
+			var response = [];
+			// Give 'em all if they haven't set a theme.
+			if (!theme) {
+				return features;
+			}
+
+			if (features) {
+				features.forEach(function (feature) {
+					if (feature.themes) {
+						if (feature.themes.some(function (name) {
+							return name === theme.key;
+						})) {
+							response.push(feature);
+						}
+					}
+				});
+			}
+			return response;
+		};
+	}).factory('altthemesService', ['$q', '$http', 'storageService', function ($q, $http, storageService) {
+		var THEME_PERSIST_KEY = 'icsm.current.theme';
+		var THEMES_LOCATION = 'icsm/resources/config/themes.json';
+		var DEFAULT_THEME = "All";
+		var waiting = [];
+		var self = this;
+
+		this.themes = [];
+		this.theme = null;
+
+		storageService.getItem(THEME_PERSIST_KEY).then(function (value) {
+			if (!value) {
+				value = DEFAULT_THEME;
+			}
+			$http.get(THEMES_LOCATION, { cache: true }).then(function (response) {
+				var themes = response.data.themes;
+
+				self.themes = themes;
+				self.theme = themes[value];
+				// Decorate the key
+				angular.forEach(themes, function (theme, key) {
+					theme.key = key;
+				});
+				waiting.forEach(function (wait) {
+					wait.resolve(self.theme);
+				});
+			});
+		});
+
+		this.getCurrentTheme = function () {
+			if (this.theme) {
+				return $q.when(self.theme);
+			} else {
+				var waiter = $q.defer();
+				waiting.push(waiter);
+				return waiter.promise;
+			}
+		};
+
+		this.getThemes = function () {
+			return $http.get(THEMES_LOCATION, { cache: true }).then(function (response) {
+				return response.data.themes;
+			});
+		};
+
+		this.setTheme = function (key) {
+			this.theme = this.themes[key];
+			storageService.setItem(THEME_PERSIST_KEY, key);
+		};
+
+		return this;
+	}]).filter('altthemesEnabled', function () {
+		return function (headers) {
+			if (headers) {
+				return headers.filter(function (value) {
+					return !!value.enabled;
+				});
+			}
+			return headers;
+		};
+	}).filter('altthemesMatchCurrent', function () {
+		return function (headers, current) {
+			if (headers) {
+				return headers.filter(function (value) {
+					return !!value.keys.find(function (key) {
+						return key === current;
+					});
+				});
+			}
+			return headers;
+		};
+	});
+})(angular);
+'use strict';
+
+(function (angular) {
+  'use strict';
+
+  angular.module('common.navigation', [])
+  /**
+   *
+   * Override the original mars user.
+   *
+   */
+  .directive('commonNavigation', [function () {
+    return {
+      restrict: 'AE',
+      template: "<alt-themes current='current'></alt-themes>",
+      scope: {
+        current: "=?"
+      },
+      link: function link(scope) {
+        scope.username = "Anonymous";
+        if (!scope.current) {
+          scope.current = "none";
+        }
+      }
+    };
+  }]).factory('navigationService', [function () {
+    return {};
+  }]);
 })(angular);
 'use strict';
 
@@ -1814,166 +1974,40 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       return MetaviewService;
    }();
 })(angular);
-'use strict';
+"use strict";
 
-(function (angular) {
+{
+   angular.module("common.proxy", []).provider("proxy", function () {
 
-	'use strict';
+      this.$get = ['$http', '$q', function ($http, $q) {
+         var base = "proxy/";
 
-	angular.module('common.altthemes', [])
+         this.setProxyBase = function (newBase) {
+            base = newBase;
+         };
 
-	/**
- 	*
- 	* Override the original mars user.
- 	*
- 	  */
-	.directive('altThemes', ['altthemesService', function (themesService) {
-		return {
-			restrict: 'AE',
-			templateUrl: 'common/navigation/altthemes.html',
-			scope: {
-				current: "="
-			},
-			link: function link(scope) {
-				themesService.getThemes().then(function (themes) {
-					scope.themes = themes;
-				});
+         return {
+            get: function get(url, options) {
+               return this._method("get", url, options);
+            },
 
-				themesService.getCurrentTheme().then(function (theme) {
-					scope.theme = theme;
-				});
+            post: function post(url, options) {
+               return this._method("post", url, options);
+            },
 
-				scope.changeTheme = function (theme) {
-					scope.theme = theme;
-					themesService.setTheme(theme.key);
-				};
-			}
-		};
-	}]).controller('altthemesCtrl', ['altthemesService', function (altthemesService) {
-		this.service = altthemesService;
-	}]).filter('altthemesFilter', function () {
-		return function (features, theme) {
-			var response = [];
-			// Give 'em all if they haven't set a theme.
-			if (!theme) {
-				return features;
-			}
+            put: function put(url, options) {
+               return this._method("put", url, options);
+            },
 
-			if (features) {
-				features.forEach(function (feature) {
-					if (feature.themes) {
-						if (feature.themes.some(function (name) {
-							return name === theme.key;
-						})) {
-							response.push(feature);
-						}
-					}
-				});
-			}
-			return response;
-		};
-	}).factory('altthemesService', ['$q', '$http', 'storageService', function ($q, $http, storageService) {
-		var THEME_PERSIST_KEY = 'icsm.current.theme';
-		var THEMES_LOCATION = 'icsm/resources/config/themes.json';
-		var DEFAULT_THEME = "All";
-		var waiting = [];
-		var self = this;
-
-		this.themes = [];
-		this.theme = null;
-
-		storageService.getItem(THEME_PERSIST_KEY).then(function (value) {
-			if (!value) {
-				value = DEFAULT_THEME;
-			}
-			$http.get(THEMES_LOCATION, { cache: true }).then(function (response) {
-				var themes = response.data.themes;
-
-				self.themes = themes;
-				self.theme = themes[value];
-				// Decorate the key
-				angular.forEach(themes, function (theme, key) {
-					theme.key = key;
-				});
-				waiting.forEach(function (wait) {
-					wait.resolve(self.theme);
-				});
-			});
-		});
-
-		this.getCurrentTheme = function () {
-			if (this.theme) {
-				return $q.when(self.theme);
-			} else {
-				var waiter = $q.defer();
-				waiting.push(waiter);
-				return waiter.promise;
-			}
-		};
-
-		this.getThemes = function () {
-			return $http.get(THEMES_LOCATION, { cache: true }).then(function (response) {
-				return response.data.themes;
-			});
-		};
-
-		this.setTheme = function (key) {
-			this.theme = this.themes[key];
-			storageService.setItem(THEME_PERSIST_KEY, key);
-		};
-
-		return this;
-	}]).filter('altthemesEnabled', function () {
-		return function (headers) {
-			if (headers) {
-				return headers.filter(function (value) {
-					return !!value.enabled;
-				});
-			}
-			return headers;
-		};
-	}).filter('altthemesMatchCurrent', function () {
-		return function (headers, current) {
-			if (headers) {
-				return headers.filter(function (value) {
-					return !!value.keys.find(function (key) {
-						return key === current;
-					});
-				});
-			}
-			return headers;
-		};
-	});
-})(angular);
-'use strict';
-
-(function (angular) {
-  'use strict';
-
-  angular.module('common.navigation', [])
-  /**
-   *
-   * Override the original mars user.
-   *
-   */
-  .directive('commonNavigation', [function () {
-    return {
-      restrict: 'AE',
-      template: "<alt-themes current='current'></alt-themes>",
-      scope: {
-        current: "=?"
-      },
-      link: function link(scope) {
-        scope.username = "Anonymous";
-        if (!scope.current) {
-          scope.current = "none";
-        }
-      }
-    };
-  }]).factory('navigationService', [function () {
-    return {};
-  }]);
-})(angular);
+            _method: function _method(method, url, options) {
+               return $http[method](base + url, options).then(function (response) {
+                  return response.data;
+               });
+            }
+         };
+      }];
+   });
+}
 "use strict";
 
 (function (angular) {
@@ -2048,40 +2082,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		};
 	}
 })(angular);
-"use strict";
-
-{
-   angular.module("common.proxy", []).provider("proxy", function () {
-
-      this.$get = ['$http', '$q', function ($http, $q) {
-         var base = "proxy/";
-
-         this.setProxyBase = function (newBase) {
-            base = newBase;
-         };
-
-         return {
-            get: function get(url, options) {
-               return this._method("get", url, options);
-            },
-
-            post: function post(url, options) {
-               return this._method("post", url, options);
-            },
-
-            put: function put(url, options) {
-               return this._method("put", url, options);
-            },
-
-            _method: function _method(method, url, options) {
-               return $http[method](base + url, options).then(function (response) {
-                  return response.data;
-               });
-            }
-         };
-      }];
-   });
-}
 'use strict';
 
 (function (angular) {
@@ -2977,6 +2977,48 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 	'use strict';
 
+	angular.module("common.toolbar", []).directive("icsmToolbar", [function () {
+		return {
+			controller: 'toolbarLinksCtrl'
+		};
+	}])
+
+	/**
+  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
+  */
+	.directive('icsmToolbarRow', [function () {
+		var DEFAULT_TITLE = "Satellite to Topography bias on base map.";
+
+		return {
+			scope: {
+				map: "=",
+				overlaytitle: "=?"
+			},
+			restrict: 'AE',
+			templateUrl: 'common/toolbar/toolbar.html',
+			link: function link(scope) {
+				scope.overlaytitle = scope.overlaytitle ? scope.overlaytitle : DEFAULT_TITLE;
+			}
+		};
+	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
+
+		var self = this;
+		configService.getConfig().then(function (config) {
+			self.links = config.toolbarLinks;
+		});
+
+		$scope.item = "";
+		$scope.toggleItem = function (item) {
+			$scope.item = $scope.item == item ? "" : item;
+		};
+	}]);
+})(angular);
+"use strict";
+
+(function (angular) {
+
+	'use strict';
+
 	angular.module("common.wms", []).directive("commonWms", ['$rootScope', '$timeout', 'flashService', 'wmsService', function ($rootScope, $timeout, flashService, wmsService) {
 		return {
 			scope: {
@@ -3149,48 +3191,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}
 	}]);
 })(angular);
-"use strict";
-
-(function (angular) {
-
-	'use strict';
-
-	angular.module("common.toolbar", []).directive("icsmToolbar", [function () {
-		return {
-			controller: 'toolbarLinksCtrl'
-		};
-	}])
-
-	/**
-  * Override the default mars tool bar row so that a different implementation of the toolbar can be used.
-  */
-	.directive('icsmToolbarRow', [function () {
-		var DEFAULT_TITLE = "Satellite to Topography bias on base map.";
-
-		return {
-			scope: {
-				map: "=",
-				overlaytitle: "=?"
-			},
-			restrict: 'AE',
-			templateUrl: 'common/toolbar/toolbar.html',
-			link: function link(scope) {
-				scope.overlaytitle = scope.overlaytitle ? scope.overlaytitle : DEFAULT_TITLE;
-			}
-		};
-	}]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
-
-		var self = this;
-		configService.getConfig().then(function (config) {
-			self.links = config.toolbarLinks;
-		});
-
-		$scope.item = "";
-		$scope.toggleItem = function (item) {
-			$scope.item = $scope.item == item ? "" : item;
-		};
-	}]);
-})(angular);
 angular.module("common.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("common/accordion/accordion.html","<div role=\"tablist\" class=\"panel-group\" ng-transclude></div>");
 $templateCache.put("common/accordion/accordionGroup.html","<div role=\"tab\" id=\"{{::headingId}}\" aria-selected=\"{{isOpen}}\" class=\"panel-heading\" ng-keypress=\"toggleOpen($event)\">\r\n  <h4 class=\"panel-title\">\r\n    <a role=\"button\" data-toggle=\"collapse\" href aria-expanded=\"{{isOpen}}\"\r\n            aria-controls=\"{{::panelId}}\" tabindex=\"0\" class=\"accordion-toggle\" ng-click=\"toggleOpen()\"\r\n            common-accordion-transclude=\"heading\" ng-disabled=\"isDisabled\" uib-tabindex-toggle>\r\n      <span common-accordion-header ng-class=\"{\'text-muted\': isDisabled}\">{{heading}}</span>\r\n   </a>\r\n  </h4>\r\n</div>\r\n<div id=\"{{::panelId}}\" aria-labelledby=\"{{::headingId}}\" aria-hidden=\"{{!isOpen}}\" role=\"tabpanel\"\r\n            class=\"panel-collapse collapse\" uib-collapse=\"!isOpen\">\r\n  <div class=\"panel-body\" ng-transclude></div>\r\n</div>");
 $templateCache.put("common/bbox/bbox.html","<button type=\"button\" class=\"undecorated\" ng-click=\"toggle()\" tooltip-placement=\"right\" title=\"Show data extent on the map.\">\r\n	<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-eye orange\':data.hasBbox,\'fa-eye-slash\':!data.hasBbox}\"></i>\r\n</button>");
@@ -3205,12 +3205,12 @@ $templateCache.put("common/header/header.html","<div class=\"container-full comm
 $templateCache.put("common/iso19115/contact.html","<ul ng-show=\"node.hierarchyLevel\">\r\n   <li>\r\n      <span class=\"iso19115-head\">Contact</span>\r\n      <iso19115-node name=\"MD_ScopeCode\" node=\"node.hierarchyLevel.MD_ScopeCode\" type=\"_codeListValue\"></iso19115-node>\r\n    </li>\r\n</ul>");
 $templateCache.put("common/iso19115/double.html","\r\n<ul ng-show=\"node\">\r\n   <li>\r\n      <span class=\"iso19115-head\">{{name | iso19115NodeName}}</span>\r\n      <iso19115-node name=\"name\" node=\"node[name]\" type=\"type\"></iso19115-node>\r\n   </li>\r\n</ul>\r\n");
 $templateCache.put("common/iso19115/metadata.html","<div class=\"iso19115\">\r\n   <ul>\r\n      <li>\r\n         <span class=\"iso19115-head\">Metadata</span>\r\n         <iso19115-node name=\"fileIdentifier\" node=\"node.fileIdentifier\" type=\"CharacterString\"></iso19115-node>\r\n         <iso19115-node name=\"language\" node=\"node.language\" type=\"LanguageCode\"></iso19115-node>\r\n         <ul ng-show=\"node.characterSet\">\r\n            <li>\r\n               <span class=\"iso19115-head\">Character Set</span>\r\n               <iso19115-node name=\"CharacterSetCode\" node=\"node.characterSet.MD_CharacterSetCode\" type=\"_codeListValue\"></iso19115-node>\r\n            </li>\r\n         </ul>\r\n\r\n         <ul ng-show=\"node.hierarchyLevel\">\r\n            <li>\r\n               <span class=\"iso19115-head\">Hierarchy Level</span>\r\n               <iso19115-node name=\"MD_ScopeCode\" node=\"node.hierarchyLevel.MD_ScopeCode\" type=\"_codeListValue\"></iso19115-node>\r\n            </li>\r\n         </ul>\r\n         <iso19115-node name=\"hierarchyLevelName\" node=\"node.hierarchyLevelName\" type=\"CharacterString\"></iso19115-node>\r\n         <iso19115-contact ng-if=\"node.contact\" node=\"node.contact\" key=\"\'contact\'\"></iso19115-contact>\r\n      </li>\r\n   </ul>\r\n</div>");
+$templateCache.put("common/navigation/altthemes.html","<span class=\"altthemes-container\">\r\n	<span ng-repeat=\"item in themes | altthemesMatchCurrent : current\">\r\n       <a title=\"{{item.label}}\" ng-href=\"{{item.url}}\" class=\"altthemesItemCompact\" target=\"_blank\">\r\n         <span class=\"altthemes-icon\" ng-class=\"item.className\"></span>\r\n       </a>\r\n    </li>\r\n</span>");
 $templateCache.put("common/metaview/dublincore.html","Dublin core");
 $templateCache.put("common/metaview/iso19115.html","<iso19115-metadata node=\"data.metadata.GetRecordByIdResponse.MD_Metadata\" key=\"\'MD_Metadata\'\"></iso19115-metadata>\r\n");
 $templateCache.put("common/metaview/iso19115node.html","<ul>\r\n   <li>\r\n      <span class=\"metaview-head\">{{key | metaviewNodeName}}</span>\r\n      <span>{{node | metaviewText}}</span>\r\n      <ng-repeat ng-if=\"isArray()\" ng-repeat=\"next in node\" node=\"next]\">\r\n         <metaview-iso19115-array ng-repeat=\"nextKey in getKeys() track by $index\" node=\"node[nextKey]\" key=\"nextKey\"></metaview-iso19115-array>\r\n      </ng-repeat>\r\n      <metaview-iso19115-node ng-if=\"!isArray()\" ng-repeat=\"nextKey in getKeys() track by $index\" node=\"node[nextKey]\" key=\"nextKey\"></metaview-iso19115-node>\r\n   </li>\r\n</ul>");
 $templateCache.put("common/metaview/item.html","<div>\r\n	<button class=\"btn btn-sm btn-outline-primary\" ng-click=\"container.selected = null\"><i class=\"fa fa-angle-double-left\"></i> Back</button>\r\n      <span style=\"font-weight: bold;padding-left:10px; font-size:130%\">{{container.selected.title}}</span>\r\n      <metaview-iso19115 data=\"container.selected\"></metaview-iso19115>\r\n</div>");
 $templateCache.put("common/metaview/metaview.html","<button type=\"button\" class=\"undecorated\" title=\"View metadata\" ng-click=\"select()\">\r\n	<i class=\"fa fa-lg fa-info metaview-info\"></i>\r\n</button>");
-$templateCache.put("common/navigation/altthemes.html","<span class=\"altthemes-container\">\r\n	<span ng-repeat=\"item in themes | altthemesMatchCurrent : current\">\r\n       <a title=\"{{item.label}}\" ng-href=\"{{item.url}}\" class=\"altthemesItemCompact\" target=\"_blank\">\r\n         <span class=\"altthemes-icon\" ng-class=\"item.className\"></span>\r\n       </a>\r\n    </li>\r\n</span>");
 $templateCache.put("common/panes/panes.html","<div class=\"container contentContainer\">\r\n	<div class=\"row icsmPanesRow\" >\r\n		<div class=\"icsmPanesCol\" ng-class=\"{\'col-md-12\':!view, \'col-md-7\':view}\" style=\"padding-right:0\">\r\n			<div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n			    <geo-extent></geo-extent>\r\n			</div>\r\n    		<div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n		</div>\r\n		<div class=\"icsmPanesColRight\" ng-class=\"{\'hidden\':!view, \'col-md-5\':view}\" style=\"padding-left:0; padding-right:0\">\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'download\'\" icsm-view></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'maps\'\" icsm-maps></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'glossary\'\" icsm-glossary></div>\r\n			<div class=\"panesTabContentItem\" ng-show=\"view == \'help\'\" icsm-help></div>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("common/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n		<button class=\"undecorated\">Download</button>\r\n	</div>\r\n	<!-- \r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n	-->\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n		<button class=\"undecorated\">Glossary</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n		<button class=\"undecorated\">Help</button>\r\n	</div>\r\n</div>\r\n");
 $templateCache.put("common/reset/reset.html","<button type=\"button\" class=\"map-tool-toggle-btn\" ng-click=\"reset()\" title=\"Reset page\">\r\n   <span class=\"hidden-sm\">Reset</span>\r\n   <i class=\"fa fa-lg fa-refresh\"></i>\r\n</button>");
