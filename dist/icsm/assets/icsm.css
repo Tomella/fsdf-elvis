@@ -87,6 +87,11 @@
 .common-header {
   background-color: white;
 }
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
+}
 .iso19115,
 .iso19115 ul,
 .iso19115 li {
@@ -125,11 +130,6 @@
 
 .iso19115-head {
   font-weight: bold;
-}
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
 }
 .mvt,
 .mvt ul,
@@ -971,6 +971,12 @@ img.elvis-logo {
   right: 7px;
   bottom: 15px;
 }
+.baselayer-slider {
+  position: absolute;
+  right: 20px;
+  top: 10px;
+  z-index: 3;
+}
 .mess-error {
   background-color: lightcoral;
 }
@@ -985,34 +991,6 @@ img.elvis-logo {
 
 .mess-container {
   font-weight: bold;
-}
-.baselayer-slider {
-  position: absolute;
-  right: 20px;
-  top: 10px;
-  z-index: 3;
-}
-.product-valid {
-  color: green;
-}
-
-.product-invalid {
-  color: red;
-}
-
-.product-warning {
-  color: darkorange;
-}
-
-.product-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.product-restrict {
-  padding-bottom: 8px;
 }
 .continue-container {
   padding: 4px;
@@ -1158,6 +1136,28 @@ img.elvis-logo {
   bottom: 0;
   left: 0;
   right: 0;
+}
+.product-valid {
+  color: green;
+}
+
+.product-invalid {
+  color: red;
+}
+
+.product-warning {
+  color: darkorange;
+}
+
+.product-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.product-restrict {
+  padding-bottom: 8px;
 }
 .reviewing-odd {
   background-color: #eeeeee;
