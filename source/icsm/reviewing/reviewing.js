@@ -85,10 +85,26 @@
             };
          }])
 
+         .directive('reviewIndustry', ["configService", "reviewService", function (configService, reviewService ) {
+            return {
+               retrict: "AE",
+               template: '<div class="input-group">' +
+               '<span class="input-group-addon" style="width:6em" id="nedf-industry">Industry</span>' +
+               '<select required="required" type="text" ng-options="ind.text for ind in industries" ng-model="data.industry" class="form-control" placeholder="Industry of interest for this data" aria-describedby="nedf-industry">' +
+               '</select></div>',
+               link: function(scope) {
+                  scope.data = reviewService.data;
+                  configService.getConfig("industries").then(list => {
+                     scope.industries = list;
+                  });
+               }
+            }
+         }])
+
       .directive("reviewEmail", ['reviewService', function (reviewService) {
          return {
             template: '<div class="input-group">' +
-               '<span class="input-group-addon" id="nedf-email">Email</span>' +
+               '<span class="input-group-addon" style="width:6em" id="nedf-email">Email</span>' +
                '<input required="required" type="email" ng-model="data.email" class="form-control" placeholder="Email address to send download link" aria-describedby="nedf-email">' +
                '</div>',
             restrict: "AE",
@@ -149,6 +165,7 @@
                            ymin: clip.yMin,
                            ymax: clip.yMax,
                            email: data.email,
+                           industry: data.industry.code,
                            recaptcha: data.recaptchaResponse
                         };
 

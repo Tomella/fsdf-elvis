@@ -155,54 +155,6 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
     return 'common-accordion-header,' + 'data-common-accordion-header,' + 'x-common-accordion-header,' + 'common\\:accordion-header,' + '[common-accordion-header],' + '[data-common-accordion-header],' + '[x-common-accordion-header]';
   }
 });
-'use strict';
-
-{
-   /**
-    * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
-    */
-
-   angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider']).directive('commonBaselayerControl', ['mapHelper', 'mapService', function (mapHelper, mapService) {
-      var DEFAULTS = {
-         maxZoom: 12
-      };
-
-      return {
-         template: '<slider ui-tooltip="hide" min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
-         scope: {
-            maxZoom: "="
-         },
-         link: function link(scope, element) {
-            if (typeof scope.maxZoom === "undefined") {
-               scope.maxZoom = DEFAULTS.maxZoom;
-            }
-            scope.slider = {
-               opacity: -1,
-               visibility: true,
-               lastOpacity: 1
-            };
-
-            // Get the initial value
-            mapHelper.getPseudoBaseLayer().then(function (layer) {
-               scope.layer = layer;
-               scope.slider.opacity = layer.options.opacity;
-            });
-
-            scope.$watch('slider.opacity', function (newValue, oldValue) {
-               if (oldValue < 0) return;
-
-               mapService.getMap().then(function (map) {
-                  map.eachLayer(function (layer) {
-                     if (layer.pseudoBaseLayer) {
-                        layer.setOpacity(scope.slider.opacity);
-                     }
-                  });
-               });
-            });
-         }
-      };
-   }]);
-}
 "use strict";
 
 {
@@ -302,6 +254,54 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
                bbox._map.removeLayer(bbox);
             }
             return null;
+         }
+      };
+   }]);
+}
+'use strict';
+
+{
+   /**
+    * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
+    */
+
+   angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider']).directive('commonBaselayerControl', ['mapHelper', 'mapService', function (mapHelper, mapService) {
+      var DEFAULTS = {
+         maxZoom: 12
+      };
+
+      return {
+         template: '<slider ui-tooltip="hide" min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
+         scope: {
+            maxZoom: "="
+         },
+         link: function link(scope, element) {
+            if (typeof scope.maxZoom === "undefined") {
+               scope.maxZoom = DEFAULTS.maxZoom;
+            }
+            scope.slider = {
+               opacity: -1,
+               visibility: true,
+               lastOpacity: 1
+            };
+
+            // Get the initial value
+            mapHelper.getPseudoBaseLayer().then(function (layer) {
+               scope.layer = layer;
+               scope.slider.opacity = layer.options.opacity;
+            });
+
+            scope.$watch('slider.opacity', function (newValue, oldValue) {
+               if (oldValue < 0) return;
+
+               mapService.getMap().then(function (map) {
+                  map.eachLayer(function (layer) {
+                     if (layer.pseudoBaseLayer) {
+                        layer.setOpacity(scope.slider.opacity);
+                     }
+                  });
+               });
+            });
          }
       };
    }]);
@@ -406,111 +406,6 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
 				} };
 		}
 	}]);
-}
-"use strict";
-
-{
-   angular.module("common.draw", ['geo.map']).directive("commonDraw", ['$log', '$rootScope', 'commonDrawService', function ($log, $rootScope, commonDrawService) {
-      var DEFAULTS = {
-         rectangleEvent: "geo.draw.rectangle.created",
-         lineEvent: "geo.draw.line.created"
-      };
-
-      return {
-         restrict: "AE",
-         scope: {
-            data: "=",
-            rectangleEvent: "@",
-            lineEvent: "@"
-         },
-         link: function link(scope, element, attrs, ctrl) {
-
-            angular.forEach(DEFAULTS, function (value, key) {
-               if (!scope[key]) {
-                  scope[key] = value;
-               }
-            });
-
-            commonDrawService.createControl(scope);
-         }
-      };
-   }]).factory("commonDrawService", ['$q', '$rootScope', 'mapService', function ($q, $rootScope, mapService) {
-      var callbackOptions, drawControl, drawer, rectangleDeferred;
-
-      return {
-         createControl: function createControl(parameters) {
-            if (drawControl) {
-               $q.when(drawControl);
-            }
-
-            return mapService.getMap().then(function (map) {
-               var drawnItems = new L.FeatureGroup(),
-                   options = {
-                  edit: {
-                     featureGroup: drawnItems
-                  }
-               };
-
-               if (parameters.data) {
-                  angular.extend(options, parameters.data);
-               }
-
-               featureGroup = parameters.drawnItems = drawnItems;
-
-               map.addLayer(drawnItems);
-               // Initialise the draw control and pass it the FeatureGroup of editable layers
-               drawControl = new L.Control.Draw(options);
-               map.addControl(drawControl);
-               map.on("draw:created", function (event) {
-                  ({
-                     polyline: function polyline() {
-                        var data = { length: event.layer.getLength(), geometry: event.layer.getLatLngs() };
-                        $rootScope.$broadcast(parameters.lineEvent, data);
-                     },
-                     // With rectangles only one can be drawn at a time.
-                     rectangle: function rectangle() {
-                        var data = {
-                           bounds: event.layer.getBounds(),
-                           options: callbackOptions
-                        };
-                        rectangleDeferred.resolve(data);
-                        rectangleDeferred = null;
-                        $rootScope.$broadcast(parameters.rectangleEvent, data);
-                     }
-                  })[event.layerType]();
-               });
-
-               return drawControl;
-            });
-         },
-
-         cancelDrawRectangle: function cancelDrawRectangle() {
-            this.options = {};
-            if (rectangleDeferred) {
-               rectangleDeferred.reject();
-               rectangleDeferred = null;
-               if (drawer) {
-                  drawer.disable();
-               }
-            }
-         },
-
-         drawRectangle: function drawRectangle(options) {
-            this.cancelDrawRectangle();
-            callbackOptions = options;
-            rectangleDeferred = $q.defer();
-            if (drawer) {
-               drawer.enable();
-            } else {
-               mapService.getMap().then(function (map) {
-                  drawer = new L.Draw.Rectangle(map, drawControl.options.polyline);
-                  drawer.enable();
-               });
-            }
-            return rectangleDeferred.promise;
-         }
-      };
-   }]);
 }
 'use strict';
 
@@ -720,6 +615,111 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
 		return service;
 	}
 })(angular, $);
+"use strict";
+
+{
+   angular.module("common.draw", ['geo.map']).directive("commonDraw", ['$log', '$rootScope', 'commonDrawService', function ($log, $rootScope, commonDrawService) {
+      var DEFAULTS = {
+         rectangleEvent: "geo.draw.rectangle.created",
+         lineEvent: "geo.draw.line.created"
+      };
+
+      return {
+         restrict: "AE",
+         scope: {
+            data: "=",
+            rectangleEvent: "@",
+            lineEvent: "@"
+         },
+         link: function link(scope, element, attrs, ctrl) {
+
+            angular.forEach(DEFAULTS, function (value, key) {
+               if (!scope[key]) {
+                  scope[key] = value;
+               }
+            });
+
+            commonDrawService.createControl(scope);
+         }
+      };
+   }]).factory("commonDrawService", ['$q', '$rootScope', 'mapService', function ($q, $rootScope, mapService) {
+      var callbackOptions, drawControl, drawer, rectangleDeferred;
+
+      return {
+         createControl: function createControl(parameters) {
+            if (drawControl) {
+               $q.when(drawControl);
+            }
+
+            return mapService.getMap().then(function (map) {
+               var drawnItems = new L.FeatureGroup(),
+                   options = {
+                  edit: {
+                     featureGroup: drawnItems
+                  }
+               };
+
+               if (parameters.data) {
+                  angular.extend(options, parameters.data);
+               }
+
+               featureGroup = parameters.drawnItems = drawnItems;
+
+               map.addLayer(drawnItems);
+               // Initialise the draw control and pass it the FeatureGroup of editable layers
+               drawControl = new L.Control.Draw(options);
+               map.addControl(drawControl);
+               map.on("draw:created", function (event) {
+                  ({
+                     polyline: function polyline() {
+                        var data = { length: event.layer.getLength(), geometry: event.layer.getLatLngs() };
+                        $rootScope.$broadcast(parameters.lineEvent, data);
+                     },
+                     // With rectangles only one can be drawn at a time.
+                     rectangle: function rectangle() {
+                        var data = {
+                           bounds: event.layer.getBounds(),
+                           options: callbackOptions
+                        };
+                        rectangleDeferred.resolve(data);
+                        rectangleDeferred = null;
+                        $rootScope.$broadcast(parameters.rectangleEvent, data);
+                     }
+                  })[event.layerType]();
+               });
+
+               return drawControl;
+            });
+         },
+
+         cancelDrawRectangle: function cancelDrawRectangle() {
+            this.options = {};
+            if (rectangleDeferred) {
+               rectangleDeferred.reject();
+               rectangleDeferred = null;
+               if (drawer) {
+                  drawer.disable();
+               }
+            }
+         },
+
+         drawRectangle: function drawRectangle(options) {
+            this.cancelDrawRectangle();
+            callbackOptions = options;
+            rectangleDeferred = $q.defer();
+            if (drawer) {
+               drawer.enable();
+            } else {
+               mapService.getMap().then(function (map) {
+                  drawer = new L.Draw.Rectangle(map, drawControl.options.polyline);
+                  drawer.enable();
+               });
+            }
+            return rectangleDeferred.promise;
+         }
+      };
+   }]);
+}
 "use strict";
 
 (function (angular) {
@@ -1976,40 +1976,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 })(angular);
 "use strict";
 
-{
-   angular.module("common.proxy", []).provider("proxy", function () {
-
-      this.$get = ['$http', '$q', function ($http, $q) {
-         var base = "proxy/";
-
-         this.setProxyBase = function (newBase) {
-            base = newBase;
-         };
-
-         return {
-            get: function get(url, options) {
-               return this._method("get", url, options);
-            },
-
-            post: function post(url, options) {
-               return this._method("post", url, options);
-            },
-
-            put: function put(url, options) {
-               return this._method("put", url, options);
-            },
-
-            _method: function _method(method, url, options) {
-               return $http[method](base + url, options).then(function (response) {
-                  return response.data;
-               });
-            }
-         };
-      }];
-   });
-}
-"use strict";
-
 (function (angular) {
 	'use strict';
 
@@ -2082,6 +2048,40 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		};
 	}
 })(angular);
+"use strict";
+
+{
+   angular.module("common.proxy", []).provider("proxy", function () {
+
+      this.$get = ['$http', '$q', function ($http, $q) {
+         var base = "proxy/";
+
+         this.setProxyBase = function (newBase) {
+            base = newBase;
+         };
+
+         return {
+            get: function get(url, options) {
+               return this._method("get", url, options);
+            },
+
+            post: function post(url, options) {
+               return this._method("post", url, options);
+            },
+
+            put: function put(url, options) {
+               return this._method("put", url, options);
+            },
+
+            _method: function _method(method, url, options) {
+               return $http[method](base + url, options).then(function (response) {
+                  return response.data;
+               });
+            }
+         };
+      }];
+   });
+}
 'use strict';
 
 (function (angular) {

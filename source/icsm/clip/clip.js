@@ -99,7 +99,7 @@
       }])
 
 
-      .factory("clipService", ['$q', '$rootScope', 'drawService', function ($q, $rootScope, drawService) {
+      .factory("clipService", ['$location', '$q', '$rootScope', 'drawService', function ($location, $q, $rootScope, drawService) {
          let options = {
             maxAreaDegrees: 4
          },
@@ -128,6 +128,10 @@
                   return drawComplete(data);
                }
             };
+
+         let search = $location.search();
+         console.log("search", search);
+
 
          $rootScope.$on("bounds.drawn", function (event, data) {
             console.log("data", data);

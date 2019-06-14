@@ -77,7 +77,8 @@
       'icsm.clip',
       'icsm.elevation.point',
 		'icsm.glossary',
-		'icsm.help',
+      'icsm.help',
+      "icsm.location",
 		'icsm.panes',
       'icsm.products',
       "icsm.side-panel",
@@ -96,8 +97,12 @@
 	])
 
 		// Set up all the service providers here.
-		.config(['configServiceProvider', 'placenamesConfigServiceProvider', 'projectsServiceProvider', 'persistServiceProvider', 'versionServiceProvider', 'elevationPointServiceProvider',
-         function (configServiceProvider, placenamesConfigServiceProvider, projectsServiceProvider, persistServiceProvider, versionServiceProvider, elevationPointServiceProvider) {
+		.config(['$locationProvider', 'configServiceProvider', 'placenamesConfigServiceProvider', 'projectsServiceProvider', 'persistServiceProvider', 'versionServiceProvider', 'elevationPointServiceProvider',
+         function ($locationProvider, configServiceProvider, placenamesConfigServiceProvider, projectsServiceProvider, persistServiceProvider, versionServiceProvider) {
+            $locationProvider.html5Mode({
+               enabled: true,
+               requireBase: false
+            });
 				configServiceProvider.location("icsm/resources/config/config.json");
 				placenamesConfigServiceProvider.location("icsm/resources/config/placenames.json");
             configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");

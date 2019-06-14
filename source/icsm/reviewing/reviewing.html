@@ -48,6 +48,9 @@
    </div>
 
    <div class="row reviewing-divider">
+      <div class="col-md-12" style="padding-bottom: 8px">
+         <div review-industry></div>
+      </div>
       <div class="col-md-12">
          <div review-email></div>
       </div>
@@ -68,7 +71,7 @@
       </div>
       <div class="col-md-4">
          <div class="pull-right" style="padding:8px;">
-            <button type="button" class="btn btn-primary" ng-click="accept()" ng-disabled="!data.email || !list.selected.length || !recaptchaResponse">Start extract of datasets
+            <button type="button" class="btn btn-primary" ng-click="accept()" ng-disabled="!data.industry || !data.email || !list.selected.length || !recaptchaResponse">Start extract of datasets
             </button>
             <button type="button" class="btn btn-primary" ng-click="cancel()">Cancel</button>
          </div>
