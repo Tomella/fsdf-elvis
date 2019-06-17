@@ -394,7 +394,12 @@ function getRemoteUrlFromParam(req) {
     if (remoteUrl) {
         // add http:// to the URL if no protocol is present
         if (!/^https?:\/\//.test(remoteUrl)) {
-            remoteUrl = 'http://' + remoteUrl;
+            // Now double slashes are removed on some URL's by some servers (which is the right behaviour)
+            if (!/^https?:\//.test(remoteUrl)) {
+               remoteUrl = 'http://' + remoteUrl;
+            } else {
+               remoteUrl = remoteUrl.replace(":/", "://");
+            }
         }
         remoteUrl = url.parse(remoteUrl);
         // copy query string

@@ -129,7 +129,8 @@
 
       .factory('reviewService', ['$http', '$q', 'clipService', 'configService', 'listService', 'persistService',
          function ($http, $q, clipService, configService, listService, persistService) {
-            var key = "elvis_download_email";
+            const EMAIL_KEY = "elvis_download_email";
+            const INDUSTRY_KEY = "elvis_download_industry";
             var data = listService.data;
             var service = {
                get data() {
@@ -147,6 +148,7 @@
 
                startExtract: function () {
                   this.setEmail(data.email);
+                  this.setIndustry(data.industry);
                   return configService.getConfig("processing").then(function (config) {
 
                      var clip = clipService.data.clip;
@@ -206,7 +208,14 @@
 
                setEmail: function (email) {
                   this.data.email = email;
-                  persistService.setItem(key, email);
+                  persistService.setItem(EMAIL_KEY, email);
+               },
+
+               setIndustry: function (industry) {
+                  this.data.industry = industry;
+                  if(industry && industry.code) {
+                     persistService.setItem(INDUSTRY_KEY, industry.code);
+                  }
                },
 
                clipProduct() {
@@ -214,8 +223,16 @@
                }
             };
 
-            persistService.getItem(key).then(value => {
+            persistService.getItem(EMAIL_KEY).then(value => {
                service.data.email = value;
+            });
+
+            persistService.getItem(INDUSTRY_KEY).then(code => {
+               if(code) {
+                  configService.getConfig("industries").then(list => {
+                     service.data.industry = list.find(item => item.code === code);
+                  });
+               }
             });
 
             return service;

@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "body-parser": "^1.18.3",
-    "express": "^4.13.3",
+    "express": "^4.17.1",
     "express-http-proxy": "^0.9.1",
     "request": "^2.74.0",
     "wiredep": "^3.0.1",

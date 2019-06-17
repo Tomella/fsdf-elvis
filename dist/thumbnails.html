@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en-us" id="ng-app" ng-app="IcsmApp">
+<head>
+<style>
+div {
+   font-size: 0;
+}
+
+.scaler {
+   height:310px;
+   border: 1px solid gray;
+   overflow-y: hidden;
+}
+
+.scaler img {
+   width:130px;
+}
+
+body {
+   background-color: white;
+}
+</style>
+
+</head>
+
+<body>
+<div class="scaler">
+   <div>
+      <img id="img_13_8"></img>
+      <img id="img_14_8"></img>
+   </div>
+   <div>
+      <img id="img_13_9"></img>
+      <img id="img_14_9"></img>
+   </div>
+   <div>
+      <img id="img_13_10"></img>
+      <img id="img_14_10"></img>
+   </div>
+</div>
+<hr/>
+<img style="position:fixed; top:465px;left:-10px; opacity:0.5" src="http://elevation.fsdf.org.au/icsm/resources/img/dem_thumb.png"></body>
+<script>
+let template = "https://s3-ap-southeast-2.amazonaws.com/fsdf.elevation.tile.cache/DEM/4/${x}/${y}.png";
+let boxes = {
+
+}
+
+for(let x = 13; x < 15; x++) {
+   for(let y = 8; y < 11; y++) {
+      let id = "img_" + x + "_" + y;
+      let url = template.replace("${x}", x).replace("${y}", y);
+      document.getElementById(id).src = url;
+
+   }
+}
+</script>
+</body>
+
+</html>

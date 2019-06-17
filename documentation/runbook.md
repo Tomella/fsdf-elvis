@@ -117,6 +117,7 @@ None other than Solr's internal storage hosted locally.
 ### Required resources - logging
 
 Apache HTTP logs - Rolling 5 week logs for both access and errors in /etc/httpd/logs
+Application logs - Rolling 9 day logs in /var/log/fsdf.log*
 
 ## Security and access control
 
@@ -134,17 +135,21 @@ Occasional scanning of logs for suspicious activiy.
 
 ### Configuration management
 
-The only private information are the username and password for the consumption of FME services. While not overly "secret" they are maintained in properties. The microservices that use them run under ec2-user logon and the `/home/ec2-user/.bash_profile` file exports the username and password.
+Some private information are the username and password for the consumption of FME services. While not overly "secret" they are maintained in properties. The microservices that use them run under ec2-user logon and the `/home/ec2-user/.bash_profile` file exports the username and password.
+
+There are two other mandatory keys. The ELEVATION_SERVICE_KEY_VALUE is a token passed to the FME server to
+signify a registered user of the service while the ELEVATION_RECAPTCHA_PRIVATE_KEY is used for the callback
+to check the recaptcha credentials.
 
 ```
-ESRI_USERNAME=xxxxxxxxx
-ESRI_PASSWORD=yyyyyyyyy
+export ESRI_USERNAME=xxxxxxxxx
+export ESRI_PASSWORD=yyyyyyyyy
 
-export ESRI_USERNAME
-export ESRI_PASSWORD
+export ELEVATION_SERVICE_KEY_VALUE=token=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+export ELEVATION_RECAPTCHA_PRIVATE_KEY=yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 ```
 
-The expiry is a long way off, roughly 900 days to go but if it is needed to be changed contact NLIG for instructions.
+The ESRI_PASSWORD expiry is a long way off, roughly 900 days to go but if it is needed to be changed contact NLIG for instructions.
 
 ## System backup and restore
 ### Backup requirements
@@ -156,7 +161,8 @@ No backups are required. No single point of truth is maintained on the VM and a 
 
 There has been no log requirements provided. FME services has its own logging and metrics are derived from the FME logs.
 
-Only logs are Apache HTTP logs - Rolling 5 week logs for both access and errors in /etc/httpd/logs
+Only logs are Apache HTTP logs - Rolling 5 week logs for both access and errors in /etc/httpd/logs and
+application logs - Rolling 9 day logs in /var/log/fsdf.log*
 
 ### Log message format
 
@@ -229,13 +235,14 @@ If Solr is added then see [gazetteer project](https://github.com/Tomella/gazette
 
 ### Batch processing
 
-There is no scheduled batch processing that falls under the maintenance of this application
+The only batch processing is to refresh the token used to call the FME services
+
+0 3,9,15,21 * * 0 /bin/bash $HOME/fsdf-elvis/code-deploy/refreshtoken
+
 
 ### Power procedures
 
 The microservices and HTTP server are both configured to auto start and have been installed and set to do so from the the first deployment of the application.
-
-If the Solr instance is needed to be installed for the place names searhing it will self managed to do the same.
 
 ### Routine and sanity checks
 

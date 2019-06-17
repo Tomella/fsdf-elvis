@@ -17,6 +17,27 @@ specific language governing permissions and limitations
 under the License.
 */
 
+"use strict";
+
+{
+   angular.module("placenames.config", []).provider("placenamesConfigService", function () {
+      var baseUrl = "placenames.json";
+
+      this.location = function (where) {
+         baseUrl = where;
+      };
+
+      this.$get = ['$http', function configServiceFactory($http) {
+         return {
+            getConfig: function getConfig() {
+               return $http.get(baseUrl, { cache: true }).then(function (response) {
+                  return response.data;
+               });
+            }
+         };
+      }];
+   });
+}
 'use strict';
 
 {
@@ -243,27 +264,6 @@ function SearchService($http, $rootScope, $timeout, placenamesConfigService, map
       }
    });
    return service;
-}
-"use strict";
-
-{
-   angular.module("placenames.config", []).provider("placenamesConfigService", function () {
-      var baseUrl = "placenames.json";
-
-      this.location = function (where) {
-         baseUrl = where;
-      };
-
-      this.$get = ['$http', function configServiceFactory($http) {
-         return {
-            getConfig: function getConfig() {
-               return $http.get(baseUrl, { cache: true }).then(function (response) {
-                  return response.data;
-               });
-            }
-         };
-      }];
-   });
 }
 "use strict";
 
