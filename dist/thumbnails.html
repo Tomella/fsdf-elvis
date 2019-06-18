@@ -1,59 +1,101 @@
 <!doctype html>
 <html lang="en-us" id="ng-app" ng-app="IcsmApp">
+
 <head>
-<style>
-div {
-   font-size: 0;
-}
+   <style>
+      div {
+         font-size: 0;
+      }
 
-.scaler {
-   height:310px;
-   border: 1px solid gray;
-   overflow-y: hidden;
-}
+      .scaler {
+         height: 310px;
+         border: 1px solid gray;
+         overflow-y: hidden;
+      }
 
-.scaler img {
-   width:130px;
-}
+      .scaler img {
+         width: 130px;
+      }
 
-body {
-   background-color: white;
-}
-</style>
+      body {
+         background-color: white;
+      }
+   </style>
 
 </head>
 
 <body>
-<div class="scaler">
-   <div>
-      <img id="img_13_8"></img>
-      <img id="img_14_8"></img>
-   </div>
-   <div>
-      <img id="img_13_9"></img>
-      <img id="img_14_9"></img>
-   </div>
-   <div>
-      <img id="img_13_10"></img>
-      <img id="img_14_10"></img>
-   </div>
-</div>
-<hr/>
-<img style="position:fixed; top:465px;left:-10px; opacity:0.5" src="http://elevation.fsdf.org.au/icsm/resources/img/dem_thumb.png"></body>
+</body>
+
+
 <script>
-let template = "https://s3-ap-southeast-2.amazonaws.com/fsdf.elevation.tile.cache/DEM/4/${x}/${y}.png";
-let boxes = {
+   const templates = {
+      dem: {
+         url: "https://s3-ap-southeast-2.amazonaws.com/fsdf.elevation.tile.cache/DEM/4/${x}/${y}.png",
+         minX: 13,
+         maxX: 14,
+         minY: 8,
+         maxY: 10
+      },
+      pointCloud: {
+         url: "https://s3-ap-southeast-2.amazonaws.com/fsdf.elevation.tile.cache/POINT_CLOUD/4/${x}/${y}.png",
+         minX: 13,
+         maxX: 14,
+         minY: 8,
+         maxY: 10
+      },
+      bathymetry: {
+         url: "https://s3-ap-southeast-2.amazonaws.com/fsdf.elevation.tile.cache/BATHYMETRY/4/${x}/${y}.png",
+         minX: 12,
+         maxX: 14,
+         minY: 8,
+         maxY: 10
+      } /*,
+      imagery: {
+         url: "https://s3-ap-southeast-2.amazonaws.com/fsdf.elevation.tile.cache/IMAGERY/4/${x}/${y}.png",
+         minX: 13,
+         maxX: 14,
+         minY: 8,
+         maxY: 10
+      }
+*/
+   };
 
-}
+   const IMAGE_WIDTH = 256;
+   const OUT_WIDTH = 280;
 
-for(let x = 13; x < 15; x++) {
-   for(let y = 8; y < 11; y++) {
-      let id = "img_" + x + "_" + y;
-      let url = template.replace("${x}", x).replace("${y}", y);
-      document.getElementById(id).src = url;
+   let keys = Object.keys(templates);
+   keys.forEach(key => {
+      let data = templates[key];
+      let container = document.createElement("div");
+      let xs = (data.maxX - data.minX + 1);
 
+      container.width = IMAGE_WIDTH * xs;
+      container.style.transform = "scale(" + (OUT_WIDTH / IMAGE_WIDTH / xs) + ")";
+      container.id = key;
+
+      for (let y = data.minY; y <= data.maxY; y++) {
+         for (let x = data.minX; x <= data.maxX; x++) {
+            let img = document.createElement("img");
+            img.src = data.url.replace("${x}", x).replace("${y}", y);
+            container.appendChild(img);
+         }
+         container.appendChild(document.createElement("br"));
+      }
+      document.body.appendChild(container);
+   })
+
+/*
+
+   for (let x = 13; x < 15; x++) {
+      for (let y = 8; y < 11; y++) {
+         let id = "img_" + x + "_" + y;
+         let url = templates.dem.url.replace("${x}", x).replace("${y}", y);
+         document.getElementById(id).src = url;
+
+      }
    }
-}
+*/
 </script>
 </body>
 

@@ -17,105 +17,50 @@ specific language governing permissions and limitations
 under the License.
 */
 
-"use strict";
+'use strict';
 
 {
+   /**
+    * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
+    */
 
-   angular.module("common.bbox", ['geo.draw']).directive("commonBboxShowAll", ['$rootScope', '$timeout', function ($rootScope, $timeout) {
-      return {
-         link: function link(scope, element) {
-            element.on("click", function () {
-               $timeout(function () {
-                  $rootScope.$broadcast("commonbboxshowall");
-               });
-            });
-         }
+   angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider']).directive('commonBaselayerControl', ['mapHelper', 'mapService', function (mapHelper, mapService) {
+      var DEFAULTS = {
+         maxZoom: 12
       };
-   }]).directive("commonBboxHideAll", ['$rootScope', function ($rootScope) {
+
       return {
-         link: function link(scope, element) {
-            element.on("click", function () {
-               $rootScope.$broadcast("commonbboxhideall");
-            });
-         }
-      };
-   }]).directive("commonBboxShowVisible", ['$rootScope', 'mapService', function ($rootScope, mapService) {
-      return {
-         link: function link(scope, element) {
-            element.on("click", function () {
-               mapService.getMap().then(function (map) {
-                  $rootScope.$broadcast("commonbboxshowvisible", map.getBounds());
-               });
-            });
-         }
-      };
-   }]).directive("commonBbox", ['$rootScope', 'bboxService', function ($rootScope, bboxService) {
-      return {
-         templateUrl: "common/bbox/bbox.html",
+         template: '<slider ui-tooltip="hide" min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
          scope: {
-            data: "="
+            maxZoom: "="
          },
          link: function link(scope, element) {
-
-            $rootScope.$on("commonbboxshowall", function () {
-               scope.data.hasBbox = true;
-            });
-
-            $rootScope.$on("commonbboxhideall", function () {
-               scope.data.hasBbox = false;
-            });
-
-            $rootScope.$on("commonbboxshowvisible", function (event, bounds) {
-               var myBounds = scope.data.bounds,
-                   draw = bounds.getWest() < myBounds.xMin && bounds.getEast() > myBounds.xMax && bounds.getNorth() > myBounds.yMax && bounds.getSouth() < myBounds.yMin;
-
-               scope.data.hasBbox = draw;
-            });
-
-            scope.$watch("data.hasBbox", function (newValue) {
-               if (newValue) {
-                  bboxService.draw(scope.data).then(function (bbox) {
-                     scope.bbox = bbox;
-                  });
-               } else {
-                  scope.bbox = bboxService.remove(scope.bbox);
-               }
-            });
-
-            scope.toggle = function () {
-               var draw = scope.data.hasBbox = !scope.data.hasBbox;
+            if (typeof scope.maxZoom === "undefined") {
+               scope.maxZoom = DEFAULTS.maxZoom;
+            }
+            scope.slider = {
+               opacity: -1,
+               visibility: true,
+               lastOpacity: 1
             };
 
-            scope.$on("$destroy", function () {
-               if (scope.data.hasBbox) {
-                  scope.bbox = bboxService.remove(scope.bbox);
-               }
+            // Get the initial value
+            mapHelper.getPseudoBaseLayer().then(function (layer) {
+               scope.layer = layer;
+               scope.slider.opacity = layer.options.opacity;
             });
-         }
-      };
-   }]).factory("bboxService", ['mapService', function (mapService) {
-      var normalLayerColor = "#ff7800",
-          hilightLayerColor = 'darkblue';
 
-      return {
-         draw: function draw(data) {
-            var parts = data.bbox.split(" "),
-                bounds = [[+parts[1], +parts[0]], [+parts[3], +parts[2]]];
+            scope.$watch('slider.opacity', function (newValue, oldValue) {
+               if (oldValue < 0) return;
 
-            return mapService.getMap().then(function (map) {
-               // create an orange rectangle
-               var layer = L.rectangle(bounds, { fill: false, color: normalLayerColor, weight: 2, opacity: 0.8 });
-               layer.addTo(map);
-               map.fitBounds(bounds);
-               return layer;
+               mapService.getMap().then(function (map) {
+                  map.eachLayer(function (layer) {
+                     if (layer.pseudoBaseLayer) {
+                        layer.setOpacity(scope.slider.opacity);
+                     }
+                  });
+               });
             });
-         },
-
-         remove: function remove(bbox) {
-            if (bbox) {
-               bbox._map.removeLayer(bbox);
-            }
-            return null;
          }
       };
    }]);
@@ -258,50 +203,105 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
     return 'common-accordion-header,' + 'data-common-accordion-header,' + 'x-common-accordion-header,' + 'common\\:accordion-header,' + '[common-accordion-header],' + '[data-common-accordion-header],' + '[x-common-accordion-header]';
   }
 });
-'use strict';
+"use strict";
 
 {
-   /**
-    * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
-    */
 
-   angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider']).directive('commonBaselayerControl', ['mapHelper', 'mapService', function (mapHelper, mapService) {
-      var DEFAULTS = {
-         maxZoom: 12
-      };
-
+   angular.module("common.bbox", ['geo.draw']).directive("commonBboxShowAll", ['$rootScope', '$timeout', function ($rootScope, $timeout) {
       return {
-         template: '<slider ui-tooltip="hide" min="0" max="1" step="0.1" ng-model="slider.opacity" updateevent="slideStop"></slider>',
-         scope: {
-            maxZoom: "="
-         },
          link: function link(scope, element) {
-            if (typeof scope.maxZoom === "undefined") {
-               scope.maxZoom = DEFAULTS.maxZoom;
-            }
-            scope.slider = {
-               opacity: -1,
-               visibility: true,
-               lastOpacity: 1
-            };
-
-            // Get the initial value
-            mapHelper.getPseudoBaseLayer().then(function (layer) {
-               scope.layer = layer;
-               scope.slider.opacity = layer.options.opacity;
-            });
-
-            scope.$watch('slider.opacity', function (newValue, oldValue) {
-               if (oldValue < 0) return;
-
-               mapService.getMap().then(function (map) {
-                  map.eachLayer(function (layer) {
-                     if (layer.pseudoBaseLayer) {
-                        layer.setOpacity(scope.slider.opacity);
-                     }
-                  });
+            element.on("click", function () {
+               $timeout(function () {
+                  $rootScope.$broadcast("commonbboxshowall");
                });
             });
+         }
+      };
+   }]).directive("commonBboxHideAll", ['$rootScope', function ($rootScope) {
+      return {
+         link: function link(scope, element) {
+            element.on("click", function () {
+               $rootScope.$broadcast("commonbboxhideall");
+            });
+         }
+      };
+   }]).directive("commonBboxShowVisible", ['$rootScope', 'mapService', function ($rootScope, mapService) {
+      return {
+         link: function link(scope, element) {
+            element.on("click", function () {
+               mapService.getMap().then(function (map) {
+                  $rootScope.$broadcast("commonbboxshowvisible", map.getBounds());
+               });
+            });
+         }
+      };
+   }]).directive("commonBbox", ['$rootScope', 'bboxService', function ($rootScope, bboxService) {
+      return {
+         templateUrl: "common/bbox/bbox.html",
+         scope: {
+            data: "="
+         },
+         link: function link(scope, element) {
+
+            $rootScope.$on("commonbboxshowall", function () {
+               scope.data.hasBbox = true;
+            });
+
+            $rootScope.$on("commonbboxhideall", function () {
+               scope.data.hasBbox = false;
+            });
+
+            $rootScope.$on("commonbboxshowvisible", function (event, bounds) {
+               var myBounds = scope.data.bounds,
+                   draw = bounds.getWest() < myBounds.xMin && bounds.getEast() > myBounds.xMax && bounds.getNorth() > myBounds.yMax && bounds.getSouth() < myBounds.yMin;
+
+               scope.data.hasBbox = draw;
+            });
+
+            scope.$watch("data.hasBbox", function (newValue) {
+               if (newValue) {
+                  bboxService.draw(scope.data).then(function (bbox) {
+                     scope.bbox = bbox;
+                  });
+               } else {
+                  scope.bbox = bboxService.remove(scope.bbox);
+               }
+            });
+
+            scope.toggle = function () {
+               var draw = scope.data.hasBbox = !scope.data.hasBbox;
+            };
+
+            scope.$on("$destroy", function () {
+               if (scope.data.hasBbox) {
+                  scope.bbox = bboxService.remove(scope.bbox);
+               }
+            });
+         }
+      };
+   }]).factory("bboxService", ['mapService', function (mapService) {
+      var normalLayerColor = "#ff7800",
+          hilightLayerColor = 'darkblue';
+
+      return {
+         draw: function draw(data) {
+            var parts = data.bbox.split(" "),
+                bounds = [[+parts[1], +parts[0]], [+parts[3], +parts[2]]];
+
+            return mapService.getMap().then(function (map) {
+               // create an orange rectangle
+               var layer = L.rectangle(bounds, { fill: false, color: normalLayerColor, weight: 2, opacity: 0.8 });
+               layer.addTo(map);
+               map.fitBounds(bounds);
+               return layer;
+            });
+         },
+
+         remove: function remove(bbox) {
+            if (bbox) {
+               bbox._map.removeLayer(bbox);
+            }
+            return null;
          }
       };
    }]);
@@ -406,111 +406,6 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
 				} };
 		}
 	}]);
-}
-"use strict";
-
-{
-   angular.module("common.draw", ['geo.map']).directive("commonDraw", ['$log', '$rootScope', 'commonDrawService', function ($log, $rootScope, commonDrawService) {
-      var DEFAULTS = {
-         rectangleEvent: "geo.draw.rectangle.created",
-         lineEvent: "geo.draw.line.created"
-      };
-
-      return {
-         restrict: "AE",
-         scope: {
-            data: "=",
-            rectangleEvent: "@",
-            lineEvent: "@"
-         },
-         link: function link(scope, element, attrs, ctrl) {
-
-            angular.forEach(DEFAULTS, function (value, key) {
-               if (!scope[key]) {
-                  scope[key] = value;
-               }
-            });
-
-            commonDrawService.createControl(scope);
-         }
-      };
-   }]).factory("commonDrawService", ['$q', '$rootScope', 'mapService', function ($q, $rootScope, mapService) {
-      var callbackOptions, drawControl, drawer, rectangleDeferred;
-
-      return {
-         createControl: function createControl(parameters) {
-            if (drawControl) {
-               $q.when(drawControl);
-            }
-
-            return mapService.getMap().then(function (map) {
-               var drawnItems = new L.FeatureGroup(),
-                   options = {
-                  edit: {
-                     featureGroup: drawnItems
-                  }
-               };
-
-               if (parameters.data) {
-                  angular.extend(options, parameters.data);
-               }
-
-               featureGroup = parameters.drawnItems = drawnItems;
-
-               map.addLayer(drawnItems);
-               // Initialise the draw control and pass it the FeatureGroup of editable layers
-               drawControl = new L.Control.Draw(options);
-               map.addControl(drawControl);
-               map.on("draw:created", function (event) {
-                  ({
-                     polyline: function polyline() {
-                        var data = { length: event.layer.getLength(), geometry: event.layer.getLatLngs() };
-                        $rootScope.$broadcast(parameters.lineEvent, data);
-                     },
-                     // With rectangles only one can be drawn at a time.
-                     rectangle: function rectangle() {
-                        var data = {
-                           bounds: event.layer.getBounds(),
-                           options: callbackOptions
-                        };
-                        rectangleDeferred.resolve(data);
-                        rectangleDeferred = null;
-                        $rootScope.$broadcast(parameters.rectangleEvent, data);
-                     }
-                  })[event.layerType]();
-               });
-
-               return drawControl;
-            });
-         },
-
-         cancelDrawRectangle: function cancelDrawRectangle() {
-            this.options = {};
-            if (rectangleDeferred) {
-               rectangleDeferred.reject();
-               rectangleDeferred = null;
-               if (drawer) {
-                  drawer.disable();
-               }
-            }
-         },
-
-         drawRectangle: function drawRectangle(options) {
-            this.cancelDrawRectangle();
-            callbackOptions = options;
-            rectangleDeferred = $q.defer();
-            if (drawer) {
-               drawer.enable();
-            } else {
-               mapService.getMap().then(function (map) {
-                  drawer = new L.Draw.Rectangle(map, drawControl.options.polyline);
-                  drawer.enable();
-               });
-            }
-            return rectangleDeferred.promise;
-         }
-      };
-   }]);
 }
 'use strict';
 
@@ -720,6 +615,111 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
 		return service;
 	}
 })(angular, $);
+"use strict";
+
+{
+   angular.module("common.draw", ['geo.map']).directive("commonDraw", ['$log', '$rootScope', 'commonDrawService', function ($log, $rootScope, commonDrawService) {
+      var DEFAULTS = {
+         rectangleEvent: "geo.draw.rectangle.created",
+         lineEvent: "geo.draw.line.created"
+      };
+
+      return {
+         restrict: "AE",
+         scope: {
+            data: "=",
+            rectangleEvent: "@",
+            lineEvent: "@"
+         },
+         link: function link(scope, element, attrs, ctrl) {
+
+            angular.forEach(DEFAULTS, function (value, key) {
+               if (!scope[key]) {
+                  scope[key] = value;
+               }
+            });
+
+            commonDrawService.createControl(scope);
+         }
+      };
+   }]).factory("commonDrawService", ['$q', '$rootScope', 'mapService', function ($q, $rootScope, mapService) {
+      var callbackOptions, drawControl, drawer, rectangleDeferred;
+
+      return {
+         createControl: function createControl(parameters) {
+            if (drawControl) {
+               $q.when(drawControl);
+            }
+
+            return mapService.getMap().then(function (map) {
+               var drawnItems = new L.FeatureGroup(),
+                   options = {
+                  edit: {
+                     featureGroup: drawnItems
+                  }
+               };
+
+               if (parameters.data) {
+                  angular.extend(options, parameters.data);
+               }
+
+               featureGroup = parameters.drawnItems = drawnItems;
+
+               map.addLayer(drawnItems);
+               // Initialise the draw control and pass it the FeatureGroup of editable layers
+               drawControl = new L.Control.Draw(options);
+               map.addControl(drawControl);
+               map.on("draw:created", function (event) {
+                  ({
+                     polyline: function polyline() {
+                        var data = { length: event.layer.getLength(), geometry: event.layer.getLatLngs() };
+                        $rootScope.$broadcast(parameters.lineEvent, data);
+                     },
+                     // With rectangles only one can be drawn at a time.
+                     rectangle: function rectangle() {
+                        var data = {
+                           bounds: event.layer.getBounds(),
+                           options: callbackOptions
+                        };
+                        rectangleDeferred.resolve(data);
+                        rectangleDeferred = null;
+                        $rootScope.$broadcast(parameters.rectangleEvent, data);
+                     }
+                  })[event.layerType]();
+               });
+
+               return drawControl;
+            });
+         },
+
+         cancelDrawRectangle: function cancelDrawRectangle() {
+            this.options = {};
+            if (rectangleDeferred) {
+               rectangleDeferred.reject();
+               rectangleDeferred = null;
+               if (drawer) {
+                  drawer.disable();
+               }
+            }
+         },
+
+         drawRectangle: function drawRectangle(options) {
+            this.cancelDrawRectangle();
+            callbackOptions = options;
+            rectangleDeferred = $q.defer();
+            if (drawer) {
+               drawer.enable();
+            } else {
+               mapService.getMap().then(function (map) {
+                  drawer = new L.Draw.Rectangle(map, drawControl.options.polyline);
+                  drawer.enable();
+               });
+            }
+            return rectangleDeferred.promise;
+         }
+      };
+   }]);
+}
 "use strict";
 
 (function (angular) {
@@ -2822,6 +2822,159 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 (function (angular) {
 
+   'use strict';
+
+   angular.module("common.tile", []).directive("commonTile", ['$rootScope', 'tileService', function ($rootScope, tileService) {
+      return {
+         scope: {
+            data: "="
+         },
+         template: '<button type="button" class="undecorated" ng-if="data.tileCache" ng-click="toggle(item)" title="Show/hide Tile layer." tooltip-placement="right" tooltip="View on mapS.">' + '<i ng-class="{active:data.isTilesShowing}" class="fa fa-lg fa-globe"></i></button>',
+         link: function link(scope) {
+            scope.$watch("data", function (newData, oldData) {
+               if (newData) {
+                  tileService.subscribe(newData);
+               } else if (oldData) {
+                  // In a fixed tag this gets called.
+                  tileService.unsubscribe(oldData);
+               }
+            });
+
+            scope.toggle = function () {
+               if (scope.data.isTilesShowing) {
+                  tileService.hide(scope.data);
+               } else {
+                  tileService.show(scope.data);
+               }
+            };
+
+            // Any imagery layer really.
+            $rootScope.$on('hide.wms', function (event, id) {
+               if (scope.data && id == scope.data.primaryId && scope.data.isTilesShowing) {
+                  scope.toggle();
+               }
+            });
+
+            // In an ng-repeat this gets called
+            scope.$on("$destroy", function () {
+               tileService.unsubscribe(scope.data);
+            });
+         }
+      };
+   }]).factory("tileService", ['$http', '$log', '$q', '$timeout', 'selectService', 'mapService', function ($http, $log, $q, $timeout, selectService, mapService) {
+      var subscribers = {};
+
+      return {
+         createLayer: function createLayer(service) {
+            return new TileClient(service);
+         },
+
+         subscribe: function subscribe(data) {
+            var id = data.primaryId,
+                subscription = subscribers[id];
+
+            if (!data || !data.tileCache) {
+               return;
+            }
+
+            if (subscription) {
+               subscription.count += 1;
+            } else {
+               subscription = subscribers[id] = {
+                  count: 1,
+                  layer: this.createLayer(data)
+               };
+            }
+
+            if (subscription.count === 1 && data.isTilesShowing) {
+               this._showLayer(subscription.layer);
+            }
+         },
+
+         unsubscribe: function unsubscribe(data) {
+            var id = data.primaryId,
+                subscription = subscribers[id];
+
+            if (subscription) {
+               subscription.count--;
+
+               if (!subscription.count) {
+                  // We want to clean up here. We don't say we aren't showing,
+                  if (data.isTilesShowing) {
+                     this._hideLayer(subscription.layer);
+                  }
+               }
+            }
+         },
+
+         _showLayer: function _showLayer(layer) {
+            if (layer) {
+               layer.showTile();
+            }
+         },
+
+         _hideLayer: function _hideLayer(layer) {
+            if (layer) {
+               layer.clearTile();
+            }
+         },
+
+         show: function show(data) {
+            data.isTilesShowing = true;
+            this._showLayer(subscribers[data.primaryId].layer);
+         },
+
+         hide: function hide(data) {
+            data.isTilesShowing = false;
+            this._hideLayer(subscribers[data.primaryId].layer);
+         }
+      };
+
+      function TileClient(service) {
+         this.service = service;
+         this.tileLayer = null;
+         this.capabilities = null;
+
+         this.toggleTile = function () {
+            if (this.tileLayer) {
+               this.clearTile();
+            } else {
+               this.showTile();
+            }
+         };
+
+         this.showTile = function () {
+            var createLayer = function createLayer() {
+               if (service.tileCacheOptions && service.tileCacheOptions.type === "WMS") {
+                  this.tileLayer = L.tileLayer.wms(service.tileCache, service.tileCacheOptions);
+               } else {
+                  // This is the default tile type
+                  this.tileLayer = L.tileLayer(service.tileCache, service.tileCacheOptions);
+               }
+               this.tileLayer.addTo(selectService.getLayerGroup());
+            };
+
+            if (this.tileLayer) {
+               this.clearTile();
+            }
+
+            return $q.when(createLayer.apply(this));
+         };
+
+         this.clearTile = function () {
+            if (this.tileLayer) {
+               selectService.getLayerGroup().removeLayer(this.tileLayer);
+               this.tileLayer = null;
+            }
+            return null;
+         };
+      }
+   }]);
+})(angular);
+"use strict";
+
+(function (angular) {
+
 	'use strict';
 
 	angular.module("common.toolbar", []).directive("icsmToolbar", [function () {
@@ -3038,162 +3191,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}
 	}]);
 })(angular);
-"use strict";
-
-(function (angular) {
-
-   'use strict';
-
-   angular.module("common.tile", []).directive("commonTile", ['$rootScope', 'tileService', function ($rootScope, tileService) {
-      return {
-         scope: {
-            data: "="
-         },
-         template: '<button type="button" class="undecorated" ng-if="data.tileCache" ng-click="toggle(item)" title="Show/hide Tile layer." tooltip-placement="right" tooltip="View on mapS.">' + '<i ng-class="{active:data.isTilesShowing}" class="fa fa-lg fa-globe"></i></button>',
-         link: function link(scope) {
-            scope.$watch("data", function (newData, oldData) {
-               if (newData) {
-                  tileService.subscribe(newData);
-               } else if (oldData) {
-                  // In a fixed tag this gets called.
-                  tileService.unsubscribe(oldData);
-               }
-            });
-
-            scope.toggle = function () {
-               if (scope.data.isTilesShowing) {
-                  tileService.hide(scope.data);
-               } else {
-                  tileService.show(scope.data);
-               }
-            };
-
-            // Any imagery layer really.
-            $rootScope.$on('hide.wms', function (event, id) {
-               if (scope.data && id == scope.data.primaryId && scope.data.isTilesShowing) {
-                  scope.toggle();
-               }
-            });
-
-            // In an ng-repeat this gets called
-            scope.$on("$destroy", function () {
-               tileService.unsubscribe(scope.data);
-            });
-         }
-      };
-   }]).factory("tileService", ['$http', '$log', '$q', '$timeout', 'selectService', 'mapService', function ($http, $log, $q, $timeout, selectService, mapService) {
-      var subscribers = {};
-
-      return {
-         createLayer: function createLayer(service) {
-            return new TileClient(service);
-         },
-
-         subscribe: function subscribe(data) {
-            var id = data.primaryId,
-                subscription = subscribers[id];
-
-            if (!data || !data.tileCache) {
-               return;
-            }
-
-            if (subscription) {
-               subscription.count += 1;
-            } else {
-               subscription = subscribers[id] = {
-                  count: 1,
-                  layer: this.createLayer(data)
-               };
-            }
-
-            if (subscription.count === 1 && data.isTilesShowing) {
-               this._showLayer(subscription.layer);
-            }
-         },
-
-         unsubscribe: function unsubscribe(data) {
-            var id = data.primaryId,
-                subscription = subscribers[id];
-
-            if (subscription) {
-               subscription.count--;
-
-               if (!subscription.count) {
-                  // We want to clean up here. We don't say we aren't showing,
-                  if (data.isTilesShowing) {
-                     this._hideLayer(subscription.layer);
-                  }
-               }
-            }
-         },
-
-         _showLayer: function _showLayer(layer) {
-            if (layer) {
-               layer.showTile();
-            }
-         },
-
-         _hideLayer: function _hideLayer(layer) {
-            if (layer) {
-               layer.clearTile();
-            }
-         },
-
-         show: function show(data) {
-            data.isTilesShowing = true;
-            this._showLayer(subscribers[data.primaryId].layer);
-         },
-
-         hide: function hide(data) {
-            data.isTilesShowing = false;
-            this._hideLayer(subscribers[data.primaryId].layer);
-         }
-      };
-
-      function TileClient(service) {
-         this.service = service;
-         this.tileLayer = null;
-         this.capabilities = null;
-
-         this.toggleTile = function () {
-            if (this.tileLayer) {
-               this.clearTile();
-            } else {
-               this.showTile();
-            }
-         };
-
-         this.showTile = function () {
-            var createLayer = function createLayer() {
-               if (service.tileCacheOptions && service.tileCacheOptions.type === "WMS") {
-                  this.tileLayer = L.tileLayer.wms(service.tileCache, service.tileCacheOptions);
-               } else {
-                  // This is the default tile type
-                  this.tileLayer = L.tileLayer(service.tileCache, service.tileCacheOptions);
-               }
-               this.tileLayer.addTo(selectService.getLayerGroup());
-            };
-
-            if (this.tileLayer) {
-               this.clearTile();
-            }
-
-            return $q.when(createLayer.apply(this));
-         };
-
-         this.clearTile = function () {
-            if (this.tileLayer) {
-               selectService.getLayerGroup().removeLayer(this.tileLayer);
-               this.tileLayer = null;
-            }
-            return null;
-         };
-      }
-   }]);
-})(angular);
-angular.module("common.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("common/bbox/bbox.html","<button type=\"button\" class=\"undecorated\" ng-click=\"toggle()\" tooltip-placement=\"right\" title=\"Show data extent on the map.\">\r\n	<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-eye orange\':data.hasBbox,\'fa-eye-slash\':!data.hasBbox}\"></i>\r\n</button>");
-$templateCache.put("common/accordion/accordion.html","<div role=\"tablist\" class=\"panel-group\" ng-transclude></div>");
+angular.module("common.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("common/accordion/accordion.html","<div role=\"tablist\" class=\"panel-group\" ng-transclude></div>");
 $templateCache.put("common/accordion/accordionGroup.html","<div role=\"tab\" id=\"{{::headingId}}\" aria-selected=\"{{isOpen}}\" class=\"panel-heading\" ng-keypress=\"toggleOpen($event)\">\r\n  <h4 class=\"panel-title\">\r\n    <a role=\"button\" data-toggle=\"collapse\" href aria-expanded=\"{{isOpen}}\"\r\n            aria-controls=\"{{::panelId}}\" tabindex=\"0\" class=\"accordion-toggle\" ng-click=\"toggleOpen()\"\r\n            common-accordion-transclude=\"heading\" ng-disabled=\"isDisabled\" uib-tabindex-toggle>\r\n      <span common-accordion-header ng-class=\"{\'text-muted\': isDisabled}\">{{heading}}</span>\r\n   </a>\r\n  </h4>\r\n</div>\r\n<div id=\"{{::panelId}}\" aria-labelledby=\"{{::headingId}}\" aria-hidden=\"{{!isOpen}}\" role=\"tabpanel\"\r\n            class=\"panel-collapse collapse\" uib-collapse=\"!isOpen\">\r\n  <div class=\"panel-body\" ng-transclude></div>\r\n</div>");
+$templateCache.put("common/bbox/bbox.html","<button type=\"button\" class=\"undecorated\" ng-click=\"toggle()\" tooltip-placement=\"right\" title=\"Show data extent on the map.\">\r\n	<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-eye orange\':data.hasBbox,\'fa-eye-slash\':!data.hasBbox}\"></i>\r\n</button>");
 $templateCache.put("common/cc/cc.html","<button type=\"button\" class=\"undecorated\" title=\"View CCBy {{details.version}} licence details\"\r\n      popover-trigger=\"outsideClick\"\r\n      uib-popover-template=\"template\" popover-placement=\"bottom\" popover-append-to-body=\"true\">\r\n	<i ng-class=\"{active:data.isWmsShowing}\" class=\"fa fa-lg fa-gavel\"></i>\r\n</button>");
 $templateCache.put("common/cc/cctemplate.html","<div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-12\">\r\n         <a target=\"_blank\" ng-href=\"{{details.link}}\">Creative Commons Attribution {{details.version}} </a>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-2\">\r\n         <span class=\"fa-stack\" aria-hidden=\"true\">\r\n         <i class=\"fa fa-check-circle-o fa-stack-2x\" aria-hidden=\"true\"></i>\r\n      </span>\r\n      </div>\r\n      <div class=\"col-md-10\">\r\n         You may use this work for commercial purposes.\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-2\">\r\n         <span class=\"fa-stack\" aria-hidden=\"true\">\r\n         <i class=\"fa fa-circle-o fa-stack-2x\"></i>\r\n         <i class=\"fa fa-female fa-stack-1x\"></i>\r\n      </span>\r\n      </div>\r\n      <div class=\"col-md-10\">\r\n         You must attribute the creator in your own works.\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("common/clip/clip.html","<div class=\"well well-sm\">\r\n<div class=\"container-fluid\">\r\n	<div class=\"row\">\r\n		<div class=\"col-md-12\">\r\n			<button style=\"margin-top:0px;\" ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" class=\"btn btn-primary btn-xs\">Draw</button>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-3\"> </div>\r\n		<div class=\"col-md-8\">\r\n			<strong>Y Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-6\">\r\n			<strong>X Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMin|number : 4}} min)</span></span>\r\n		</div>\r\n		<div class=\"col-md-6\">\r\n			<strong>X Max:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.xMax\"></input><span ng-show=\"showBounds && bounds\">({{bounds.xMax|number : 4}} max)</span></span>\r\n		</div>\r\n	</div>\r\n	<div class=\"row\">\r\n		<div class=\"col-md-offset-3 col-md-8\">\r\n			<strong>Y Min:</strong>\r\n			<span><input type=\"text\" style=\"width:6em\" ng-model=\"clip.yMin\"></input><span ng-show=\"showBounds && bounds\">({{bounds.yMin|number : 4}} min)</span></span>\r\n		</div>\r\n	</div>\r\n</div>\r\n</div>");
