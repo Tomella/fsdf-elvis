@@ -253,9 +253,241 @@
       "elevationTemplate": "//services.ga.gov.au/gis/services/DEM_SRTM_1Second_over_Bathymetry_Topography/MapServer/WCSServer?SERVICE=WCS&VERSION=1.0.0&REQUEST=GetCoverage&coverage=1&CRS=EPSG:4326&BBOX={bbox}&FORMAT=GeoTIFF&RESX=1&RESY=1&RESPONSE_CRS=EPSG:4326&HEIGHT=1&WIDTH=1"
    },
    "industries": [
-      {"code": "BAK", "text": "Baker"},
-      {"code": "BUT", "text": "Butcher"},
-      {"code": "CAN", "text": "Candle stick maker"},
-      {"code": "GOV", "text": "Government"}
+      {
+         "code": "Aeronautical",
+         "text": "Aeronautical"
+      },
+      {
+         "code": "Agriculture",
+         "text": "Agriculture"
+      },
+      {
+         "code": "Banking",
+         "text": "Banking"
+      },
+      {
+         "code": "Building Services",
+         "text": "Building Services"
+      },
+      {
+         "code": "Commonwealth Government",
+         "text": "Commonwealth Government"
+      },
+      {
+         "code": "Communications",
+         "text": "Communications"
+      },
+      {
+         "code": "Community",
+         "text": "Community"
+      },
+      {
+         "code": "Community Services",
+         "text": "Community Services"
+      },
+      {
+         "code": "Construction",
+         "text": "Construction"
+      },
+      {
+         "code": "Data Analysis",
+         "text": "Data Analysis"
+      },
+      {
+         "code": "Defence",
+         "text": "Defence"
+      },
+      {
+         "code": "Digital Media",
+         "text": "Digital Media"
+      },
+      {
+         "code": "Education",
+         "text": "Education"
+      },
+      {
+         "code": "Emergency Services",
+         "text": "Emergency Services"
+      },
+      {
+         "code": "Employment",
+         "text": "Employment"
+      },
+      {
+         "code": "Utilities - Electricity",
+         "text": "Utilities - Electricity"
+      },
+      {
+         "code": "Entertainment",
+         "text": "Entertainment"
+      },
+      {
+         "code": "Environmental",
+         "text": "Environmental"
+      },
+      {
+         "code": "Finance",
+         "text": "Finance"
+      },
+      {
+         "code": "Food Services",
+         "text": "Food Services"
+      },
+      {
+         "code": "Foreign Government",
+         "text": "Foreign Government"
+      },
+      {
+         "code": "Forestry",
+         "text": "Forestry"
+      },
+      {
+         "code": "Geological Survey Organisation",
+         "text": "Geological Survey Organisation"
+      },
+      {
+         "code": "Graphic Design",
+         "text": "Graphic Design"
+      },
+      {
+         "code": "Hazards and Risk",
+         "text": "Hazards and Risk"
+      },
+      {
+         "code": "Health",
+         "text": "Health"
+      },
+      {
+         "code": "Hospitality",
+         "text": "Hospitality"
+      },
+      {
+         "code": "ICT",
+         "text": "ICT"
+      },
+      {
+         "code": "Imagery",
+         "text": "Imagery"
+      },
+      {
+         "code": "Infrastructure",
+         "text": "Infrastructure"
+      },
+      {
+         "code": "Insurance",
+         "text": "Insurance"
+      },
+      {
+         "code": "Intelligence",
+         "text": "Intelligence"
+      },
+      {
+         "code": "Investment",
+         "text": "Investment"
+      },
+      {
+         "code": "Transportation",
+         "text": "Transportation"
+      },
+      {
+         "code": "Legal",
+         "text": "Legal"
+      },
+      {
+         "code": "Local Government",
+         "text": "Local Government"
+      },
+      {
+         "code": "Logistics",
+         "text": "Logistics"
+      },
+      {
+         "code": "Ports",
+         "text": "Ports"
+      },
+      {
+         "code": "Marketing",
+         "text": "Marketing"
+      },
+      {
+         "code": "Media",
+         "text": "Media"
+      },
+      {
+         "code": "Meteorology",
+         "text": "Meteorology"
+      },
+      {
+         "code": "Mining",
+         "text": "Mining"
+      },
+      {
+         "code": "National Government",
+         "text": "National Government"
+      },
+      {
+         "code": "Utilities - Water",
+         "text": "Utilities - Water"
+      },
+      {
+         "code": "Private",
+         "text": "Private"
+      },
+      {
+         "code": "Property Development",
+         "text": "Property Development"
+      },
+      {
+         "code": "Real Estate",
+         "text": "Real Estate"
+      },
+      {
+         "code": "Recreation",
+         "text": "Recreation"
+      },
+      {
+         "code": "Retail",
+         "text": "Retail"
+      },
+      {
+         "code": "Scientific",
+         "text": "Scientific"
+      },
+      {
+         "code": "Spatial",
+         "text": "Spatial"
+      },
+      {
+         "code": "State Government",
+         "text": "State Government"
+      },
+      {
+         "code": "Surveying",
+         "text": "Surveying"
+      },
+      {
+         "code": "Telecommunications",
+         "text": "Telecommunications"
+      },
+      {
+         "code": "Tourism",
+         "text": "Tourism"
+      },
+      {
+         "code": "Urban Design",
+         "text": "Urban Design"
+      },
+      {
+         "code": "Other",
+         "text": "Other"
+      },
+      {
+         "code": "Energy",
+         "text": "Energy"
+      },
+      {
+         "code": "Shipping",
+         "text": "Shipping"
+      }
    ]
 }
