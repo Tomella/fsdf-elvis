@@ -314,6 +314,10 @@
          "text": "Employment"
       },
       {
+         "code": "Energy",
+         "text": "Energy"
+      },
+      {
          "code": "Utilities - Electricity",
          "text": "Utilities - Electricity"
       },
@@ -386,10 +390,6 @@
          "text": "Investment"
       },
       {
-         "code": "Transportation",
-         "text": "Transportation"
-      },
-      {
          "code": "Legal",
          "text": "Legal"
       },
@@ -400,10 +400,6 @@
       {
          "code": "Logistics",
          "text": "Logistics"
-      },
-      {
-         "code": "Ports",
-         "text": "Ports"
       },
       {
          "code": "Marketing",
@@ -426,8 +422,8 @@
          "text": "National Government"
       },
       {
-         "code": "Utilities - Water",
-         "text": "Utilities - Water"
+         "code": "Ports",
+         "text": "Ports"
       },
       {
          "code": "Private",
@@ -454,6 +450,10 @@
          "text": "Scientific"
       },
       {
+         "code": "Shipping",
+         "text": "Shipping"
+      },
+      {
          "code": "Spatial",
          "text": "Spatial"
       },
@@ -474,20 +474,20 @@
          "text": "Tourism"
       },
       {
+         "code": "Transportation",
+         "text": "Transportation"
+      },
+      {
          "code": "Urban Design",
          "text": "Urban Design"
       },
       {
+         "code": "Utilities - Water",
+         "text": "Utilities - Water"
+      },
+      {
          "code": "Other",
          "text": "Other"
-      },
-      {
-         "code": "Energy",
-         "text": "Energy"
-      },
-      {
-         "code": "Shipping",
-         "text": "Shipping"
       }
    ]
 }

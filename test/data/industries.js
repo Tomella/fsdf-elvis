@@ -13,6 +13,7 @@ Digital Media
 Education
 Emergency Services
 Employment
+Energy
 Utilities - Electricity
 Entertainment
 Environmental
@@ -31,31 +32,30 @@ Infrastructure
 Insurance
 Intelligence
 Investment
-Transportation
 Legal
 Local Government
 Logistics
-Ports
 Marketing
 Media
 Meteorology
 Mining
 National Government
-Utilities - Water
+Ports
 Private
 Property Development
 Real Estate
 Recreation
 Retail
 Scientific
+Shipping
 Spatial
 State Government
 Surveying
 Telecommunications
 Tourism
+Transportation
 Urban Design
-Other
-Energy
-Shipping`;
+Utilities - Water
+Other`;
 
 module.exports = data;
