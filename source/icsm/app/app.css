@@ -1,3 +1,8 @@
+/* TODO: I haven't worked out why it is showing up. Find out why and remove */
+.leaflet-draw-draw-circlemarker {
+   display:none !important;
+}
+
 /* Overrides */
 img.logo {
 	width: 218px;

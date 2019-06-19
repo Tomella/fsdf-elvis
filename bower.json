@@ -32,7 +32,8 @@
     "leaflet-draw": "^0.4.14",
     "ngInfiniteScroll": "1.0.0",
     "babel-polyfill": "^0.0.1",
-    "angular-recaptcha": "^4.1.5"
+    "angular-recaptcha": "^4.1.5",
+    "turfjs": "*"
   },
   "resolutions": {
     "angular": "~1.4.12",

@@ -3895,28 +3895,189 @@ var Strategies = function () {
       return this;
    }]);
 }
-"use strict";
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 {
+   var TerrainLoader = function () {
+      function TerrainLoader(options) {
+         _classCallCheck(this, TerrainLoader);
 
-   angular.module("elevation.toolbar", []).directive("elevationToolbar", [function () {
-      return {
-         restrict: "AE",
-         templateUrl: "icsm/toolbar/toolbar.html",
-         controller: 'toolbarLinksCtrl',
-         transclude: true
-      };
-   }]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
-      var self = this;
-      configService.getConfig().then(function (config) {
-         self.links = config.toolbarLinks;
-      });
+         options = options || {};
+      }
 
-      $scope.item = "";
-      $scope.toggleItem = function (item) {
-         $scope.item = $scope.item === item ? "" : item;
+      _createClass(TerrainLoader, [{
+         key: 'load',
+         value: function load(url, onload, onerror) {
+            var request = new XMLHttpRequest();
+
+            request.addEventListener('load', function (event) {
+               try {
+                  var parser = new GeotiffParser();
+                  parser.parseHeader(event.target.response);
+                  onload(parser.loadPixels());
+               } catch (error) {
+                  onerror(error);
+               }
+            }, false);
+
+            if (onerror !== undefined) {
+               request.addEventListener('error', function (event) {
+                  onerror(event);
+               }, false);
+            }
+
+            if (options.crossOrigin !== undefined) {
+               request.crossOrigin = options.crossOrigin;
+            }
+
+            request.open('GET', url, true);
+            request.responseType = 'arraybuffer';
+            request.send(null);
+         }
+      }, {
+         key: 'setCrossOrigin',
+         value: function setCrossOrigin(value) {
+            options.crossOrigin = value;
+         }
+      }]);
+
+      return TerrainLoader;
+   }();
+
+   angular.module("icsm.transect", []).provider("transectService", function () {
+      var diagonal = 500,
+          layers = {},
+          ptElevationUrl,
+          extent = {
+         lngMin: 112.99986111100009,
+         lngMax: 153.999861113351,
+         latMin: -44.0001389004617,
+         latMax: -10.00013890099995
       };
-   }]);
+
+      this.extent = function (newExtent) {
+         extent.lngMin = angular.isUndefined(newExtent.lngMin) ? extent.lngMin : newExtent.lngMin;
+         extent.lngMax = angular.isUndefined(newExtent.lngMax) ? extent.lngMax : newExtent.lngMax;
+         extent.latMin = angular.isUndefined(newExtent.latMin) ? extent.latMin : newExtent.latMin;
+         extent.latMax = angular.isUndefined(newExtent.latMax) ? extent.latMax : newExtent.latMax;
+      };
+
+      this.setServiceUrl = function (name, url) {
+         name = name.toLowerCase();
+         layers[name] = {
+            urlTemplate: url
+         };
+         if (name === "elevation") ptElevationUrl = url.replace(/{height}|{width}/g, "1");
+      };
+
+      function calcSides(diagonal, ar) {
+         // x * x + ar * ar * x * x = diagonal * diagonal
+         // (1 + ar * ar) * x * x = diagonal * diagonal
+         // x * x = diagonal * diagonal / (1 + ar * ar)
+         var y = Math.sqrt(diagonal * diagonal / (1 + ar * ar));
+         return { y: Math.ceil(y), x: Math.ceil(y * ar) };
+      }
+
+      this.$get = ['$q', function ($q) {
+
+         return {
+            getElevation: function getElevation(geometry, buffer) {
+               return this.getServiceData("elevation", geometry, buffer);
+            },
+
+            getServiceData: function getServiceData(name, geometry, buffer) {
+               var feature = Exp.Util.toGeoJSONFeature(geometry),
+                   bbox = turf.extent(feature),
+                   response = {
+                  type: "FeatureCollection",
+                  features: []
+               },
+                   lngMin = bbox[0],
+                   latMin = bbox[1],
+                   lngMax = bbox[2],
+                   latMax = bbox[3];
+
+               // Sanity check for service url
+               name = name.toLowerCase();
+               var svcUrl = layers[name] && layers[name].urlTemplate;
+               if (!svcUrl) return $q.when(response);
+
+               // Sanity check for coordinates
+               lngMax = lngMax > lngMin ? lngMax : lngMin + 0.0001;
+               latMax = latMax > latMin ? latMax : latMin + 0.0001;
+               var dx = lngMax - lngMin,
+                   dy = latMax - latMin;
+               if (!buffer) buffer = 0;
+               latMin = latMin - buffer * dy;
+               latMax = latMax + buffer * dy;
+               lngMin = lngMin - buffer * dx;
+               lngMax = lngMax + buffer * dx;
+
+               var xy = calcSides(diagonal, dx / dy),
+                   kiloms = turf.lineDistance(feature, "kilometers"),
+                   terrainLoader = new TerrainLoader(),
+                   deferred = $q.defer();
+               svcUrl = svcUrl.replace("{bbox}", lngMin + "," + latMin + "," + lngMax + "," + latMax).replace(/{width}/g, "" + Math.ceil(xy.x)).replace(/{height}/g, "" + Math.ceil(xy.y));
+               terrainLoader.load(svcUrl, function (loaded) {
+                  //                            console.log("width: " + xy.x + ", height: " + xy.y + "calculated cells = " + (xy.x * xy.y) + " loaded length = " + loaded.length);
+
+                  var delta = kiloms / (diagonal - 1);
+                  for (var i = 0; i < diagonal; i++) {
+                     var distance = i * delta;
+                     var deltaFeature = turf.along(feature, distance, "kilometers"),
+                         height = toHeight(deltaFeature.geometry.coordinates);
+
+                     deltaFeature.properties.distance = distance;
+                     ;
+                     if (height > -32767) {
+                        deltaFeature.geometry.coordinates.push(height);
+                        response.features.push(deltaFeature);
+                     }
+                  }
+                  deferred.resolve(response);
+
+                  function toHeight(coord) {
+                     var x = coord[0],
+                         y = coord[1],
+                         zeroX = lngMin,
+                         zeroY = latMax,
+                         cellY = Math.round((zeroY - y) / dy * (xy.y - 1)),
+                         cellX = Math.round((x - zeroX) / dx * (xy.x - 1)),
+                         index = cellY * xy.x + cellX;
+                     // console.log("Cell x = " + cellX + ", y = " + cellY + " Index = " + index + ", value = " + loaded[index]);
+                     return loaded[index];
+                  }
+               }, function (error) {
+                  console.log("Failed to load transect data for " + name);
+                  deferred.reject(error);
+               });
+
+               return deferred.promise;
+            },
+
+            isServiceDataAvailable: function isServiceDataAvailable(name) {
+               return layers[name] && layers[name].urlTemplate;
+            },
+
+            getElevationAtPoint: function getElevationAtPoint(latlng) {
+               var lng = latlng.lng,
+                   lat = latlng.lat;
+               if (lat < extent.latMin || lat > extent.latMax || lng < extent.lngMin || lng > extent.lngMax) return $q.when(null);
+
+               var bbox = [lng - 0.000001, lat - 0.000001, lng + 0.000001, lat + 0.000001];
+               var deferred = $q.defer();
+               new TerrainLoader().load(ptElevationUrl.replace("{bbox}", bbox.join(",")), function (elev) {
+                  deferred.resolve(elev);
+               });
+               return deferred.promise;
+            }
+         };
+      }];
+   });
 }
 "use strict";
 
@@ -4037,6 +4198,29 @@ var Strategies = function () {
 
    DownloadService.$inject = ['$http', '$q', '$rootScope', 'mapService', 'storageService'];
 }
+"use strict";
+
+{
+
+   angular.module("elevation.toolbar", []).directive("elevationToolbar", [function () {
+      return {
+         restrict: "AE",
+         templateUrl: "icsm/toolbar/toolbar.html",
+         controller: 'toolbarLinksCtrl',
+         transclude: true
+      };
+   }]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
+      var self = this;
+      configService.getConfig().then(function (config) {
+         self.links = config.toolbarLinks;
+      });
+
+      $scope.item = "";
+      $scope.toggleItem = function (item) {
+         $scope.item = $scope.item === item ? "" : item;
+      };
+   }]);
+}
 angular.module("icsm.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("icsm/app/app.html","<div>\r\n	<!-- BEGIN: Sticky Header -->\r\n	<div explorer-header style=\"z-index:1\"\r\n			class=\"navbar navbar-default navbar-fixed-top\"\r\n			heading=\"\'Elevation\'\"\r\n			headingtitle=\"\'ICSM\'\"\r\n			breadcrumbs=\"[{name:\'ICSM\', title: \'Reload Elevation\', url: \'.\'}]\"\r\n			helptitle=\"\'Get help about Elevation\'\"\r\n			helpalttext=\"\'Get help about Elevation\'\">\r\n	</div>\r\n	<!-- END: Sticky Header -->\r\n\r\n	<!-- Messages go here. They are fixed to the tab bar. -->\r\n	<div explorer-messages class=\"marsMessages noPrint\"></div>\r\n	<icsm-panes data=\"root.data\" default-item=\"download\"></icsm-panes>\r\n</div>");
 $templateCache.put("icsm/clip/clip.html","<div class=\"well well-sm\">\r\n	<div class=\"container-fluid\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-10\">\r\n				<strong style=\"font-size:120%\">Select area:</strong>\r\n				<button ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" tooltip-placement=\"right\" uib-tooltip=\"Enable drawing of a bounding box. On enabling, click on the map and drag diagonally\"\r\n					class=\"btn btn-primary btn-default\">Draw...</button>\r\n				<button ng-click=\"typing = !typing\"  tooltip-placement=\"right\" uib-tooltip=\"Type coordinates of a bounding box. Restricted to maximum of 2.25 square degrees.\"\r\n					class=\"btn btn-primary btn-default\">Manual entry...</button>\r\n			</div>\r\n			<div class=\"col-md-2\">\r\n				<button style=\"float:right\" ng-click=\"showInfo = !showInfo\" tooltip-placement=\"left\" uib-tooltip=\"Information.\" class=\"btn btn-primary btn-default\"><i class=\"fa fa-info\"></i></button>\r\n				<exp-info title=\"Selecting an area\" show-close=\"true\" style=\"width:450px;position:fixed;top:230px;right:40px\" is-open=\"showInfo\">\r\n					<icsm-info-bbox>\r\n			</div>\r\n			</exp-info>\r\n		</div>\r\n   </div>\r\n   <div class=\"row\" ng-hide=\"typing || (!clip.xMin && clip.xMin !== 0) || oversize\" style=\"padding-top:7px;\">\r\n      <div class=\"col-md-12 ng-binding\">Selected bounds:\r\n               {{clip.xMin | number : 4}}° west,\r\n               {{clip.yMax | number : 4}}° north,\r\n               {{clip.xMax | number : 4}}° east,\r\n               {{clip.yMin | number : 4}}° south\r\n      </div>\r\n  </div>\r\n  <clip-modal title=\"Define search area\" show-close=\"true\" style=\"width:480px;position:fixed;top:110px;right:80px\" is-open=\"typing\">\r\n      <icsm-manual-clip></icsm-manual-clip>\r\n   </clip-modal>\r\n</div>");
 $templateCache.put("icsm/clip/infobbox.html","<div class=\"\">\r\n	<strong style=\"font-size:120%\">Select an area of interest.</strong>\r\n   By hitting the \"Draw...\" button an area on the map can be selected with the mouse by clicking a\r\n   corner and while holding the left mouse button\r\n	down drag diagonally across the map to the opposite corner.\r\n	<br/>\r\n   Clicking the \"Draw...\" button again allows replacing a previous area selection. <br/>\r\n   Alternatively you can type in the minimum and maximum coordinates and search by using the \"Manual entry\" button.<br/>\r\n	<strong>Notes:</strong>\r\n   <ul>\r\n      <li>The data does not cover all of Australia.</li>\r\n      <li>Restrict a search area to below 1.5 degrees square. eg 2x0.75 or 1x1.5</li>\r\n   </ul>\r\n	<p style=\"padding-top:5px\"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n		You can zoom in and out using the mouse wheel or the \"+\" and \"-\" map control on the top left of the map. If you\r\n		don\'t like the position of your drawn area, hit the \"Draw\" button and draw a new bounding box.\r\n	</p>\r\n</div>");
@@ -4073,5 +4257,5 @@ $templateCache.put("icsm/side-panel/side-panel-left.html","<div class=\"cbp-spme
 $templateCache.put("icsm/side-panel/side-panel-right.html","<div class=\"cbp-spmenu cbp-spmenu-vertical cbp-spmenu-right noPrint\" ng-attr-style=\"width:{{right.width}}\" ng-class=\"{\'cbp-spmenu-open\': right.active}\">\r\n    <a href=\"\" title=\"Close panel\" ng-click=\"closePanel()\" style=\"z-index: 1\">\r\n        <span class=\"glyphicon glyphicon-chevron-right pull-left\"></span>\r\n    </a>\r\n\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'download\'\" icsm-view></div>\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'maps\'\" icsm-maps></div>\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'glossary\'\" icsm-glossary></div>\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'help\'\" icsm-help></div>\r\n    <panel-close-on-event only-on=\"search\" event-name=\"clear.button.fired\"></panel-close-on-event>\r\n</div>\r\n");
 $templateCache.put("icsm/splash/splash.html","<div class=\"modal-header\">\r\n   <h3 class=\"modal-title splash\">Elevation - Foundation Spatial Data</h3>\r\n</div>\r\n<div class=\"modal-body\" id=\"accept\" ng-form exp-enter=\"accept()\" icsm-splash-modal style=\"width: 100%; margin-left: auto; margin-right: auto;\">\r\n	<div>\r\n		<p>\r\n			Here you can download point cloud and elevation datasets sourced from jurisdictions.\r\n		</p>\r\n		<p>\r\n			<a href=\"http://www.ga.gov.au/topographic-mapping/digital-elevation-data.html\" target=\"_blank\">Find out more on our Elevation page.</a>\r\n		</p>\r\n		<p>\r\n         Data can be downloaded at <strong>no charge</strong> but note that there is a <strong>15GB limit per request</strong> (please check the file size before you download your files).\r\n		</p>\r\n		<p>\r\n			<a href=\"http://opentopo.sdsc.edu/gridsphere/gridsphere?cid=contributeframeportlet&gs_action=listTools\" target=\"_blank\">Click here for Free GIS Tools.</a>\r\n		</p>\r\n      <h5>How to use</h5>\r\n      <p>\r\n         <ul>\r\n            <li>Pan and zoom the map to your area of interest,</li>\r\n            <li>Click on the \"Select an area...\" button to enable drawing,</li>\r\n            <li>Click on the map, holding the button down,</li>\r\n            <li>Drag to a diagonal corner (not too big, there is a limit of roughly 2 square degrees or 200 square km))</li>\r\n            <li>On release we will check for data within or very near your area of interest</li>\r\n            <li>If the list is large you can filter:\r\n               <ul>\r\n                  <li>Partial text match by typing in the filter field and/or</li>\r\n                  <li>You can restrict the display to either elevation (DEM) or point cloud file types</li>\r\n               </ul>\r\n            </li>\r\n            <li>Check against any file you would like to download. To reiterate, these files can be huge so take note of the file size before downloading</li>\r\n            <li>Review your selected datasets and submit.</li>\r\n            <li>An email will be sent to you with a link to all your data, zipped into a single file.</li>\r\n            <li>These files can be huge so take note of the file size before submitting or downloading</li>\r\n         </ul>\r\n      </p>\r\n      <h5>Hints</h5>\r\n      <p>\r\n         <ul>\r\n            <li>Hovering over many items will give you further information about the purpose of the item</li>\r\n            <li>Drawing a polyline allows you to measure distance along the polyline.</li>\r\n            <li>On completion on drawing a line the elevation along that line is plotted.</li>\r\n            <li>While the tool to draw your area of interest is enabled it is easiest to pan the map using the arrow keys.</li>\r\n            <li>There are many areas where there is no data though the coverage is improving all the time.</li\r\n         </ul>\r\n      </p>\r\n	</div>\r\n   <div style=\"padding:30px; padding-top:0; padding-bottom:40px; width:100%\">\r\n		<div class=\"pull-right\">\r\n		  	<button type=\"button\" class=\"btn btn-primary\" ng-model=\"seenSplash\" ng-click=\"accept()\" autofocus>Continue</button>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/themes/themes.html","<div class=\"dropdown themesdropdown\">\r\n  <button class=\"btn btn-default dropdown-toggle themescurrent\" type=\"button\" id=\"dropdownMenu1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"true\">\r\n    Theme\r\n    <span class=\"caret\"></span>\r\n  </button>\r\n  <ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenu1\">\r\n    <li ng-repeat=\"item in themes\">\r\n       <a href=\"#\" title=\"{{item.title}}\" ng-href=\"{{item.url}}\" class=\"themesItemCompact\">\r\n         <span class=\"icsm-icon\" ng-class=\"item.className\"></span>\r\n         <strong style=\"vertical-align:top;font-size:110%\">{{item.label}}</strong>\r\n       </a>\r\n    </li>\r\n  </ul>\r\n</div>");
-$templateCache.put("icsm/toolbar/toolbar.html","<div class=\"elevation-toolbar noPrint\">\r\n   <div class=\"toolBarContainer\">\r\n      <div>\r\n         <ul class=\"left-toolbar-items\">\r\n            <li>\r\n               <div class=\"btn-group searchBar\" ng-show=\"root.whichSearch != \'region\'\">\r\n                  <div class=\"input-group input-group-custom\" geo-search>\r\n                     <input type=\"text\" ng-autocomplete ng-model=\"values.from.description\" options=\'{country:\"au\"}\'\r\n                        size=\"32\" title=\"Select a locality to pan the map to.\" class=\"form-control\" aria-label=\"...\">\r\n                     <div class=\"input-group-btn\">\r\n                        <button ng-click=\"zoom(false)\" exp-ga=\"[\'send\', \'event\', \'icsm\', \'click\', \'zoom to location\']\"\r\n                           class=\"btn btn-default\" title=\"Pan and potentially zoom to location.\">\r\n                           <i class=\"fa fa-search\"></i>\r\n                        </button>\r\n                     </div>\r\n                  </div>\r\n               </div>\r\n            </li>\r\n         </ul>\r\n         <ul class=\"right-toolbar-items\">\r\n            <li coverage-toggle></li>\r\n            <li>\r\n               <panel-trigger panel-id=\"download\" panel-width=\"590px\" name=\"Download\" default=\"default\"\r\n                  icon-class=\"fa-list\" title=\"Select an area of interest and select datasets for download\">\r\n               </panel-trigger>\r\n            </li>\r\n            <li>\r\n               <panel-trigger panel-id=\"help\" panel-width=\"590px\" name=\"Help\" icon-class=\"fa-question-circle-o\"\r\n                  title=\"Show help\"></panel-trigger>\r\n            </li>\r\n            <li>\r\n               <panel-trigger panel-id=\"glossary\" panel-width=\"590px\" name=\"Glossary\" icon-class=\"fa-book\"\r\n                  title=\"Show glossary\"></panel-trigger>\r\n            </li>\r\n            <li reset-page></li>\r\n         </ul>\r\n      </div>\r\n   </div>\r\n</div>");
-$templateCache.put("icsm/view/view.html","<div class=\"container-fluid downloadPane\">\r\n   <icsm-clip data=\"data.item\"></icsm-clip>\r\n   <div class=\"list-container\">\r\n      <icsm-list></icsm-list>\r\n   </div>\r\n   <div class=\"downloadCont\" icsm-search-continue></div>\r\n</div>");}]);
+$templateCache.put("icsm/view/view.html","<div class=\"container-fluid downloadPane\">\r\n   <icsm-clip data=\"data.item\"></icsm-clip>\r\n   <div class=\"list-container\">\r\n      <icsm-list></icsm-list>\r\n   </div>\r\n   <div class=\"downloadCont\" icsm-search-continue></div>\r\n</div>");
+$templateCache.put("icsm/toolbar/toolbar.html","<div class=\"elevation-toolbar noPrint\">\r\n   <div class=\"toolBarContainer\">\r\n      <div>\r\n         <ul class=\"left-toolbar-items\">\r\n            <li>\r\n               <div class=\"btn-group searchBar\" ng-show=\"root.whichSearch != \'region\'\">\r\n                  <div class=\"input-group input-group-custom\" geo-search>\r\n                     <input type=\"text\" ng-autocomplete ng-model=\"values.from.description\" options=\'{country:\"au\"}\'\r\n                        size=\"32\" title=\"Select a locality to pan the map to.\" class=\"form-control\" aria-label=\"...\">\r\n                     <div class=\"input-group-btn\">\r\n                        <button ng-click=\"zoom(false)\" exp-ga=\"[\'send\', \'event\', \'icsm\', \'click\', \'zoom to location\']\"\r\n                           class=\"btn btn-default\" title=\"Pan and potentially zoom to location.\">\r\n                           <i class=\"fa fa-search\"></i>\r\n                        </button>\r\n                     </div>\r\n                  </div>\r\n               </div>\r\n            </li>\r\n         </ul>\r\n         <ul class=\"right-toolbar-items\">\r\n            <li coverage-toggle></li>\r\n            <li>\r\n               <panel-trigger panel-id=\"download\" panel-width=\"590px\" name=\"Download\" default=\"default\"\r\n                  icon-class=\"fa-list\" title=\"Select an area of interest and select datasets for download\">\r\n               </panel-trigger>\r\n            </li>\r\n            <li>\r\n               <panel-trigger panel-id=\"help\" panel-width=\"590px\" name=\"Help\" icon-class=\"fa-question-circle-o\"\r\n                  title=\"Show help\"></panel-trigger>\r\n            </li>\r\n            <li>\r\n               <panel-trigger panel-id=\"glossary\" panel-width=\"590px\" name=\"Glossary\" icon-class=\"fa-book\"\r\n                  title=\"Show glossary\"></panel-trigger>\r\n            </li>\r\n            <li reset-page></li>\r\n         </ul>\r\n      </div>\r\n   </div>\r\n</div>");}]);
