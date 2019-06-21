@@ -25,12 +25,17 @@
             };
          }])
 
-      .factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService', 'flashService', 'messageService',
-         function ($http, $q, $rootScope, $timeout, configService, flashService, messageService) {
+      .factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService', 'flashService', 'messageService',  "parametersService",
+         function ($http, $q, $rootScope, $timeout, configService, flashService, messageService, parametersService) {
             let clipTimeout, notify;
             return {
                init: function () {
-                  notify = $q.defer();
+                  let notify = $q.defer();
+                  if(parametersService.hasValidBbox()) {
+                     send('Checking for data (' + parametersService.metadata + ')...');
+                     getList(parametersService.clip);
+                  }
+
                   $rootScope.$on('icsm.clip.drawn', function (event, clip) {
                      send('Area drawn. Checking for data...');
                      checkSize(clip).then(function (message) {
@@ -165,6 +170,10 @@
                         .replace("{minx}", clip.xMin)
                         .replace("{maxy}", clip.yMax)
                         .replace("{miny}", clip.yMin);
+
+                     if(clip.metadata) {
+                        urlWithParms += "&metadata=" + clip.metadata;
+                     }
 
                      send("Checking there is data in your selected area...", "wait", 180000);
                      $http.get(urlWithParms).then(function (response) {

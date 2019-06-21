@@ -52,7 +52,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.persist', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'explorer.map.templates', 'ui.bootstrap', 'ui.bootstrap-slider', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer', 'vcRecaptcha',
 
 				//'geo.baselayer.control',
-				'geo.draw', 'geo.elevation', 'geo.geosearch', 'geo.map', 'geo.maphelper', 'geo.measure', 'placenames.search', 'placenames.config', 'placenames.summary', 'icsm.bounds', 'icsm.contributors', 'icsm.coverage', 'icsm.clip', 'icsm.elevation.point', 'icsm.glossary', 'icsm.help', "icsm.location", 'icsm.panes', 'icsm.products', "icsm.side-panel",
+				'geo.draw', 'geo.elevation', 'geo.geosearch', 'geo.map', 'geo.maphelper', 'geo.measure', 'placenames.search', 'placenames.config', 'placenames.summary', 'icsm.bounds', 'icsm.contributors', 'icsm.coverage', 'icsm.clip', 'icsm.elevation.point', 'icsm.glossary', 'icsm.help', 'icsm.panes', "icsm.parameters", 'icsm.products', "icsm.side-panel",
 				// Alternate list
 				'elvis.header', 'elvis.results', 'elvis.reviewing', 'icsm.mapevents', 'icsm.select', 'icsm.splash', 'icsm.layerswitch', 'icsm.templates', 'elevation.toolbar', 'icsm.view'])
 
@@ -136,12 +136,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             });
          }
       };
-   }]).factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService', 'flashService', 'messageService', function ($http, $q, $rootScope, $timeout, configService, flashService, messageService) {
+   }]).factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService', 'flashService', 'messageService', "parametersService", function ($http, $q, $rootScope, $timeout, configService, flashService, messageService, parametersService) {
       var clipTimeout = void 0,
           notify = void 0;
       return {
          init: function init() {
-            notify = $q.defer();
+            var notify = $q.defer();
+            if (parametersService.hasValidBbox()) {
+               send('Checking for data (' + parametersService.metadata + ')...');
+               getList(parametersService.clip);
+            }
+
             $rootScope.$on('icsm.clip.drawn', function (event, clip) {
                send('Area drawn. Checking for data...');
                _checkSize(clip).then(function (message) {
@@ -262,6 +267,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             if (url) {
                // Order matches the $watch signature so be careful
                var urlWithParms = url.replace("{maxx}", clip.xMax).replace("{minx}", clip.xMin).replace("{maxy}", clip.yMax).replace("{miny}", clip.yMin);
+
+               if (clip.metadata) {
+                  urlWithParms += "&metadata=" + clip.metadata;
+               }
 
                send("Checking there is data in your selected area...", "wait", 180000);
                $http.get(urlWithParms).then(function (response) {
@@ -411,7 +420,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             };
          }
       };
-   }]).factory("clipService", ['$location', '$q', '$rootScope', 'drawService', function ($location, $q, $rootScope, drawService) {
+   }]).factory("clipService", ['$rootScope', 'drawService', 'parametersService', function ($rootScope, drawService, parametersService) {
       var options = {
          maxAreaDegrees: 4
       },
@@ -441,19 +450,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          }
       };
 
-      var search = $location.search();
-      console.log("search", search);
-
       $rootScope.$on("bounds.drawn", function (event, data) {
+         $rootScope.$broadcast('icsm.clip.drawn', broadcaster(data)); // Let people know it is drawn
+      });
+
+      var data = parametersService.data;
+      if (data) {
+         broadcaster(data);
+      }
+
+      return service;
+
+      function broadcaster(data) {
          console.log("data", data);
          service.setClip(data);
          var c = service.data.clip;
 
-         $rootScope.$broadcast('icsm.clip.drawn', c); // Let people know it is drawn
          $rootScope.$broadcast('icsm.bounds.draw', [c.xMin, c.yMin, c.xMax, c.yMax]); // Draw it
-      });
-
-      return service;
+         return c;
+      }
 
       function drawComplete(data) {
          var clip = service.data.clip;
@@ -981,13 +996,6 @@ var TerrainLoader = function () {
       };
    }]);
 }
-"use strict";
-
-{
-  angular.module("icsm.location", []);
-
-  // .run();
-}
 'use strict';
 
 {
@@ -1329,6 +1337,89 @@ var TerrainLoader = function () {
 
 
    PaneService.$inject = [];
+}
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+{
+   angular.module("icsm.parameters", []).factory("parametersService", ["$location", function ($location) {
+      // We read the parameters once only. Then the app can decide what to do with them.
+      var Service = function () {
+         function Service(search) {
+            _classCallCheck(this, Service);
+
+            this.search = search;
+         }
+
+         _createClass(Service, [{
+            key: "ignoreSizeLimit",
+            value: function ignoreSizeLimit() {
+               return !!this.search.metadata;
+            }
+         }, {
+            key: "hasValidBbox",
+            value: function hasValidBbox() {
+               var parameters = this.search;
+               return !(isNaN(parameters.minx) || isNaN(parameters.maxx) || isNaN(parameters.miny) || isNaN(parameters.maxy));
+            }
+         }, {
+            key: "clear",
+            value: function clear() {
+               this.search = {};
+            }
+         }, {
+            key: "bbox",
+            get: function get() {
+               return this.hasValidBbox() ? {
+                  minx: +this.search.minx,
+                  maxx: +this.search.maxx,
+                  miny: +this.search.miny,
+                  maxy: +this.search.maxy
+               } : null;
+            }
+         }, {
+            key: "clip",
+            get: function get() {
+               return this.hasValidBbox() ? {
+                  xMin: +this.search.minx,
+                  xMax: +this.search.maxx,
+                  yMin: +this.search.miny,
+                  yMax: +this.search.maxy,
+                  metadata: this.search.metadata
+               } : null;
+            }
+         }, {
+            key: "bounds",
+            get: function get() {
+               var s = this.search;
+               return this.hasValidBbox() ? L.latLngBounds([s.miny, s.minx], [s.maxy, s.maxx]) : null;
+            }
+         }, {
+            key: "data",
+            get: function get() {
+               // Just a wrapper around bounds same as draw does.
+               return this.hasValidBbox() ? { bounds: this.bounds, metadata: this.metadata } : null;
+            }
+         }, {
+            key: "metadata",
+            get: function get() {
+               return this.search.metadata;
+            }
+         }]);
+
+         return Service;
+      }();
+
+      ;
+
+      var service = new Service($location.search());
+
+      window.larry = service;
+      return service;
+   }]);
 }
 "use strict";
 
@@ -3794,6 +3885,29 @@ var Strategies = function () {
 
    return Strategies;
 }();
+"use strict";
+
+{
+
+   angular.module("elevation.toolbar", []).directive("elevationToolbar", [function () {
+      return {
+         restrict: "AE",
+         templateUrl: "icsm/toolbar/toolbar.html",
+         controller: 'toolbarLinksCtrl',
+         transclude: true
+      };
+   }]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
+      var self = this;
+      configService.getConfig().then(function (config) {
+         self.links = config.toolbarLinks;
+      });
+
+      $scope.item = "";
+      $scope.toggleItem = function (item) {
+         $scope.item = $scope.item === item ? "" : item;
+      };
+   }]);
+}
 'use strict';
 
 {
@@ -3906,7 +4020,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       function TerrainLoader(options) {
          _classCallCheck(this, TerrainLoader);
 
-         options = options || {};
+         this.options = options || {};
       }
 
       _createClass(TerrainLoader, [{
@@ -3930,8 +4044,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                }, false);
             }
 
-            if (options.crossOrigin !== undefined) {
-               request.crossOrigin = options.crossOrigin;
+            if (this.options.crossOrigin !== undefined) {
+               request.crossOrigin = this.options.crossOrigin;
             }
 
             request.open('GET', url, true);
@@ -3941,7 +4055,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       }, {
          key: 'setCrossOrigin',
          value: function setCrossOrigin(value) {
-            options.crossOrigin = value;
+            this.options.crossOrigin = value;
          }
       }]);
 
@@ -4198,29 +4312,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
    DownloadService.$inject = ['$http', '$q', '$rootScope', 'mapService', 'storageService'];
 }
-"use strict";
-
-{
-
-   angular.module("elevation.toolbar", []).directive("elevationToolbar", [function () {
-      return {
-         restrict: "AE",
-         templateUrl: "icsm/toolbar/toolbar.html",
-         controller: 'toolbarLinksCtrl',
-         transclude: true
-      };
-   }]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
-      var self = this;
-      configService.getConfig().then(function (config) {
-         self.links = config.toolbarLinks;
-      });
-
-      $scope.item = "";
-      $scope.toggleItem = function (item) {
-         $scope.item = $scope.item === item ? "" : item;
-      };
-   }]);
-}
 angular.module("icsm.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("icsm/app/app.html","<div>\r\n	<!-- BEGIN: Sticky Header -->\r\n	<div explorer-header style=\"z-index:1\"\r\n			class=\"navbar navbar-default navbar-fixed-top\"\r\n			heading=\"\'Elevation\'\"\r\n			headingtitle=\"\'ICSM\'\"\r\n			breadcrumbs=\"[{name:\'ICSM\', title: \'Reload Elevation\', url: \'.\'}]\"\r\n			helptitle=\"\'Get help about Elevation\'\"\r\n			helpalttext=\"\'Get help about Elevation\'\">\r\n	</div>\r\n	<!-- END: Sticky Header -->\r\n\r\n	<!-- Messages go here. They are fixed to the tab bar. -->\r\n	<div explorer-messages class=\"marsMessages noPrint\"></div>\r\n	<icsm-panes data=\"root.data\" default-item=\"download\"></icsm-panes>\r\n</div>");
 $templateCache.put("icsm/clip/clip.html","<div class=\"well well-sm\">\r\n	<div class=\"container-fluid\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-10\">\r\n				<strong style=\"font-size:120%\">Select area:</strong>\r\n				<button ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" tooltip-placement=\"right\" uib-tooltip=\"Enable drawing of a bounding box. On enabling, click on the map and drag diagonally\"\r\n					class=\"btn btn-primary btn-default\">Draw...</button>\r\n				<button ng-click=\"typing = !typing\"  tooltip-placement=\"right\" uib-tooltip=\"Type coordinates of a bounding box. Restricted to maximum of 2.25 square degrees.\"\r\n					class=\"btn btn-primary btn-default\">Manual entry...</button>\r\n			</div>\r\n			<div class=\"col-md-2\">\r\n				<button style=\"float:right\" ng-click=\"showInfo = !showInfo\" tooltip-placement=\"left\" uib-tooltip=\"Information.\" class=\"btn btn-primary btn-default\"><i class=\"fa fa-info\"></i></button>\r\n				<exp-info title=\"Selecting an area\" show-close=\"true\" style=\"width:450px;position:fixed;top:230px;right:40px\" is-open=\"showInfo\">\r\n					<icsm-info-bbox>\r\n			</div>\r\n			</exp-info>\r\n		</div>\r\n   </div>\r\n   <div class=\"row\" ng-hide=\"typing || (!clip.xMin && clip.xMin !== 0) || oversize\" style=\"padding-top:7px;\">\r\n      <div class=\"col-md-12 ng-binding\">Selected bounds:\r\n               {{clip.xMin | number : 4}}° west,\r\n               {{clip.yMax | number : 4}}° north,\r\n               {{clip.xMax | number : 4}}° east,\r\n               {{clip.yMin | number : 4}}° south\r\n      </div>\r\n  </div>\r\n  <clip-modal title=\"Define search area\" show-close=\"true\" style=\"width:480px;position:fixed;top:110px;right:80px\" is-open=\"typing\">\r\n      <icsm-manual-clip></icsm-manual-clip>\r\n   </clip-modal>\r\n</div>");
 $templateCache.put("icsm/clip/infobbox.html","<div class=\"\">\r\n	<strong style=\"font-size:120%\">Select an area of interest.</strong>\r\n   By hitting the \"Draw...\" button an area on the map can be selected with the mouse by clicking a\r\n   corner and while holding the left mouse button\r\n	down drag diagonally across the map to the opposite corner.\r\n	<br/>\r\n   Clicking the \"Draw...\" button again allows replacing a previous area selection. <br/>\r\n   Alternatively you can type in the minimum and maximum coordinates and search by using the \"Manual entry\" button.<br/>\r\n	<strong>Notes:</strong>\r\n   <ul>\r\n      <li>The data does not cover all of Australia.</li>\r\n      <li>Restrict a search area to below 1.5 degrees square. eg 2x0.75 or 1x1.5</li>\r\n   </ul>\r\n	<p style=\"padding-top:5px\"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n		You can zoom in and out using the mouse wheel or the \"+\" and \"-\" map control on the top left of the map. If you\r\n		don\'t like the position of your drawn area, hit the \"Draw\" button and draw a new bounding box.\r\n	</p>\r\n</div>");
@@ -4256,6 +4347,6 @@ $templateCache.put("icsm/select/select.html","<div>\r\n	<div style=\"position:re
 $templateCache.put("icsm/side-panel/side-panel-left.html","<div class=\"cbp-spmenu cbp-spmenu-vertical cbp-spmenu-left\" style=\"width: {{left.width}}px;\" ng-class=\"{\'cbp-spmenu-open\': left.active}\">\r\n    <a href=\"\" title=\"Close panel\" ng-click=\"closeLeft()\" style=\"z-index: 1200\">\r\n        <span class=\"glyphicon glyphicon-chevron-left pull-right\"></span>\r\n    </a>\r\n    <div ng-show=\"left.active === \'legend\'\" class=\"left-side-menu-container\">\r\n        <legend url=\"\'img/AustralianTopogaphyLegend.png\'\" title=\"\'Map Legend\'\"></legend>\r\n    </div>\r\n</div>");
 $templateCache.put("icsm/side-panel/side-panel-right.html","<div class=\"cbp-spmenu cbp-spmenu-vertical cbp-spmenu-right noPrint\" ng-attr-style=\"width:{{right.width}}\" ng-class=\"{\'cbp-spmenu-open\': right.active}\">\r\n    <a href=\"\" title=\"Close panel\" ng-click=\"closePanel()\" style=\"z-index: 1\">\r\n        <span class=\"glyphicon glyphicon-chevron-right pull-left\"></span>\r\n    </a>\r\n\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'download\'\" icsm-view></div>\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'maps\'\" icsm-maps></div>\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'glossary\'\" icsm-glossary></div>\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'help\'\" icsm-help></div>\r\n    <panel-close-on-event only-on=\"search\" event-name=\"clear.button.fired\"></panel-close-on-event>\r\n</div>\r\n");
 $templateCache.put("icsm/splash/splash.html","<div class=\"modal-header\">\r\n   <h3 class=\"modal-title splash\">Elevation - Foundation Spatial Data</h3>\r\n</div>\r\n<div class=\"modal-body\" id=\"accept\" ng-form exp-enter=\"accept()\" icsm-splash-modal style=\"width: 100%; margin-left: auto; margin-right: auto;\">\r\n	<div>\r\n		<p>\r\n			Here you can download point cloud and elevation datasets sourced from jurisdictions.\r\n		</p>\r\n		<p>\r\n			<a href=\"http://www.ga.gov.au/topographic-mapping/digital-elevation-data.html\" target=\"_blank\">Find out more on our Elevation page.</a>\r\n		</p>\r\n		<p>\r\n         Data can be downloaded at <strong>no charge</strong> but note that there is a <strong>15GB limit per request</strong> (please check the file size before you download your files).\r\n		</p>\r\n		<p>\r\n			<a href=\"http://opentopo.sdsc.edu/gridsphere/gridsphere?cid=contributeframeportlet&gs_action=listTools\" target=\"_blank\">Click here for Free GIS Tools.</a>\r\n		</p>\r\n      <h5>How to use</h5>\r\n      <p>\r\n         <ul>\r\n            <li>Pan and zoom the map to your area of interest,</li>\r\n            <li>Click on the \"Select an area...\" button to enable drawing,</li>\r\n            <li>Click on the map, holding the button down,</li>\r\n            <li>Drag to a diagonal corner (not too big, there is a limit of roughly 2 square degrees or 200 square km))</li>\r\n            <li>On release we will check for data within or very near your area of interest</li>\r\n            <li>If the list is large you can filter:\r\n               <ul>\r\n                  <li>Partial text match by typing in the filter field and/or</li>\r\n                  <li>You can restrict the display to either elevation (DEM) or point cloud file types</li>\r\n               </ul>\r\n            </li>\r\n            <li>Check against any file you would like to download. To reiterate, these files can be huge so take note of the file size before downloading</li>\r\n            <li>Review your selected datasets and submit.</li>\r\n            <li>An email will be sent to you with a link to all your data, zipped into a single file.</li>\r\n            <li>These files can be huge so take note of the file size before submitting or downloading</li>\r\n         </ul>\r\n      </p>\r\n      <h5>Hints</h5>\r\n      <p>\r\n         <ul>\r\n            <li>Hovering over many items will give you further information about the purpose of the item</li>\r\n            <li>Drawing a polyline allows you to measure distance along the polyline.</li>\r\n            <li>On completion on drawing a line the elevation along that line is plotted.</li>\r\n            <li>While the tool to draw your area of interest is enabled it is easiest to pan the map using the arrow keys.</li>\r\n            <li>There are many areas where there is no data though the coverage is improving all the time.</li\r\n         </ul>\r\n      </p>\r\n	</div>\r\n   <div style=\"padding:30px; padding-top:0; padding-bottom:40px; width:100%\">\r\n		<div class=\"pull-right\">\r\n		  	<button type=\"button\" class=\"btn btn-primary\" ng-model=\"seenSplash\" ng-click=\"accept()\" autofocus>Continue</button>\r\n		</div>\r\n	</div>\r\n</div>");
+$templateCache.put("icsm/toolbar/toolbar.html","<div class=\"elevation-toolbar noPrint\">\r\n   <div class=\"toolBarContainer\">\r\n      <div>\r\n         <ul class=\"left-toolbar-items\">\r\n            <li>\r\n               <div class=\"btn-group searchBar\" ng-show=\"root.whichSearch != \'region\'\">\r\n                  <div class=\"input-group input-group-custom\" geo-search>\r\n                     <input type=\"text\" ng-autocomplete ng-model=\"values.from.description\" options=\'{country:\"au\"}\'\r\n                        size=\"32\" title=\"Select a locality to pan the map to.\" class=\"form-control\" aria-label=\"...\">\r\n                     <div class=\"input-group-btn\">\r\n                        <button ng-click=\"zoom(false)\" exp-ga=\"[\'send\', \'event\', \'icsm\', \'click\', \'zoom to location\']\"\r\n                           class=\"btn btn-default\" title=\"Pan and potentially zoom to location.\">\r\n                           <i class=\"fa fa-search\"></i>\r\n                        </button>\r\n                     </div>\r\n                  </div>\r\n               </div>\r\n            </li>\r\n         </ul>\r\n         <ul class=\"right-toolbar-items\">\r\n            <li coverage-toggle></li>\r\n            <li>\r\n               <panel-trigger panel-id=\"download\" panel-width=\"590px\" name=\"Download\" default=\"default\"\r\n                  icon-class=\"fa-list\" title=\"Select an area of interest and select datasets for download\">\r\n               </panel-trigger>\r\n            </li>\r\n            <li>\r\n               <panel-trigger panel-id=\"help\" panel-width=\"590px\" name=\"Help\" icon-class=\"fa-question-circle-o\"\r\n                  title=\"Show help\"></panel-trigger>\r\n            </li>\r\n            <li>\r\n               <panel-trigger panel-id=\"glossary\" panel-width=\"590px\" name=\"Glossary\" icon-class=\"fa-book\"\r\n                  title=\"Show glossary\"></panel-trigger>\r\n            </li>\r\n            <li reset-page></li>\r\n         </ul>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/themes/themes.html","<div class=\"dropdown themesdropdown\">\r\n  <button class=\"btn btn-default dropdown-toggle themescurrent\" type=\"button\" id=\"dropdownMenu1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"true\">\r\n    Theme\r\n    <span class=\"caret\"></span>\r\n  </button>\r\n  <ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenu1\">\r\n    <li ng-repeat=\"item in themes\">\r\n       <a href=\"#\" title=\"{{item.title}}\" ng-href=\"{{item.url}}\" class=\"themesItemCompact\">\r\n         <span class=\"icsm-icon\" ng-class=\"item.className\"></span>\r\n         <strong style=\"vertical-align:top;font-size:110%\">{{item.label}}</strong>\r\n       </a>\r\n    </li>\r\n  </ul>\r\n</div>");
-$templateCache.put("icsm/view/view.html","<div class=\"container-fluid downloadPane\">\r\n   <icsm-clip data=\"data.item\"></icsm-clip>\r\n   <div class=\"list-container\">\r\n      <icsm-list></icsm-list>\r\n   </div>\r\n   <div class=\"downloadCont\" icsm-search-continue></div>\r\n</div>");
-$templateCache.put("icsm/toolbar/toolbar.html","<div class=\"elevation-toolbar noPrint\">\r\n   <div class=\"toolBarContainer\">\r\n      <div>\r\n         <ul class=\"left-toolbar-items\">\r\n            <li>\r\n               <div class=\"btn-group searchBar\" ng-show=\"root.whichSearch != \'region\'\">\r\n                  <div class=\"input-group input-group-custom\" geo-search>\r\n                     <input type=\"text\" ng-autocomplete ng-model=\"values.from.description\" options=\'{country:\"au\"}\'\r\n                        size=\"32\" title=\"Select a locality to pan the map to.\" class=\"form-control\" aria-label=\"...\">\r\n                     <div class=\"input-group-btn\">\r\n                        <button ng-click=\"zoom(false)\" exp-ga=\"[\'send\', \'event\', \'icsm\', \'click\', \'zoom to location\']\"\r\n                           class=\"btn btn-default\" title=\"Pan and potentially zoom to location.\">\r\n                           <i class=\"fa fa-search\"></i>\r\n                        </button>\r\n                     </div>\r\n                  </div>\r\n               </div>\r\n            </li>\r\n         </ul>\r\n         <ul class=\"right-toolbar-items\">\r\n            <li coverage-toggle></li>\r\n            <li>\r\n               <panel-trigger panel-id=\"download\" panel-width=\"590px\" name=\"Download\" default=\"default\"\r\n                  icon-class=\"fa-list\" title=\"Select an area of interest and select datasets for download\">\r\n               </panel-trigger>\r\n            </li>\r\n            <li>\r\n               <panel-trigger panel-id=\"help\" panel-width=\"590px\" name=\"Help\" icon-class=\"fa-question-circle-o\"\r\n                  title=\"Show help\"></panel-trigger>\r\n            </li>\r\n            <li>\r\n               <panel-trigger panel-id=\"glossary\" panel-width=\"590px\" name=\"Glossary\" icon-class=\"fa-book\"\r\n                  title=\"Show glossary\"></panel-trigger>\r\n            </li>\r\n            <li reset-page></li>\r\n         </ul>\r\n      </div>\r\n   </div>\r\n</div>");}]);
+$templateCache.put("icsm/view/view.html","<div class=\"container-fluid downloadPane\">\r\n   <icsm-clip data=\"data.item\"></icsm-clip>\r\n   <div class=\"list-container\">\r\n      <icsm-list></icsm-list>\r\n   </div>\r\n   <div class=\"downloadCont\" icsm-search-continue></div>\r\n</div>");}]);

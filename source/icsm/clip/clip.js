@@ -99,7 +99,8 @@
       }])
 
 
-      .factory("clipService", ['$location', '$q', '$rootScope', 'drawService', function ($location, $q, $rootScope, drawService) {
+      .factory("clipService", ['$rootScope', 'drawService', 'parametersService',
+               function ($rootScope, drawService, parametersService) {
          let options = {
             maxAreaDegrees: 4
          },
@@ -129,27 +130,31 @@
                }
             };
 
-         let search = $location.search();
-         console.log("search", search);
-
 
          $rootScope.$on("bounds.drawn", function (event, data) {
+            $rootScope.$broadcast('icsm.clip.drawn', broadcaster(data));  // Let people know it is drawn
+         });
+
+         let data = parametersService.data;
+         if(data) {
+            broadcaster(data);
+         }
+
+         return service;
+
+         function broadcaster(data) {
             console.log("data", data);
             service.setClip(data);
             let c = service.data.clip;
 
-            $rootScope.$broadcast('icsm.clip.drawn', c);  // Let people know it is drawn
             $rootScope.$broadcast('icsm.bounds.draw', [
                c.xMin,
                c.yMin,
                c.xMax,
                c.yMax
             ]);// Draw it
-         });
-
-         return service;
-
-
+            return c;
+         }
 
          function drawComplete(data) {
             let clip = service.data.clip;

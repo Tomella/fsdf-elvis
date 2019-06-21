@@ -78,8 +78,8 @@
       'icsm.elevation.point',
 		'icsm.glossary',
       'icsm.help',
-      "icsm.location",
 		'icsm.panes',
+      "icsm.parameters",
       'icsm.products',
       "icsm.side-panel",
 		// Alternate list

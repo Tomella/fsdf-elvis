@@ -1,7 +1,7 @@
 {
    class TerrainLoader {
       constructor(options) {
-         options = options || {};
+         this.options = options || {};
       }
 
       load(url, onload, onerror) {
@@ -24,8 +24,8 @@
             }, false);
          }
 
-         if (options.crossOrigin !== undefined) {
-            request.crossOrigin = options.crossOrigin;
+         if (this.options.crossOrigin !== undefined) {
+            request.crossOrigin = this.options.crossOrigin;
          }
 
          request.open('GET', url, true);
@@ -34,7 +34,7 @@
       }
 
       setCrossOrigin(value) {
-         options.crossOrigin = value;
+         this.options.crossOrigin = value;
       }
    }
 
