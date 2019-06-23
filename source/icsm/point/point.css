@@ -1,0 +1,32 @@
+.leaflet-control-elevation {
+   background-image: url(/icsm/resources/img/mountain24.png);
+}
+
+.point-container {
+   position: fixed;
+   bottom: 40px;
+   left: 10px;
+   height: 100px;
+   width: 280px;
+   background-color: white;
+   border: 1px solid gray;
+   border-radius: 8px;
+}
+
+.point-container {
+   margin: 2px;
+   padding: 10px;
+   padding-left: 8px;
+   background-color: white;
+   white-space: nowrap;
+   text-align: left;
+   -webkit-transition: all 1s ease;
+   transition: all 1s ease;
+   box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+}
+
+.point-container .title {
+   width: 7em;
+   font-weight: bold;
+   display: inline-block;
+}

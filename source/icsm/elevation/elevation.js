@@ -14,7 +14,7 @@ angular.module("icsm.elevation.point", [])
 
                      new TerrainLoader().load(url, function(elev) {
                         resolve(elev);
-                     });
+                     }, function() {}); // Swallow errors
                   });
                });
             }
@@ -23,29 +23,3 @@ angular.module("icsm.elevation.point", [])
       }
    ]);
 
-   class TerrainLoader {
-      load(url, onload, onerror) {
-          let request = new XMLHttpRequest();
-
-          request.addEventListener( 'load', function ( event ) {
-              try {
-                  var parser = new GeotiffParser();
-                  parser.parseHeader(event.target.response);
-                  onload(parser.loadPixels());
-              }
-              catch(error) {
-                  onerror(error);
-              }
-          }, false );
-
-          if ( onerror !== undefined ) {
-              request.addEventListener( 'error', function ( event ) {
-                  onerror( event );
-              }, false );
-          }
-
-          request.open( 'GET', url, true );
-          request.responseType = 'arraybuffer';
-          request.send(null);
-      }
-  }

@@ -166,6 +166,8 @@
                   var deferred = $q.defer();
                   new TerrainLoader().load(ptElevationUrl.replace("{bbox}", bbox.join(",")), function (elev) {
                      deferred.resolve(elev);
+                  }, function(error) {
+                     console.log("Error, probably out of bounds");
                   });
                   return deferred.promise;
                }

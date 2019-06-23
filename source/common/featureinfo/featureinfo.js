@@ -3,8 +3,8 @@
 
    angular.module("common.featureinfo", [])
 
-      .directive("commonFeatureInfo", ['$http', '$log', '$q', '$timeout', 'featureInfoService', 'flashService', 'messageService',
-         function ($http, $log, $q, $timeout, featureInfoService, flashService, messageService) {
+      .directive("commonFeatureInfo", ['$http', '$log', '$q', '$timeout', 'featureInfoService', 'flashService', 'mapService', 'messageService',
+         function ($http, $log, $q, $timeout, featureInfoService, flashService, mapService, messageService) {
             var template = "https://elvis2018-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetFeatureInfo_ElevationAvailableData.fmw?" +
                "SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&SRS=EPSG%3A4326&BBOX=${bounds}&WIDTH=${width}&HEIGHT=${height}" +
                //"LAYERS=public.5dem_ProjectsIndex&" +
@@ -17,7 +17,6 @@
             var layers = ["public.5dem_ProjectsIndex", "public.NSW_100k_Index"];
 
             return {
-               require: "^geoMap",
                restrict: "AE",
                link: function (scope, element, attrs, ctrl) {
                   var flasher = null;
@@ -27,7 +26,7 @@
                      scope.options = {};
                   }
 
-                  ctrl.getMap().then(function (map) {
+                  mapService.getMap().then(function (map) {
                      map.on('popupclose', function (e) {
                         featureInfoService.removeLastLayer(map);
                      });

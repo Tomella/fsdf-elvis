@@ -78,9 +78,12 @@
       'icsm.elevation.point',
 		'icsm.glossary',
       'icsm.help',
+      'icsm.imagery',
 		'icsm.panes',
       "icsm.parameters",
+		'icsm.point',
       'icsm.products',
+      'icsm.preview',
       "icsm.side-panel",
 		// Alternate list
 		'elvis.header',

@@ -1,0 +1,36 @@
+.preview-container {
+   position: fixed;
+   display: block;
+   top:0;
+   bottom:0;
+   left:0;
+   right:0;
+   z-index: 10000;
+}
+
+.preview-blocker {
+   background-color: black;
+   z-index:0;
+   position: absolute;
+   opacity: 0.93;
+   left: 0;
+   right:0;
+   top:0;
+   bottom:0
+}
+
+.preview-image {
+   position: absolute;
+   max-width: 80%;
+   max-height: 80%;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+}
+
+.preview-button-container {
+   position:absolute;
+   right: 10px;
+   z-index: 1;
+   top:20px;
+}

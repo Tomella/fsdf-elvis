@@ -1,0 +1,14 @@
+<div class="preview-container" ng-if="image">
+   <div class="preview-blocker" ng-click="clear()"></div>
+   <div style="position:absolute; right: 10px; z-index: 1; top:20px">
+      <div class="pull-right">
+         <button type="button" class="btn btn-primary" ng-click="clear()" autofocus>Hide</button>
+      </div>
+   </div>
+   <img class="preview-image" ng-src="{{image.url}}">
+   <div style="position:absolute; top:10px; left:10px;color:white"><strong>File name:</strong> {{image.item.file_name}}</div>
+
+
+   </div>
+
+</div>
