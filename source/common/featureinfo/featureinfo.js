@@ -31,18 +31,22 @@
                         featureInfoService.removeLastLayer(map);
                      });
 
-                     map.on("draw:drawstart", function () {
+                     map.on("draw:drawstart point:start", function () {
                         paused = true;
                         $timeout(function () {
                            paused = false;
                         }, 60000);
                      });
 
-                     map.on("draw:drawstop", function () {
+                     map.on("draw:drawstop point:end", function () {
                         paused = false;
                      });
 
                      map.on("click", function (event) {
+                        if (paused) {
+                           return;
+                        }
+
                         var layer = null;
                         var size = map.getSize();
                         var point = map.latLngToContainerPoint(event.latlng, map.getZoom());
@@ -55,10 +59,6 @@
                            width: size.x
                         };
                         var url = template;
-
-                        if (paused) {
-                           return;
-                        }
 
                         flashService.remove(flasher);
                         flasher = flashService.add("Checking available data at this point", 30000, true);

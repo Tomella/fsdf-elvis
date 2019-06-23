@@ -10,7 +10,6 @@ class TerrainLoader {
             parser.parseHeader(event.target.response);
             onload(parser.loadPixels());
          } catch (error) {
-            console.log("nooooooooooooooooooooooooooooooooooooooooo")
             onerror(error);
          }
       }, false);

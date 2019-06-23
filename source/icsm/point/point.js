@@ -1,5 +1,4 @@
 L.Control.ElevationControl = L.Control.extend({
-
    statics: {
       TITLE: 'Elevation at a point'
    },
@@ -12,9 +11,12 @@ L.Control.ElevationControl = L.Control.extend({
       let handler = this.options.handler;
       if (this.enabled) {
          handler.disable();
+         this._map.fire(L.Control.ElevationControl.Event.POINTEND, {});
          this._map.off('click', handleClick);
          this.enabled = false;
+
       } else {
+         this._map.fire(L.Control.ElevationControl.Event.POINTSTART, {});
          handler.enable();
          this._map.on('click', handleClick);
          this.enabled = true;
@@ -22,26 +24,16 @@ L.Control.ElevationControl = L.Control.extend({
 
       function handleClick(e) {
          handler.searching(e.latlng);
-         e.originalEvent.stopPropagation();
-         e.originalEvent.preventDefault();
-         return false;
       }
    },
 
    clear: function () {
+      // Toggle does all the hard lifting so route through it
       if (this.enabled) this.toggle();
    },
 
    onAdd: function (map) {
       var className = 'leaflet-control-elevation';
-      console.log(this)
-
-      if (!L.Browser.touch || L.Browser.ie) {
-         L.DomEvent.disableClickPropagation(element);
-         L.DomEvent.on(this._map._container, 'mousewheel', L.DomEvent.stopPropagation);
-      } else {
-         L.DomEvent.on(this._map._container, 'click', L.DomEvent.stopPropagation);
-      }
 
       this._container = L.DomUtil.create('div', 'leaflet-bar');
 
@@ -64,6 +56,11 @@ L.Map.mergeOptions({
 
 L.Control.elevationControl = function (options) {
    return new L.Control.ElevationControl(options);
+};
+
+L.Control.ElevationControl.Event = {
+   POINTSTART: "point:start",
+   POINTEND: "point:end"
 };
 
 {
@@ -111,7 +108,7 @@ L.Control.elevationControl = function (options) {
                      scope.longitude = latlng.lng;
                      scope.elevation = scope.error = null;
                      elevationPointService.getElevation(latlng).then(elevation => {
-                        scope.elevation = elevation[0];
+                        scope.elevation = +elevation[0];
                      }).catch(e => {
                         scope.error = "No data available at this point";
                      })
