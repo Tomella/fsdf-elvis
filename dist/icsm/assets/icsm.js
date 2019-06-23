@@ -719,7 +719,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 angular.module("icsm.elevation.point", []).factory("elevationPointService", ['$q', 'configService', function ($q, configService) {
    var service = {
       getElevation: function getElevation(latlng) {
-         return $q(function (resolve) {
+         return $q(function (resolve, reject) {
             configService.getConfig("elevation").then(function (config) {
                var delta = 0.000001;
                var lat = latlng.lat;
@@ -729,7 +729,9 @@ angular.module("icsm.elevation.point", []).factory("elevationPointService", ['$q
 
                new TerrainLoader().load(url, function (elev) {
                   resolve(elev);
-               }, function () {}); // Swallow errors
+               }, function (e) {
+                  reject(e);
+               });
             });
          });
       }
@@ -1514,13 +1516,13 @@ L.Control.elevationControl = function (options) {
             var handler = {
                disable: function disable() {
                   scope.enabled = false;
-                  scope.elevation = scope.latitude = scope.longitude = null;
+                  scope.error = scope.elevation = scope.latitude = scope.longitude = null;
                   console.log("Disable elevation handler here");
                },
 
                enable: function enable(map) {
                   scope.enabled = true;
-                  scope.elevation = scope.latitude = scope.longitude = null;
+                  scope.error = scope.elevation = scope.latitude = scope.longitude = null;
                   console.log("Enable elevation handler here");
                },
 
@@ -1531,9 +1533,11 @@ L.Control.elevationControl = function (options) {
                searching: function searching(latlng) {
                   scope.latitude = latlng.lat;
                   scope.longitude = latlng.lng;
-                  scope.elevation = null;
+                  scope.elevation = scope.error = null;
                   elevationPointService.getElevation(latlng).then(function (elevation) {
                      scope.elevation = elevation[0];
+                  }).catch(function (e) {
+                     scope.error = "No data available at this point";
                   });
                },
 
@@ -4220,59 +4224,9 @@ var Strategies = function () {
       };
    }]);
 }
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+"use strict";
 
 {
-   var TerrainLoader = function () {
-      function TerrainLoader(options) {
-         _classCallCheck(this, TerrainLoader);
-
-         this.options = options || {};
-      }
-
-      _createClass(TerrainLoader, [{
-         key: 'load',
-         value: function load(url, onload, onerror) {
-            var request = new XMLHttpRequest();
-
-            request.addEventListener('load', function (event) {
-               try {
-                  var parser = new GeotiffParser();
-                  parser.parseHeader(event.target.response);
-                  onload(parser.loadPixels());
-               } catch (error) {
-                  onerror(error);
-               }
-            }, false);
-
-            if (onerror !== undefined) {
-               request.addEventListener('error', function (event) {
-                  onerror(event);
-               }, false);
-            }
-
-            if (this.options.crossOrigin !== undefined) {
-               request.crossOrigin = this.options.crossOrigin;
-            }
-
-            request.open('GET', url, true);
-            request.responseType = 'arraybuffer';
-            request.send(null);
-         }
-      }, {
-         key: 'setCrossOrigin',
-         value: function setCrossOrigin(value) {
-            this.options.crossOrigin = value;
-         }
-      }]);
-
-      return TerrainLoader;
-   }();
-
    angular.module("icsm.transect", []).provider("transectService", function () {
       var diagonal = 500,
           layers = {},
@@ -4542,7 +4496,7 @@ $templateCache.put("icsm/imagery/launch.html","<button type=\"button\" class=\"u
 $templateCache.put("icsm/message/message.html","<div class=\"well well-sm mess-container\" ng-show=\"message.type && message.text\"\r\n   ng-class=\"{\'mess-error\': message.type == \'error\', \'mess-warn\': message.type == \'warn\', \'mess-info\': (message.type == \'info\' || message.type == \'wait\')}\">\r\n   <i class=\"fa fa-spinner fa-spin fa-fw\" aria-hidden=\"true\" ng-if=\"message.type == \'wait\'\"></i>\r\n   <span>{{message.text}}</span>\r\n</div>");
 $templateCache.put("icsm/panes/panes.html","<div class=\"mapContainer\" class=\"col-md-12\" style=\"padding-right:0\"  ng-attr-style=\"right:{{right.width}}\">\r\n   <span common-baselayer-control class=\"baselayer-slider\" max-zoom=\"16\" title=\"Satellite to Topography bias on base map.\"></span>\r\n   <div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n      <geo-extent></geo-extent>\r\n      <icsm-layerswitch></icsm-layerswitch>\r\n   </div>\r\n   <div class=\"base-layer-controller\">\r\n      <div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n   </div>\r\n   <restrict-pan bounds=\"data.map.position.bounds\"></restrict-pan>\r\n</div>");
 $templateCache.put("icsm/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n   <div class=\"paneTabItem\" style=\"width:60px; opacity:0\">\r\n\r\n   </div>\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n      <button class=\"undecorated\">Datasets Download</button>\r\n   </div>\r\n   <!--\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n   -->\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'downloader\'}\" ng-click=\"setView(\'downloader\')\">\r\n      <button class=\"undecorated\">Products Download</button>\r\n   </div>\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n      <button class=\"undecorated\">Glossary</button>\r\n   </div>\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n      <button class=\"undecorated\">Help</button>\r\n   </div>\r\n</div>");
-$templateCache.put("icsm/point/point.html","<div class=\"point-container\" ng-if=\"enabled\">\r\n   <div style=\"text-align: center;\">\r\n      <span style=\"font-weight: bold; font-size: 120%\">Elevation at a Point</span>\r\n      <button class=\"undecorated coverage-unstick\" ng-click=\"close()\" style=\"float:right; color:gray\"  title=\"Cancel elevation display\">X</button>\r\n      </div>\r\n   <div ng-show=\"latitude\">\r\n      <div>\r\n         <div class=\"title\">Latitude:</div>{{latitude | number : 5}}&deg;\r\n      </div>\r\n      <div>\r\n         <div class=\"title\">Longitude:</div>{{longitude | number : 5}}&deg;\r\n      </div>\r\n      <div ng-hide=\"elevation && elevation !== 0\">Looking up elevation...</div>\r\n      <div ng-show=\"elevation || elevation === 0\">\r\n         <div class=\"title\">Elevation:</div>{{elevation | number : 2}}m\r\n      </div>\r\n   </div>\r\n   <div ng-hide=\"latitude\">\r\n      <ul>\r\n         <li>Zoom and pan to your point of interest.</li>\r\n         <li>Click on the point.</li>\r\n      </ul>\r\n   </div>\r\n</div>");
+$templateCache.put("icsm/point/point.html","<div class=\"point-container\" ng-if=\"enabled\">\r\n   <div style=\"text-align: center;\">\r\n      <span style=\"font-weight: bold; font-size: 120%\">Elevation at a Point</span>\r\n      <button class=\"undecorated coverage-unstick\" ng-click=\"close()\" style=\"float:right; color:gray\"  title=\"Cancel elevation display\">X</button>\r\n      </div>\r\n   <div ng-show=\"latitude\">\r\n      <div>\r\n         <div class=\"title\">Latitude:</div>{{latitude | number : 5}}&deg;\r\n      </div>\r\n      <div>\r\n         <div class=\"title\">Longitude:</div>{{longitude | number : 5}}&deg;\r\n      </div>\r\n      <div ng-hide=\"(elevation && elevation !== 0) || error\">Looking up elevation...</div>\r\n      <div ng-show=\"error\">{{error}}</div>\r\n      <div ng-show=\"elevation || elevation === 0\">\r\n         <div class=\"title\">Elevation:</div>{{elevation | number : 2}}m\r\n      </div>\r\n   </div>\r\n   <div ng-hide=\"latitude\">\r\n      <ul>\r\n         <li>Zoom and pan to your point of interest.</li>\r\n         <li>Click on the point.</li>\r\n      </ul>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/preview/preview.html","<div class=\"preview-container\" ng-if=\"image\">\r\n   <div class=\"preview-blocker\" ng-click=\"clear()\"></div>\r\n   <div style=\"position:absolute; right: 10px; z-index: 1; top:20px\">\r\n      <div class=\"pull-right\">\r\n         <button type=\"button\" class=\"btn btn-primary\" ng-click=\"clear()\" autofocus>Hide</button>\r\n      </div>\r\n   </div>\r\n   <img class=\"preview-image\" ng-src=\"{{image.url}}\">\r\n   <div style=\"position:absolute; top:10px; left:10px;color:white\"><strong>File name:</strong> {{image.item.file_name}}</div>\r\n\r\n\r\n   </div>\r\n\r\n</div>");
 $templateCache.put("icsm/products/download.html","<div class=\"well\" ng-show=\"item.showDownload\">\r\n\r\n   <div class=\"well\">\r\n      <div ng-show=\"processing.validClip\" class=\"product-restrict\">\r\n         <span class=\"product-label\">Bounds:</span> {{processing.clip.xMin|number : 4}}&deg; west, {{processing.clip.yMax|number : 4}}&deg; north, {{processing.clip.xMax|number\r\n         : 4}}&deg; east, {{processing.clip.yMin|number : 4}}&deg; south\r\n\r\n         <div ng-show=\"processing.message\" class=\"product-warning\">\r\n            {{processing.message}}\r\n         </div>\r\n      </div>\r\n      <product-projection processing=\"processing\"></product-projection>\r\n      <br/>\r\n      <product-formats processing=\"processing\"></product-formats>\r\n      <br/>\r\n      <product-email processing=\"processing\"></product-email>\r\n   </div>\r\n   <product-download-submit processing=\"processing\" item=\"item\"></product-download-submit>\r\n</div>");
 $templateCache.put("icsm/products/email.html","<div class=\"input-group\">\r\n      <span class=\"input-group-addon\" id=\"nedf-email\">Email</span>\r\n      <input required=\"required\" type=\"email\" ng-model=\"processing.email\" class=\"form-control\" placeholder=\"Email address to send download link\">\r\n   </div>\r\n");

@@ -91,13 +91,13 @@ L.Control.elevationControl = function (options) {
                var handler = {
                   disable: function () {
                      scope.enabled = false;
-                     scope.elevation = scope.latitude = scope.longitude = null;
+                     scope.error = scope.elevation = scope.latitude = scope.longitude = null;
                      console.log("Disable elevation handler here")
                   },
 
                   enable: function (map) {
                      scope.enabled = true;
-                     scope.elevation = scope.latitude = scope.longitude = null;
+                     scope.error = scope.elevation = scope.latitude = scope.longitude = null;
                      console.log("Enable elevation handler here");
 
                   },
@@ -109,9 +109,11 @@ L.Control.elevationControl = function (options) {
                   searching: function (latlng) {
                      scope.latitude = latlng.lat;
                      scope.longitude = latlng.lng;
-                     scope.elevation = null;
+                     scope.elevation = scope.error = null;
                      elevationPointService.getElevation(latlng).then(elevation => {
                         scope.elevation = elevation[0];
+                     }).catch(e => {
+                        scope.error = "No data available at this point";
                      })
 
                   },

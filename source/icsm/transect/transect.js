@@ -1,43 +1,4 @@
 {
-   class TerrainLoader {
-      constructor(options) {
-         this.options = options || {};
-      }
-
-      load(url, onload, onerror) {
-         var request = new XMLHttpRequest();
-
-         request.addEventListener('load', function (event) {
-            try {
-               var parser = new GeotiffParser();
-               parser.parseHeader(event.target.response);
-               onload(parser.loadPixels());
-            }
-            catch (error) {
-               onerror(error);
-            }
-         }, false);
-
-         if (onerror !== undefined) {
-            request.addEventListener('error', function (event) {
-               onerror(event);
-            }, false);
-         }
-
-         if (this.options.crossOrigin !== undefined) {
-            request.crossOrigin = this.options.crossOrigin;
-         }
-
-         request.open('GET', url, true);
-         request.responseType = 'arraybuffer';
-         request.send(null);
-      }
-
-      setCrossOrigin(value) {
-         this.options.crossOrigin = value;
-      }
-   }
-
    angular.module("icsm.transect", [])
 
       .provider("transectService", function () {

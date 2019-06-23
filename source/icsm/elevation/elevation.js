@@ -4,7 +4,7 @@ angular.module("icsm.elevation.point", [])
       function ($q, configService) {
          const service = {
             getElevation: function(latlng) {
-               return $q(function(resolve) {
+               return $q(function(resolve, reject) {
                   configService.getConfig("elevation").then(config => {
                      const delta = 0.000001;
                      let lat = latlng.lat;
@@ -14,7 +14,9 @@ angular.module("icsm.elevation.point", [])
 
                      new TerrainLoader().load(url, function(elev) {
                         resolve(elev);
-                     }, function() {}); // Swallow errors
+                     }, function(e) {
+                        reject(e);
+                     });
                   });
                });
             }

@@ -10,7 +10,8 @@
       <div>
          <div class="title">Longitude:</div>{{longitude | number : 5}}&deg;
       </div>
-      <div ng-hide="elevation && elevation !== 0">Looking up elevation...</div>
+      <div ng-hide="(elevation && elevation !== 0) || error">Looking up elevation...</div>
+      <div ng-show="error">{{error}}</div>
       <div ng-show="elevation || elevation === 0">
          <div class="title">Elevation:</div>{{elevation | number : 2}}m
       </div>

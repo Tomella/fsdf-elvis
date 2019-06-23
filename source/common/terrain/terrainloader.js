@@ -9,8 +9,8 @@ class TerrainLoader {
             var parser = new GeotiffParser();
             parser.parseHeader(event.target.response);
             onload(parser.loadPixels());
-         }
-         catch (error) {
+         } catch (error) {
+            console.log("nooooooooooooooooooooooooooooooooooooooooo")
             onerror(error);
          }
       }, false);
