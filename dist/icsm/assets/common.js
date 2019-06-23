@@ -617,64 +617,6 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
 })(angular, $);
 "use strict";
 
-(function (angular) {
-	'use strict';
-
-	angular.module("common.extent", ["explorer.switch"]).directive("commonExtent", ['extentService', function (extentService) {
-		return {
-			restrict: "AE",
-			templateUrl: "common/extent/extent.html",
-			controller: ['$scope', function ($scope) {
-				$scope.parameters = extentService.getParameters();
-			}],
-			link: function link(scope, element, attrs) {}
-		};
-	}]).factory("extentService", ExtentService);
-
-	ExtentService.$inject = ['mapService', 'searchService'];
-	function ExtentService(mapService, searchService) {
-		var bbox = searchService.getSearchCriteria().bbox;
-
-		if (bbox.fromMap) {
-			enableMapListeners();
-		}
-
-		return {
-			getParameters: function getParameters() {
-				return bbox;
-			}
-		};
-
-		function enableMapListeners() {
-			mapService.getMap().then(function (map) {
-				map.on("moveend", execute);
-				map.on("zoomend", execute);
-				execute();
-			});
-		}
-
-		function disableMapListeners() {
-			return mapService.getMap().then(function (map) {
-				map.off("moveend", execute);
-				map.off("zoomend", execute);
-				return map;
-			});
-		}
-
-		function execute() {
-			mapService.getMap().then(function (map) {
-				var bounds = map.getBounds();
-				bbox.yMin = bounds.getSouth();
-				bbox.xMin = bounds.getWest();
-				bbox.yMax = bounds.getNorth();
-				bbox.xMax = bounds.getEast();
-				searchService.refresh();
-			});
-		}
-	}
-})(angular);
-"use strict";
-
 {
    angular.module("common.draw", ['geo.map']).directive("commonDraw", ['$log', '$rootScope', 'commonDrawService', function ($log, $rootScope, commonDrawService) {
       var DEFAULTS = {
@@ -780,6 +722,64 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
 }
 "use strict";
 
+(function (angular) {
+	'use strict';
+
+	angular.module("common.extent", ["explorer.switch"]).directive("commonExtent", ['extentService', function (extentService) {
+		return {
+			restrict: "AE",
+			templateUrl: "common/extent/extent.html",
+			controller: ['$scope', function ($scope) {
+				$scope.parameters = extentService.getParameters();
+			}],
+			link: function link(scope, element, attrs) {}
+		};
+	}]).factory("extentService", ExtentService);
+
+	ExtentService.$inject = ['mapService', 'searchService'];
+	function ExtentService(mapService, searchService) {
+		var bbox = searchService.getSearchCriteria().bbox;
+
+		if (bbox.fromMap) {
+			enableMapListeners();
+		}
+
+		return {
+			getParameters: function getParameters() {
+				return bbox;
+			}
+		};
+
+		function enableMapListeners() {
+			mapService.getMap().then(function (map) {
+				map.on("moveend", execute);
+				map.on("zoomend", execute);
+				execute();
+			});
+		}
+
+		function disableMapListeners() {
+			return mapService.getMap().then(function (map) {
+				map.off("moveend", execute);
+				map.off("zoomend", execute);
+				return map;
+			});
+		}
+
+		function execute() {
+			mapService.getMap().then(function (map) {
+				var bounds = map.getBounds();
+				bbox.yMin = bounds.getSouth();
+				bbox.xMin = bounds.getWest();
+				bbox.yMax = bounds.getNorth();
+				bbox.xMax = bounds.getEast();
+				searchService.refresh();
+			});
+		}
+	}
+})(angular);
+"use strict";
+
 (function (angular, L) {
    'use strict';
 
@@ -793,7 +793,6 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
          restrict: "AE",
          link: function link(scope, element, attrs, ctrl) {
             var flasher = null;
-            var paused = false;
 
             if (typeof scope.options === "undefined") {
                scope.options = {};
@@ -805,18 +804,23 @@ angular.module('common.accordion', ['ui.bootstrap.collapse']).constant('commonAc
                });
 
                map.on("draw:drawstart point:start", function () {
-                  paused = true;
+                  scope.paused = true;
                   $timeout(function () {
-                     paused = false;
+                     scope.paused = false;
                   }, 60000);
                });
 
                map.on("draw:drawstop point:end", function () {
-                  paused = false;
+                  // Argh. Can't get an event that runs before the click on draw but
+                  // if I wait a few milliseconds then all is good.
+                  $timeout(function () {
+                     scope.paused = false;
+                  }, 6);
                });
 
                map.on("click", function (event) {
-                  if (paused) {
+                  console.log("clicked");
+                  if (scope.paused) {
                      return;
                   }
 
@@ -1975,40 +1979,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 })(angular);
 "use strict";
 
-{
-   angular.module("common.proxy", []).provider("proxy", function () {
-
-      this.$get = ['$http', '$q', function ($http, $q) {
-         var base = "proxy/";
-
-         this.setProxyBase = function (newBase) {
-            base = newBase;
-         };
-
-         return {
-            get: function get(url, options) {
-               return this._method("get", url, options);
-            },
-
-            post: function post(url, options) {
-               return this._method("post", url, options);
-            },
-
-            put: function put(url, options) {
-               return this._method("put", url, options);
-            },
-
-            _method: function _method(method, url, options) {
-               return $http[method](base + url, options).then(function (response) {
-                  return response.data;
-               });
-            }
-         };
-      }];
-   });
-}
-"use strict";
-
 (function (angular) {
 	'use strict';
 
@@ -2081,6 +2051,40 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		};
 	}
 })(angular);
+"use strict";
+
+{
+   angular.module("common.proxy", []).provider("proxy", function () {
+
+      this.$get = ['$http', '$q', function ($http, $q) {
+         var base = "proxy/";
+
+         this.setProxyBase = function (newBase) {
+            base = newBase;
+         };
+
+         return {
+            get: function get(url, options) {
+               return this._method("get", url, options);
+            },
+
+            post: function post(url, options) {
+               return this._method("post", url, options);
+            },
+
+            put: function put(url, options) {
+               return this._method("put", url, options);
+            },
+
+            _method: function _method(method, url, options) {
+               return $http[method](base + url, options).then(function (response) {
+                  return response.data;
+               });
+            }
+         };
+      }];
+   });
+}
 'use strict';
 
 (function (angular) {

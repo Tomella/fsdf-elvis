@@ -20,7 +20,6 @@
                restrict: "AE",
                link: function (scope, element, attrs, ctrl) {
                   var flasher = null;
-                  var paused = false;
 
                   if (typeof scope.options === "undefined") {
                      scope.options = {};
@@ -32,18 +31,23 @@
                      });
 
                      map.on("draw:drawstart point:start", function () {
-                        paused = true;
+                        scope.paused = true;
                         $timeout(function () {
-                           paused = false;
+                           scope.paused = false;
                         }, 60000);
                      });
 
                      map.on("draw:drawstop point:end", function () {
-                        paused = false;
+                        // Argh. Can't get an event that runs before the click on draw but
+                        // if I wait a few milliseconds then all is good.
+                        $timeout(function () {
+                           scope.paused = false;
+                        }, 6);
                      });
 
                      map.on("click", function (event) {
-                        if (paused) {
+                        console.log("clicked");
+                        if (scope.paused) {
                            return;
                         }
 
