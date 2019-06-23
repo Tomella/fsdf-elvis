@@ -15,11 +15,11 @@
             };
              */
             scope.clear = () => {
-               scope.image = null;
+               scope.previewData = null;
             };
 
-            $rootScope.$on("icsm-preview", function(data) {
-               scope.image = data;
+            $rootScope.$on("icsm-preview", function(event, data) {
+               scope.previewData = data;
             });
          }
       }

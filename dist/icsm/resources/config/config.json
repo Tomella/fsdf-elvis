@@ -485,5 +485,8 @@
          "code": "Other",
          "text": "Other"
       }
-   ]
+   ],
+   "imagery": {
+      "baseUrl": "icsm/resources/img/fbimage.jpg?${file_name}"
+   }
 }
