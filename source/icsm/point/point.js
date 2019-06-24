@@ -67,7 +67,7 @@ L.Control.ElevationControl.Event = {
 
 {
    angular.module("icsm.point", [])
-      .directive("pointElevation", ["elevationPointService",  "mapService", function (elevationPointService, mapService) {
+      .directive("pointElevation", ["elevationPointsService",  "mapService", function (elevationPointsService, mapService) {
          return {
             restrict: "AE",
             templateUrl: "icsm/point/point.html",
@@ -79,9 +79,6 @@ L.Control.ElevationControl.Event = {
                   scope.elevation = scope.latitude = scope.longitude = null;
                }
 
-               scope.elevation = 45.6666667234;
-               scope.latitude = -38.34425882254;
-               scope.longitude = 148.2342115;
                mapService.getMap().then(map => {
                   scope.control = L.Control.elevationControl({ handler }).addTo(map);
                   console.log("Point signing in");
@@ -109,7 +106,7 @@ L.Control.ElevationControl.Event = {
                      scope.latitude = latlng.lat;
                      scope.longitude = latlng.lng;
                      scope.elevation = scope.error = null;
-                     elevationPointService.getElevation(latlng).then(elevation => {
+                     elevationPointsService.getElevation(latlng).then(elevation => {
                         scope.elevation = +elevation[0];
                      }).catch(e => {
                         scope.error = "No data available at this point";

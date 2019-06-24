@@ -1,7 +1,7 @@
 {
    angular.module("icsm.elevation.point", [])
 
-      .factory("elevationPointService", ['$q', 'configService',
+      .factory("elevationPointsService", ['$q', 'configService',
          function ($q, configService) {
             const service = {
                getElevation: function (latlng) {

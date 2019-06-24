@@ -17,61 +17,6 @@ specific language governing permissions and limitations
 under the License.
 */
 
-'use strict';
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-{
-				var RootCtrl = function RootCtrl($http, configService, mapService) {
-								var _this = this;
-
-								_classCallCheck(this, RootCtrl);
-
-								mapService.getMap().then(function (map) {
-												_this.map = map;
-								});
-								configService.getConfig().then(function (data) {
-												_this.data = data;
-												// If its got WebGL its got everything we need.
-												try {
-																var canvas = document.createElement('canvas');
-																data.modern = !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
-												} catch (e) {
-																data.modern = false;
-												}
-								});
-				};
-
-				RootCtrl.$invoke = ['$http', 'configService', 'mapService'];
-
-				angular.module("IcsmApp", ['common.altthemes', 'common.baselayer.control', 'common.cc', 'common.featureinfo', 'common.header', 'common.legend', 'common.navigation', 'common.reset', "common.side-panel", 'common.slider', 'common.storage', 'common.templates', 'elvis.results', 'elvis.reviewing', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.persist', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'explorer.map.templates', 'geo.draw', 'geo.elevation', 'geo.geosearch', 'geo.map', 'geo.maphelper', 'geo.measure', 'icsm.bounds', 'icsm.clip', 'icsm.contributors', 'icsm.coverage', 'icsm.elevation.point', 'icsm.glossary', 'icsm.header', 'icsm.help', 'icsm.imagery', 'icsm.layerswitch', 'icsm.mapevents', 'icsm.panes', "icsm.parameters", 'icsm.point', 'icsm.products', 'icsm.preview', 'icsm.select', 'icsm.splash', 'icsm.templates', 'icsm.toolbar', 'icsm.view', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer', 'placenames.search', 'placenames.config', 'placenames.summary', 'ui.bootstrap', 'vcRecaptcha'])
-
-				// Set up all the service providers here.
-				.config(['$locationProvider', 'configServiceProvider', 'placenamesConfigServiceProvider', 'projectsServiceProvider', 'persistServiceProvider', 'versionServiceProvider', 'elevationPointServiceProvider', function ($locationProvider, configServiceProvider, placenamesConfigServiceProvider, projectsServiceProvider, persistServiceProvider, versionServiceProvider) {
-								$locationProvider.html5Mode({
-												enabled: true,
-												requireBase: false
-								});
-								configServiceProvider.location("icsm/resources/config/config.json");
-								placenamesConfigServiceProvider.location("icsm/resources/config/placenames.json");
-								//configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
-								versionServiceProvider.url("icsm/assets/package.json");
-								projectsServiceProvider.setProject("icsm");
-								persistServiceProvider.handler("local");
-				}]).factory("userService", [function () {
-								return {
-												login: noop,
-												hasAcceptedTerms: noop,
-												setAcceptedTerms: noop,
-												getUsername: function getUsername() {
-																return "anon";
-												}
-								};
-								function noop() {
-												return true;
-								}
-				}]).controller("RootCtrl", RootCtrl);
-}
 "use strict";
 
 {
@@ -313,6 +258,61 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          }
       }
    }]);
+}
+'use strict';
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+{
+				var RootCtrl = function RootCtrl($http, configService, mapService) {
+								var _this = this;
+
+								_classCallCheck(this, RootCtrl);
+
+								mapService.getMap().then(function (map) {
+												_this.map = map;
+								});
+								configService.getConfig().then(function (data) {
+												_this.data = data;
+												// If its got WebGL its got everything we need.
+												try {
+																var canvas = document.createElement('canvas');
+																data.modern = !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+												} catch (e) {
+																data.modern = false;
+												}
+								});
+				};
+
+				RootCtrl.$invoke = ['$http', 'configService', 'mapService'];
+
+				angular.module("IcsmApp", ['common.altthemes', 'common.baselayer.control', 'common.cc', 'common.featureinfo', 'common.header', 'common.legend', 'common.navigation', 'common.reset', "common.side-panel", 'common.slider', 'common.storage', 'common.templates', 'elvis.results', 'elvis.reviewing', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.googleanalytics', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.persist', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'explorer.map.templates', 'geo.draw', 'geo.elevation', 'geo.geosearch', 'geo.map', 'geo.maphelper', 'geo.measure', 'icsm.bounds', 'icsm.clip', 'icsm.contributors', 'icsm.coverage', 'icsm.elevation.point', 'icsm.glossary', 'icsm.header', 'icsm.help', 'icsm.imagery', 'icsm.layerswitch', 'icsm.mapevents', 'icsm.panes', "icsm.parameters", 'icsm.point', 'icsm.products', 'icsm.preview', 'icsm.select', 'icsm.splash', 'icsm.templates', 'icsm.toolbar', 'icsm.view', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer', 'placenames.search', 'placenames.config', 'placenames.summary', 'ui.bootstrap', 'vcRecaptcha'])
+
+				// Set up all the service providers here.
+				.config(['$locationProvider', 'configServiceProvider', 'placenamesConfigServiceProvider', 'projectsServiceProvider', 'persistServiceProvider', 'versionServiceProvider', function ($locationProvider, configServiceProvider, placenamesConfigServiceProvider, projectsServiceProvider, persistServiceProvider, versionServiceProvider) {
+								$locationProvider.html5Mode({
+												enabled: true,
+												requireBase: false
+								});
+								configServiceProvider.location("icsm/resources/config/config.json");
+								placenamesConfigServiceProvider.location("icsm/resources/config/placenames.json");
+								//configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
+								versionServiceProvider.url("icsm/assets/package.json");
+								projectsServiceProvider.setProject("icsm");
+								persistServiceProvider.handler("local");
+				}]).factory("userService", [function () {
+								return {
+												login: noop,
+												hasAcceptedTerms: noop,
+												setAcceptedTerms: noop,
+												getUsername: function getUsername() {
+																return "anon";
+												}
+								};
+								function noop() {
+												return true;
+								}
+				}]).controller("RootCtrl", RootCtrl);
 }
 'use strict';
 
@@ -707,7 +707,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 "use strict";
 
 {
-   angular.module("icsm.elevation.point", []).factory("elevationPointService", ['$q', 'configService', function ($q, configService) {
+   angular.module("icsm.elevation.point", []).factory("elevationPointsService", ['$q', 'configService', function ($q, configService) {
       var service = {
          getElevation: function getElevation(latlng) {
             return $q(function (resolve, reject) {
@@ -729,6 +729,41 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       };
       return service;
    }]);
+}
+"use strict";
+
+{
+   var GlossaryCtrl = function GlossaryCtrl($log, glossaryService) {
+      var _this = this;
+
+      $log.info("GlossaryCtrl");
+      glossaryService.getTerms().then(function (terms) {
+         _this.terms = terms;
+      });
+   };
+
+   var GlossaryService = function GlossaryService($http) {
+      var TERMS_SERVICE = "icsm/resources/config/glossary.json";
+
+      return {
+         getTerms: function getTerms() {
+            return $http.get(TERMS_SERVICE, { cache: true }).then(function (response) {
+               return response.data;
+            });
+         }
+      };
+   };
+
+   angular.module("icsm.glossary", []).directive("icsmGlossary", [function () {
+      return {
+         templateUrl: "icsm/glossary/glossary.html"
+      };
+   }]).controller("GlossaryCtrl", GlossaryCtrl).factory("glossaryService", GlossaryService);
+
+   GlossaryCtrl.$inject = ['$log', 'glossaryService'];
+
+
+   GlossaryService.$inject = ['$http'];
 }
 'use strict';
 
@@ -784,37 +819,33 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 "use strict";
 
 {
-   var GlossaryCtrl = function GlossaryCtrl($log, glossaryService) {
-      var _this = this;
-
-      $log.info("GlossaryCtrl");
-      glossaryService.getTerms().then(function (terms) {
-         _this.terms = terms;
-      });
+   var showButton = function showButton(data) {
+      return data.file_url && data.file_url.lastIndexOf(".zip") > 0; // Well it needs something in front of ".zip";
    };
 
-   var GlossaryService = function GlossaryService($http) {
-      var TERMS_SERVICE = "icsm/resources/config/glossary.json";
+   var generateUrl = function generateUrl(config, data) {
+      var index = data.file_name.lastIndexOf(".zip");
+      return config.baseUrl.replace("${file_name}", data.file_name.substr(0, index) + ".jpg");
+   };
 
+   angular.module("icsm.imagery", []).directive("launchImage", ["$rootScope", "configService", function ($rootScope, configService) {
       return {
-         getTerms: function getTerms() {
-            return $http.get(TERMS_SERVICE, { cache: true }).then(function (response) {
-               return response.data;
-            });
+         templateUrl: "icsm/imagery/launch.html",
+         restrict: "AE",
+         link: function link(scope) {
+            var item = scope.item;
+            scope.show = showButton(item);
+
+            scope.preview = function () {
+               configService.getConfig("imagery").then(function (config) {
+                  var url = generateUrl(config, item);
+                  console.log(url, item);
+                  $rootScope.$broadcast("icsm-preview", { url: url, item: item });
+               });
+            };
          }
       };
-   };
-
-   angular.module("icsm.glossary", []).directive("icsmGlossary", [function () {
-      return {
-         templateUrl: "icsm/glossary/glossary.html"
-      };
-   }]).controller("GlossaryCtrl", GlossaryCtrl).factory("glossaryService", GlossaryService);
-
-   GlossaryCtrl.$inject = ['$log', 'glossaryService'];
-
-
-   GlossaryService.$inject = ['$http'];
+   }]);
 }
 "use strict";
 
@@ -862,37 +893,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 
 	HelpService.$inject = ['$http'];
-}
-"use strict";
-
-{
-   var showButton = function showButton(data) {
-      return data.file_url && data.file_url.lastIndexOf(".zip") > 0; // Well it needs something in front of ".zip";
-   };
-
-   var generateUrl = function generateUrl(config, data) {
-      var index = data.file_name.lastIndexOf(".zip");
-      return config.baseUrl.replace("${file_name}", data.file_name.substr(0, index) + ".jpg");
-   };
-
-   angular.module("icsm.imagery", []).directive("launchImage", ["$rootScope", "configService", function ($rootScope, configService) {
-      return {
-         templateUrl: "icsm/imagery/launch.html",
-         restrict: "AE",
-         link: function link(scope) {
-            var item = scope.item;
-            scope.show = showButton(item);
-
-            scope.preview = function () {
-               configService.getConfig("imagery").then(function (config) {
-                  var url = generateUrl(config, item);
-                  console.log(url, item);
-                  $rootScope.$broadcast("icsm-preview", { url: url, item: item });
-               });
-            };
-         }
-      };
-   }]);
 }
 'use strict';
 
@@ -1238,6 +1238,89 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 }
 "use strict";
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+{
+   angular.module("icsm.parameters", []).factory("parametersService", ["$location", function ($location) {
+      // We read the parameters once only. Then the app can decide what to do with them.
+      var Service = function () {
+         function Service(search) {
+            _classCallCheck(this, Service);
+
+            this.search = search;
+         }
+
+         _createClass(Service, [{
+            key: "ignoreSizeLimit",
+            value: function ignoreSizeLimit() {
+               return !!this.search.metadata;
+            }
+         }, {
+            key: "hasValidBbox",
+            value: function hasValidBbox() {
+               var parameters = this.search;
+               return !(isNaN(parameters.minx) || isNaN(parameters.maxx) || isNaN(parameters.miny) || isNaN(parameters.maxy));
+            }
+         }, {
+            key: "clear",
+            value: function clear() {
+               this.search = {};
+            }
+         }, {
+            key: "bbox",
+            get: function get() {
+               return this.hasValidBbox() ? {
+                  minx: +this.search.minx,
+                  maxx: +this.search.maxx,
+                  miny: +this.search.miny,
+                  maxy: +this.search.maxy
+               } : null;
+            }
+         }, {
+            key: "clip",
+            get: function get() {
+               return this.hasValidBbox() ? {
+                  xMin: +this.search.minx,
+                  xMax: +this.search.maxx,
+                  yMin: +this.search.miny,
+                  yMax: +this.search.maxy,
+                  metadata: this.search.metadata
+               } : null;
+            }
+         }, {
+            key: "bounds",
+            get: function get() {
+               var s = this.search;
+               return this.hasValidBbox() ? L.latLngBounds([s.miny, s.minx], [s.maxy, s.maxx]) : null;
+            }
+         }, {
+            key: "data",
+            get: function get() {
+               // Just a wrapper around bounds same as draw does.
+               return this.hasValidBbox() ? { bounds: this.bounds, metadata: this.metadata } : null;
+            }
+         }, {
+            key: "metadata",
+            get: function get() {
+               return this.search.metadata;
+            }
+         }]);
+
+         return Service;
+      }();
+
+      ;
+
+      var service = new Service($location.search());
+
+      window.larry = service;
+      return service;
+   }]);
+}
+"use strict";
+
 {
    var PaneCtrl = function PaneCtrl(paneService) {
       var _this = this;
@@ -1325,89 +1408,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
    PaneService.$inject = [];
 }
-"use strict";
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-{
-   angular.module("icsm.parameters", []).factory("parametersService", ["$location", function ($location) {
-      // We read the parameters once only. Then the app can decide what to do with them.
-      var Service = function () {
-         function Service(search) {
-            _classCallCheck(this, Service);
-
-            this.search = search;
-         }
-
-         _createClass(Service, [{
-            key: "ignoreSizeLimit",
-            value: function ignoreSizeLimit() {
-               return !!this.search.metadata;
-            }
-         }, {
-            key: "hasValidBbox",
-            value: function hasValidBbox() {
-               var parameters = this.search;
-               return !(isNaN(parameters.minx) || isNaN(parameters.maxx) || isNaN(parameters.miny) || isNaN(parameters.maxy));
-            }
-         }, {
-            key: "clear",
-            value: function clear() {
-               this.search = {};
-            }
-         }, {
-            key: "bbox",
-            get: function get() {
-               return this.hasValidBbox() ? {
-                  minx: +this.search.minx,
-                  maxx: +this.search.maxx,
-                  miny: +this.search.miny,
-                  maxy: +this.search.maxy
-               } : null;
-            }
-         }, {
-            key: "clip",
-            get: function get() {
-               return this.hasValidBbox() ? {
-                  xMin: +this.search.minx,
-                  xMax: +this.search.maxx,
-                  yMin: +this.search.miny,
-                  yMax: +this.search.maxy,
-                  metadata: this.search.metadata
-               } : null;
-            }
-         }, {
-            key: "bounds",
-            get: function get() {
-               var s = this.search;
-               return this.hasValidBbox() ? L.latLngBounds([s.miny, s.minx], [s.maxy, s.maxx]) : null;
-            }
-         }, {
-            key: "data",
-            get: function get() {
-               // Just a wrapper around bounds same as draw does.
-               return this.hasValidBbox() ? { bounds: this.bounds, metadata: this.metadata } : null;
-            }
-         }, {
-            key: "metadata",
-            get: function get() {
-               return this.search.metadata;
-            }
-         }]);
-
-         return Service;
-      }();
-
-      ;
-
-      var service = new Service($location.search());
-
-      window.larry = service;
-      return service;
-   }]);
-}
 'use strict';
 
 L.Control.ElevationControl = L.Control.extend({
@@ -1474,7 +1474,7 @@ L.Control.ElevationControl.Event = {
 };
 
 {
-   angular.module("icsm.point", []).directive("pointElevation", ["elevationPointService", "mapService", function (elevationPointService, mapService) {
+   angular.module("icsm.point", []).directive("pointElevation", ["elevationPointsService", "mapService", function (elevationPointsService, mapService) {
       return {
          restrict: "AE",
          templateUrl: "icsm/point/point.html",
@@ -1486,9 +1486,6 @@ L.Control.ElevationControl.Event = {
                scope.elevation = scope.latitude = scope.longitude = null;
             };
 
-            scope.elevation = 45.6666667234;
-            scope.latitude = -38.34425882254;
-            scope.longitude = 148.2342115;
             mapService.getMap().then(function (map) {
                scope.control = L.Control.elevationControl({ handler: handler }).addTo(map);
                console.log("Point signing in");
@@ -1515,7 +1512,7 @@ L.Control.ElevationControl.Event = {
                   scope.latitude = latlng.lat;
                   scope.longitude = latlng.lng;
                   scope.elevation = scope.error = null;
-                  elevationPointService.getElevation(latlng).then(function (elevation) {
+                  elevationPointsService.getElevation(latlng).then(function (elevation) {
                      scope.elevation = +elevation[0];
                   }).catch(function (e) {
                      scope.error = "No data available at this point";
@@ -4467,11 +4464,11 @@ $templateCache.put("icsm/contributors/contributors.html","<span class=\"contribu
 $templateCache.put("icsm/contributors/show.html","<a ng-mouseenter=\"over()\" ng-mouseleave=\"out()\" class=\"contributors-link\" title=\"Click to lock/unlock contributors list.\"\r\n      ng-click=\"toggleStick()\" href=\"#contributors0\">Contributors</a>");
 $templateCache.put("icsm/coverage/popup.html","<span class=\"coverage\" ng-class=\"state.show ? \'transitioned-down\' : \'transitioned-up\'\">\r\n   <div style=\"padding-bottom:15px\" class=\"coverage-off\">\r\n      <button class=\"undecorated coverage-unstick\" ng-click=\"hide()\" style=\"float:right\" title=\"Hide layer selections\">X</button>\r\n   </div>\r\n   <div ng-repeat=\"layer in state.layers\" class=\"coverage-layer\">\r\n      <input type=\"checkbox\" ng-checked=\"layer.visible\" ng-click=\"toggleVisibility(layer)\"></input>\r\n      <span>\r\n         <span class=\"coverage-title\">{{layer.name}}</span><br/>\r\n         <img style=\"width:100px\" ng-src=\"{{layer.coverage.thumb}}\"></img>\r\n      </span>\r\n      <div class=\"pull-right\">\r\n         <div style=\"width: 110px\" ng-repeat=\"type in layer.coverage.types\">\r\n            <span class=\"coverage-legend-color\" ng-style=\"{\'background-color\':type.color}\"></span>\r\n            {{type.name}}\r\n         </div>\r\n      </div>\r\n   </div>\r\n</span>");
 $templateCache.put("icsm/coverage/trigger.html","<button ng-click=\"toggle()\" type=\"button\" class=\"map-tool-toggle-btn\" title=\"Select views of coverage, view legends and summaries of the coverage layers\">\r\n      <span class=\"hidden-sm\">Layers</span>\r\n      <img src=\"icsm/resources/img/layers-16.png\">\r\n</button>");
-$templateCache.put("icsm/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n        	<li role=\"menuitem\" style=\"padding-right:10px;position: relative;top: -3px;\">\r\n              <span class=\"altthemes-container\">\r\n	               <span>\r\n                     <a title=\"Location INformation Knowledge platform (LINK)\" href=\"http://fsdf.org.au/\" target=\"_blank\">\r\n                        <img alt=\"FSDF\" src=\"icsm/resources/img/FSDFimagev4.0.png\" style=\"height: 66px\">\r\n                     </a>\r\n                  </span>\r\n               </span>\r\n           </li>\r\n        	<li common-navigation role=\"menuitem\" current=\"current\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n<div class=\"contributorsLink\" style=\"position: absolute; right:7px; bottom:15px\">\r\n      <icsm-contributors-link></icsm-contributors-link>\r\n</div>\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");
 $templateCache.put("icsm/glossary/glossary.html","<div ng-controller=\"GlossaryCtrl as glossary\">\r\n   <div style=\"position:relative;padding:5px;padding-left:10px;\">\r\n      <div class=\"panel\" style=\"padding:5px;\">\r\n         <p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n	         <strong>Glossary</strong>\r\n         </p>\r\n\r\n         <div class=\"panel-body\">\r\n            <table class=\"table table-striped\">\r\n               <thead>\r\n                  <tr>\r\n                     <th>Term</th>\r\n                     <th>Definition</th>\r\n                  </tr>\r\n               </thead>\r\n               <tbody>\r\n                  <tr ng-repeat=\"term in glossary.terms\">\r\n                     <td>{{term.term}}</td>\r\n                     <td>{{term.definition}}</td>\r\n                  </tr>\r\n               </tbody>\r\n            </table>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
+$templateCache.put("icsm/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n    <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n        <ul class=\"nav navbar-nav\">\r\n            <li class=\"hidden-xs\"><a href=\"/\"><h1 class=\"applicationTitle\">{{heading}}</h1></a></li>\r\n        </ul>\r\n        <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n        	<li role=\"menuitem\" style=\"padding-right:10px;position: relative;top: -3px;\">\r\n              <span class=\"altthemes-container\">\r\n	               <span>\r\n                     <a title=\"Location INformation Knowledge platform (LINK)\" href=\"http://fsdf.org.au/\" target=\"_blank\">\r\n                        <img alt=\"FSDF\" src=\"icsm/resources/img/FSDFimagev4.0.png\" style=\"height: 66px\">\r\n                     </a>\r\n                  </span>\r\n               </span>\r\n           </li>\r\n        	<li common-navigation role=\"menuitem\" current=\"current\" style=\"padding-right:10px\"></li>\r\n			<li mars-version-display role=\"menuitem\"></li>\r\n			<li style=\"width:10px\"></li>\r\n        </ul>\r\n    </div><!--/.nav-collapse -->\r\n</div>\r\n<div class=\"contributorsLink\" style=\"position: absolute; right:7px; bottom:15px\">\r\n      <icsm-contributors-link></icsm-contributors-link>\r\n</div>\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <div class=\"strap-blue\">\r\n        </div>\r\n        <div class=\"strap-white\">\r\n        </div>\r\n        <div class=\"strap-red\">\r\n        </div>\r\n    </div>\r\n</div>");
+$templateCache.put("icsm/imagery/launch.html","<button type=\"button\" class=\"undecorated\" title=\"View preview of imagery\" ng-click=\"preview()\" ng-if=\"show\">\r\n	<i class=\"fa fa-lg fa-eye\"></i>\r\n</button>");
 $templateCache.put("icsm/help/faqs.html","<p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n   <strong>FAQS</strong>\r\n</p>\r\n\r\n<h5 ng-repeat=\"faq in faqs\"><button type=\"button\" class=\"undecorated\" ng-click=\"focus(faq.key)\">{{faq.question}}</button></h5>\r\n<hr/>\r\n<div class=\"row\" ng-repeat=\"faq in faqs\">\r\n   <div class=\"col-md-12\">\r\n      <h5 tabindex=\"0\" id=\"faqs_{{faq.key}}\">{{faq.question}}</h5>\r\n      <span ng-bind-html=\"faq.answer\"></span>\r\n      <hr/>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/help/help.html","<p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n	<strong>Help</strong>\r\n</p>\r\n\r\n<div class=\"panel-body\" ng-controller=\"HelpCtrl as help\">\r\n	The steps to get data!\r\n	<ol>\r\n		<li>Define area of interest</li>\r\n		<li>Select datasets</li>\r\n		<li>Confirm selections</li>\r\n		<li>Enter email address</li>\r\n		<li>Start extract</li>\r\n	</ol>\r\n	An email will be sent to you on completion of the data extract with a link to your data.\r\n   <hr>\r\n	<icsm-faqs faqs=\"help.faqs\" ></icsm-faqs>\r\n</div>");
-$templateCache.put("icsm/imagery/launch.html","<button type=\"button\" class=\"undecorated\" title=\"View preview of imagery\" ng-click=\"preview()\" ng-if=\"show\">\r\n	<i class=\"fa fa-lg fa-eye\"></i>\r\n</button>");
 $templateCache.put("icsm/message/message.html","<div class=\"well well-sm mess-container\" ng-show=\"message.type && message.text\"\r\n   ng-class=\"{\'mess-error\': message.type == \'error\', \'mess-warn\': message.type == \'warn\', \'mess-info\': (message.type == \'info\' || message.type == \'wait\')}\">\r\n   <i class=\"fa fa-spinner fa-spin fa-fw\" aria-hidden=\"true\" ng-if=\"message.type == \'wait\'\"></i>\r\n   <span>{{message.text}}</span>\r\n</div>");
 $templateCache.put("icsm/panes/panes.html","<div class=\"mapContainer\" class=\"col-md-12\" style=\"padding-right:0\"  ng-attr-style=\"right:{{right.width}}\">\r\n   <span common-baselayer-control class=\"baselayer-slider\" max-zoom=\"16\" title=\"Satellite to Topography bias on base map.\"></span>\r\n   <div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n      <geo-extent></geo-extent>\r\n      <icsm-layerswitch></icsm-layerswitch>\r\n   </div>\r\n   <div class=\"base-layer-controller\">\r\n      <div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n   </div>\r\n   <restrict-pan bounds=\"data.map.position.bounds\"></restrict-pan>\r\n</div>");
 $templateCache.put("icsm/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n   <div class=\"paneTabItem\" style=\"width:60px; opacity:0\">\r\n\r\n   </div>\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n      <button class=\"undecorated\">Datasets Download</button>\r\n   </div>\r\n   <!--\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n   -->\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'downloader\'}\" ng-click=\"setView(\'downloader\')\">\r\n      <button class=\"undecorated\">Products Download</button>\r\n   </div>\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n      <button class=\"undecorated\">Glossary</button>\r\n   </div>\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n      <button class=\"undecorated\">Help</button>\r\n   </div>\r\n</div>");
