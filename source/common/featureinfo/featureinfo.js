@@ -32,9 +32,6 @@
 
                      map.on("draw:drawstart point:start", function () {
                         scope.paused = true;
-                        $timeout(function () {
-                           scope.paused = false;
-                        }, 60000);
                      });
 
                      map.on("draw:drawstop point:end", function () {
