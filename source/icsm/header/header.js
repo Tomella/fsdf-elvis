@@ -1,6 +1,5 @@
  {
-
-	angular.module('elvis.header', [])
+	angular.module('icsm.header', [])
 
 		.controller('headerController', ['$scope', '$q', '$timeout', function ($scope, $q, $timeout) {
 
@@ -54,5 +53,4 @@
 
 		.factory('headerService', ['$http', function () {
 		}]);
-
 }

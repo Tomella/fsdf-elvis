@@ -1,5 +1,4 @@
 {
-
    angular.module("icsm.glossary", [])
 
       .directive("icsmGlossary", [function () {
@@ -31,5 +30,4 @@
          }
       };
    }
-
 }

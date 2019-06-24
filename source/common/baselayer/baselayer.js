@@ -3,7 +3,7 @@
     * Uses: https://raw.githubusercontent.com/seiyria/angular-bootstrap-slider
     */
 
-   angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'ui.bootstrap-slider'])
+   angular.module('common.baselayer.control', ['geo.maphelper', 'geo.map', 'common.slider'])
 
       .directive('commonBaselayerControl', ['mapHelper', 'mapService', function (mapHelper, mapService) {
          var DEFAULTS = {

@@ -1,4 +1,6 @@
 {
+   "clientSessionId": "default",
+   "version":1,
    "wizardState": {
       "popup": "hide"
    },
@@ -90,7 +92,17 @@
                   "format": "image/png",
                   "transparent": true,
                   "opacity": 0.7,
-                  "switch": "nswTopo"
+                  "switch": "nswTopo",
+                  "bounds": [
+                     [
+                        -38,
+                        140
+                     ],
+                     [
+                        -27,
+                        155
+                     ]
+                  ]
                }
             ],
             "addLayerControl": false,

@@ -26,15 +26,17 @@
 		'common.header',
 		'common.legend',
       'common.navigation',
-      //'common.panes',
-
       'common.reset',
+      "common.side-panel",
+      'common.slider',
       'common.storage',
       'common.templates',
 
+		'elvis.results',
+      'elvis.reviewing',
+
       'explorer.config',
       'explorer.confirm',
-      // 'ed.download',
 		'explorer.drag',
 		'explorer.enter',
       'explorer.flasher',
@@ -51,15 +53,6 @@
 		'exp.ui.templates',
 		'explorer.map.templates',
 
-		'ui.bootstrap',
-		'ui.bootstrap-slider',
-      'ngAutocomplete',
-		'ngRoute',
-		'ngSanitize',
-      'page.footer',
-      'vcRecaptcha',
-
-		//'geo.baselayer.control',
 		'geo.draw',
 		'geo.elevation',
 		'geo.geosearch',
@@ -67,36 +60,41 @@
 		'geo.maphelper',
       'geo.measure',
 
-      'placenames.search',
-      'placenames.config',
-      'placenames.summary',
-
 		'icsm.bounds',
+      'icsm.clip',
       'icsm.contributors',
       'icsm.coverage',
-      'icsm.clip',
       'icsm.elevation.point',
 		'icsm.glossary',
+		'icsm.header',
       'icsm.help',
       'icsm.imagery',
+      'icsm.layerswitch',
+      'icsm.mapevents',
 		'icsm.panes',
       "icsm.parameters",
 		'icsm.point',
       'icsm.products',
       'icsm.preview',
-      "icsm.side-panel",
-		// Alternate list
-		'elvis.header',
-		'elvis.results',
-		'elvis.reviewing',
-
-      'icsm.mapevents',
 		'icsm.select',
 		'icsm.splash',
-      'icsm.layerswitch',
 		'icsm.templates',
-		'elevation.toolbar',
-		'icsm.view'
+		'icsm.toolbar',
+      'icsm.view',
+
+      'ngAutocomplete',
+		'ngRoute',
+		'ngSanitize',
+
+      'page.footer',
+
+      'placenames.search',
+      'placenames.config',
+      'placenames.summary',
+
+		'ui.bootstrap',
+
+      'vcRecaptcha'
 	])
 
 		// Set up all the service providers here.
@@ -108,7 +106,7 @@
             });
 				configServiceProvider.location("icsm/resources/config/config.json");
 				placenamesConfigServiceProvider.location("icsm/resources/config/placenames.json");
-            configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
+            //configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
 				versionServiceProvider.url("icsm/assets/package.json");
 				projectsServiceProvider.setProject("icsm");
 				persistServiceProvider.handler("local");

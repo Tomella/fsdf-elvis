@@ -1,5 +1,4 @@
 {
-
    angular.module("elvis.reviewing", [])
 
       .directive('icsmReview', ['$rootScope', '$uibModal', '$log', 'messageService', 'reviewService',

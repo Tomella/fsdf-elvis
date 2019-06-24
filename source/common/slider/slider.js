@@ -1,6 +1,6 @@
-(function(angular) {
+{
 
-angular.module('ui.bootstrap-slider', [])
+angular.module('common.slider', [])
     .directive('slider', ['$parse', '$timeout', function ($parse, $timeout) {
         return {
             restrict: 'AE',
@@ -203,4 +203,4 @@ angular.module('ui.bootstrap-slider', [])
             }
         };
     }]);
-})(angular);
+}

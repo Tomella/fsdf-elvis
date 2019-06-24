@@ -1,5 +1,5 @@
 {
-   angular.module("icsm.side-panel", [])
+   angular.module("common.side-panel", [])
 
       .factory('panelSideFactory', ['$rootScope', '$timeout', ($rootScope, $timeout) => {
          let state = {

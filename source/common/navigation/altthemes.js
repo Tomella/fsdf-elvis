@@ -1,7 +1,4 @@
-(function (angular) {
-
-	'use strict';
-
+{
 	angular.module('common.altthemes', [])
 
 		/**
@@ -135,5 +132,4 @@
 				return headers;
 			};
 		});
-
-})(angular);
+}

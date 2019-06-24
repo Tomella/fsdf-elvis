@@ -1,6 +1,4 @@
-(function (angular, L) {
-   'use strict';
-
+{
    angular.module("common.featureinfo", [])
 
       .directive("commonFeatureInfo", ['$http', '$log', '$q', '$timeout', 'featureInfoService', 'flashService', 'mapService', 'messageService',
@@ -216,4 +214,4 @@
       }
       return data.substr(0, 4) + "/" + data.substr(4, 2) + "/" + data.substr(6, 2);
    }
-})(angular, L);
+}

@@ -1,6 +1,4 @@
 {
-
-
    angular.module('icsm.themes', [])
 
       /**

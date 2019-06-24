@@ -11,12 +11,14 @@ L.Control.ElevationControl = L.Control.extend({
       let handler = this.options.handler;
       if (this.enabled) {
          handler.disable();
+         this._map._container.style.cursor = "";
          this._map.fire(L.Control.ElevationControl.Event.POINTEND, {});
          this._map.off('click', handleClick);
          this.enabled = false;
 
       } else {
          this._map.fire(L.Control.ElevationControl.Event.POINTSTART, {});
+         this._map._container.style.cursor = "crosshair";
          handler.enable();
          this._map.on('click', handleClick);
          this.enabled = true;
