@@ -67,7 +67,7 @@ L.Control.ElevationControl.Event = {
 
 {
    angular.module("icsm.point", [])
-      .directive("pointElevation", ["elevationPointsService",  "mapService", function (elevationPointsService, mapService) {
+      .directive("pointElevation", ["elevationPointsService", "mapService", function (elevationPointsService, mapService) {
          return {
             restrict: "AE",
             templateUrl: "icsm/point/point.html",
@@ -92,10 +92,11 @@ L.Control.ElevationControl.Event = {
                   },
 
                   enable: function (map) {
-                     scope.enabled = true;
-                     scope.error = scope.elevation = scope.latitude = scope.longitude = null;
-                     console.log("Enable elevation handler here");
-
+                     scope.$apply(() => {
+                        scope.enabled = true;
+                        scope.error = scope.elevation = scope.latitude = scope.longitude = null;
+                        console.log("Enable elevation handler here");
+                     });
                   },
 
                   enabled: function () {
