@@ -1418,7 +1418,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 L.Control.ElevationControl = L.Control.extend({
    statics: {
-      TITLE: 'Elevation at a point'
+      TITLE: 'Elevation at a point',
+      ALT_TITLE: 'Disable elevation at a point',
+      CLASS_NAME: "leaflet-control-elevation"
    },
    options: {
       position: 'topleft',
@@ -1433,11 +1435,13 @@ L.Control.ElevationControl = L.Control.extend({
          this._map._container.style.cursor = "";
          this._map.fire(L.Control.ElevationControl.Event.POINTEND, {});
          this._map.off('click', handleClick);
+         this.link.title = L.Control.ElevationControl.TITLE;
          handler.disable();
       } else {
          this._map.fire(L.Control.ElevationControl.Event.POINTSTART, {});
          this._map._container.style.cursor = "crosshair";
          this._map.on('click', handleClick);
+         this.link.title = L.Control.ElevationControl.ALT_TITLE;
          handler.enable();
       }
    },
@@ -1445,11 +1449,11 @@ L.Control.ElevationControl = L.Control.extend({
    onAdd: function onAdd(map) {
       var _this = this;
 
-      var className = 'leaflet-control-elevation';
+      var className = L.Control.ElevationControl.CLASS_NAME;
 
       this._container = L.DomUtil.create('div', 'leaflet-bar');
 
-      var link = L.DomUtil.create('a', className, this._container);
+      var link = this.link = L.DomUtil.create('a', className, this._container);
       link.href = '#';
       link.title = L.Control.ElevationControl.TITLE;
 
@@ -1533,7 +1537,7 @@ L.Control.ElevationControl.Event = {
                      */
                      var elevation = data["HEIGHT AT LOCATION"];
                      var buffer = [];
-                     if (elevation === "m") {
+                     if (elevation === "m" || elevation === undefined) {
                         buffer.push("<strong>No data available at this point</strong>");
                      } else {
                         buffer.push(title("Elevation") + elevation);

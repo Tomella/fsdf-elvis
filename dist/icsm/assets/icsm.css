@@ -1,13 +1,4 @@
 
-.leaflet-popup {
-  position: absolute;
-  text-align: center;
-}
-
-.fi-popup hr {
-  margin-top: 3px;
-  margin-bottom: 3px;
-}
 .nav-icons {
   margin-top: 7px !important;
 }
@@ -37,6 +28,15 @@
 
 .common-header {
   background-color: white;
+}
+.leaflet-popup {
+  position: absolute;
+  text-align: center;
+}
+
+.fi-popup hr {
+  margin-top: 3px;
+  margin-bottom: 3px;
 }
 .common-legend {
   position: abssolute;
@@ -491,48 +491,6 @@ body {
 .leaflet-container {
   background-color: rgba(255,0,0,0.0);
 }
-.clipmodal {
-  z-index: 1010;
-  padding: 1px;
-  text-align: left;
-  white-space: normal;
-  opacity: 1;
-  background-color: #F8f8f8;
-  background-clip: padding-box;
-  border: 1px solid #ccc;
-  border: 1px solid rgba(0, 0, 0, .2);
-  border-radius: 6px;
-  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
-  box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
-}
-
-.clipmodal-title {
-  padding: 8px 14px;
-  margin: 0;
-  font-size: 14px;
-  font-weight: bold;
-  line-height: 18px;
-  background-color: #e0e0e0;
-  border-bottom: 1px solid #ebebeb;
-  border-radius: 5px 5px 0 0;
-}
-
-.clipmodal-content {
-  padding: 9px 14px;
-}
-
-.clipmodal.ng-hide-add,
-.clipmodal.ng-hide-remove {
-  /* this is required as of 1.3x to properly
-      apply all styling in a show/hide animation */
-  transition: 0s linear all;
-}
-
-.clipmodal.ng-hide-add-active,
-.clipmodal.ng-hide-remove-active {
-  /* the transition is defined in the active class */
-  transition: 1s linear all;
-}
 .contributors {
   margin: 2px;
   padding: 10px;
@@ -691,6 +649,48 @@ img.elvis-logo {
   right: 7px;
   bottom: 15px;
 }
+.clipmodal {
+  z-index: 1010;
+  padding: 1px;
+  text-align: left;
+  white-space: normal;
+  opacity: 1;
+  background-color: #F8f8f8;
+  background-clip: padding-box;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, .2);
+  border-radius: 6px;
+  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+}
+
+.clipmodal-title {
+  padding: 8px 14px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 18px;
+  background-color: #e0e0e0;
+  border-bottom: 1px solid #ebebeb;
+  border-radius: 5px 5px 0 0;
+}
+
+.clipmodal-content {
+  padding: 9px 14px;
+}
+
+.clipmodal.ng-hide-add,
+.clipmodal.ng-hide-remove {
+  /* this is required as of 1.3x to properly
+      apply all styling in a show/hide animation */
+  transition: 0s linear all;
+}
+
+.clipmodal.ng-hide-add-active,
+.clipmodal.ng-hide-remove-active {
+  /* the transition is defined in the active class */
+  transition: 1s linear all;
+}
 .mess-error {
   background-color: lightcoral;
 }
@@ -800,6 +800,47 @@ img.elvis-logo {
   top: 10px;
   z-index: 3;
 }
+.leaflet-control-elevation {
+  background-image: url("../../../icsm/resources/img/mountain24.png");
+}
+
+.leaflet-control-alt-elevation {
+  background-image: url("../../../icsm/resources/img/alt_mountain24.png");
+}
+
+.elevation-popup {
+  max-width: 380px;
+  display: inline-flex;
+}
+
+.point-container {
+  position: fixed;
+  bottom: 40px;
+  left: 10px;
+  height: 100px;
+  width: 280px;
+  background-color: white;
+  border: 1px solid gray;
+  border-radius: 8px;
+}
+
+.point-container {
+  margin: 2px;
+  padding: 10px;
+  padding-left: 8px;
+  background-color: white;
+  white-space: nowrap;
+  text-align: left;
+  -webkit-transition: all 1s ease;
+  transition: all 1s ease;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+}
+
+.point-container .title {
+  width: 7em;
+  font-weight: bold;
+  display: inline-block;
+}
 .preview-container {
   position: fixed;
   display: block;
@@ -835,43 +876,6 @@ img.elvis-logo {
   right: 10px;
   z-index: 1;
   top: 20px;
-}
-.leaflet-control-elevation {
-  background-image: url("../../../icsm/resources/img/mountain24.png");
-}
-
-.elevation-popup {
-  max-width: 380px;
-  display: inline-flex;
-}
-
-.point-container {
-  position: fixed;
-  bottom: 40px;
-  left: 10px;
-  height: 100px;
-  width: 280px;
-  background-color: white;
-  border: 1px solid gray;
-  border-radius: 8px;
-}
-
-.point-container {
-  margin: 2px;
-  padding: 10px;
-  padding-left: 8px;
-  background-color: white;
-  white-space: nowrap;
-  text-align: left;
-  -webkit-transition: all 1s ease;
-  transition: all 1s ease;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
-}
-
-.point-container .title {
-  width: 7em;
-  font-weight: bold;
-  display: inline-block;
 }
 .product-valid {
   color: green;
