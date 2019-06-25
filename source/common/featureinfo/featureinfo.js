@@ -41,10 +41,10 @@
                      });
 
                      map.on("click", function (event) {
-                        console.log("clicked");
                         if (scope.paused) {
                            return;
                         }
+                        console.log("clicked feature info");
 
                         var layer = null;
                         var size = map.getSize();

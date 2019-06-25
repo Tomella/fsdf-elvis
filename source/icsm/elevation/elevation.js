@@ -1,8 +1,8 @@
 {
    angular.module("icsm.elevation.point", [])
 
-      .factory("elevationPointsService", ['$q', 'configService',
-         function ($q, configService) {
+      .factory("elevationPointsService", ['$http', '$q', 'configService',
+         function ($http, $q, configService) {
             const service = {
                getElevation: function (latlng) {
                   return $q(function (resolve, reject) {
@@ -20,6 +20,13 @@
                         });
                      });
                   });
+               },
+
+               getHiResElevation: function (latlng) {
+                  return configService.getConfig("elevation").then(config =>
+                        $http.get(config.hiResElevationTemplate
+                                    .replace("{lng}", latlng.lng)
+                                    .replace("{lat}", latlng.lat)))
                }
             };
             return service;

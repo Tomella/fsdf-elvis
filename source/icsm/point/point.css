@@ -2,6 +2,11 @@
    background-image: url(/icsm/resources/img/mountain24.png);
 }
 
+.elevation-popup {
+   max-width:380px;
+   display: inline-flex;
+}
+
 .point-container {
    position: fixed;
    bottom: 40px;

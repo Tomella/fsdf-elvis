@@ -1,3 +1,4 @@
+
 .leaflet-popup {
   position: absolute;
   text-align: center;
@@ -252,27 +253,6 @@
 .cbp-spmenu-open .left-side-menu-container,
 .cbp-spmenu-open .right-side-menu-container {
   overflow-y: auto;
-}
-.placenames {
-  margin: 2px;
-  padding: 6px;
-  position: fixed;
-  bottom: 55px;
-  left: 5px;
-  opacity: 0.9;
-  z-index: 1200;
-  background-color: white;
-  white-space: nowrap;
-  text-align: left;
-  -webkit-transition: height 1s;
-  /* Safari */
-  transition: height 1s;
-  border: 1px, solid;
-  border-radius: 3px;
-}
-
-.placenames-title {
-  font-weight: bold;
 }
 /* TODO: I haven't worked out why it is showing up. Find out why and remove */
 
@@ -820,38 +800,6 @@ img.elvis-logo {
   top: 10px;
   z-index: 3;
 }
-.leaflet-control-elevation {
-  background-image: url("../../../icsm/resources/img/mountain24.png");
-}
-
-.point-container {
-  position: fixed;
-  bottom: 40px;
-  left: 10px;
-  height: 100px;
-  width: 280px;
-  background-color: white;
-  border: 1px solid gray;
-  border-radius: 8px;
-}
-
-.point-container {
-  margin: 2px;
-  padding: 10px;
-  padding-left: 8px;
-  background-color: white;
-  white-space: nowrap;
-  text-align: left;
-  -webkit-transition: all 1s ease;
-  transition: all 1s ease;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
-}
-
-.point-container .title {
-  width: 7em;
-  font-weight: bold;
-  display: inline-block;
-}
 .preview-container {
   position: fixed;
   display: block;
@@ -887,6 +835,43 @@ img.elvis-logo {
   right: 10px;
   z-index: 1;
   top: 20px;
+}
+.leaflet-control-elevation {
+  background-image: url("../../../icsm/resources/img/mountain24.png");
+}
+
+.elevation-popup {
+  max-width: 380px;
+  display: inline-flex;
+}
+
+.point-container {
+  position: fixed;
+  bottom: 40px;
+  left: 10px;
+  height: 100px;
+  width: 280px;
+  background-color: white;
+  border: 1px solid gray;
+  border-radius: 8px;
+}
+
+.point-container {
+  margin: 2px;
+  padding: 10px;
+  padding-left: 8px;
+  background-color: white;
+  white-space: nowrap;
+  text-align: left;
+  -webkit-transition: all 1s ease;
+  transition: all 1s ease;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+}
+
+.point-container .title {
+  width: 7em;
+  font-weight: bold;
+  display: inline-block;
 }
 .product-valid {
   color: green;
@@ -1102,6 +1087,68 @@ img.elvis-logo {
 i.fa.active {
   color: red;
 }
+.icsm-icon {
+  background: url("icsm/img/global-sprites.svg") no-repeat;
+  display: inline-block;
+  width: 19px;
+  height: 30px;
+  margin: 0 auto 0 auto;
+}
+
+.icsm-pin {
+  background-position: 0px;
+}
+
+.icsm-map {
+  background-position: -63px;
+}
+
+.icsm-crosshair {
+  background-position: -82px;
+}
+
+.icsm-sign {
+  background-position: -102px;
+}
+
+.icsm-parcel {
+  background-position: -121px;
+}
+
+.icsm-satellite {
+  background-position: -140px;
+}
+
+.icsm-ship {
+  background-position: -160px;
+}
+
+.icsm-water {
+  background-position: -179px;
+}
+
+.icsm-shore {
+  background-position: -199px;
+}
+
+.icsm-land {
+  background-position: -218px;
+}
+
+.themesItemCompact {
+  margin-top: 0px !important;
+}
+
+.themesdropdown {
+  margin-top: -8px;
+  padding-right: 20px;
+  z-index: 100000;
+}
+
+.themesdropdown .themescurrent {
+  color: #fff;
+  background-color: #777;
+}
 .common-baselayer-control {
   width: 210px;
   color: #333;
@@ -1202,68 +1249,6 @@ i.fa.active {
   height: 30px;
   font-size: 13px;
 }
-.icsm-icon {
-  background: url("icsm/img/global-sprites.svg") no-repeat;
-  display: inline-block;
-  width: 19px;
-  height: 30px;
-  margin: 0 auto 0 auto;
-}
-
-.icsm-pin {
-  background-position: 0px;
-}
-
-.icsm-map {
-  background-position: -63px;
-}
-
-.icsm-crosshair {
-  background-position: -82px;
-}
-
-.icsm-sign {
-  background-position: -102px;
-}
-
-.icsm-parcel {
-  background-position: -121px;
-}
-
-.icsm-satellite {
-  background-position: -140px;
-}
-
-.icsm-ship {
-  background-position: -160px;
-}
-
-.icsm-water {
-  background-position: -179px;
-}
-
-.icsm-shore {
-  background-position: -199px;
-}
-
-.icsm-land {
-  background-position: -218px;
-}
-
-.themesItemCompact {
-  margin-top: 0px !important;
-}
-
-.themesdropdown {
-  margin-top: -8px;
-  padding-right: 20px;
-  z-index: 100000;
-}
-
-.themesdropdown .themescurrent {
-  color: #fff;
-  background-color: #777;
-}
 .downloadPane {
   padding-left: 0px !important;
   padding-right: 5px !important;
@@ -1279,6 +1264,27 @@ i.fa.active {
   position: fixed;
   right: 0;
   bottom: 8px;
+}
+.placenames {
+  margin: 2px;
+  padding: 6px;
+  position: fixed;
+  bottom: 55px;
+  left: 5px;
+  opacity: 0.9;
+  z-index: 1200;
+  background-color: white;
+  white-space: nowrap;
+  text-align: left;
+  -webkit-transition: height 1s;
+  /* Safari */
+  transition: height 1s;
+  border: 1px, solid;
+  border-radius: 3px;
+}
+
+.placenames-title {
+  font-weight: bold;
 }
 .start-content-container {
   position: fixed;

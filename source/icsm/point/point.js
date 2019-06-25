@@ -9,29 +9,19 @@ L.Control.ElevationControl = L.Control.extend({
 
    toggle: function () {
       let handler = this.options.handler;
-      if (this.enabled) {
-         handler.disable();
+      let handleClick = this.handleClick;
+
+      if (handler.enabled()) {
          this._map._container.style.cursor = "";
          this._map.fire(L.Control.ElevationControl.Event.POINTEND, {});
          this._map.off('click', handleClick);
-         this.enabled = false;
-
+         handler.disable();
       } else {
          this._map.fire(L.Control.ElevationControl.Event.POINTSTART, {});
          this._map._container.style.cursor = "crosshair";
-         handler.enable();
          this._map.on('click', handleClick);
-         this.enabled = true;
+         handler.enable();
       }
-
-      function handleClick(e) {
-         handler.searching(e.latlng);
-      }
-   },
-
-   clear: function () {
-      // Toggle does all the hard lifting so route through it
-      if (this.enabled) this.toggle();
    },
 
    onAdd: function (map) {
@@ -47,6 +37,16 @@ L.Control.ElevationControl = L.Control.extend({
          .addListener(link, 'click', L.DomEvent.stopPropagation)
          .addListener(link, 'click', L.DomEvent.preventDefault)
          .addListener(link, 'click', this.toggle, this);
+
+      map.on("draw:drawstart", () => {
+         this.clear();
+      });
+
+      this.handleClick = function handleClick(me) {
+         return function(e) {
+            me.searching(e.latlng);
+         }
+      }(this.options.handler);
 
       return this._container;
    }
@@ -67,19 +67,15 @@ L.Control.ElevationControl.Event = {
 
 {
    angular.module("icsm.point", [])
-      .directive("pointElevation", ["elevationPointsService", "mapService", function (elevationPointsService, mapService) {
+      .directive("pointElevation", ["elevationPointsService", "flashService", "mapService",
+                  function (elevationPointsService, flashService, mapService) {
          return {
             restrict: "AE",
-            templateUrl: "icsm/point/point.html",
             link: function (scope) {
-
-               scope.close = function () {
-                  scope.control.clear();
-                  scope.enabled = false;
-                  scope.elevation = scope.latitude = scope.longitude = null;
-               }
+               var flasher = null;
 
                mapService.getMap().then(map => {
+                  scope.map = map;
                   scope.control = L.Control.elevationControl({ handler }).addTo(map);
                   console.log("Point signing in");
                });
@@ -87,15 +83,17 @@ L.Control.ElevationControl.Event = {
                var handler = {
                   disable: function () {
                      scope.enabled = false;
-                     scope.error = scope.elevation = scope.latitude = scope.longitude = null;
                      console.log("Disable elevation handler here")
+                     flashService.remove(flasher);
+                     map.closePopup();
+                     flasher = flashService.add("Click map for datasets surrounding a point.", 10000);
                   },
 
                   enable: function (map) {
+                     scope.enabled = true;
                      scope.$apply(() => {
-                        scope.enabled = true;
-                        scope.error = scope.elevation = scope.latitude = scope.longitude = null;
-                        console.log("Enable elevation handler here");
+                        flashService.remove(flasher);
+                        flasher = flashService.add("Click map for detailed elevation information at point", 10000);
                      });
                   },
 
@@ -104,19 +102,53 @@ L.Control.ElevationControl.Event = {
                   },
 
                   searching: function (latlng) {
-                     scope.latitude = latlng.lat;
-                     scope.longitude = latlng.lng;
+                     flashService.remove(flasher);
                      scope.elevation = scope.error = null;
-                     elevationPointsService.getElevation(latlng).then(elevation => {
-                        scope.elevation = +elevation[0];
+                     flasher = flashService.add("Retrieving elevation data", 10000, true);
+                     elevationPointsService.getHiResElevation(latlng).then(response => {
+                        let data = response.data;
+                        let map = scope.map;
+                        flashService.remove(flasher);
+                        /*
+                           "SOURCE": "Geoscience Australia",
+                           "DATASET": "SRTM-derived 1 Second Digital Elevation Models Version 1.0",
+                           "DEM RESOLUTION": "30m",
+                           "HEIGHT AT LOCATION": "524.67m",
+                           “METADATA_URL”: “https://ecat.ga.gov.au/geonetwork/srv/eng/catalog.search#/metadata/22be4b55-2465-4320-e053-10a3070a5236”
+                        */
+                        let elevation = data["HEIGHT AT LOCATION"];
+                        let buffer = [];
+                        if(elevation === "m") {
+                           buffer.push("<strong>No data available at this point</strong>");
+                        } else {
+                           buffer.push(title("Elevation") + elevation);
+                           buffer.push(title("Lat/Lng") + latlng.lat.toFixed(5) + "&deg;/" + latlng.lng.toFixed(5) + "&deg;");
+                           buffer.push(title("Source") + data.SOURCE);
+                           buffer.push(title("Dataset") + "<span class='elevation-popup ellipsis' title='" +
+                                 data.DATASET + "'>" +  metadataLink(data.DATASET, data["METADATA URL"]) + "</span>");
+                           buffer.push(title("DEM Resolution") + data["DEM RESOLUTION"]);
+                        }
+                        L.popup({maxWidth:400})
+                           .setLatLng(latlng)
+                           .setContent("<div class='fi-popup'>" + buffer.join("<br/>") + "</div>")
+                           .openOn(map);
+                        scope.elevation = data;
+
                      }).catch(e => {
+                        flashService.remove(flasher);
                         scope.error = "No data available at this point";
-                     })
+                     });
 
-                  },
+                     function title(text) {
+                        return "<strong>" + text + ":</strong> "
+                     }
 
-                  searched: function (elevation) {
-                     scope.elevation = elevation;
+                     function metadataLink(text, link) {
+                        if(!link) return text;
+
+                        return "<a href='" + link + "' target='_blank'>" + text + "</a>";
+                     }
+
                   }
                }
             }
