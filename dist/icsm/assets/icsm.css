@@ -1,4 +1,12 @@
+.leaflet-popup {
+  position: absolute;
+  text-align: center;
+}
 
+.fi-popup hr {
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
 .nav-icons {
   margin-top: 7px !important;
 }
@@ -28,15 +36,6 @@
 
 .common-header {
   background-color: white;
-}
-.leaflet-popup {
-  position: absolute;
-  text-align: center;
-}
-
-.fi-popup hr {
-  margin-top: 3px;
-  margin-bottom: 3px;
 }
 .common-legend {
   position: abssolute;
@@ -253,6 +252,27 @@
 .cbp-spmenu-open .left-side-menu-container,
 .cbp-spmenu-open .right-side-menu-container {
   overflow-y: auto;
+}
+.placenames {
+  margin: 2px;
+  padding: 6px;
+  position: fixed;
+  bottom: 55px;
+  left: 5px;
+  opacity: 0.9;
+  z-index: 1200;
+  background-color: white;
+  white-space: nowrap;
+  text-align: left;
+  -webkit-transition: height 1s;
+  /* Safari */
+  transition: height 1s;
+  border: 1px, solid;
+  border-radius: 3px;
+}
+
+.placenames-title {
+  font-weight: bold;
 }
 /* TODO: I haven't worked out why it is showing up. Find out why and remove */
 
@@ -491,6 +511,48 @@ body {
 .leaflet-container {
   background-color: rgba(255,0,0,0.0);
 }
+.clipmodal {
+  z-index: 1010;
+  padding: 1px;
+  text-align: left;
+  white-space: normal;
+  opacity: 1;
+  background-color: #F8f8f8;
+  background-clip: padding-box;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, .2);
+  border-radius: 6px;
+  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+}
+
+.clipmodal-title {
+  padding: 8px 14px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 18px;
+  background-color: #e0e0e0;
+  border-bottom: 1px solid #ebebeb;
+  border-radius: 5px 5px 0 0;
+}
+
+.clipmodal-content {
+  padding: 9px 14px;
+}
+
+.clipmodal.ng-hide-add,
+.clipmodal.ng-hide-remove {
+  /* this is required as of 1.3x to properly
+      apply all styling in a show/hide animation */
+  transition: 0s linear all;
+}
+
+.clipmodal.ng-hide-add-active,
+.clipmodal.ng-hide-remove-active {
+  /* the transition is defined in the active class */
+  transition: 1s linear all;
+}
 .contributors {
   margin: 2px;
   padding: 10px;
@@ -648,48 +710,6 @@ img.elvis-logo {
   position: absolute;
   right: 7px;
   bottom: 15px;
-}
-.clipmodal {
-  z-index: 1010;
-  padding: 1px;
-  text-align: left;
-  white-space: normal;
-  opacity: 1;
-  background-color: #F8f8f8;
-  background-clip: padding-box;
-  border: 1px solid #ccc;
-  border: 1px solid rgba(0, 0, 0, .2);
-  border-radius: 6px;
-  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
-  box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
-}
-
-.clipmodal-title {
-  padding: 8px 14px;
-  margin: 0;
-  font-size: 14px;
-  font-weight: bold;
-  line-height: 18px;
-  background-color: #e0e0e0;
-  border-bottom: 1px solid #ebebeb;
-  border-radius: 5px 5px 0 0;
-}
-
-.clipmodal-content {
-  padding: 9px 14px;
-}
-
-.clipmodal.ng-hide-add,
-.clipmodal.ng-hide-remove {
-  /* this is required as of 1.3x to properly
-      apply all styling in a show/hide animation */
-  transition: 0s linear all;
-}
-
-.clipmodal.ng-hide-add-active,
-.clipmodal.ng-hide-remove-active {
-  /* the transition is defined in the active class */
-  transition: 1s linear all;
 }
 .mess-error {
   background-color: lightcoral;
@@ -1091,68 +1111,6 @@ img.elvis-logo {
 i.fa.active {
   color: red;
 }
-.icsm-icon {
-  background: url("icsm/img/global-sprites.svg") no-repeat;
-  display: inline-block;
-  width: 19px;
-  height: 30px;
-  margin: 0 auto 0 auto;
-}
-
-.icsm-pin {
-  background-position: 0px;
-}
-
-.icsm-map {
-  background-position: -63px;
-}
-
-.icsm-crosshair {
-  background-position: -82px;
-}
-
-.icsm-sign {
-  background-position: -102px;
-}
-
-.icsm-parcel {
-  background-position: -121px;
-}
-
-.icsm-satellite {
-  background-position: -140px;
-}
-
-.icsm-ship {
-  background-position: -160px;
-}
-
-.icsm-water {
-  background-position: -179px;
-}
-
-.icsm-shore {
-  background-position: -199px;
-}
-
-.icsm-land {
-  background-position: -218px;
-}
-
-.themesItemCompact {
-  margin-top: 0px !important;
-}
-
-.themesdropdown {
-  margin-top: -8px;
-  padding-right: 20px;
-  z-index: 100000;
-}
-
-.themesdropdown .themescurrent {
-  color: #fff;
-  background-color: #777;
-}
 .common-baselayer-control {
   width: 210px;
   color: #333;
@@ -1253,6 +1211,68 @@ i.fa.active {
   height: 30px;
   font-size: 13px;
 }
+.icsm-icon {
+  background: url("icsm/img/global-sprites.svg") no-repeat;
+  display: inline-block;
+  width: 19px;
+  height: 30px;
+  margin: 0 auto 0 auto;
+}
+
+.icsm-pin {
+  background-position: 0px;
+}
+
+.icsm-map {
+  background-position: -63px;
+}
+
+.icsm-crosshair {
+  background-position: -82px;
+}
+
+.icsm-sign {
+  background-position: -102px;
+}
+
+.icsm-parcel {
+  background-position: -121px;
+}
+
+.icsm-satellite {
+  background-position: -140px;
+}
+
+.icsm-ship {
+  background-position: -160px;
+}
+
+.icsm-water {
+  background-position: -179px;
+}
+
+.icsm-shore {
+  background-position: -199px;
+}
+
+.icsm-land {
+  background-position: -218px;
+}
+
+.themesItemCompact {
+  margin-top: 0px !important;
+}
+
+.themesdropdown {
+  margin-top: -8px;
+  padding-right: 20px;
+  z-index: 100000;
+}
+
+.themesdropdown .themescurrent {
+  color: #fff;
+  background-color: #777;
+}
 .downloadPane {
   padding-left: 0px !important;
   padding-right: 5px !important;
@@ -1268,27 +1288,6 @@ i.fa.active {
   position: fixed;
   right: 0;
   bottom: 8px;
-}
-.placenames {
-  margin: 2px;
-  padding: 6px;
-  position: fixed;
-  bottom: 55px;
-  left: 5px;
-  opacity: 0.9;
-  z-index: 1200;
-  background-color: white;
-  white-space: nowrap;
-  text-align: left;
-  -webkit-transition: height 1s;
-  /* Safari */
-  transition: height 1s;
-  border: 1px, solid;
-  border-radius: 3px;
-}
-
-.placenames-title {
-  font-weight: bold;
 }
 .start-content-container {
   position: fixed;

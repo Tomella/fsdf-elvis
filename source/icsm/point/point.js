@@ -108,7 +108,7 @@ L.Control.ElevationControl.Event = {
                   searching: function (latlng) {
                      flashService.remove(flasher);
                      scope.elevation = scope.error = null;
-                     flasher = flashService.add("Retrieving elevation data", 10000, true);
+                     flasher = flashService.add("Retrieving elevation data", 20000, true);
                      elevationPointsService.getHiResElevation(latlng).then(response => {
                         let data = response.data;
                         let map = scope.map;
