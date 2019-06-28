@@ -1,8 +1,9 @@
 L.Control.ElevationControl = L.Control.extend({
    statics: {
-      TITLE: 'Elevation at a point',
+      TITLE: 'Find elevation at a point',
       ALT_TITLE: 'Disable elevation at a point',
-      CLASS_NAME: "leaflet-control-elevation"
+      CLASS_NAME: "leaflet-control-elevation",
+      ALT_CLASS_NAME: "leaflet-control-alt-elevation"
    },
    options: {
       position: 'topleft',
@@ -18,12 +19,16 @@ L.Control.ElevationControl = L.Control.extend({
          this._map.fire(L.Control.ElevationControl.Event.POINTEND, {});
          this._map.off('click', handleClick);
          this.link.title = L.Control.ElevationControl.TITLE;
+         L.DomUtil.removeClass(this.link, L.Control.ElevationControl.ALT_CLASS_NAME);
+         L.DomUtil.addClass(this.link, L.Control.ElevationControl.CLASS_NAME);
          handler.disable();
       } else {
          this._map.fire(L.Control.ElevationControl.Event.POINTSTART, {});
          this._map._container.style.cursor = "crosshair";
          this._map.on('click', handleClick);
          this.link.title = L.Control.ElevationControl.ALT_TITLE;
+         L.DomUtil.removeClass(this.link, L.Control.ElevationControl.CLASS_NAME);
+         L.DomUtil.addClass(this.link, L.Control.ElevationControl.ALT_CLASS_NAME);
          handler.enable();
       }
    },
@@ -80,6 +85,7 @@ L.Control.ElevationControl.Event = {
 
                mapService.getMap().then(map => {
                   scope.map = map;
+                  L.Control.ElevationControl.ALT_TITLE = 'Find features around a point'
                   scope.control = L.Control.elevationControl({ handler }).addTo(map);
                   console.log("Point signing in");
                });
@@ -90,14 +96,14 @@ L.Control.ElevationControl.Event = {
                      console.log("Disable elevation handler here")
                      flashService.remove(flasher);
                      map.closePopup();
-                     flasher = flashService.add("Click map for datasets surrounding a point.", 10000);
+                     flasher = flashService.add("Click map for datasets surrounding a point.", 4000);
                   },
 
                   enable: function (map) {
                      scope.enabled = true;
                      scope.$apply(() => {
                         flashService.remove(flasher);
-                        flasher = flashService.add("Click map for detailed elevation information at point", 10000);
+                        flasher = flashService.add("Click map for detailed elevation information at point", 4000);
                      });
                   },
 
