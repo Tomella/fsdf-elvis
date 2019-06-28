@@ -122,11 +122,14 @@ L.Control.ElevationControl.Event = {
                         */
                         let elevation = data["HEIGHT AT LOCATION"];
                         let buffer = [];
-                        if(elevation === "m" || elevation === undefined) {
+                        let lat = latlng.lat.toFixed(5) + "&deg;";
+                        let lng = latlng.lng.toFixed(5) + "&deg;";
+                        if(elevation === "m" || elevation === undefined || elevation === "No data") {
+                           buffer.push(title("Lat/Lng") + lat + "/" + lng);
                            buffer.push("<strong>No data available at this point</strong>");
                         } else {
                            buffer.push(title("Elevation") + elevation);
-                           buffer.push(title("Lat/Lng") + latlng.lat.toFixed(5) + "&deg;/" + latlng.lng.toFixed(5) + "&deg;");
+                           buffer.push(title("Lat/Lng") + lat + "/" + lng);
                            buffer.push(title("Source") + data.SOURCE);
                            buffer.push(title("Dataset") + "<span class='elevation-popup ellipsis' title='" +
                                  data.DATASET + "'>" +  metadataLink(data.DATASET, data["METADATA URL"]) + "</span>");
