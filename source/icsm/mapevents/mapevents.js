@@ -68,21 +68,14 @@
                   ymin = bbox[1];
 
                // It's a bbox.
-               makePoly({
-                  type: "Feature",
-                  geometry: {
-                     type: "Polygon",
-                     coordinates: [
+               makePoly([
                         [[xmin, ymin], [xmax, ymin], [xmax, ymax],
                         [xmin, ymax], [xmin, ymin]]
-                     ]
-                  },
-                  properties: {}
-               }, false);
+                     ], false);
             });
-            $rootScope.$on('icsm.poly.draw', function showBbox(event, geojson) {
-               // It's a GeoJSON Polygon geometry and it has a single ring.
-               makePoly(geojson, true);
+            $rootScope.$on('icsm.poly.draw', function showBbox(event, data) {
+               // It's a polygon geometry and it has a single ring.
+               makePoly(data, true);
             });
 
             if (config.listenForMarkerEvent) {
@@ -131,17 +124,16 @@
                   if (poly) {
                      map.removeLayer(poly);
                   }
+                  if (bounds) {
+                     map.removeLayer(bounds);
+                  }
 
                   if (data) {
-                     poly = L.geoJson(data, {
-                        style: function (feature) {
-                           return {
-                              opacity: 1,
-                              clickable: false,
-                              fillOpacity: 0,
-                              color: "red"
-                           };
-                        }
+                     poly = L.polygon(data, {
+                        opacity: 1,
+                        clickable: false,
+                        fillOpacity: 0,
+                        color: "black"
                      }).addTo(map);
 
                      if (zoomTo) {
@@ -162,6 +154,10 @@
                   if (bounds) {
                      map.removeLayer(bounds);
                   }
+                  if (poly) {
+                     map.removeLayer(poly);
+                  }
+
 
                   if (data) {
                      bounds = L.geoJson(data, {

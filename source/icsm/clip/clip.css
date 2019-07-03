@@ -13,6 +13,42 @@
            box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
  }
 
+.clip-btn {
+   background-color: white;
+   display: inline-block;
+   margin-bottom: 0;
+   width: 44px;
+   padding:3px;
+   line-height: 1.2857143;
+   text-align: center;
+   white-space: nowrap;
+   vertical-align: middle;
+   -ms-touch-action: manipulation;
+   touch-action: manipulation;
+   cursor: pointer;
+   -webkit-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+   border: 1px solid gray;
+   border-radius: 4px;
+}
+
+button.clip-btn:hover div {
+   opacity:0.4;
+}
+
+.clip-btn div {
+   position:absolute;
+   left: 0;
+   top:0;
+   bottom:-1px;
+   right:0;
+   background-color:#006983;
+   opacity:0.2;
+   border-radius: 4px;
+}
+
  .clipmodal-title {
    padding: 8px 14px;
    margin: 0;

@@ -1,30 +1,55 @@
 <div class="well well-sm">
-	<div class="container-fluid">
-		<div class="row">
-			<div class="col-md-10">
-				<strong style="font-size:120%">Select area:</strong>
-				<button ng-click="initiateDraw()" ng-disable="client.drawing" tooltip-placement="right" uib-tooltip="Enable drawing of a bounding box. On enabling, click on the map and drag diagonally"
-					class="btn btn-primary btn-default">Draw...</button>
-				<button ng-click="typing = !typing"  tooltip-placement="right" uib-tooltip="Type coordinates of a bounding box. Restricted to maximum of 2.25 square degrees."
-					class="btn btn-primary btn-default">Manual entry...</button>
-			</div>
-			<div class="col-md-2">
-				<button style="float:right" ng-click="showInfo = !showInfo" tooltip-placement="left" uib-tooltip="Information." class="btn btn-primary btn-default"><i class="fa fa-info"></i></button>
-				<exp-info title="Selecting an area" show-close="true" style="width:450px;position:fixed;top:230px;right:40px" is-open="showInfo">
-					<icsm-info-bbox>
-			</div>
-			</exp-info>
-		</div>
+   <div class="container-fluid">
+      <div class="row">
+         <div class="col-md-10">
+            <strong style="font-size:120%">Select area by:</strong>
+            <button ng-click="initiateDraw()" style="position:relative" ng-disable="client.drawing" tooltip-placement="right"
+               uib-tooltip="Drawing a bounding box. On enabling, click on the map and drag diagonally"
+               class="clip-btn">
+               <img style="height:24px;" src="icsm/resources/img/draw_rectangle.png"></img>
+               <div></div>
+            </button>
+            <button ng-click="initiatePolygon()" style="position:relative" ng-disable="client.drawing" tooltip-placement="right"
+               uib-tooltip="Drawing a polygon. On enabling, click vertices on the map, double click on the last vertex to complete"
+               class="clip-btn">
+               <img style="height:26px;" src="icsm/resources/img/draw_polygon.png"></img>
+               <div></div>
+            </button>
+            <button ng-click="typing = !typing" style="position:relative" tooltip-placement="right"
+               uib-tooltip="Type coordinates of a bounding box. Restricted to maximum of 2.25 square degrees."
+               class="clip-btn">
+               <i class="fa fa-keyboard-o fa-2x" aria-hidden="true"></i>
+               <div></div>
+            </button>
+         </div>
+         <div class="col-md-2">
+            <button style="float:right" ng-click="showInfo = !showInfo" tooltip-placement="left"
+               uib-tooltip="Information." class="btn btn-primary btn-default"><i class="fa fa-info"></i></button>
+            <exp-info title="Selecting an area" show-close="true"
+               style="width:450px;position:fixed;top:230px;right:40px" is-open="showInfo">
+               <icsm-info-bbox>
+         </div>
+         </exp-info>
+      </div>
    </div>
    <div class="row" ng-hide="typing || (!clip.xMin && clip.xMin !== 0) || oversize" style="padding-top:7px;">
-      <div class="col-md-12 ng-binding">Selected bounds:
-               {{clip.xMin | number : 4}}° west,
-               {{clip.yMax | number : 4}}° north,
-               {{clip.xMax | number : 4}}° east,
-               {{clip.yMin | number : 4}}° south
-      </div>
-  </div>
-  <clip-modal title="Define search area" show-close="true" style="width:480px;position:fixed;top:110px;right:80px" is-open="typing">
+         <div class="col-md-12 ng-binding" ng-if="clip.type == 'polygon'">
+            Ploygon bounded by:
+            {{clip.xMin | number : 4}}° west,
+            {{clip.yMax | number : 4}}° north,
+            {{clip.xMax | number : 4}}° east,
+            {{clip.yMin | number : 4}}° south
+         </div>
+         <div class="col-md-12 ng-binding" ng-if="clip.type == 'bbox'">
+            Selected bounds:
+            {{clip.xMin | number : 4}}° west,
+            {{clip.yMax | number : 4}}° north,
+            {{clip.xMax | number : 4}}° east,
+            {{clip.yMin | number : 4}}° south
+         </div>
+   </div>
+   <clip-modal title="Define search area" show-close="true" style="width:480px;position:fixed;top:110px;right:80px"
+      is-open="typing">
       <icsm-manual-clip></icsm-manual-clip>
    </clip-modal>
 </div>

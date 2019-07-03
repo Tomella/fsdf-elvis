@@ -1,13 +1,3 @@
-
-.leaflet-popup {
-  position: absolute;
-  text-align: center;
-}
-
-.fi-popup hr {
-  margin-top: 3px;
-  margin-bottom: 3px;
-}
 .nav-icons {
   margin-top: 7px !important;
 }
@@ -42,6 +32,15 @@
 
 .common-header {
   background-color: white;
+}
+.leaflet-popup {
+  position: absolute;
+  text-align: center;
+}
+
+.fi-popup hr {
+  margin-top: 3px;
+  margin-bottom: 3px;
 }
 .common-legend {
   position: abssolute;
@@ -258,6 +257,27 @@
 .cbp-spmenu-open .left-side-menu-container,
 .cbp-spmenu-open .right-side-menu-container {
   overflow-y: auto;
+}
+.placenames {
+  margin: 2px;
+  padding: 6px;
+  position: fixed;
+  bottom: 55px;
+  left: 5px;
+  opacity: 0.9;
+  z-index: 1200;
+  background-color: white;
+  white-space: nowrap;
+  text-align: left;
+  -webkit-transition: height 1s;
+  /* Safari */
+  transition: height 1s;
+  border: 1px, solid;
+  border-radius: 3px;
+}
+
+.placenames-title {
+  font-weight: bold;
 }
 /* TODO: I haven't worked out why it is showing up. Find out why and remove */
 
@@ -511,6 +531,42 @@ body {
   box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
 }
 
+.clip-btn {
+  background-color: white;
+  display: inline-block;
+  margin-bottom: 0;
+  width: 44px;
+  padding: 3px;
+  line-height: 1.2857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  border: 1px solid gray;
+  border-radius: 4px;
+}
+
+button.clip-btn:hover div {
+  opacity: 0.4;
+}
+
+.clip-btn div {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: -1px;
+  right: 0;
+  background-color: #006983;
+  opacity: 0.2;
+  border-radius: 4px;
+}
+
 .clipmodal-title {
   padding: 8px 14px;
   margin: 0;
@@ -696,6 +752,21 @@ img.elvis-logo {
   right: 7px;
   bottom: 15px;
 }
+.mess-error {
+  background-color: lightcoral;
+}
+
+.mess-info {
+  background-color: lightblue;
+}
+
+.mess-warn {
+  background-color: #ffbc1e;
+}
+
+.mess-container {
+  font-weight: bold;
+}
 .icsmTabs {
   position: absolute;
   top: 0px;
@@ -789,21 +860,6 @@ img.elvis-logo {
   right: 20px;
   top: 10px;
   z-index: 3;
-}
-.mess-error {
-  background-color: lightcoral;
-}
-
-.mess-info {
-  background-color: lightblue;
-}
-
-.mess-warn {
-  background-color: #ffbc1e;
-}
-
-.mess-container {
-  font-weight: bold;
 }
 .leaflet-control-elevation {
   background-image: url("../../../icsm/resources/img/mountain24.png");
@@ -1273,27 +1329,6 @@ i.fa.active {
   position: fixed;
   right: 0;
   bottom: 8px;
-}
-.placenames {
-  margin: 2px;
-  padding: 6px;
-  position: fixed;
-  bottom: 55px;
-  left: 5px;
-  opacity: 0.9;
-  z-index: 1200;
-  background-color: white;
-  white-space: nowrap;
-  text-align: left;
-  -webkit-transition: height 1s;
-  /* Safari */
-  transition: height 1s;
-  border: 1px, solid;
-  border-radius: 3px;
-}
-
-.placenames-title {
-  font-weight: bold;
 }
 .start-content-container {
   position: fixed;

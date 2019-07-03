@@ -56,6 +56,11 @@
                      messageService.info("Click on the map and drag to define your area of interest.");
                      clipService.initiateDraw();
                   };
+
+                  scope.initiatePolygon = function () {
+                     messageService.info("Click on map for each vertex. Double click to draw the last vertex and close the polygon.");
+                     clipService.initiatePolygon();
+                  };
                }
             };
          }])
@@ -99,7 +104,7 @@
       }])
 
 
-      .factory("clipService", ['$rootScope', 'drawService', 'parametersService',
+      .factory("clipService", ['$rootScope', 'drawService', 'mapService', 'parametersService',
                function ($rootScope, drawService, parametersService) {
          let options = {
             maxAreaDegrees: 4
@@ -109,6 +114,7 @@
                   clip: {}
                },
                initiateDraw: function () {
+                  this.cancelDraw();
                   $rootScope.$broadcast("clip.initiate.draw", { started: true });
                   let clip = this.data.clip;
                   delete clip.xMin;
@@ -116,13 +122,29 @@
                   delete clip.yMin;
                   delete clip.yMax;
                   delete clip.area;
+                  delete clip.type;
                   return drawService.drawRectangle({
                      retryOnOversize: false
                   });
                },
 
+               initiatePolygon: function () {
+                  this.cancelDraw();
+                  $rootScope.$broadcast("clip.initiate.draw", { started: true });
+                  let clip = this.data.clip;
+                  delete clip.xMin;
+                  delete clip.xMax;
+                  delete clip.yMin;
+                  delete clip.yMax;
+                  delete clip.area;
+                  delete clip.type;
+                  return drawService.drawPolygon({
+                     retryOnOversize: false
+                  });
+               },
+
                cancelDraw: function () {
-                  drawService.cancelDrawRectangle();
+                  drawService.cancelDraw();
                },
 
                setClip: function (data) {
@@ -131,13 +153,27 @@
             };
 
 
-         $rootScope.$on("bounds.drawn", function (event, data) {
-            $rootScope.$broadcast('icsm.clip.drawn', broadcaster(data));  // Let people know it is drawn
-         });
+            $rootScope.$on("bounds.drawn", function (event, data) {
+               broadcaster(data);  // Let people know it is drawn
+            });
+
+
+            $rootScope.$on("polygon.drawn", (event, data) => {
+               console.log("*********************************** POLLY ****************************", data);
+               $rootScope.$broadcast('icsm.poly.draw', data[0]);  // Let people know it is drawn
+               let clip = service.data.clip;
+               let polyData = data[0];
+               clip.type = "polygon";
+               clip.xMax = Math.max(...polyData.map(element => element.lng));
+               clip.xMin = Math.min(...polyData.map(element => element.lng));
+               clip.yMax = Math.max(...polyData.map(element => element.lat));
+               clip.yMin = Math.min(...polyData.map(element => element.lat));
+            });
 
          let data = parametersService.data;
          if(data) {
             broadcaster(data);
+            service.data.clip.type = "bbox";
          }
 
          return service;
@@ -153,7 +189,8 @@
                c.xMax,
                c.yMax
             ]);// Draw it
-            return c;
+
+            $rootScope.$broadcast('icsm.clip.drawn', c);  // Let people know it is drawn
          }
 
          function drawComplete(data) {
@@ -162,6 +199,7 @@
             clip.xMin = data.bounds.getWest().toFixed(5);
             clip.yMax = data.bounds.getNorth().toFixed(5);
             clip.yMin = data.bounds.getSouth().toFixed(5);
+            clip.type = "bbox";
 
             service.data.area = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
 

@@ -151,7 +151,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          },
 
          cancelDraw: function cancelDraw() {
-            drawService.cancelDrawRectangle();
+            drawService.cancelDraw();
          },
 
          checkSize: function checkSize(clip) {
@@ -316,6 +316,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 }
 'use strict';
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 {
    angular.module("icsm.clip", ['geo.draw', 'explorer.clip.modal']).directive('icsmInfoBbox', function () {
       return {
@@ -371,6 +373,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                messageService.info("Click on the map and drag to define your area of interest.");
                clipService.initiateDraw();
             };
+
+            scope.initiatePolygon = function () {
+               messageService.info("Click on map for each vertex. Double click to draw the last vertex and close the polygon.");
+               clipService.initiatePolygon();
+            };
          }
       };
    }]).directive('icsmManualClip', ["$rootScope", "clipService", function ($rootScope, clipService) {
@@ -410,7 +417,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             };
          }
       };
-   }]).factory("clipService", ['$rootScope', 'drawService', 'parametersService', function ($rootScope, drawService, parametersService) {
+   }]).factory("clipService", ['$rootScope', 'drawService', 'mapService', 'parametersService', function ($rootScope, drawService, parametersService) {
       var options = {
          maxAreaDegrees: 4
       },
@@ -419,6 +426,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             clip: {}
          },
          initiateDraw: function initiateDraw() {
+            this.cancelDraw();
             $rootScope.$broadcast("clip.initiate.draw", { started: true });
             var clip = this.data.clip;
             delete clip.xMin;
@@ -426,13 +434,29 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             delete clip.yMin;
             delete clip.yMax;
             delete clip.area;
+            delete clip.type;
             return drawService.drawRectangle({
                retryOnOversize: false
             });
          },
 
+         initiatePolygon: function initiatePolygon() {
+            this.cancelDraw();
+            $rootScope.$broadcast("clip.initiate.draw", { started: true });
+            var clip = this.data.clip;
+            delete clip.xMin;
+            delete clip.xMax;
+            delete clip.yMin;
+            delete clip.yMax;
+            delete clip.area;
+            delete clip.type;
+            return drawService.drawPolygon({
+               retryOnOversize: false
+            });
+         },
+
          cancelDraw: function cancelDraw() {
-            drawService.cancelDrawRectangle();
+            drawService.cancelDraw();
          },
 
          setClip: function setClip(data) {
@@ -441,12 +465,33 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       };
 
       $rootScope.$on("bounds.drawn", function (event, data) {
-         $rootScope.$broadcast('icsm.clip.drawn', broadcaster(data)); // Let people know it is drawn
+         broadcaster(data); // Let people know it is drawn
+      });
+
+      $rootScope.$on("polygon.drawn", function (event, data) {
+         console.log("*********************************** POLLY ****************************", data);
+         $rootScope.$broadcast('icsm.poly.draw', data[0]); // Let people know it is drawn
+         var clip = service.data.clip;
+         var polyData = data[0];
+         clip.type = "polygon";
+         clip.xMax = Math.max.apply(Math, _toConsumableArray(polyData.map(function (element) {
+            return element.lng;
+         })));
+         clip.xMin = Math.min.apply(Math, _toConsumableArray(polyData.map(function (element) {
+            return element.lng;
+         })));
+         clip.yMax = Math.max.apply(Math, _toConsumableArray(polyData.map(function (element) {
+            return element.lat;
+         })));
+         clip.yMin = Math.min.apply(Math, _toConsumableArray(polyData.map(function (element) {
+            return element.lat;
+         })));
       });
 
       var data = parametersService.data;
       if (data) {
          broadcaster(data);
+         service.data.clip.type = "bbox";
       }
 
       return service;
@@ -457,7 +502,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          var c = service.data.clip;
 
          $rootScope.$broadcast('icsm.bounds.draw', [c.xMin, c.yMin, c.xMax, c.yMax]); // Draw it
-         return c;
+
+         $rootScope.$broadcast('icsm.clip.drawn', c); // Let people know it is drawn
       }
 
       function drawComplete(data) {
@@ -466,6 +512,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          clip.xMin = data.bounds.getWest().toFixed(5);
          clip.yMax = data.bounds.getNorth().toFixed(5);
          clip.yMin = data.bounds.getSouth().toFixed(5);
+         clip.type = "bbox";
 
          service.data.area = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
 
@@ -1051,18 +1098,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
              ymin = bbox[1];
 
          // It's a bbox.
-         makePoly({
-            type: "Feature",
-            geometry: {
-               type: "Polygon",
-               coordinates: [[[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax], [xmin, ymin]]]
-            },
-            properties: {}
-         }, false);
+         makePoly([[[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax], [xmin, ymin]]], false);
       });
-      $rootScope.$on('icsm.poly.draw', function showBbox(event, geojson) {
-         // It's a GeoJSON Polygon geometry and it has a single ring.
-         makePoly(geojson, true);
+      $rootScope.$on('icsm.poly.draw', function showBbox(event, data) {
+         // It's a polygon geometry and it has a single ring.
+         makePoly(data, true);
       });
 
       if (config.listenForMarkerEvent) {
@@ -1108,17 +1148,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             if (poly) {
                map.removeLayer(poly);
             }
+            if (bounds) {
+               map.removeLayer(bounds);
+            }
 
             if (data) {
-               poly = L.geoJson(data, {
-                  style: function style(feature) {
-                     return {
-                        opacity: 1,
-                        clickable: false,
-                        fillOpacity: 0,
-                        color: "red"
-                     };
-                  }
+               poly = L.polygon(data, {
+                  opacity: 1,
+                  clickable: false,
+                  fillOpacity: 0,
+                  color: "black"
                }).addTo(map);
 
                if (zoomTo) {
@@ -1138,6 +1177,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          mapService.getMap().then(function (map) {
             if (bounds) {
                map.removeLayer(bounds);
+            }
+            if (poly) {
+               map.removeLayer(poly);
             }
 
             if (data) {
@@ -1467,6 +1509,13 @@ L.Control.ElevationControl = L.Control.extend({
       map.on("draw:drawstart", function () {
          _this.clear();
       });
+
+      this.clear = function () {
+         var handler = this.options.handler;
+         if (handler.enabled()) {
+            this.toggle();
+         }
+      };
 
       this.handleClick = function handleClick(me) {
          return function (e) {
@@ -4506,7 +4555,7 @@ var Strategies = function () {
    DownloadService.$inject = ['$http', '$q', '$rootScope', 'mapService', 'storageService'];
 }
 angular.module("icsm.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("icsm/app/app.html","<div>\r\n	<!-- BEGIN: Sticky Header -->\r\n	<div explorer-header style=\"z-index:1\"\r\n			class=\"navbar navbar-default navbar-fixed-top\"\r\n			heading=\"\'Elevation\'\"\r\n			headingtitle=\"\'ICSM\'\"\r\n			breadcrumbs=\"[{name:\'ICSM\', title: \'Reload Elevation\', url: \'.\'}]\"\r\n			helptitle=\"\'Get help about Elevation\'\"\r\n			helpalttext=\"\'Get help about Elevation\'\">\r\n	</div>\r\n	<!-- END: Sticky Header -->\r\n\r\n	<!-- Messages go here. They are fixed to the tab bar. -->\r\n	<div explorer-messages class=\"marsMessages noPrint\"></div>\r\n	<icsm-panes data=\"root.data\" default-item=\"download\"></icsm-panes>\r\n</div>");
-$templateCache.put("icsm/clip/clip.html","<div class=\"well well-sm\">\r\n	<div class=\"container-fluid\">\r\n		<div class=\"row\">\r\n			<div class=\"col-md-10\">\r\n				<strong style=\"font-size:120%\">Select area:</strong>\r\n				<button ng-click=\"initiateDraw()\" ng-disable=\"client.drawing\" tooltip-placement=\"right\" uib-tooltip=\"Enable drawing of a bounding box. On enabling, click on the map and drag diagonally\"\r\n					class=\"btn btn-primary btn-default\">Draw...</button>\r\n				<button ng-click=\"typing = !typing\"  tooltip-placement=\"right\" uib-tooltip=\"Type coordinates of a bounding box. Restricted to maximum of 2.25 square degrees.\"\r\n					class=\"btn btn-primary btn-default\">Manual entry...</button>\r\n			</div>\r\n			<div class=\"col-md-2\">\r\n				<button style=\"float:right\" ng-click=\"showInfo = !showInfo\" tooltip-placement=\"left\" uib-tooltip=\"Information.\" class=\"btn btn-primary btn-default\"><i class=\"fa fa-info\"></i></button>\r\n				<exp-info title=\"Selecting an area\" show-close=\"true\" style=\"width:450px;position:fixed;top:230px;right:40px\" is-open=\"showInfo\">\r\n					<icsm-info-bbox>\r\n			</div>\r\n			</exp-info>\r\n		</div>\r\n   </div>\r\n   <div class=\"row\" ng-hide=\"typing || (!clip.xMin && clip.xMin !== 0) || oversize\" style=\"padding-top:7px;\">\r\n      <div class=\"col-md-12 ng-binding\">Selected bounds:\r\n               {{clip.xMin | number : 4}}° west,\r\n               {{clip.yMax | number : 4}}° north,\r\n               {{clip.xMax | number : 4}}° east,\r\n               {{clip.yMin | number : 4}}° south\r\n      </div>\r\n  </div>\r\n  <clip-modal title=\"Define search area\" show-close=\"true\" style=\"width:480px;position:fixed;top:110px;right:80px\" is-open=\"typing\">\r\n      <icsm-manual-clip></icsm-manual-clip>\r\n   </clip-modal>\r\n</div>");
+$templateCache.put("icsm/clip/clip.html","<div class=\"well well-sm\">\r\n   <div class=\"container-fluid\">\r\n      <div class=\"row\">\r\n         <div class=\"col-md-10\">\r\n            <strong style=\"font-size:120%\">Select area by:</strong>\r\n            <button ng-click=\"initiateDraw()\" style=\"position:relative\" ng-disable=\"client.drawing\" tooltip-placement=\"right\"\r\n               uib-tooltip=\"Drawing a bounding box. On enabling, click on the map and drag diagonally\"\r\n               class=\"clip-btn\">\r\n               <img style=\"height:24px;\" src=\"icsm/resources/img/draw_rectangle.png\"></img>\r\n               <div></div>\r\n            </button>\r\n            <button ng-click=\"initiatePolygon()\" style=\"position:relative\" ng-disable=\"client.drawing\" tooltip-placement=\"right\"\r\n               uib-tooltip=\"Drawing a polygon. On enabling, click vertices on the map, double click on the last vertex to complete\"\r\n               class=\"clip-btn\">\r\n               <img style=\"height:26px;\" src=\"icsm/resources/img/draw_polygon.png\"></img>\r\n               <div></div>\r\n            </button>\r\n            <button ng-click=\"typing = !typing\" style=\"position:relative\" tooltip-placement=\"right\"\r\n               uib-tooltip=\"Type coordinates of a bounding box. Restricted to maximum of 2.25 square degrees.\"\r\n               class=\"clip-btn\">\r\n               <i class=\"fa fa-keyboard-o fa-2x\" aria-hidden=\"true\"></i>\r\n               <div></div>\r\n            </button>\r\n         </div>\r\n         <div class=\"col-md-2\">\r\n            <button style=\"float:right\" ng-click=\"showInfo = !showInfo\" tooltip-placement=\"left\"\r\n               uib-tooltip=\"Information.\" class=\"btn btn-primary btn-default\"><i class=\"fa fa-info\"></i></button>\r\n            <exp-info title=\"Selecting an area\" show-close=\"true\"\r\n               style=\"width:450px;position:fixed;top:230px;right:40px\" is-open=\"showInfo\">\r\n               <icsm-info-bbox>\r\n         </div>\r\n         </exp-info>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\" ng-hide=\"typing || (!clip.xMin && clip.xMin !== 0) || oversize\" style=\"padding-top:7px;\">\r\n         <div class=\"col-md-12 ng-binding\" ng-if=\"clip.type == \'polygon\'\">\r\n            Ploygon bounded by:\r\n            {{clip.xMin | number : 4}}° west,\r\n            {{clip.yMax | number : 4}}° north,\r\n            {{clip.xMax | number : 4}}° east,\r\n            {{clip.yMin | number : 4}}° south\r\n         </div>\r\n         <div class=\"col-md-12 ng-binding\" ng-if=\"clip.type == \'bbox\'\">\r\n            Selected bounds:\r\n            {{clip.xMin | number : 4}}° west,\r\n            {{clip.yMax | number : 4}}° north,\r\n            {{clip.xMax | number : 4}}° east,\r\n            {{clip.yMin | number : 4}}° south\r\n         </div>\r\n   </div>\r\n   <clip-modal title=\"Define search area\" show-close=\"true\" style=\"width:480px;position:fixed;top:110px;right:80px\"\r\n      is-open=\"typing\">\r\n      <icsm-manual-clip></icsm-manual-clip>\r\n   </clip-modal>\r\n</div>");
 $templateCache.put("icsm/clip/infobbox.html","<div class=\"\">\r\n	<strong style=\"font-size:120%\">Select an area of interest.</strong>\r\n   By hitting the \"Draw...\" button an area on the map can be selected with the mouse by clicking a\r\n   corner and while holding the left mouse button\r\n	down drag diagonally across the map to the opposite corner.\r\n	<br/>\r\n   Clicking the \"Draw...\" button again allows replacing a previous area selection. <br/>\r\n   Alternatively you can type in the minimum and maximum coordinates and search by using the \"Manual entry\" button.<br/>\r\n	<strong>Notes:</strong>\r\n   <ul>\r\n      <li>The data does not cover all of Australia.</li>\r\n      <li>Restrict a search area to below 1.5 degrees square. eg 2x0.75 or 1x1.5</li>\r\n   </ul>\r\n	<p style=\"padding-top:5px\"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n		You can zoom in and out using the mouse wheel or the \"+\" and \"-\" map control on the top left of the map. If you\r\n		don\'t like the position of your drawn area, hit the \"Draw\" button and draw a new bounding box.\r\n	</p>\r\n</div>");
 $templateCache.put("icsm/clip/manual.html","<div class=\"container-fluid\" style=\"padding-top:7px\">\r\n   <div class=\"row\">\r\n      <div class=\"col-md-3\"> </div>\r\n      <div class=\"col-md-8\">\r\n         <div style=\"font-weight:bold;width:3.5em;display:inline-block\">Y Max:</div>\r\n         <span>\r\n            <input type=\"text\" style=\"width:6em\" ng-model=\"yMax\" ng-change=\"check()\"></input>\r\n         </span>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-6\">\r\n         <div style=\"font-weight:bold;width:3.5em;display:inline-block\">X Min:</div>\r\n         <span>\r\n            <input type=\"text\" style=\"width:6em\" ng-model=\"xMin\" ng-change=\"check()\"></input>\r\n         </span>\r\n      </div>\r\n      <div class=\"col-md-6\">\r\n         <div style=\"font-weight:bold;width:3.5em;display:inline-block\">X Max:</div>\r\n         <span>\r\n            <input type=\"text\" style=\"width:6em\" ng-model=\"xMax\" ng-change=\"check()\"></input>\r\n         </span>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-offset-3 col-md-5\">\r\n         <div style=\"font-weight:bold;width:3.5em;display:inline-block\">Y Min:</div>\r\n         <span>\r\n            <input type=\"text\" style=\"width:6em\" ng-model=\"yMin\" ng-change=\"check()\"></input>\r\n         </span>\r\n      </div>\r\n      <div class=\"col-md-4\">\r\n         <button style=\"float:right\" ng-disabled=\"!xMin || !xMax || !yMin || !yMax || isNan(xMin) || isNan(xMax) || isNan(yMin) || isNan(yMax) || (+xMin) === (+xMax) || (+yMin) === (+yMax)\" class=\"btn btn-primary btn-default\" ng-click=\"search()\">Search</button>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/clip/modal.html","<div class=\"clipmodal\" ng-show=\"isOpen\">\r\n	<div class=\"clipmodal-inner\">\r\n      <h3 ng-show=\"title\" class=\"clipmodal-title\">\r\n		  	<span  ng-bind=\"title\"></span>\r\n		  	<span ng-show=\"showClose\" class=\"pull-right\">\r\n		 		<button type=\"button\" class=\"undecorated\" ng-click=\"isOpen = false\"><i class=\"fa fa-close\"></i></button>\r\n			</span>\r\n		</h3>\r\n      <div class=\"clipmodal-content\" ng-transclude></div>\r\n	</div>\r\n</div>");
@@ -4520,7 +4569,7 @@ $templateCache.put("icsm/help/faqs.html","<p style=\"text-align: left; margin: 1
 $templateCache.put("icsm/help/help.html","<p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n	<strong>Help</strong>\r\n</p>\r\n\r\n<div class=\"panel-body\" ng-controller=\"HelpCtrl as help\">\r\n	The steps to get data!\r\n	<ol>\r\n		<li>Define area of interest</li>\r\n		<li>Select datasets</li>\r\n		<li>Confirm selections</li>\r\n		<li>Enter email address</li>\r\n		<li>Start extract</li>\r\n	</ol>\r\n	An email will be sent to you on completion of the data extract with a link to your data.\r\n   <hr>\r\n	<icsm-faqs faqs=\"help.faqs\" ></icsm-faqs>\r\n</div>");
 $templateCache.put("icsm/imagery/launch.html","<button type=\"button\" class=\"undecorated\" title=\"View preview of imagery\" ng-click=\"preview()\" ng-if=\"show\">\r\n	<i class=\"fa fa-lg fa-eye\"></i>\r\n</button>");
 $templateCache.put("icsm/message/message.html","<div class=\"well well-sm mess-container\" ng-show=\"message.type && message.text\"\r\n   ng-class=\"{\'mess-error\': message.type == \'error\', \'mess-warn\': message.type == \'warn\', \'mess-info\': (message.type == \'info\' || message.type == \'wait\')}\">\r\n   <i class=\"fa fa-spinner fa-spin fa-fw\" aria-hidden=\"true\" ng-if=\"message.type == \'wait\'\"></i>\r\n   <span>{{message.text}}</span>\r\n</div>");
-$templateCache.put("icsm/panes/panes.html","<div class=\"mapContainer\" class=\"col-md-12\" style=\"padding-right:0\"  ng-attr-style=\"right:{{right.width}}\">\r\n   <span common-baselayer-control class=\"baselayer-slider\" max-zoom=\"16\" title=\"Satellite to Topography bias on base map.\"></span>\r\n   <div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n      <geo-extent></geo-extent>\r\n      <icsm-layerswitch></icsm-layerswitch>\r\n   </div>\r\n   <div class=\"base-layer-controller\">\r\n      <div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\"></div>\r\n   </div>\r\n   <restrict-pan bounds=\"data.map.position.bounds\"></restrict-pan>\r\n</div>");
+$templateCache.put("icsm/panes/panes.html","<div class=\"mapContainer\" class=\"col-md-12\" style=\"padding-right:0\"  ng-attr-style=\"right:{{right.width}}\">\r\n   <span common-baselayer-control class=\"baselayer-slider\" max-zoom=\"16\" title=\"Satellite to Topography bias on base map.\"></span>\r\n   <div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n      <geo-extent></geo-extent>\r\n      <icsm-layerswitch></icsm-layerswitch>\r\n   </div>\r\n   <div class=\"base-layer-controller\">\r\n      <div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\" polygon-event=\"polygon.drawn\"></div>\r\n   </div>\r\n   <restrict-pan bounds=\"data.map.position.bounds\"></restrict-pan>\r\n</div>");
 $templateCache.put("icsm/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n   <div class=\"paneTabItem\" style=\"width:60px; opacity:0\">\r\n\r\n   </div>\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n      <button class=\"undecorated\">Datasets Download</button>\r\n   </div>\r\n   <!--\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n   -->\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'downloader\'}\" ng-click=\"setView(\'downloader\')\">\r\n      <button class=\"undecorated\">Products Download</button>\r\n   </div>\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n      <button class=\"undecorated\">Glossary</button>\r\n   </div>\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n      <button class=\"undecorated\">Help</button>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/preview/preview.html","<div class=\"preview-container\" ng-if=\"previewData\">\r\n   <div class=\"preview-blocker\" ng-click=\"clear()\"></div>\r\n\r\n   <div style=\"position:absolute; right: 10px; z-index: 1; top:20px\">\r\n      <div class=\"pull-right\">\r\n         <button type=\"button\" class=\"btn btn-primary\" ng-click=\"clear()\" autofocus>Hide</button>\r\n      </div>\r\n   </div>\r\n\r\n   <img class=\"preview-image\" ng-src=\"{{previewData.url}}\"></img>\r\n   <div style=\"position:absolute; top:10px; left:10px;color:white\">\r\n      <strong>File name:</strong>\r\n      {{previewData.item.file_name}}\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/products/download.html","<div class=\"well\" ng-show=\"item.showDownload\">\r\n\r\n   <div class=\"well\">\r\n      <div ng-show=\"processing.validClip\" class=\"product-restrict\">\r\n         <span class=\"product-label\">Bounds:</span> {{processing.clip.xMin|number : 4}}&deg; west, {{processing.clip.yMax|number : 4}}&deg; north, {{processing.clip.xMax|number\r\n         : 4}}&deg; east, {{processing.clip.yMin|number : 4}}&deg; south\r\n\r\n         <div ng-show=\"processing.message\" class=\"product-warning\">\r\n            {{processing.message}}\r\n         </div>\r\n      </div>\r\n      <product-projection processing=\"processing\"></product-projection>\r\n      <br/>\r\n      <product-formats processing=\"processing\"></product-formats>\r\n      <br/>\r\n      <product-email processing=\"processing\"></product-email>\r\n   </div>\r\n   <product-download-submit processing=\"processing\" item=\"item\"></product-download-submit>\r\n</div>");

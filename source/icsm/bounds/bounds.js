@@ -50,7 +50,7 @@
                },
 
                cancelDraw: function () {
-                  drawService.cancelDrawRectangle();
+                  drawService.cancelDraw();
                },
 
                checkSize: function (clip) {

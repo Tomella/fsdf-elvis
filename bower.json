@@ -18,7 +18,7 @@
   ],
   "license": "http://git.prod.lan/raw/explorer/explorer-icsm.git/master/LICENCE",
   "dependencies": {
-    "ga-explorer-map-components": "https://github.com/Tomella/explorer-map-components.git#0.1.1",
+    "ga-explorer-map-components": "https://github.com/Tomella/explorer-map-components.git#0.1.2",
     "explorer-ui-components": "https://github.com/Tomella/explorer-ui-components.git#master",
     "explorer-search-components": "https://github.com/Tomella/explorer-search-components.git",
     "angular": "~1.4.12",

@@ -51,6 +51,13 @@ L.Control.ElevationControl = L.Control.extend({
          this.clear();
       });
 
+      this.clear = function () {
+         let handler = this.options.handler;
+         if (handler.enabled()) {
+            this.toggle();
+         }
+      }
+
       this.handleClick = function handleClick(me) {
          return function(e) {
             me.searching(e.latlng);
