@@ -10,7 +10,7 @@
                <div></div>
             </button>
             <button ng-click="initiatePolygon()" style="position:relative" ng-disable="client.drawing" tooltip-placement="right"
-               uib-tooltip="Drawing a polygon. On enabling, click vertices on the map, double click on the last vertex to complete"
+               uib-tooltip="Drawing a polygon. On enabling, click vertices on the map, click on the first vertex to complete the loop."
                class="clip-btn">
                <img style="height:26px;" src="icsm/resources/img/draw_polygon.png"></img>
                <div></div>
@@ -34,7 +34,7 @@
    </div>
    <div class="row" ng-hide="typing || (!clip.xMin && clip.xMin !== 0) || oversize" style="padding-top:7px;">
          <div class="col-md-12 ng-binding" ng-if="clip.type == 'polygon'">
-            Ploygon bounded by:
+            Polygon bounded by:
             {{clip.xMin | number : 4}}° west,
             {{clip.yMax | number : 4}}° north,
             {{clip.xMax | number : 4}}° east,

@@ -73,6 +73,7 @@
       'icsm.mapevents',
 		'icsm.panes',
       "icsm.parameters",
+      "icsm.polygon",
 		'icsm.point',
       'icsm.products',
       'icsm.preview',

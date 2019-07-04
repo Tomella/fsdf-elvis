@@ -58,7 +58,7 @@
                   };
 
                   scope.initiatePolygon = function () {
-                     messageService.info("Click on map for each vertex. Double click to draw the last vertex and close the polygon.");
+                     messageService.info("Click on map for each vertex. Click on the first vertex to close the polygon.", 6);
                      clipService.initiatePolygon();
                   };
                }
@@ -168,6 +168,9 @@
                clip.xMin = Math.min(...polyData.map(element => element.lng));
                clip.yMax = Math.max(...polyData.map(element => element.lat));
                clip.yMin = Math.min(...polyData.map(element => element.lat));
+               clip.polygon = polyData;
+
+               $rootScope.$broadcast('icsm.polygon.drawn', clip);
             });
 
          let data = parametersService.data;

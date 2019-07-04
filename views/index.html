@@ -69,8 +69,8 @@ version of this application. The latest Firefox, Chrome plus Microsoft Internet 
 <!-- END: Sticky Header -->
 
 
-<!-- Messages go here. They are fixed to the tab bar. -->
-<div explorer-messages class="marsMessages noPrint"></div>
+<!-- Messages go here. They are fixed to the tab bar. Watch the z-index. The panels are in the 1000's-->
+<div explorer-messages class="marsMessages noPrint" style="z-index:2000"></div>
 <elevation-toolbar></elevation-toolbar>
 
 <!-- BEGIN: Page Content -->
@@ -87,7 +87,7 @@ version of this application. The latest Firefox, Chrome plus Microsoft Internet 
 <div icsm-coverage-layers-selector></div>
 <div path-elevation-plot class="noPrint elevationFixedBottom" style="z-index: 1011"></div>
 
-<icsm-mapevents icsm-bounds></icsm-mapevents>
+<icsm-mapevents icsm-bounds icsm-polygon></icsm-mapevents>
 
 <div explorer-flash class="noPrint" style="z-index: 1300"></div>
 <div icsm-review open="data.reviewing"></div>
@@ -110,7 +110,7 @@ version of this application. The latest Firefox, Chrome plus Microsoft Internet 
     <script src='https://www.google.com/recaptcha/api.js'></script>
 
 	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet-src.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js"></script>
 	<script src="//cdn.jsdelivr.net/leaflet.esri/1.0.0/esri-leaflet.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
   	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-animate.min.js"></script>
@@ -125,7 +125,7 @@ version of this application. The latest Firefox, Chrome plus Microsoft Internet 
 
    <script src="icsm/bower_components/ngAutocomplete/src/ngAutocomplete.js"></script>
 	<script src="icsm/bower_components/seiyria-bootstrap-slider/dist/bootstrap-slider.js"></script>
-   <script src="icsm/bower_components/leaflet-draw/dist/leaflet.draw-src.js"></script>
+   <script src="icsm/bower_components/leaflet-draw/dist/leaflet.draw.js"></script>
    <script src="icsm/bower_components/ga-explorer-map-components/dist/vendor/leaflet-locationfilter/locationfilter.js"></script>
    <script src="icsm/bower_components/ga-explorer-map-components/dist/vendor/leaflet-plotter/leaflet-plotter.js"></script>
    <script src="icsm/bower_components/ga-explorer-map-components/dist/vendor/leaflet-measurecontrol/leaflet.measurecontrol.js"></script>
