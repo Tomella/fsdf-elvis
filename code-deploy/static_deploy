@@ -8,6 +8,9 @@ cd /home/ec2-user/fsdf-elvis
 
 # Update code base
 git pull
+
+# We were missing changes in versions of web content. This updates before copying to the web server
+bower update
 # Copy static content to Apache
 sudo cp -rf dist/* /var/www/html
 
