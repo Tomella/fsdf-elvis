@@ -1638,6 +1638,8 @@ L.Control.ElevationControl.Event = {
 }
 "use strict";
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 {
    var fileSize = function fileSize(size) {
       var meg = 1000 * 1000;
@@ -1794,18 +1796,9 @@ L.Control.ElevationControl.Event = {
             if (url) {
                // Order matches the $watch signature so be careful
                var urlWithParms = url.replace("{maxx}", clip.xMax.toFixed(5)).replace("{minx}", clip.xMin.toFixed(5)).replace("{maxy}", clip.yMax.toFixed(5)).replace("{miny}", clip.yMin.toFixed(5));
-               /*
-                                    urlWithParms += "&geoJSON=" + encodeURIComponent(JSON.stringify({
-                                       type: "Feature",
-                                       geometry: {
-                                         type: "Polygon",
-                                         coordinates: [
-                                           clip.polygon.map(item => [item.lat, item.lng])
-                                         ]
-                                       }
-                                    }));
-               */
-               urlWithParms += "&polygon=" + encodeURIComponent("POLYGON((" + clip.polygon.map(function (item) {
+               var polygon = clip.polygon;
+
+               urlWithParms += "&polygon=" + encodeURIComponent("POLYGON((" + [].concat(_toConsumableArray(polygon), [polygon[0]]).map(function (item) {
                   return item.lng.toFixed(5) + " " + item.lat.toFixed(5);
                }).join(",") + "))");
 

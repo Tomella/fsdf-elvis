@@ -143,19 +143,10 @@
                         .replace("{minx}", clip.xMin.toFixed(5))
                         .replace("{maxy}", clip.yMax.toFixed(5))
                         .replace("{miny}", clip.yMin.toFixed(5));
-/*
-                     urlWithParms += "&geoJSON=" + encodeURIComponent(JSON.stringify({
-                        type: "Feature",
-                        geometry: {
-                          type: "Polygon",
-                          coordinates: [
-                            clip.polygon.map(item => [item.lat, item.lng])
-                          ]
-                        }
-                     }));
-*/
+                     let polygon = clip.polygon;
+
                      urlWithParms += "&polygon=" + encodeURIComponent("POLYGON((" +
-                           clip.polygon.map(item => item.lng.toFixed(5) + " " + item.lat.toFixed(5)).join(",") + "))");
+                           [...polygon, polygon[0]].map(item => item.lng.toFixed(5) + " " + item.lat.toFixed(5)).join(",") + "))");
 
                      if(clip.metadata) {
                         urlWithParms += "&metadata=" + clip.metadata;

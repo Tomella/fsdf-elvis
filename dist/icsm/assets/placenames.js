@@ -267,24 +267,6 @@ function SearchService($http, $rootScope, $timeout, placenamesConfigService, map
 }
 "use strict";
 
-function getBounds(bounds, restrictTo) {
-   var fq = void 0;
-
-   if (restrictTo) {
-
-      var left = Math.max(bounds.getWest(), -180, restrictTo.getWest());
-      var right = Math.min(bounds.getEast(), 180, restrictTo.getEast());
-      var top = Math.min(bounds.getNorth(), 90, restrictTo.getNorth());
-      var bottom = Math.max(bounds.getSouth(), -90, restrictTo.getSouth());
-
-      fq = "location:[" + (bottom > top ? top : bottom) + "," + (left > right ? right : left) + " TO " + top + "," + right + "]";
-   } else {
-      fq = "location:[" + Math.max(bounds.getSouth(), -90) + "," + Math.max(bounds.getWest(), -180) + " TO " + Math.min(bounds.getNorth(), 90) + "," + Math.min(bounds.getEast(), 180) + "]";
-   }
-   return fq;
-}
-"use strict";
-
 {
    angular.module("placenames.summary", []).directive("placenamesSummary", ['$document', "$rootScope", "mapService", function ($document, $rootScope, mapService) {
       return {
@@ -328,6 +310,24 @@ function getBounds(bounds, restrictTo) {
          }
       };
    }]);
+}
+"use strict";
+
+function getBounds(bounds, restrictTo) {
+   var fq = void 0;
+
+   if (restrictTo) {
+
+      var left = Math.max(bounds.getWest(), -180, restrictTo.getWest());
+      var right = Math.min(bounds.getEast(), 180, restrictTo.getEast());
+      var top = Math.min(bounds.getNorth(), 90, restrictTo.getNorth());
+      var bottom = Math.max(bounds.getSouth(), -90, restrictTo.getSouth());
+
+      fq = "location:[" + (bottom > top ? top : bottom) + "," + (left > right ? right : left) + " TO " + top + "," + right + "]";
+   } else {
+      fq = "location:[" + Math.max(bounds.getSouth(), -90) + "," + Math.max(bounds.getWest(), -180) + " TO " + Math.min(bounds.getNorth(), 90) + "," + Math.min(bounds.getEast(), 180) + "]";
+   }
+   return fq;
 }
 angular.module("placenames.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("placenames/search/quicksearch.html","<div class=\"search-text\" style=\"color:black; width: 26em\" title=\"Start typing in the filter field. Up to twenty matches will be shown as you type with those nearest your map center at the top of the list. The results are restricted to your map\'s field of view so zooming the map in or out will change the number of results.\">\r\n   <div class=\"input-group input-group-sm\" style=\"width:100%\">\r\n      <input class=\"hide\"></input>\r\n      <input type=\"text\" ng-model=\"state.filter\" placeholder=\"Match by feature name...\" placenames-on-enter=\"search($item, $model, $label)\"\r\n         ng-model-options=\"{ debounce: 300}\" typeahead-on-select=\"search($item, $model, $label)\" typeahead-focus-first=\"false\"\r\n         typeahead-template-url=\"placenames/search/typeahead.html\" class=\"form-control\" typeahead-min-length=\"1\"\r\n         uib-typeahead=\"doc as doc.name for doc in loadDocs(state.filter)\" typeahead-loading=\"loadingLocations\" typeahead-no-results=\"noResults\"\r\n         placenames-clear>\r\n   </div>\r\n</div>");
 $templateCache.put("placenames/search/typeahead.html","<a placenames-options ng-mouseenter=\"enter()\" ng-mouseleave=\"leave()\"  tooltip-append-to-body=\"true\"\r\n               tooltip-placement=\"bottom\" uib-tooltip-html=\"match.model | placenamesTooltip\">\r\n   <span ng-bind-html=\"match.model.name | uibTypeaheadHighlight:query\"></span>\r\n   (<span ng-bind-html=\"match.model.authority + \' - \' + match.model.feature\"></span>)\r\n</a>");
