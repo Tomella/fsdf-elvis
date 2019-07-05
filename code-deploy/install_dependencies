@@ -9,7 +9,7 @@ FSDF_SERVICE_NAME=fsdf
 FSDF_SERVICE_TARGET=/etc/init.d/$FSDF_SERVICE_NAME
 FSDF_SERVICE_SOURCE=$PROJECT_DIR/code-deploy/fsdf
 
-sudo curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
+sudo curl --silent --location https://rpm.nodesource.com/setup_7.x | bash -
 sudo yum -y install nodejs
 sudo yum install -y gcc-c++ make
 sudo yum install -y httpd24
