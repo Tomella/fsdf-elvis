@@ -1786,17 +1786,21 @@ L.Control.ElevationControl.Event = {
             var url = conf.intersectsUrl;
             if (url) {
                // Order matches the $watch signature so be careful
-               var urlWithParms = url.replace("{maxx}", clip.xMax).replace("{minx}", clip.xMin).replace("{maxy}", clip.yMax).replace("{miny}", clip.yMin);
-
-               urlWithParms += "&geoJSON=" + encodeURIComponent(JSON.stringify({
-                  type: "Feature",
-                  geometry: {
-                     type: "Polygon",
-                     coordinates: [clip.polygon.map(function (item) {
-                        return [item.lat, item.lng];
-                     })]
-                  }
-               }));
+               var urlWithParms = url.replace("{maxx}", clip.xMax.toFixed(5)).replace("{minx}", clip.xMin.toFixed(5)).replace("{maxy}", clip.yMax.toFixed(5)).replace("{miny}", clip.yMin.toFixed(5));
+               /*
+                                    urlWithParms += "&geoJSON=" + encodeURIComponent(JSON.stringify({
+                                       type: "Feature",
+                                       geometry: {
+                                         type: "Polygon",
+                                         coordinates: [
+                                           clip.polygon.map(item => [item.lat, item.lng])
+                                         ]
+                                       }
+                                    }));
+               */
+               urlWithParms += "&polygon=" + encodeURIComponent("POLYGON((" + clip.polygon.map(function (item) {
+                  return item.lng.toFixed(5) + " " + item.lat.toFixed(5);
+               }).join(",") + "))");
 
                if (clip.metadata) {
                   urlWithParms += "&metadata=" + clip.metadata;
@@ -3892,25 +3896,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 'use strict';
 
 {
-   angular.module('icsm.state', []).directive("icsmStateToggle", ['downloadService', function (downloadService) {
-      return {
-         restrict: 'AE',
-         template: '<button ng-click="toggle(false)" ng-disabled="state.show" class="btn btn-default" title="Start downlaod selection."><i class="fa fa-lg fa-object-group"></i></button>',
-         link: function link(scope) {
-            downloadService.data().then(function (data) {
-               scope.state = data;
-            });
-
-            scope.toggle = function () {
-               scope.state.show = !scope.state.show;
-            };
-         }
-      };
-   }]);
-}
-'use strict';
-
-{
    angular.module("icsm.splash", []).directive('icsmSplash', ['$rootScope', '$uibModal', '$log', 'splashService', function ($rootScope, $uibModal, $log, splashService) {
       return {
          controller: ['$scope', 'splashService', function ($scope, splashService) {
@@ -4021,6 +4006,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
          });
          return response;
+      };
+   }]);
+}
+'use strict';
+
+{
+   angular.module('icsm.state', []).directive("icsmStateToggle", ['downloadService', function (downloadService) {
+      return {
+         restrict: 'AE',
+         template: '<button ng-click="toggle(false)" ng-disabled="state.show" class="btn btn-default" title="Start downlaod selection."><i class="fa fa-lg fa-object-group"></i></button>',
+         link: function link(scope) {
+            downloadService.data().then(function (data) {
+               scope.state = data;
+            });
+
+            scope.toggle = function () {
+               scope.state.show = !scope.state.show;
+            };
+         }
       };
    }]);
 }

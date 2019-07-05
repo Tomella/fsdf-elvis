@@ -139,11 +139,11 @@
                   if (url) {
                      // Order matches the $watch signature so be careful
                      let urlWithParms = url
-                        .replace("{maxx}", clip.xMax)
-                        .replace("{minx}", clip.xMin)
-                        .replace("{maxy}", clip.yMax)
-                        .replace("{miny}", clip.yMin);
-
+                        .replace("{maxx}", clip.xMax.toFixed(5))
+                        .replace("{minx}", clip.xMin.toFixed(5))
+                        .replace("{maxy}", clip.yMax.toFixed(5))
+                        .replace("{miny}", clip.yMin.toFixed(5));
+/*
                      urlWithParms += "&geoJSON=" + encodeURIComponent(JSON.stringify({
                         type: "Feature",
                         geometry: {
@@ -153,6 +153,9 @@
                           ]
                         }
                      }));
+*/
+                     urlWithParms += "&polygon=" + encodeURIComponent("POLYGON((" +
+                           clip.polygon.map(item => item.lng.toFixed(5) + " " + item.lat.toFixed(5)).join(",") + "))");
 
                      if(clip.metadata) {
                         urlWithParms += "&metadata=" + clip.metadata;
