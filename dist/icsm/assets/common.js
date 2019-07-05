@@ -68,6 +68,38 @@ under the License.
 "use strict";
 
 {
+
+   var versions = {
+      3: {
+         version: "3.0",
+         link: "https://creativecommons.org/licenses/by/3.0/au/"
+      },
+      4: {
+         version: "4.0",
+         link: "https://creativecommons.org/licenses/by/4.0/"
+      }
+   };
+
+   angular.module("common.cc", []).directive('commonCc', [function () {
+      return {
+         templateUrl: 'common/cc/cc.html',
+         scope: {
+            version: "=?"
+         },
+         link: function link(scope) {
+            if (!scope.version) {
+               scope.details = versions[4];
+            } else {
+               scope.details = versions[scope.version];
+            }
+            scope.template = 'common/cc/cctemplate.html';
+         }
+      };
+   }]);
+}
+"use strict";
+
+{
    var captured = function captured(twoDates) {
       var dates = twoDates.split(" - ");
       if (dates.length !== 2) {
@@ -263,38 +295,6 @@ under the License.
                map.removeLayer(lastFeature);
                lastFeature = null;
             }
-         }
-      };
-   }]);
-}
-"use strict";
-
-{
-
-   var versions = {
-      3: {
-         version: "3.0",
-         link: "https://creativecommons.org/licenses/by/3.0/au/"
-      },
-      4: {
-         version: "4.0",
-         link: "https://creativecommons.org/licenses/by/4.0/"
-      }
-   };
-
-   angular.module("common.cc", []).directive('commonCc', [function () {
-      return {
-         templateUrl: 'common/cc/cc.html',
-         scope: {
-            version: "=?"
-         },
-         link: function link(scope) {
-            if (!scope.version) {
-               scope.details = versions[4];
-            } else {
-               scope.details = versions[scope.version];
-            }
-            scope.template = 'common/cc/cctemplate.html';
          }
       };
    }]);

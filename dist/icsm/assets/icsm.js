@@ -388,12 +388,19 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
          link: function link(scope) {
             // yMax, yMin, xMax,xMin
 
+            $rootScope.$on('icsm.polygon.drawn', function (event, c) {
+               return setClip(c);
+            });
             $rootScope.$on('icsm.clip.drawn', function (event, c) {
+               return setClip(c);
+            });
+
+            function setClip(c) {
                scope.xMin = c.xMin;
                scope.yMin = c.yMin;
                scope.xMax = c.xMax;
                scope.yMax = c.yMax;
-            });
+            }
 
             scope.allowSearch = function () {
                return !isNan(scope.xMin) && !isNan(scope.xMax) && !isNan(scope.yMin) && !isNan(scope.yMax) && +scope.xMin !== +scope.xMax && +scope.yMin !== +scope.yMax;

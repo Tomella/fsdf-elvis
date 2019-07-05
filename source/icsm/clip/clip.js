@@ -73,12 +73,15 @@
             link: function (scope) {
                // yMax, yMin, xMax,xMin
 
-               $rootScope.$on('icsm.clip.drawn', function(event, c) {
+               $rootScope.$on('icsm.polygon.drawn', (event, c) => setClip(c));
+               $rootScope.$on('icsm.clip.drawn', (event, c) => setClip(c));
+
+               function setClip(c) {
                   scope.xMin = c.xMin;
                   scope.yMin = c.yMin;
                   scope.xMax = c.xMax;
                   scope.yMax = c.yMax;
-               });
+               }
 
                scope.allowSearch = () => !isNan(scope.xMin) && !isNan(scope.xMax) && !isNan(scope.yMin) && !isNan(scope.yMax) &&
                   (+scope.xMin) !== (+scope.xMax) && (+scope.yMin) !== (+scope.yMax);
