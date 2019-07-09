@@ -25,24 +25,22 @@
             };
          }])
 
-      .factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService', 'flashService', 'messageService',  "parametersService",
+      .factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService', 'flashService', 'messageService', "parametersService",
          function ($http, $q, $rootScope, $timeout, configService, flashService, messageService, parametersService) {
             let clipTimeout, notify;
             return {
                init: function () {
                   let notify = $q.defer();
-                  if(parametersService.hasValidBbox()) {
+                  if (parametersService.hasValidBbox()) {
                      send('Checking for data (' + parametersService.metadata + ')...');
                      getList(parametersService.clip);
                   }
 
-                  $rootScope.$on('icsm.clip.drawn', function (event, clip) {
+                  $rootScope.$on('icsm.clip.drawn', (event, clip) => {
                      send('Area drawn. Checking for data...');
                      checkSize(clip).then(function (message) {
                         if (message.code === "success") {
                            getList(clip);
-                        } else {
-                           // $rootScope.$broadcast('icsm.clip.draw', { message: "oversize" });
                         }
                      });
                   });
@@ -61,52 +59,38 @@
             function send(message, type, duration) {
                flashService.remove(notify);
 
-               if(message) {
-                  if(type === "error") {
+               if (message) {
+                  if (type === "error") {
                      messageService.error(message);
                   } else {
-                     notify = flashService.add( message, duration, true);
+                     notify = flashService.add(message, duration, true);
                   }
                }
-               /*
-
-               if (notify) {
-                  notify.notify({
-                     text: message,
-                     type: type,
-                     duration: duration
-                  });
-               }
-               */
             }
 
             function checkSize(clip) {
-               let deferred = $q.defer();
-               let result = drawn(clip);
-               if (result && result.code) {
-                  switch (result.code) {
-                     case "oversize":
-                        $timeout(function () {
-                           send("", "clear");
-                           send("The selected area is too large to process. Please restrict to approximately " +
-                              "1.5 degrees square.",
-                              "error");
-                           deferred.resolve(result);
-                        });
-                        break;
-                     case "undersize":
-                        $timeout(function () {
-                           send("", "clear");
-                           send("X Min and Y Min should be smaller than X Max and Y Max, respectively. " +
-                              "Please update the drawn area.", "error");
-                           deferred.resolve(result);
-                        });
-                        break;
-                     default:
-                        return $q.when(result);
+               return $q((resolve) => {
+                  let result = drawn(clip);
+                  if (result && result.code) {
+                     switch (result.code) {
+                        case "oversize":
+                           $timeout(function () {
+                              send("", "clear");
+                              send("The selected area is too large to process. Please restrict to approximately " +
+                                 "1.5 degrees square.",
+                                 "error");
+                           });
+                           break;
+                        case "undersize":
+                           $timeout(function () {
+                              send("", "clear");
+                              send("X Min and Y Min should be smaller than X Max and Y Max, respectively. " +
+                                 "Please update the drawn area.", "error");
+                           });
+                     }
+                     resolve(result);
                   }
-               }
-               return deferred.promise;
+               });
             }
 
             function underSizeLimit(clip) {
@@ -171,7 +155,7 @@
                         .replace("{maxy}", clip.yMax)
                         .replace("{miny}", clip.yMin);
 
-                     if(clip.metadata) {
+                     if (clip.metadata) {
                         urlWithParms += "&metadata=" + clip.metadata;
                      }
 
@@ -215,7 +199,7 @@
 
                function decorateItem(item) {
                   item.fileSize = fileSize(item.file_size);
-                  if(item.product) {
+                  if (item.product) {
                      //  "bbox" : "113,-44,154,-10"
                      var arr = item.bbox.split(",").map(num => +num);
                      item.bbox = [

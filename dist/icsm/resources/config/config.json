@@ -138,19 +138,15 @@
                ]
             },
             "pseudoBaseLayer": true,
-            "type": [
-               "TileLayer"
-            ],
+            "type": ["TileLayer", "WMS"],
             "key": "indexesTile",
             "parameters": [
-               "https://s3-ap-southeast-2.amazonaws.com/fsdf.elevation.tile.cache/DEM/{z}/{x}/{y}.png",
+               "http://ec2-13-236-177-25.ap-southeast-2.compute.amazonaws.com:8080/geoserver/dem/wms",
                {
-                  "tms": false,
-                  "maxZoom": 11,
-                  "bounds": [
-                     [-61, 88],
-                     [-7, 174]
-                 ]
+                  "layers" : "dem:dem",
+                  "format" : "image/png",
+                  "transparent" : true,
+                  "opacity" : 0.7
                }
             ],
             "addLayerControl": false
@@ -185,6 +181,33 @@
             "addLayerControl": false
          },
          {
+            "name": "Imagery",
+            "coverage": {
+               "thumb": "icsm/resources/img/imagery_thumb.png",
+               "types": [
+                  {
+                     "name": "Coverage",
+                     "color": "#660033"
+                  }
+               ]
+            },
+            "pseudoBaseLayer": true,
+            "type": ["TileLayer", "WMS"],
+            "key": "indexesTile",
+            "parameters": [
+               "http://ec2-13-236-177-25.ap-southeast-2.compute.amazonaws.com:8080/geoserver/imagery/wms",
+               {
+                  "layers" : "imagery:imagery",
+                  "format" : "image/png",
+                  "transparent" : true,
+                  "opacity" : 0.7
+               }
+            ],
+            "addLayerControl": false
+         },
+
+
+         {
             "name": "Bathymetry",
             "coverage": {
                "thumb": "icsm/resources/img/bathymetry_thumb.png",
@@ -200,19 +223,15 @@
                ]
             },
             "pseudoBaseLayer": true,
-            "type": [
-               "TileLayer"
-            ],
+            "type": ["TileLayer", "WMS"],
             "key": "indexesTile",
             "parameters": [
-               "https://s3-ap-southeast-2.amazonaws.com/fsdf.elevation.tile.cache/BATHYMETRY/{z}/{x}/{y}.png",
+               "http://ec2-13-236-177-25.ap-southeast-2.compute.amazonaws.com:8080/geoserver/bathymetry/wms",
                {
-                  "tms": false,
-                  "maxZoom": 11,
-                  "bounds": [
-                     [-61, 88],
-                     [-7, 174]
-                 ]
+                  "layers" : "bathymetry:bathymetry",
+                  "format" : "image/png",
+                  "transparent" : true,
+                  "opacity" : 0.7
                }
             ],
             "addLayerControl": false

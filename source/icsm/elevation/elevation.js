@@ -8,8 +8,7 @@
                   return $q(function (resolve, reject) {
                      configService.getConfig("elevation").then(config => {
                         const delta = 0.000001;
-                        let lat = latlng.lat;
-                        let lng = latlng.lng;
+                        let [lat, lng] = latlng;
                         let bbox = [lng - delta, lat - delta, lng + delta, lat + delta];
                         let url = config.elevationTemplate.replace("{bbox}", bbox.join(","));
 

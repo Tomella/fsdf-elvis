@@ -1,5 +1,4 @@
 {
-
    angular.module('icsm.contributors', [])
 
       .directive("icsmContributors", ["$interval", "contributorsService", function ($interval, contributorsService) {

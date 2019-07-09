@@ -77,11 +77,11 @@ function CoverageService(configService, mapService) {
 
                mapService.getMap().then(map => {
                   state.map = map;
-                  state.lookup = {};
-                  state.layers.forEach(element => {
-                     state.lookup[element.name] = element;
+                  state.lookup = state.layers.reduce((acc, element) => {
+                     acc[element.name] = element;
                      element.visible = map.hasLayer(element.layer);
-                  });
+                     return acc;
+                  }, {});
                });
             });
          }

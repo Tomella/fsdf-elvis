@@ -65,7 +65,7 @@
             };
          }])
 
-      .directive('icsmManualClip', ["$rootScope", "clipService", function ($rootScope, clipService) {
+      .directive('icsmManualClip', ["$rootScope", "clipService", function ($rootScope) {
          return {
             restrict: 'AE',
             templateUrl: 'icsm/clip/manual.html',
@@ -162,7 +162,6 @@
 
 
             $rootScope.$on("polygon.drawn", (event, data) => {
-               console.log("*********************************** POLLY ****************************", data);
                $rootScope.$broadcast('icsm.poly.draw', data[0]);  // Let people know it is drawn
                let clip = service.data.clip;
                let polyData = data[0];
