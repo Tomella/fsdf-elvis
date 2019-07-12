@@ -372,22 +372,6 @@ under the License.
 'use strict';
 
 {
-   angular.module('common.reset', []).directive('resetPage', function ($window) {
-      return {
-         restrict: 'AE',
-         scope: {},
-         templateUrl: 'common/reset/reset.html',
-         controller: ['$scope', function ($scope) {
-            $scope.reset = function () {
-               $window.location.reload();
-            };
-         }]
-      };
-   });
-}
-'use strict';
-
-{
 	angular.module('common.altthemes', [])
 
 	/**
@@ -540,6 +524,22 @@ under the License.
       return {};
    }]);
 }
+'use strict';
+
+{
+   angular.module('common.reset', []).directive('resetPage', function ($window) {
+      return {
+         restrict: 'AE',
+         scope: {},
+         templateUrl: 'common/reset/reset.html',
+         controller: ['$scope', function ($scope) {
+            $scope.reset = function () {
+               $window.location.reload();
+            };
+         }]
+      };
+   });
+}
 "use strict";
 
 (function (angular) {
@@ -570,206 +570,6 @@ under the License.
       };
    }]);
 })(angular);
-'use strict';
-
-{
-
-    angular.module('common.slider', []).directive('slider', ['$parse', '$timeout', function ($parse, $timeout) {
-        return {
-            restrict: 'AE',
-            replace: true,
-            template: '<div><input class="slider-input" type="text" /></div>',
-            require: 'ngModel',
-            scope: {
-                max: "=",
-                min: "=",
-                step: "=",
-                value: "=",
-                ngModel: '=',
-                range: '=',
-                enabled: '=',
-                sliderid: '=',
-                formatter: '&',
-                onStartSlide: '&',
-                onStopSlide: '&',
-                onSlide: '&'
-            },
-            link: function link($scope, element, attrs, ngModelCtrl, $compile) {
-                var ngModelDeregisterFn, ngDisabledDeregisterFn;
-
-                initSlider();
-
-                function initSlider() {
-                    var options = {};
-
-                    function setOption(key, value, defaultValue) {
-                        options[key] = value || defaultValue;
-                    }
-
-                    function setFloatOption(key, value, defaultValue) {
-                        options[key] = value ? parseFloat(value) : defaultValue;
-                    }
-
-                    function setBooleanOption(key, value, defaultValue) {
-                        options[key] = value ? value + '' === 'true' : defaultValue;
-                    }
-
-                    function getArrayOrValue(value) {
-                        return angular.isString(value) && value.indexOf("[") === 0 ? angular.fromJson(value) : value;
-                    }
-
-                    setOption('id', $scope.sliderid);
-                    setOption('orientation', attrs.orientation, 'horizontal');
-                    setOption('selection', attrs.selection, 'before');
-                    setOption('handle', attrs.handle, 'round');
-                    setOption('tooltip', attrs.uiTooltip, 'show');
-                    setOption('tooltipseparator', attrs.tooltipseparator, ':');
-
-                    setFloatOption('min', $scope.min, 0);
-                    setFloatOption('max', $scope.max, 10);
-                    setFloatOption('step', $scope.step, 1);
-                    var strNbr = options.step + '';
-                    var decimals = strNbr.substring(strNbr.lastIndexOf('.') + 1);
-                    setFloatOption('precision', attrs.precision, decimals);
-
-                    setBooleanOption('tooltip_split', attrs.tooltipsplit, false);
-                    setBooleanOption('enabled', attrs.enabled, true);
-                    setBooleanOption('naturalarrowkeys', attrs.naturalarrowkeys, false);
-                    setBooleanOption('reversed', attrs.reversed, false);
-
-                    setBooleanOption('range', $scope.range, false);
-                    if (options.range) {
-                        if (angular.isArray($scope.value)) {
-                            options.value = $scope.value;
-                        } else if (angular.isString($scope.value)) {
-                            options.value = getArrayOrValue($scope.value);
-                            if (!angular.isArray(options.value)) {
-                                var value = parseFloat($scope.value);
-                                if (isNaN(value)) value = 5;
-
-                                if (value < $scope.min) {
-                                    value = $scope.min;
-                                    options.value = [value, options.max];
-                                } else if (value > $scope.max) {
-                                    value = $scope.max;
-                                    options.value = [options.min, value];
-                                } else {
-                                    options.value = [options.min, options.max];
-                                }
-                            }
-                        } else {
-                            options.value = [options.min, options.max]; // This is needed, because of value defined at $.fn.slider.defaults - default value 5 prevents creating range slider
-                        }
-                        $scope.ngModel = options.value; // needed, otherwise turns value into [null, ##]
-                    } else {
-                        setFloatOption('value', $scope.value, 5);
-                    }
-
-                    if ($scope.formatter) options.formatter = $scope.$eval($scope.formatter);
-
-                    var slider = $(element).find(".slider-input").eq(0);
-
-                    // check if slider jQuery plugin exists
-                    if ($.fn.slider) {
-                        // adding methods to jQuery slider plugin prototype
-                        $.fn.slider.constructor.prototype.disable = function () {
-                            this.picker.off();
-                        };
-                        $.fn.slider.constructor.prototype.enable = function () {
-                            this.picker.on();
-                        };
-
-                        // destroy previous slider to reset all options
-                        slider.slider(options);
-                        slider.slider('destroy');
-                        slider.slider(options);
-
-                        // everything that needs slider element
-                        var updateEvent = getArrayOrValue(attrs.updateevent);
-                        if (angular.isString(updateEvent)) {
-                            // if only single event name in string
-                            updateEvent = [updateEvent];
-                        } else {
-                            // default to slide event
-                            updateEvent = ['slide'];
-                        }
-                        angular.forEach(updateEvent, function (sliderEvent) {
-                            slider.on(sliderEvent, function (ev) {
-                                ngModelCtrl.$setViewValue(ev.value);
-                                $timeout(function () {
-                                    $scope.$apply();
-                                });
-                            });
-                        });
-                        slider.on('change', function (ev) {
-                            ngModelCtrl.$setViewValue(ev.value.newValue);
-                            $timeout(function () {
-                                $scope.$apply();
-                            });
-                        });
-
-                        // Event listeners
-                        var sliderEvents = {
-                            slideStart: 'onStartSlide',
-                            slide: 'onSlide',
-                            slideStop: 'onStopSlide'
-                        };
-                        angular.forEach(sliderEvents, function (sliderEventAttr, sliderEvent) {
-                            slider.on(sliderEvent, function (ev) {
-
-                                if ($scope[sliderEventAttr]) {
-                                    var invoker = $parse(attrs[sliderEventAttr]);
-                                    invoker($scope.$parent, { $event: ev, value: ev.value });
-
-                                    $timeout(function () {
-                                        $scope.$apply();
-                                    });
-                                }
-                            });
-                        });
-
-                        // deregister ngDisabled watcher to prevent memory leaks
-                        if (angular.isFunction(ngDisabledDeregisterFn)) {
-                            ngDisabledDeregisterFn();
-                            ngDisabledDeregisterFn = null;
-                        }
-                        if (angular.isDefined(attrs.ngDisabled)) {
-                            ngDisabledDeregisterFn = $scope.$watch(attrs.ngDisabled, function (value) {
-                                if (value) {
-                                    slider.slider('disable');
-                                } else {
-                                    slider.slider('enable');
-                                }
-                            });
-                        }
-                        // deregister ngModel watcher to prevent memory leaks
-                        if (angular.isFunction(ngModelDeregisterFn)) ngModelDeregisterFn();
-                        ngModelDeregisterFn = $scope.$watch('ngModel', function (value) {
-                            slider.slider('setValue', value);
-                        });
-                    }
-
-                    window.slip = slider;
-
-                    $scope.$watch("enabled", function (value) {
-                        if (value) {
-                            slider.slider('disable');
-                        } else {
-                            slider.slider('enable');
-                        }
-                    });
-                }
-
-                var watchers = ['min', 'max', 'step', 'range'];
-                angular.forEach(watchers, function (prop) {
-                    $scope.$watch(prop, function () {
-                        initSlider();
-                    });
-                });
-            }
-        };
-    }]);
-}
 'use strict';
 
 {
@@ -996,6 +796,206 @@ under the License.
 }
 'use strict';
 
+{
+
+    angular.module('common.slider', []).directive('slider', ['$parse', '$timeout', function ($parse, $timeout) {
+        return {
+            restrict: 'AE',
+            replace: true,
+            template: '<div><input class="slider-input" type="text" /></div>',
+            require: 'ngModel',
+            scope: {
+                max: "=",
+                min: "=",
+                step: "=",
+                value: "=",
+                ngModel: '=',
+                range: '=',
+                enabled: '=',
+                sliderid: '=',
+                formatter: '&',
+                onStartSlide: '&',
+                onStopSlide: '&',
+                onSlide: '&'
+            },
+            link: function link($scope, element, attrs, ngModelCtrl, $compile) {
+                var ngModelDeregisterFn, ngDisabledDeregisterFn;
+
+                initSlider();
+
+                function initSlider() {
+                    var options = {};
+
+                    function setOption(key, value, defaultValue) {
+                        options[key] = value || defaultValue;
+                    }
+
+                    function setFloatOption(key, value, defaultValue) {
+                        options[key] = value ? parseFloat(value) : defaultValue;
+                    }
+
+                    function setBooleanOption(key, value, defaultValue) {
+                        options[key] = value ? value + '' === 'true' : defaultValue;
+                    }
+
+                    function getArrayOrValue(value) {
+                        return angular.isString(value) && value.indexOf("[") === 0 ? angular.fromJson(value) : value;
+                    }
+
+                    setOption('id', $scope.sliderid);
+                    setOption('orientation', attrs.orientation, 'horizontal');
+                    setOption('selection', attrs.selection, 'before');
+                    setOption('handle', attrs.handle, 'round');
+                    setOption('tooltip', attrs.uiTooltip, 'show');
+                    setOption('tooltipseparator', attrs.tooltipseparator, ':');
+
+                    setFloatOption('min', $scope.min, 0);
+                    setFloatOption('max', $scope.max, 10);
+                    setFloatOption('step', $scope.step, 1);
+                    var strNbr = options.step + '';
+                    var decimals = strNbr.substring(strNbr.lastIndexOf('.') + 1);
+                    setFloatOption('precision', attrs.precision, decimals);
+
+                    setBooleanOption('tooltip_split', attrs.tooltipsplit, false);
+                    setBooleanOption('enabled', attrs.enabled, true);
+                    setBooleanOption('naturalarrowkeys', attrs.naturalarrowkeys, false);
+                    setBooleanOption('reversed', attrs.reversed, false);
+
+                    setBooleanOption('range', $scope.range, false);
+                    if (options.range) {
+                        if (angular.isArray($scope.value)) {
+                            options.value = $scope.value;
+                        } else if (angular.isString($scope.value)) {
+                            options.value = getArrayOrValue($scope.value);
+                            if (!angular.isArray(options.value)) {
+                                var value = parseFloat($scope.value);
+                                if (isNaN(value)) value = 5;
+
+                                if (value < $scope.min) {
+                                    value = $scope.min;
+                                    options.value = [value, options.max];
+                                } else if (value > $scope.max) {
+                                    value = $scope.max;
+                                    options.value = [options.min, value];
+                                } else {
+                                    options.value = [options.min, options.max];
+                                }
+                            }
+                        } else {
+                            options.value = [options.min, options.max]; // This is needed, because of value defined at $.fn.slider.defaults - default value 5 prevents creating range slider
+                        }
+                        $scope.ngModel = options.value; // needed, otherwise turns value into [null, ##]
+                    } else {
+                        setFloatOption('value', $scope.value, 5);
+                    }
+
+                    if ($scope.formatter) options.formatter = $scope.$eval($scope.formatter);
+
+                    var slider = $(element).find(".slider-input").eq(0);
+
+                    // check if slider jQuery plugin exists
+                    if ($.fn.slider) {
+                        // adding methods to jQuery slider plugin prototype
+                        $.fn.slider.constructor.prototype.disable = function () {
+                            this.picker.off();
+                        };
+                        $.fn.slider.constructor.prototype.enable = function () {
+                            this.picker.on();
+                        };
+
+                        // destroy previous slider to reset all options
+                        slider.slider(options);
+                        slider.slider('destroy');
+                        slider.slider(options);
+
+                        // everything that needs slider element
+                        var updateEvent = getArrayOrValue(attrs.updateevent);
+                        if (angular.isString(updateEvent)) {
+                            // if only single event name in string
+                            updateEvent = [updateEvent];
+                        } else {
+                            // default to slide event
+                            updateEvent = ['slide'];
+                        }
+                        angular.forEach(updateEvent, function (sliderEvent) {
+                            slider.on(sliderEvent, function (ev) {
+                                ngModelCtrl.$setViewValue(ev.value);
+                                $timeout(function () {
+                                    $scope.$apply();
+                                });
+                            });
+                        });
+                        slider.on('change', function (ev) {
+                            ngModelCtrl.$setViewValue(ev.value.newValue);
+                            $timeout(function () {
+                                $scope.$apply();
+                            });
+                        });
+
+                        // Event listeners
+                        var sliderEvents = {
+                            slideStart: 'onStartSlide',
+                            slide: 'onSlide',
+                            slideStop: 'onStopSlide'
+                        };
+                        angular.forEach(sliderEvents, function (sliderEventAttr, sliderEvent) {
+                            slider.on(sliderEvent, function (ev) {
+
+                                if ($scope[sliderEventAttr]) {
+                                    var invoker = $parse(attrs[sliderEventAttr]);
+                                    invoker($scope.$parent, { $event: ev, value: ev.value });
+
+                                    $timeout(function () {
+                                        $scope.$apply();
+                                    });
+                                }
+                            });
+                        });
+
+                        // deregister ngDisabled watcher to prevent memory leaks
+                        if (angular.isFunction(ngDisabledDeregisterFn)) {
+                            ngDisabledDeregisterFn();
+                            ngDisabledDeregisterFn = null;
+                        }
+                        if (angular.isDefined(attrs.ngDisabled)) {
+                            ngDisabledDeregisterFn = $scope.$watch(attrs.ngDisabled, function (value) {
+                                if (value) {
+                                    slider.slider('disable');
+                                } else {
+                                    slider.slider('enable');
+                                }
+                            });
+                        }
+                        // deregister ngModel watcher to prevent memory leaks
+                        if (angular.isFunction(ngModelDeregisterFn)) ngModelDeregisterFn();
+                        ngModelDeregisterFn = $scope.$watch('ngModel', function (value) {
+                            slider.slider('setValue', value);
+                        });
+                    }
+
+                    window.slip = slider;
+
+                    $scope.$watch("enabled", function (value) {
+                        if (value) {
+                            slider.slider('disable');
+                        } else {
+                            slider.slider('enable');
+                        }
+                    });
+                }
+
+                var watchers = ['min', 'max', 'step', 'range'];
+                angular.forEach(watchers, function (prop) {
+                    $scope.$watch(prop, function () {
+                        initSlider();
+                    });
+                });
+            }
+        };
+    }]);
+}
+'use strict';
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1039,6 +1039,6 @@ var TerrainLoader = function () {
 angular.module("common.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("common/cc/cc.html","<button type=\"button\" class=\"undecorated\" title=\"View CCBy {{details.version}} licence details\"\r\n      popover-trigger=\"outsideClick\"\r\n      uib-popover-template=\"template\" popover-placement=\"bottom\" popover-append-to-body=\"true\">\r\n	<i ng-class=\"{active:data.isWmsShowing}\" class=\"fa fa-lg fa-gavel\"></i>\r\n</button>");
 $templateCache.put("common/cc/cctemplate.html","<div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-12\">\r\n         <a target=\"_blank\" ng-href=\"{{details.link}}\">Creative Commons Attribution {{details.version}} </a>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-2\">\r\n         <span class=\"fa-stack\" aria-hidden=\"true\">\r\n         <i class=\"fa fa-check-circle-o fa-stack-2x\" aria-hidden=\"true\"></i>\r\n      </span>\r\n      </div>\r\n      <div class=\"col-md-10\">\r\n         You may use this work for commercial purposes.\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-2\">\r\n         <span class=\"fa-stack\" aria-hidden=\"true\">\r\n         <i class=\"fa fa-circle-o fa-stack-2x\"></i>\r\n         <i class=\"fa fa-female fa-stack-1x\"></i>\r\n      </span>\r\n      </div>\r\n      <div class=\"col-md-10\">\r\n         You must attribute the creator in your own works.\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("common/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n   <div class=\"navbar-header\">\r\n\r\n      <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".ga-header-collapse\">\r\n         <span class=\"sr-only\">Toggle navigation</span>\r\n         <span class=\"icon-bar\"></span>\r\n         <span class=\"icon-bar\"></span>\r\n         <span class=\"icon-bar\"></span>\r\n      </button>\r\n\r\n      <a href=\"/\" class=\"appTitle visible-xs\">\r\n         <h1 style=\"font-size:120%\">{{heading}}</h1>\r\n      </a>\r\n   </div>\r\n   <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n      <ul class=\"nav navbar-nav\">\r\n         <li class=\"hidden-xs\">\r\n            <a href=\"https://www.icsm.gov.au/\" target=\"_blank\" class=\"icsm-logo\"\r\n               style=\"margin-top: -4px;display:inline-block;\">\r\n               <img alt=\"ICSM - ANZLIC Committee on Surveying &amp; Mapping\" class=\"header-logo\"\r\n                  src=\"icsm/resources/img/icsm-logo-sml.gif\">\r\n            </a>\r\n            <a href=\"/\" style=\"margin-top:8px; padding:5px;display:inline-block\">\r\n               <h1 class=\"applicationTitle\">{{heading}}</h1>\r\n            </a>\r\n         </li>\r\n      </ul>\r\n      <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n         <li common-navigation role=\"menuitem\" current=\"current\" style=\"padding-right:10px\"></li>\r\n         <li mars-version-display role=\"menuitem\"></li>\r\n         <li style=\"width:10px\"></li>\r\n      </ul>\r\n   </div>\r\n   <!--/.nav-collapse -->\r\n</div>\r\n\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n   <div class=\"col-md-12\">\r\n      <div class=\"strap-blue\">\r\n      </div>\r\n      <div class=\"strap-white\">\r\n      </div>\r\n      <div class=\"strap-red\">\r\n      </div>\r\n   </div>\r\n</div>");
-$templateCache.put("common/reset/reset.html","<button type=\"button\" class=\"map-tool-toggle-btn\" ng-click=\"reset()\" title=\"Reset page\">\r\n   <span class=\"hidden-sm\">Reset</span>\r\n   <i class=\"fa fa-lg fa-refresh\"></i>\r\n</button>");
 $templateCache.put("common/navigation/altthemes.html","<span class=\"altthemes-container\">\r\n	<span ng-repeat=\"item in themes | altthemesMatchCurrent : current\">\r\n       <a title=\"{{item.label}}\" ng-href=\"{{item.url}}\" class=\"altthemesItemCompact\" target=\"_blank\">\r\n         <span class=\"altthemes-icon\" ng-class=\"item.className\"></span>\r\n       </a>\r\n    </li>\r\n</span>");
+$templateCache.put("common/reset/reset.html","<button type=\"button\" class=\"map-tool-toggle-btn\" ng-click=\"reset()\" title=\"Reset page\">\r\n   <span class=\"hidden-sm\">Reset</span>\r\n   <i class=\"fa fa-lg fa-refresh\"></i>\r\n</button>");
 $templateCache.put("common/side-panel/trigger.html","<button ng-click=\"toggle()\" type=\"button\" class=\"map-tool-toggle-btn\">\r\n   <span class=\"hidden-sm\">{{name}}</span>\r\n   <ng-transclude></ng-transclude>\r\n   <i class=\"fa fa-lg\" ng-class=\"iconClass\"></i>\r\n</button>");}]);

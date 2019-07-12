@@ -134,6 +134,10 @@
                   {
                      "name": "1 Second",
                      "color": "#ffffcc"
+                  },
+                  {
+                     "name": "Restricted",
+                     "color": "#f01405"
                   }
                ]
             },
@@ -157,8 +161,12 @@
                "thumb": "icsm/resources/img/point_cloud_thumb.png",
                "types": [
                   {
-                     "name": "Point Cloud",
+                     "name": "Point Cloud Area",
                      "color": "#9933FF"
+                  },
+                  {
+                     "name": "Restricted",
+                     "color": "#F01405"
                   }
                ]
             },
@@ -182,8 +190,12 @@
                "thumb": "icsm/resources/img/imagery_thumb.png",
                "types": [
                   {
-                     "name": "Coverage",
+                     "name": "2Km",
                      "color": "#660033"
+                  },
+                  {
+                     "name": "1Km",
+                     "color": "#990033"
                   }
                ]
             },

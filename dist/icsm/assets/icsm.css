@@ -861,42 +861,6 @@ img.elvis-logo {
   top: 10px;
   z-index: 3;
 }
-.preview-container {
-  position: fixed;
-  display: block;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 10000;
-}
-
-.preview-blocker {
-  background-color: black;
-  z-index: 0;
-  position: absolute;
-  opacity: 0.93;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-}
-
-.preview-image {
-  position: absolute;
-  max-width: 80%;
-  max-height: 80%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.preview-button-container {
-  position: absolute;
-  right: 10px;
-  z-index: 1;
-  top: 20px;
-}
 .leaflet-control-elevation {
   background-image: url("../../../icsm/resources/img/mountain24.png");
 }
@@ -937,6 +901,42 @@ img.elvis-logo {
   width: 7em;
   font-weight: bold;
   display: inline-block;
+}
+.preview-container {
+  position: fixed;
+  display: block;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+}
+
+.preview-blocker {
+  background-color: black;
+  z-index: 0;
+  position: absolute;
+  opacity: 0.93;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.preview-image {
+  position: absolute;
+  max-width: 80%;
+  max-height: 80%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.preview-button-container {
+  position: absolute;
+  right: 10px;
+  z-index: 1;
+  top: 20px;
 }
 .product-valid {
   color: green;
@@ -1314,6 +1314,22 @@ i.fa.active {
   height: 30px;
   font-size: 13px;
 }
+.downloadPane {
+  padding-left: 0px !important;
+  padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 10px;
+  overflow: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
+}
 .start-content-container {
   position: fixed;
   top: 95px;
@@ -1376,20 +1392,4 @@ i.fa.active {
 
 .select-land {
   background-position: -675px;
-}
-.downloadPane {
-  padding-left: 0px !important;
-  padding-right: 5px !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 10px;
-  overflow: hidden;
-}
-
-.downloadCont {
-  position: fixed;
-  right: 0;
-  bottom: 8px;
 }
