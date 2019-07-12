@@ -1,3 +1,12 @@
+.leaflet-popup {
+  position: absolute;
+  text-align: center;
+}
+
+.fi-popup hr {
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
 .nav-icons {
   margin-top: 7px !important;
 }
@@ -32,15 +41,6 @@
 
 .common-header {
   background-color: white;
-}
-.leaflet-popup {
-  position: absolute;
-  text-align: center;
-}
-
-.fi-popup hr {
-  margin-top: 3px;
-  margin-bottom: 3px;
 }
 .common-legend {
   position: abssolute;
@@ -594,6 +594,74 @@ button.clip-btn:hover div {
   /* the transition is defined in the active class */
   transition: 1s linear all;
 }
+.contributors {
+  margin: 2px;
+  padding: 10px;
+  padding-left: 8px;
+  position: fixed;
+  top: 70px;
+  right: 1px;
+  opacity: 0.95;
+  z-index: 1300;
+  background-color: white;
+  white-space: nowrap;
+  text-align: center;
+  -webkit-transition: height 1s;
+  /* Safari */
+  transition: height 1s;
+}
+
+img.contributor-logo {
+  height: 70px;
+}
+
+.contributors img {
+  -webkit-transition: height 1s;
+  /* Safari */
+  transition: height 1s;
+}
+
+.contributors.transitioned-up img {
+  height: 0;
+}
+
+.contributors.transitioned-up .contributors-unstick {
+  display: none;
+}
+
+.contributors.transitioned-down {
+  border: 1px solid gray;
+  border-radius: 3px;
+}
+
+.transitioned-up {
+  height: 0px;
+  border: 0 none;
+  margin: 0;
+  padding: 0;
+}
+
+.contributors.transitioned-up a {
+  height: 0px;
+  border: 0 none;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+}
+
+.contributors-unstick {
+  vertical-align: top;
+  font-weight: bold;
+}
+
+.contributors-link {
+  font-weight: bold;
+}
+
+.elevation-and-depth {
+  padding-left: 12px;
+  padding-right: 12px;
+}
 .coverage {
   margin: 2px;
   padding: 10px;
@@ -670,74 +738,6 @@ button.clip-btn:hover div {
   padding-left: 10px;
   border: 1px solid gray;
   border-radius: 2px;
-}
-.contributors {
-  margin: 2px;
-  padding: 10px;
-  padding-left: 8px;
-  position: fixed;
-  top: 70px;
-  right: 1px;
-  opacity: 0.95;
-  z-index: 1300;
-  background-color: white;
-  white-space: nowrap;
-  text-align: center;
-  -webkit-transition: height 1s;
-  /* Safari */
-  transition: height 1s;
-}
-
-img.contributor-logo {
-  height: 70px;
-}
-
-.contributors img {
-  -webkit-transition: height 1s;
-  /* Safari */
-  transition: height 1s;
-}
-
-.contributors.transitioned-up img {
-  height: 0;
-}
-
-.contributors.transitioned-up .contributors-unstick {
-  display: none;
-}
-
-.contributors.transitioned-down {
-  border: 1px solid gray;
-  border-radius: 3px;
-}
-
-.transitioned-up {
-  height: 0px;
-  border: 0 none;
-  margin: 0;
-  padding: 0;
-}
-
-.contributors.transitioned-up a {
-  height: 0px;
-  border: 0 none;
-  margin: 0;
-  padding: 0;
-  border-radius: 0;
-}
-
-.contributors-unstick {
-  vertical-align: top;
-  font-weight: bold;
-}
-
-.contributors-link {
-  font-weight: bold;
-}
-
-.elevation-and-depth {
-  padding-left: 12px;
-  padding-right: 12px;
 }
 img.elvis-logo {
   height: 75px;
@@ -861,6 +861,42 @@ img.elvis-logo {
   top: 10px;
   z-index: 3;
 }
+.preview-container {
+  position: fixed;
+  display: block;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+}
+
+.preview-blocker {
+  background-color: black;
+  z-index: 0;
+  position: absolute;
+  opacity: 0.93;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.preview-image {
+  position: absolute;
+  max-width: 80%;
+  max-height: 80%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.preview-button-container {
+  position: absolute;
+  right: 10px;
+  z-index: 1;
+  top: 20px;
+}
 .leaflet-control-elevation {
   background-image: url("../../../icsm/resources/img/mountain24.png");
 }
@@ -902,42 +938,6 @@ img.elvis-logo {
   font-weight: bold;
   display: inline-block;
 }
-.preview-container {
-  position: fixed;
-  display: block;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 10000;
-}
-
-.preview-blocker {
-  background-color: black;
-  z-index: 0;
-  position: absolute;
-  opacity: 0.93;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-}
-
-.preview-image {
-  position: absolute;
-  max-width: 80%;
-  max-height: 80%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.preview-button-container {
-  position: absolute;
-  right: 10px;
-  z-index: 1;
-  top: 20px;
-}
 .product-valid {
   color: green;
 }
@@ -959,6 +959,38 @@ img.elvis-logo {
 
 .product-restrict {
   padding-bottom: 8px;
+}
+.reviewing-odd {
+  background-color: #eeeeee;
+}
+
+.row.reviewing-divider {
+  border-top: 1px solid lightgray;
+  padding-top: 5px;
+  margin-top: 5px;
+}
+
+.reviewing-datasets {
+  max-height: 450px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-height: 750px) {
+  .reviewing-datasets {
+    max-height: 350px;
+  }
+}
+
+@media (max-height: 650px) {
+  .reviewing-datasets {
+    max-height: 250px;
+  }
+}
+
+.exclude {
+  color: #777777;
+  text-decoration: line-through;
 }
 .continue-container {
   padding: 4px;
@@ -1104,38 +1136,6 @@ img.elvis-logo {
   bottom: 0;
   left: 0;
   right: 0;
-}
-.reviewing-odd {
-  background-color: #eeeeee;
-}
-
-.row.reviewing-divider {
-  border-top: 1px solid lightgray;
-  padding-top: 5px;
-  margin-top: 5px;
-}
-
-.reviewing-datasets {
-  max-height: 450px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-@media (max-height: 750px) {
-  .reviewing-datasets {
-    max-height: 350px;
-  }
-}
-
-@media (max-height: 650px) {
-  .reviewing-datasets {
-    max-height: 250px;
-  }
-}
-
-.exclude {
-  color: #777777;
-  text-decoration: line-through;
 }
 .selectContainer {
   width: 100%;
@@ -1314,22 +1314,6 @@ i.fa.active {
   height: 30px;
   font-size: 13px;
 }
-.downloadPane {
-  padding-left: 0px !important;
-  padding-right: 5px !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 10px;
-  overflow: hidden;
-}
-
-.downloadCont {
-  position: fixed;
-  right: 0;
-  bottom: 8px;
-}
 .start-content-container {
   position: fixed;
   top: 95px;
@@ -1392,4 +1376,20 @@ i.fa.active {
 
 .select-land {
   background-position: -675px;
+}
+.downloadPane {
+  padding-left: 0px !important;
+  padding-right: 5px !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 10px;
+  overflow: hidden;
+}
+
+.downloadCont {
+  position: fixed;
+  right: 0;
+  bottom: 8px;
 }
