@@ -137,7 +137,7 @@
                   },
                   {
                      "name": "Restricted",
-                     "color": "#f01405"
+                     "color": "#FC7369"
                   }
                ]
             },
@@ -166,7 +166,7 @@
                   },
                   {
                      "name": "Restricted",
-                     "color": "#F01405"
+                     "color": "#FC7369"
                   }
                ]
             },
@@ -191,11 +191,11 @@
                "types": [
                   {
                      "name": "2Km",
-                     "color": "#660033"
+                     "color": "#D9FF66"
                   },
                   {
                      "name": "1Km",
-                     "color": "#990033"
+                     "color": "#CCFF66"
                   }
                ]
             },
@@ -284,7 +284,7 @@
    "processing": {
       "method": "POST",
       "postProcessingUrl": "/elevation/initiateJob",
-      "intersectsUrl": "https://elvis2018-ga.fmecloud.com/fmedatastreaming/elvis_indexes/ReturnDownloadables.fmw?ymin={miny}&ymax={maxy}&xmin={minx}&xmax={maxx}",
+      "intersectsUrl": "https://elvis2018-ga.fmecloud.com/fmedatastreaming/elvis_indexes/ReturnDownloadables.fmw?",
       "recaptchaKey": "6LfUrFsUAAAAAKu4EJY_FSi3zFXvWm60RDVknRHf"
    },
    "downloadLimit": 15000000000,

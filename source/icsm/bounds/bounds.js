@@ -148,19 +148,21 @@
                configService.getConfig("processing").then(function (conf) {
                   let url = conf.intersectsUrl;
                   if (url) {
-                     // Order matches the $watch signature so be careful
-                     let urlWithParms = url
-                        .replace("{maxx}", clip.xMax)
-                        .replace("{minx}", clip.xMin)
-                        .replace("{maxy}", clip.yMax)
-                        .replace("{miny}", clip.yMin);
+                     let xMax = clip.xMax.toFixed(5),
+                        xMin = clip.xMin.toFixed(5),
+                        yMax = clip.yMax.toFixed(5),
+                        yMin = clip.yMin.toFixed(5),
+
+                     params = [
+                        "polygon=" + encodeURIComponent(clip.polygon)
+                     ];
 
                      if (clip.metadata) {
-                        urlWithParms += "&metadata=" + clip.metadata;
+                        params.push("metadata=" + clip.metadata);
                      }
 
                      send("Checking there is data in your selected area...", "wait", 180000);
-                     $http.get(urlWithParms).then(function (response) {
+                     $http.get(url + params.join("&")).then(function (response) {
                         if (response.data && response.data.available_data) {
                            let hasData = false;
                            send("", "clear");

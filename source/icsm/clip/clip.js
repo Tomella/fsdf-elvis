@@ -126,6 +126,7 @@
                   delete clip.yMax;
                   delete clip.area;
                   delete clip.type;
+                  delete clip.polygon;
                   return drawService.drawRectangle({
                      retryOnOversize: false
                   });
@@ -141,6 +142,7 @@
                   delete clip.yMax;
                   delete clip.area;
                   delete clip.type;
+                  delete clip.polygon;
                   return drawService.drawPolygon({
                      retryOnOversize: false
                   });
@@ -155,11 +157,9 @@
                }
             };
 
-
             $rootScope.$on("bounds.drawn", function (event, data) {
                broadcaster(data);  // Let people know it is drawn
             });
-
 
             $rootScope.$on("polygon.drawn", (event, data) => {
                $rootScope.$broadcast('icsm.poly.draw', data[0]);  // Let people know it is drawn
@@ -170,7 +170,8 @@
                clip.xMin = Math.min(...polyData.map(element => element.lng));
                clip.yMax = Math.max(...polyData.map(element => element.lat));
                clip.yMin = Math.min(...polyData.map(element => element.lat));
-               clip.polygon = polyData;
+               clip.polygon = "POLYGON((" +
+                        [...polyData, polyData[0]].map(item => item.lng.toFixed(5) + " " + item.lat.toFixed(5)).join(",") + "))";
 
                $rootScope.$broadcast('icsm.polygon.drawn', clip);
             });
@@ -205,6 +206,12 @@
             clip.yMax = data.bounds.getNorth().toFixed(5);
             clip.yMin = data.bounds.getSouth().toFixed(5);
             clip.type = "bbox";
+            clip.polygon = "POLYGON(("
+                  + clip.xMin + " " + clip.yMin + ","
+                  + clip.xMin + " " + clip.yMax + ","
+                  + clip.xMax + " " + clip.yMax + ","
+                  + clip.xMax + " " + clip.yMin + ","
+                  + clip.xMin + " " + clip.yMin + "))";
 
             service.data.area = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
 

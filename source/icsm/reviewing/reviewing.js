@@ -161,10 +161,7 @@
                         );
 
                         postData.parameters = {
-                           xmin: clip.xMin,
-                           xmax: clip.xMax,
-                           ymin: clip.yMin,
-                           ymax: clip.yMax,
+                           polygon: clip.polygon,
                            email: data.email,
                            industry: data.industry.code,
                            recaptcha: data.recaptchaResponse

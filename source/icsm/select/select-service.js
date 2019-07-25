@@ -159,7 +159,7 @@
                      service.removeLayer(dataset);
                   } else {
                      coords = box.split(" ");
-                     if (coords.length == 4 && within(+coords[0], +coords[1], +coords[2], +coords[3])) {
+                     if (coords.length === 4 && within(+coords[0], +coords[1], +coords[2], +coords[3])) {
                         // show
                         service.createLayer(dataset);
                      } else {

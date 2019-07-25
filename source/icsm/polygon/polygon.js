@@ -138,22 +138,18 @@
                   let url = conf.intersectsUrl;
                   if (url) {
                      // Order matches the $watch signature so be careful
-                     let urlWithParms = url
-                        .replace("{maxx}", clip.xMax.toFixed(5))
-                        .replace("{minx}", clip.xMin.toFixed(5))
-                        .replace("{maxy}", clip.yMax.toFixed(5))
-                        .replace("{miny}", clip.yMin.toFixed(5));
                      let polygon = clip.polygon;
 
-                     urlWithParms += "&polygon=" + encodeURIComponent("POLYGON((" +
-                           [...polygon, polygon[0]].map(item => item.lng.toFixed(5) + " " + item.lat.toFixed(5)).join(",") + "))");
+                     let params = [
+                        "polygon=" + encodeURIComponent(polygon)
+                     ];
 
-                     if(clip.metadata) {
-                        urlWithParms += "&metadata=" + clip.metadata;
+                     if (clip.metadata) {
+                        params.push("metadata=" + clip.metadata);
                      }
 
                      send("Checking there is data in your selected area...", "wait", 180000);
-                     $http.get(urlWithParms).then(function (response) {
+                     $http.get(url + params.join("&")).then(function (response) {
                         if (response.data && response.data.available_data) {
                            let hasData = false;
                            send("", "clear");
