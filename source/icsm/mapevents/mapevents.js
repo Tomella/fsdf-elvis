@@ -13,21 +13,21 @@
 
       .factory('icsmMapeventsService', ['$rootScope', '$timeout', 'configService', 'mapService',
          function ($rootScope, $timeout, configService, mapService) {
-            var marker, poly, bounds;
+            var marker, poly, bbox;
             var config = configService.getConfig("mapConfig");
 
             // We want to propagate the events from the download function so that it ripples through to other
             // parts of the system, namely the clip functionality.
-/*
-            $rootScope.$on('ed.clip.extent.change.out', function showBbox(event, data) {
-               console.log("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-            });
+            /*
+                        $rootScope.$on('ed.clip.extent.change.out', function showBbox(event, data) {
+                           console.log("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+                        });
 
 
-            $rootScope.$on('ed.clip.extent.change.in', function showBbox(event, data) {
-               console.log("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGE");
-            });
-*/
+                        $rootScope.$on('ed.clip.extent.change.in', function showBbox(event, data) {
+                           console.log("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGE");
+                        });
+            */
 
             $rootScope.$on('icsm.bounds.draw', function showBbox(event, bbox) {
                // 149.090045383719,-35.4,149.4,-35.3
@@ -58,7 +58,7 @@
             $rootScope.$on('icsm.bbox.draw', function showBbox(event, bbox) {
                // 149.090045383719,-35.4,149.4,-35.3
                if (!bbox) {
-                  makePoly(null);
+                  makeGeoJson(null);
                   return;
                }
 
@@ -68,11 +68,19 @@
                   ymin = bbox[1];
 
                // It's a bbox.
-               makePoly([
+               makeGeoJson({
+                  type: "Feature",
+                  geometry: {
+                     type: "Polygon",
+                     coordinates: [
                         [[xmin, ymin], [xmax, ymin], [xmax, ymax],
                         [xmin, ymax], [xmin, ymin]]
-                     ], false);
+                     ]
+                  },
+                  properties: {}
+               }, false);
             });
+
             $rootScope.$on('icsm.poly.draw', function showBbox(event, data) {
                // It's a polygon geometry and it has a single ring.
                makePoly(data, true);
@@ -119,13 +127,41 @@
                });
             }
 
+            function makeGeoJson(data, zoomTo) {
+               mapService.getMap().then(function (map) {
+                  if (bbox) {
+                     map.removeLayer(bbox);
+                  }
+
+                  if (data) {
+                     bbox = L.geoJson(data, {
+                        style: function (feature) {
+                           return {
+                              opacity: 1,
+                              clickable: false,
+                              fillOpacity: 0,
+                              color: "red"
+                           };
+                        }
+                     }).addTo(map);
+
+                     if (zoomTo) {
+                        $timeout(function () {
+                           var bounds = bbox.getBounds();
+                           map.fitBounds(bounds, {
+                              animate: true,
+                              padding: L.point(100, 100)
+                           });
+                        }, 50);
+                     }
+                  }
+               });
+            }
+
             function makePoly(data, zoomTo) {
                mapService.getMap().then(function (map) {
                   if (poly) {
                      map.removeLayer(poly);
-                  }
-                  if (bounds) {
-                     map.removeLayer(bounds);
                   }
 
                   if (data) {
@@ -151,16 +187,12 @@
 
             function makeBounds(data, zoomTo) {
                mapService.getMap().then(function (map) {
-                  if (bounds) {
-                     map.removeLayer(bounds);
-                  }
                   if (poly) {
                      map.removeLayer(poly);
                   }
 
-
                   if (data) {
-                     bounds = L.geoJson(data, {
+                     poly = L.geoJson(data, {
                         style: function (feature) {
                            return {
                               opacity: 1,
@@ -173,7 +205,7 @@
 
                      if (zoomTo) {
                         $timeout(function () {
-                           var boundingBox = bounds.getBounds();
+                           var boundingBox = poly.getBounds();
                            map.fitBounds(boundingBox, {
                               animate: true,
                               padding: L.point(100, 100)
