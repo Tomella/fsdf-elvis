@@ -4,7 +4,7 @@
    </div>
    <div ng-repeat="layer in state.layers" class="coverage-layer">
       <input type="checkbox" ng-checked="layer.visible" ng-click="toggleVisibility(layer)"></input>
-      <span>
+      <span ng-click="toggleVisibility(layer)">
          <span class="coverage-title">{{layer.name}}</span><br/>
          <img style="width:100px" ng-src="{{layer.coverage.thumb}}"></img>
       </span>
