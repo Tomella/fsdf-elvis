@@ -121,19 +121,19 @@
                "types": [
                   {
                      "name": "1 Metre",
-                     "color": "#225ea8"
+                     "color": "#4E3D5B"
                   },
                   {
                      "name": "2 Metre",
-                     "color": "#41b6c4"
+                     "color": "#497986"
                   },
                   {
                      "name": "5 Metre",
-                     "color": "#a1dab4"
+                     "color": "#D18989"
                   },
                   {
                      "name": "1 Second",
-                     "color": "#ffffcc"
+                     "color": "#EFCFCF"
                   },
                   {
                      "name": "Restricted",
@@ -162,7 +162,7 @@
                "types": [
                   {
                      "name": "Point Cloud Area",
-                     "color": "#9933FF"
+                     "color": "#00F2FF"
                   },
                   {
                      "name": "Restricted",
@@ -191,11 +191,11 @@
                "types": [
                   {
                      "name": "2Km",
-                     "color": "#D9FF66"
+                     "color": "#F88E8E"
                   },
                   {
                      "name": "1Km",
-                     "color": "#CCFF66"
+                     "color": "#EA6ED0"
                   }
                ]
             },
@@ -222,11 +222,11 @@
                "types": [
                   {
                      "name": "50 Metre",
-                     "color": "#d95f0e"
+                     "color": "#E0876A"
                   },
                   {
                      "name": "100 Metre",
-                     "color": "#fec44f"
+                     "color": "#F9CCAC"
                   }
                ]
             },

@@ -19,10 +19,22 @@
       <p>
          <ul>
             <li>Pan and zoom the map to your area of interest,</li>
-            <li>Click on the "Select an area..." button to enable drawing,</li>
-            <li>Click on the map, holding the button down,</li>
-            <li>Drag to a diagonal corner (not too big, there is a limit of roughly 2 square degrees or 200 square km))</li>
-            <li>On release we will check for data within or very near your area of interest</li>
+            <li>Click on one of the "Select area by..." buttons to define your area of interest,
+               <ul>
+                  <li>
+                        <img style="height:26px;padding-right:10px" src="icsm/resources/img/draw_rectangle.png">Drawing a bounding box. On enabling, click on the map and drag diagonally. There is a limit of roughly 2 square degrees or 200 square km.
+                  </li>
+                  <li>
+                     <img style="height:26px;padding-right:10px" src="icsm/resources/img/draw_polygon.png">
+                     Drawing a polygon. On enabling, click on the map for each vertex, click on the first vertex to close the polygon. Don't do too many vertices, it will not afford you greater accuracy and will slow down your search.
+                  </li>
+                  <li>
+                     <i class="fa fa-keyboard-o fa-2x" style="padding-right:10px" aria-hidden="true"></i>
+                      Manually entering the minimum and maximum latitudes and longitudes. The same area restrictions apply to drawing the bounds.
+                  </li>
+               </ul>
+            </li>
+            <li>On drawing complete we will check for data within or very near your area of interest</li>
             <li>If the list is large you can filter:
                <ul>
                   <li>Partial text match by typing in the filter field and/or</li>
