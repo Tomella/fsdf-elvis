@@ -208,7 +208,7 @@
                   "layers" : "imagery:imagery",
                   "format" : "image/png",
                   "transparent" : true,
-                  "opacity" : 0.5
+                  "opacity" : 0.6
                }
             ],
             "addLayerControl": false
@@ -239,7 +239,7 @@
                   "layers" : "bathymetry:bathymetry",
                   "format" : "image/png",
                   "transparent" : true,
-                  "opacity" : 0.5
+                  "opacity" : 0.75
                }
             ],
             "addLayerControl": false
