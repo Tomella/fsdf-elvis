@@ -205,7 +205,7 @@
             "parameters": [
                "http://ec2-13-236-177-25.ap-southeast-2.compute.amazonaws.com:8080/geoserver/imagery/wms",
                {
-                  "layers" : "imagery:imagery",
+                  "layers" : "imagery:IMAGERY",
                   "format" : "image/png",
                   "transparent" : true,
                   "opacity" : 0.6
