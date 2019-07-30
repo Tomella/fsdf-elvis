@@ -73,7 +73,7 @@
                   "format": "image/png",
                   "transparent": true,
                   "switch": "topography",
-                  "opacity": 0.7
+                  "opacity": 0.5
                }
             ],
             "addLayerControl": false,
@@ -91,7 +91,7 @@
                {
                   "format": "image/png",
                   "transparent": true,
-                  "opacity": 0.7,
+                  "opacity": 0.5,
                   "switch": "nswTopo",
                   "bounds": [
                      [
@@ -150,7 +150,7 @@
                   "layers" : "dem:dem",
                   "format" : "image/png",
                   "transparent" : true,
-                  "opacity" : 0.7
+                  "opacity" : 0.5
                }
             ],
             "addLayerControl": false
@@ -179,7 +179,7 @@
                   "layers" : "point-cloud:point_cloud",
                   "format" : "image/png",
                   "transparent" : true,
-                  "opacity" : 0.7
+                  "opacity" : 0.5
                }
             ],
             "addLayerControl": false
@@ -208,7 +208,7 @@
                   "layers" : "imagery:imagery",
                   "format" : "image/png",
                   "transparent" : true,
-                  "opacity" : 0.7
+                  "opacity" : 0.5
                }
             ],
             "addLayerControl": false
@@ -239,7 +239,7 @@
                   "layers" : "bathymetry:bathymetry",
                   "format" : "image/png",
                   "transparent" : true,
-                  "opacity" : 0.7
+                  "opacity" : 0.5
                }
             ],
             "addLayerControl": false
