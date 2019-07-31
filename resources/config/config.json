@@ -284,7 +284,8 @@
    "processing": {
       "method": "POST",
       "postProcessingUrl": "/elevation/initiateJob",
-      "intersectsUrl": "https://elvis2018-ga.fmecloud.com/fmedatastreaming/elvis_indexes/ReturnDownloadables.fmw?",
+      "intersectsUrl": "https://elvis2018-ga.fmecloud.com/fmedatastreaming/elvis_test/ReturnDownloadables.fmw?",
+      "intersectsUrlOld": "https://elvis2018-ga.fmecloud.com/fmedatastreaming/elvis_indexes/ReturnDownloadables.fmw?",
       "recaptchaKey": "6LfUrFsUAAAAAKu4EJY_FSi3zFXvWm60RDVknRHf"
    },
    "downloadLimit": 15000000000,
