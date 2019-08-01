@@ -302,93 +302,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       }
    }]);
 }
-"use strict";
-
-{
-   var ContributorsService = function ContributorsService($http) {
-      var state = {
-         show: false,
-         ingroup: false,
-         stick: false
-      };
-
-      $http.get("icsm/resources/config/contributors.json").then(function (response) {
-         state.orgs = response.data;
-      });
-
-      return {
-         getState: function getState() {
-            return state;
-         }
-      };
-   };
-
-   angular.module('icsm.contributors', []).directive("icsmContributors", ["$interval", "contributorsService", function ($interval, contributorsService) {
-      return {
-         templateUrl: "icsm/contributors/contributors.html",
-         scope: {},
-         link: function link(scope, element) {
-            var timer = void 0;
-
-            scope.contributors = contributorsService.getState();
-
-            scope.over = function () {
-               $interval.cancel(timer);
-               scope.contributors.ingroup = true;
-            };
-
-            scope.out = function () {
-               timer = $interval(function () {
-                  scope.contributors.ingroup = false;
-               }, 1000);
-            };
-
-            scope.unstick = function () {
-               scope.contributors.ingroup = scope.contributors.show = scope.contributors.stick = false;
-               element.find("a").blur();
-            };
-         }
-      };
-   }]).directive("icsmContributorsLink", ["$interval", "contributorsService", function ($interval, contributorsService) {
-      return {
-         restrict: "AE",
-         templateUrl: "icsm/contributors/show.html",
-         scope: {},
-         link: function link(scope) {
-            var timer = void 0;
-            scope.contributors = contributorsService.getState();
-            scope.over = function () {
-               $interval.cancel(timer);
-               scope.contributors.show = true;
-            };
-
-            scope.toggleStick = function () {
-               scope.contributors.stick = !scope.contributors.stick;
-               if (!scope.contributors.stick) {
-                  scope.contributors.show = scope.contributors.ingroup = false;
-               }
-            };
-
-            scope.out = function () {
-               timer = $interval(function () {
-                  scope.contributors.show = false;
-               }, 700);
-            };
-         }
-      };
-   }]).factory("contributorsService", ContributorsService).filter("activeContributors", function () {
-      return function (contributors) {
-         if (!contributors) {
-            return [];
-         }
-         return contributors.filter(function (contributor) {
-            return contributor.enabled;
-         });
-      };
-   });
-
-   ContributorsService.$inject = ["$http"];
-}
 'use strict';
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -654,6 +567,93 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 "use strict";
 
 {
+   var ContributorsService = function ContributorsService($http) {
+      var state = {
+         show: false,
+         ingroup: false,
+         stick: false
+      };
+
+      $http.get("icsm/resources/config/contributors.json").then(function (response) {
+         state.orgs = response.data;
+      });
+
+      return {
+         getState: function getState() {
+            return state;
+         }
+      };
+   };
+
+   angular.module('icsm.contributors', []).directive("icsmContributors", ["$interval", "contributorsService", function ($interval, contributorsService) {
+      return {
+         templateUrl: "icsm/contributors/contributors.html",
+         scope: {},
+         link: function link(scope, element) {
+            var timer = void 0;
+
+            scope.contributors = contributorsService.getState();
+
+            scope.over = function () {
+               $interval.cancel(timer);
+               scope.contributors.ingroup = true;
+            };
+
+            scope.out = function () {
+               timer = $interval(function () {
+                  scope.contributors.ingroup = false;
+               }, 1000);
+            };
+
+            scope.unstick = function () {
+               scope.contributors.ingroup = scope.contributors.show = scope.contributors.stick = false;
+               element.find("a").blur();
+            };
+         }
+      };
+   }]).directive("icsmContributorsLink", ["$interval", "contributorsService", function ($interval, contributorsService) {
+      return {
+         restrict: "AE",
+         templateUrl: "icsm/contributors/show.html",
+         scope: {},
+         link: function link(scope) {
+            var timer = void 0;
+            scope.contributors = contributorsService.getState();
+            scope.over = function () {
+               $interval.cancel(timer);
+               scope.contributors.show = true;
+            };
+
+            scope.toggleStick = function () {
+               scope.contributors.stick = !scope.contributors.stick;
+               if (!scope.contributors.stick) {
+                  scope.contributors.show = scope.contributors.ingroup = false;
+               }
+            };
+
+            scope.out = function () {
+               timer = $interval(function () {
+                  scope.contributors.show = false;
+               }, 700);
+            };
+         }
+      };
+   }]).factory("contributorsService", ContributorsService).filter("activeContributors", function () {
+      return function (contributors) {
+         if (!contributors) {
+            return [];
+         }
+         return contributors.filter(function (contributor) {
+            return contributor.enabled;
+         });
+      };
+   });
+
+   ContributorsService.$inject = ["$http"];
+}
+"use strict";
+
+{
    var CoverageService = function CoverageService(configService, mapService) {
       var state = {
          show: false
@@ -686,7 +686,11 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
          toggleVisibility: function toggleVisibility(element) {
             element.visible = !element.visible;
             if (element.visible) {
-               state.map.addLayer(element.layer);
+               if (element.layer) {
+                  state.map.addLayer(element.layer);
+               } else {
+                  mapService.addLayer(element);
+               }
             } else {
                element.layer.remove();
             }
@@ -4807,13 +4811,13 @@ var Strategies = function () {
    DownloadService.$inject = ['$http', '$q', '$rootScope', 'mapService', 'storageService'];
 }
 angular.module("icsm.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("icsm/app/app.html","<div>\r\n	<!-- BEGIN: Sticky Header -->\r\n	<div explorer-header style=\"z-index:1\"\r\n			class=\"navbar navbar-default navbar-fixed-top\"\r\n			heading=\"\'Elevation\'\"\r\n			headingtitle=\"\'ICSM\'\"\r\n			breadcrumbs=\"[{name:\'ICSM\', title: \'Reload Elevation\', url: \'.\'}]\"\r\n			helptitle=\"\'Get help about Elevation\'\"\r\n			helpalttext=\"\'Get help about Elevation\'\">\r\n	</div>\r\n	<!-- END: Sticky Header -->\r\n\r\n	<!-- Messages go here. They are fixed to the tab bar. -->\r\n	<div explorer-messages class=\"marsMessages noPrint\"></div>\r\n	<icsm-panes data=\"root.data\" default-item=\"download\"></icsm-panes>\r\n</div>");
-$templateCache.put("icsm/contributors/contributors.html","<span class=\"contributors\" ng-mouseenter=\"over()\" ng-mouseleave=\"out()\"\r\n      ng-class=\"(contributors.show || contributors.ingroup || contributors.stick) ? \'transitioned-down\' : \'transitioned-up\'\">\r\n   <button class=\"undecorated contributors-unstick\" ng-click=\"unstick()\" style=\"float:right\">X</button>\r\n   <div ng-repeat=\"contributor in contributors.orgs | activeContributors\" style=\"text-align:center\">\r\n      <a ng-href=\"{{contributor.href}}\" name=\"contributors{{$index}}\" title=\"{{contributor.title}}\" target=\"_blank\">\r\n         <img ng-src=\"{{contributor.image}}\" alt=\"{{contributor.title}}\" class=\"contributor-logo\" ng-class=\"contributor.class\"></img>\r\n      </a>\r\n   </div>\r\n</span>");
-$templateCache.put("icsm/contributors/show.html","<a ng-mouseenter=\"over()\" ng-mouseleave=\"out()\" class=\"contributors-link\" title=\"Click to lock/unlock contributors list.\"\r\n      ng-click=\"toggleStick()\" href=\"#contributors0\">Contributors</a>");
 $templateCache.put("icsm/clip/clip.html","<div class=\"well well-sm\">\r\n   <div class=\"container-fluid\">\r\n      <div class=\"row\">\r\n         <div class=\"col-md-10\">\r\n            <strong style=\"font-size:120%\">Select area by:</strong>\r\n            <button ng-click=\"initiateDraw()\" style=\"position:relative\" ng-disable=\"client.drawing\" tooltip-placement=\"right\"\r\n               uib-tooltip=\"Drawing a bounding box. On enabling, click on the map and drag diagonally\"\r\n               class=\"clip-btn\">\r\n               <img style=\"height:24px;\" src=\"icsm/resources/img/draw_rectangle.png\"></img>\r\n               <div></div>\r\n            </button>\r\n            <button ng-click=\"initiatePolygon()\" style=\"position:relative\" ng-disable=\"client.drawing\" tooltip-placement=\"right\"\r\n               uib-tooltip=\"Drawing a polygon. On enabling, click vertices on the map, click on the first vertex to complete the loop.\"\r\n               class=\"clip-btn\">\r\n               <img style=\"height:26px;\" src=\"icsm/resources/img/draw_polygon.png\"></img>\r\n               <div></div>\r\n            </button>\r\n            <button ng-click=\"typing = !typing\" style=\"position:relative\" tooltip-placement=\"right\"\r\n               uib-tooltip=\"Type coordinates of a bounding box. Restricted to maximum of 2.25 square degrees.\"\r\n               class=\"clip-btn\">\r\n               <i class=\"fa fa-keyboard-o fa-2x\" aria-hidden=\"true\"></i>\r\n               <div></div>\r\n            </button>\r\n         </div>\r\n         <div class=\"col-md-2\">\r\n            <button style=\"float:right\" ng-click=\"showInfo = !showInfo\" tooltip-placement=\"left\"\r\n               uib-tooltip=\"Information.\" class=\"btn btn-primary btn-default\"><i class=\"fa fa-info\"></i></button>\r\n            <exp-info title=\"Selecting an area\" show-close=\"true\"\r\n               style=\"width:450px;position:fixed;top:230px;right:40px\" is-open=\"showInfo\">\r\n               <icsm-info-bbox>\r\n         </div>\r\n         </exp-info>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\" ng-hide=\"typing || (!clip.xMin && clip.xMin !== 0) || oversize\" style=\"padding-top:7px;\">\r\n         <div class=\"col-md-12 ng-binding\" ng-if=\"clip.type == \'polygon\'\">\r\n            Polygon bounded by:\r\n            {{clip.xMin | number : 4}}° west,\r\n            {{clip.yMax | number : 4}}° north,\r\n            {{clip.xMax | number : 4}}° east,\r\n            {{clip.yMin | number : 4}}° south\r\n         </div>\r\n         <div class=\"col-md-12 ng-binding\" ng-if=\"clip.type == \'bbox\'\">\r\n            Selected bounds:\r\n            {{clip.xMin | number : 4}}° west,\r\n            {{clip.yMax | number : 4}}° north,\r\n            {{clip.xMax | number : 4}}° east,\r\n            {{clip.yMin | number : 4}}° south\r\n         </div>\r\n   </div>\r\n   <clip-modal title=\"Define search area\" show-close=\"true\" style=\"width:480px;position:fixed;top:110px;right:80px\"\r\n      is-open=\"typing\">\r\n      <icsm-manual-clip></icsm-manual-clip>\r\n   </clip-modal>\r\n</div>");
 $templateCache.put("icsm/clip/infobbox.html","<div class=\"\">\r\n	<strong style=\"font-size:120%\">Select an area of interest.</strong>\r\n   By hitting one of the \"Draw\" buttons an area on the map can be selected with the mouse by drawing a bounding box, drawing a polygon or manually typing in the minimum and maximum of latitude and longitude. Hover over the buttons to see\r\n	more information.\r\n	<br/>\r\n   Clicking one of the \"Draw\" buttons again allows replacing a previous area selection. <br/>\r\n   <strong>Notes:</strong>\r\n   <ul>\r\n      <li>The data does not cover all of Australia.</li>\r\n      <li>Restrict a search area to below 1.5 degrees square. eg 2x0.75 or 1x1.5</li>\r\n   </ul>\r\n	<p style=\"padding-top:5px\"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n		You can zoom in and out using the mouse wheel or the \"+\" and \"-\" map control on the top left of the map. If you\r\n		don\'t like the position of your drawn area, hit the one of the \"Draw\" buttons to draw a new search area.\r\n	</p>\r\n</div>");
 $templateCache.put("icsm/clip/manual.html","<div class=\"container-fluid\" style=\"padding-top:7px\">\r\n   <div class=\"row\">\r\n      <div class=\"col-md-3\"> </div>\r\n      <div class=\"col-md-8\">\r\n         <div style=\"font-weight:bold;width:3.5em;display:inline-block\">Y Max:</div>\r\n         <span>\r\n            <input type=\"text\" style=\"width:6em\" ng-model=\"yMax\" ng-change=\"check()\"></input>\r\n         </span>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-6\">\r\n         <div style=\"font-weight:bold;width:3.5em;display:inline-block\">X Min:</div>\r\n         <span>\r\n            <input type=\"text\" style=\"width:6em\" ng-model=\"xMin\" ng-change=\"check()\"></input>\r\n         </span>\r\n      </div>\r\n      <div class=\"col-md-6\">\r\n         <div style=\"font-weight:bold;width:3.5em;display:inline-block\">X Max:</div>\r\n         <span>\r\n            <input type=\"text\" style=\"width:6em\" ng-model=\"xMax\" ng-change=\"check()\"></input>\r\n         </span>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\">\r\n      <div class=\"col-md-offset-3 col-md-5\">\r\n         <div style=\"font-weight:bold;width:3.5em;display:inline-block\">Y Min:</div>\r\n         <span>\r\n            <input type=\"text\" style=\"width:6em\" ng-model=\"yMin\" ng-change=\"check()\"></input>\r\n         </span>\r\n      </div>\r\n      <div class=\"col-md-4\">\r\n         <button style=\"float:right\" ng-disabled=\"!xMin || !xMax || !yMin || !yMax || isNan(xMin) || isNan(xMax) || isNan(yMin) || isNan(yMax) || (+xMin) === (+xMax) || (+yMin) === (+yMax)\" class=\"btn btn-primary btn-default\" ng-click=\"search()\">Search</button>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/clip/modal.html","<div class=\"clipmodal\" ng-show=\"isOpen\">\r\n	<div class=\"clipmodal-inner\">\r\n      <h3 ng-show=\"title\" class=\"clipmodal-title\">\r\n		  	<span  ng-bind=\"title\"></span>\r\n		  	<span ng-show=\"showClose\" class=\"pull-right\">\r\n		 		<button type=\"button\" class=\"undecorated\" ng-click=\"isOpen = false\"><i class=\"fa fa-close\"></i></button>\r\n			</span>\r\n		</h3>\r\n      <div class=\"clipmodal-content\" ng-transclude></div>\r\n	</div>\r\n</div>");
-$templateCache.put("icsm/coverage/popup.html","<span class=\"coverage\" ng-class=\"state.show ? \'transitioned-down\' : \'transitioned-up\'\">\r\n   <div style=\"padding-bottom:15px\" class=\"coverage-off\">\r\n      <button class=\"undecorated coverage-unstick\" ng-click=\"hide()\" style=\"float:right\" title=\"Hide layer selections\">X</button>\r\n   </div>\r\n   <div ng-repeat=\"layer in state.layers\" class=\"coverage-layer\">\r\n      <input type=\"checkbox\" ng-checked=\"layer.visible\" ng-click=\"toggleVisibility(layer)\"></input>\r\n      <span ng-click=\"toggleVisibility(layer)\">\r\n         <span class=\"coverage-title\">{{layer.name}}</span><br/>\r\n         <img style=\"width:100px\" ng-src=\"{{layer.coverage.thumb}}\"></img>\r\n      </span>\r\n      <div class=\"pull-right\">\r\n         <div style=\"width: 110px\" ng-repeat=\"type in layer.coverage.types\">\r\n            <span class=\"coverage-legend-color\" ng-style=\"{\'background-color\':type.color}\"></span>\r\n            {{type.name}}\r\n         </div>\r\n      </div>\r\n   </div>\r\n</span>");
+$templateCache.put("icsm/contributors/contributors.html","<span class=\"contributors\" ng-mouseenter=\"over()\" ng-mouseleave=\"out()\"\r\n      ng-class=\"(contributors.show || contributors.ingroup || contributors.stick) ? \'transitioned-down\' : \'transitioned-up\'\">\r\n   <button class=\"undecorated contributors-unstick\" ng-click=\"unstick()\" style=\"float:right\">X</button>\r\n   <div ng-repeat=\"contributor in contributors.orgs | activeContributors\" style=\"text-align:center\">\r\n      <a ng-href=\"{{contributor.href}}\" name=\"contributors{{$index}}\" title=\"{{contributor.title}}\" target=\"_blank\">\r\n         <img ng-src=\"{{contributor.image}}\" alt=\"{{contributor.title}}\" class=\"contributor-logo\" ng-class=\"contributor.class\"></img>\r\n      </a>\r\n   </div>\r\n</span>");
+$templateCache.put("icsm/contributors/show.html","<a ng-mouseenter=\"over()\" ng-mouseleave=\"out()\" class=\"contributors-link\" title=\"Click to lock/unlock contributors list.\"\r\n      ng-click=\"toggleStick()\" href=\"#contributors0\">Contributors</a>");
+$templateCache.put("icsm/coverage/popup.html","<span class=\"coverage\" ng-class=\"state.show ? \'transitioned-down\' : \'transitioned-up\'\">\r\n   <div style=\"padding-bottom:15px\" class=\"coverage-off\">\r\n      <button class=\"undecorated coverage-unstick\" ng-click=\"hide()\" style=\"float:right\" title=\"Hide layer selections\">X</button>\r\n   </div>\r\n   <div ng-repeat=\"layer in state.layers\" class=\"coverage-layer\" tooltip-placement=\"left\"\r\n         uib-tooltip=\"Hint: To bring this layer to the top turn it off then on. The last clicked layer is always on top.\">\r\n      <input type=\"checkbox\" ng-checked=\"layer.visible\" ng-click=\"toggleVisibility(layer)\"></input>\r\n      <span ng-click=\"toggleVisibility(layer)\">\r\n         <span class=\"coverage-title\">{{layer.name}}</span><br/>\r\n         <img style=\"width:100px\" ng-src=\"{{layer.coverage.thumb}}\"></img>\r\n      </span>\r\n      <div class=\"pull-right\">\r\n         <div style=\"width: 110px\" ng-repeat=\"type in layer.coverage.types\">\r\n            <span class=\"coverage-legend-color\" ng-style=\"{\'background-color\':type.color}\"></span>\r\n            {{type.name}}\r\n         </div>\r\n      </div>\r\n   </div>\r\n</span>");
 $templateCache.put("icsm/coverage/trigger.html","<button ng-click=\"toggle()\" type=\"button\" class=\"map-tool-toggle-btn\" title=\"Select views of coverage, view legends and summaries of the coverage layers\">\r\n      <span class=\"hidden-sm\">Layers</span>\r\n      <img src=\"icsm/resources/img/layers-16.png\">\r\n</button>");
 $templateCache.put("icsm/glossary/glossary.html","<div ng-controller=\"GlossaryCtrl as glossary\">\r\n   <div style=\"position:relative;padding:5px;padding-left:10px;\">\r\n      <div class=\"panel\" style=\"padding:5px;\">\r\n         <p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n	         <strong>Glossary</strong>\r\n         </p>\r\n\r\n         <div class=\"panel-body\">\r\n            <table class=\"table table-striped\">\r\n               <thead>\r\n                  <tr>\r\n                     <th>Term</th>\r\n                     <th>Definition</th>\r\n                  </tr>\r\n               </thead>\r\n               <tbody>\r\n                  <tr ng-repeat=\"term in glossary.terms\">\r\n                     <td>{{term.term}}</td>\r\n                     <td>{{term.definition}}</td>\r\n                  </tr>\r\n               </tbody>\r\n            </table>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n   <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n      <ul class=\"nav navbar-nav\">\r\n         <li class=\"hidden-xs\">\r\n            <a href=\"https://www.icsm.gov.au/\" target=\"_blank\" class=\"icsm-logo\"\r\n               style=\"margin-top: -4px;display:inline-block;\">\r\n               <img alt=\"ICSM - ANZLIC Committee on Surveying &amp; Mapping\" class=\"header-logo\"\r\n                  src=\"icsm/resources/img/icsm-logo-sml.gif\">\r\n            </a>\r\n            <a href=\"/\">\r\n               <h1 class=\"applicationTitle\">{{heading}}</h1>\r\n            </a>\r\n         </li>\r\n      </ul>\r\n      <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n         <li role=\"menuitem\" style=\"padding-right:10px;position: relative;top: -3px;\">\r\n            <span class=\"altthemes-container\">\r\n               <span>\r\n                  <a title=\"Location INformation Knowledge platform (LINK)\" href=\"http://fsdf.org.au/\" target=\"_blank\">\r\n                     <img alt=\"FSDF\" src=\"icsm/resources/img/FSDFimagev4.0.png\" style=\"height: 66px\">\r\n                  </a>\r\n               </span>\r\n            </span>\r\n         </li>\r\n         <li common-navigation role=\"menuitem\" current=\"current\" style=\"padding-right:10px\"></li>\r\n         <li mars-version-display role=\"menuitem\"></li>\r\n         <li style=\"width:10px\"></li>\r\n      </ul>\r\n   </div>\r\n   <!--/.nav-collapse -->\r\n</div>\r\n<div class=\"contributorsLink\" style=\"position: absolute; right:7px; bottom:15px\">\r\n   <icsm-contributors-link></icsm-contributors-link>\r\n</div>\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n   <div class=\"col-md-12\">\r\n      <div class=\"strap-blue\">\r\n      </div>\r\n      <div class=\"strap-white\">\r\n      </div>\r\n      <div class=\"strap-red\">\r\n      </div>\r\n   </div>\r\n</div>");

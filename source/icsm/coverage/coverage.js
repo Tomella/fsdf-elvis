@@ -90,7 +90,11 @@ function CoverageService(configService, mapService) {
       toggleVisibility: function(element) {
          element.visible = !element.visible;
          if(element.visible) {
-            state.map.addLayer(element.layer);
+            if(element.layer) {
+               state.map.addLayer(element.layer);
+            } else {
+               mapService.addLayer(element);
+            }
          } else {
             element.layer.remove();
          }

@@ -56,8 +56,7 @@
                   "opacity": 1
                }
             ],
-            "addLayerControl": false,
-            "visible": false
+            "addLayerControl": false
          },
          {
             "name": "Australian Topography",
@@ -76,8 +75,7 @@
                   "opacity": 0.5
                }
             ],
-            "addLayerControl": false,
-            "visible": false
+            "addLayerControl": false
          },
          {
             "name": "NSW Topography",
@@ -179,10 +177,12 @@
                   "layers" : "point-cloud:point_cloud",
                   "format" : "image/png",
                   "transparent" : true,
-                  "opacity" : 0.5
+                  "opacity" : 0.5,
+                  "visible": false
                }
             ],
-            "addLayerControl": false
+            "addLayerControl": false,
+            "visible": false
          },
          {
             "name": "Imagery",
@@ -208,10 +208,12 @@
                   "layers" : "imagery:IMAGERY",
                   "format" : "image/png",
                   "transparent" : true,
-                  "opacity" : 0.6
+                  "opacity" : 0.6,
+                  "visible": false
                }
             ],
-            "addLayerControl": false
+            "addLayerControl": false,
+            "visible": false
          },
 
 

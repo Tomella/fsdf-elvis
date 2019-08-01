@@ -524,6 +524,22 @@ under the License.
       return {};
    }]);
 }
+'use strict';
+
+{
+   angular.module('common.reset', []).directive('resetPage', function ($window) {
+      return {
+         restrict: 'AE',
+         scope: {},
+         templateUrl: 'common/reset/reset.html',
+         controller: ['$scope', function ($scope) {
+            $scope.reset = function () {
+               $window.location.reload();
+            };
+         }]
+      };
+   });
+}
 "use strict";
 
 (function (angular) {
@@ -554,22 +570,6 @@ under the License.
       };
    }]);
 })(angular);
-'use strict';
-
-{
-   angular.module('common.reset', []).directive('resetPage', function ($window) {
-      return {
-         restrict: 'AE',
-         scope: {},
-         templateUrl: 'common/reset/reset.html',
-         controller: ['$scope', function ($scope) {
-            $scope.reset = function () {
-               $window.location.reload();
-            };
-         }]
-      };
-   });
-}
 'use strict';
 
 {
@@ -741,6 +741,55 @@ under the License.
             scope.closeLeft = function () {
                panelSideFactory.setLeft(null);
             };
+         }
+      };
+   }]);
+}
+"use strict";
+
+{
+   angular.module("common.storage", ['explorer.projects']).factory("storageService", ['$log', '$q', 'projectsService', function ($log, $q, projectsService) {
+      return {
+         setGlobalItem: function setGlobalItem(key, value) {
+            this._setItem("_system", key, value);
+         },
+
+         setItem: function setItem(key, value) {
+            projectsService.getCurrentProject().then(function (project) {
+               this._setItem(project, key, value);
+            }.bind(this));
+         },
+
+         _setItem: function _setItem(project, key, value) {
+            $log.debug("Fetching state for key locally" + key);
+            localStorage.setItem("mars.anon." + project + "." + key, JSON.stringify(value));
+         },
+
+         getGlobalItem: function getGlobalItem(key) {
+            return this._getItem("_system", key);
+         },
+
+         getItem: function getItem(key) {
+            var deferred = $q.defer();
+            projectsService.getCurrentProject().then(function (project) {
+               this._getItem(project, key).then(function (response) {
+                  deferred.resolve(response);
+               });
+            }.bind(this));
+            return deferred.promise;
+         },
+
+         _getItem: function _getItem(project, key) {
+            $log.debug("Fetching state locally for key " + key);
+            var item = localStorage.getItem("mars.anon." + project + "." + key);
+            if (item) {
+               try {
+                  item = JSON.parse(item);
+               } catch (e) {
+                  // Do nothing as it will be a string
+               }
+            }
+            return $q.when(item);
          }
       };
    }]);
@@ -944,55 +993,6 @@ under the License.
             }
         };
     }]);
-}
-"use strict";
-
-{
-   angular.module("common.storage", ['explorer.projects']).factory("storageService", ['$log', '$q', 'projectsService', function ($log, $q, projectsService) {
-      return {
-         setGlobalItem: function setGlobalItem(key, value) {
-            this._setItem("_system", key, value);
-         },
-
-         setItem: function setItem(key, value) {
-            projectsService.getCurrentProject().then(function (project) {
-               this._setItem(project, key, value);
-            }.bind(this));
-         },
-
-         _setItem: function _setItem(project, key, value) {
-            $log.debug("Fetching state for key locally" + key);
-            localStorage.setItem("mars.anon." + project + "." + key, JSON.stringify(value));
-         },
-
-         getGlobalItem: function getGlobalItem(key) {
-            return this._getItem("_system", key);
-         },
-
-         getItem: function getItem(key) {
-            var deferred = $q.defer();
-            projectsService.getCurrentProject().then(function (project) {
-               this._getItem(project, key).then(function (response) {
-                  deferred.resolve(response);
-               });
-            }.bind(this));
-            return deferred.promise;
-         },
-
-         _getItem: function _getItem(project, key) {
-            $log.debug("Fetching state locally for key " + key);
-            var item = localStorage.getItem("mars.anon." + project + "." + key);
-            if (item) {
-               try {
-                  item = JSON.parse(item);
-               } catch (e) {
-                  // Do nothing as it will be a string
-               }
-            }
-            return $q.when(item);
-         }
-      };
-   }]);
 }
 'use strict';
 
