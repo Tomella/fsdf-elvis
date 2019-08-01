@@ -20,83 +20,23 @@
       body {
          background-color: white;
       }
+      img {
+         padding:1px;
+         border:1px solid black;
+      }
    </style>
 
 </head>
 
 <body>
-</body>
-
-
-<script>
-   const templates = {
-      dem: {
-         url: "https://s3-ap-southeast-2.amazonaws.com/fsdf.elevation.tile.cache/DEM/4/${x}/${y}.png",
-         minX: 13,
-         maxX: 14,
-         minY: 8,
-         maxY: 10
-      },
-      pointCloud: {
-         url: "https://s3-ap-southeast-2.amazonaws.com/fsdf.elevation.tile.cache/POINT_CLOUD/4/${x}/${y}.png",
-         minX: 13,
-         maxX: 14,
-         minY: 8,
-         maxY: 10
-      },
-      bathymetry: {
-         url: "https://s3-ap-southeast-2.amazonaws.com/fsdf.elevation.tile.cache/BATHYMETRY/4/${x}/${y}.png",
-         minX: 12,
-         maxX: 14,
-         minY: 8,
-         maxY: 10
-      } /*,
-      imagery: {
-         url: "https://s3-ap-southeast-2.amazonaws.com/fsdf.elevation.tile.cache/IMAGERY/4/${x}/${y}.png",
-         minX: 13,
-         maxX: 14,
-         minY: 8,
-         maxY: 10
-      }
-*/
-   };
-
-   const IMAGE_WIDTH = 256;
-   const OUT_WIDTH = 280;
-
-   let keys = Object.keys(templates);
-   keys.forEach(key => {
-      let data = templates[key];
-      let container = document.createElement("div");
-      let xs = (data.maxX - data.minX + 1);
-
-      container.width = IMAGE_WIDTH * xs;
-      container.style.transform = "scale(" + (OUT_WIDTH / IMAGE_WIDTH / xs) + ")";
-      container.id = key;
-
-      for (let y = data.minY; y <= data.maxY; y++) {
-         for (let x = data.minX; x <= data.maxX; x++) {
-            let img = document.createElement("img");
-            img.src = data.url.replace("${x}", x).replace("${y}", y);
-            container.appendChild(img);
-         }
-         container.appendChild(document.createElement("br"));
-      }
-      document.body.appendChild(container);
-   })
-
-/*
-
-   for (let x = 13; x < 15; x++) {
-      for (let y = 8; y < 11; y++) {
-         let id = "img_" + x + "_" + y;
-         let url = templates.dem.url.replace("${x}", x).replace("${y}", y);
-         document.getElementById(id).src = url;
-
-      }
-   }
-*/
-</script>
+   <img width="95" src="http://ec2-13-236-177-25.ap-southeast-2.compute.amazonaws.com:8080/geoserver/imagery/wms?service=WMS&request=GetMap&layers=imagery%3AIMAGERY&styles=&format=image%2Fpng&transparent=true&version=1.1.1&visible=false&width=190&height=190&srs=EPSG%3A4326&bbox=125,-36,148,-14"></img>
+   <br/>
+   <img width="95" src="http://ec2-13-236-177-25.ap-southeast-2.compute.amazonaws.com:8080/geoserver/bathymetry/wms?service=WMS&request=GetMap&layers=bathymetry%3Abathymetry&styles=&format=image%2Fpng&transparent=true&version=1.1.1&visible=false&width=190&height=190&srs=EPSG%3A4326&bbox=90,-65,170,-2"></img>
+   <br/>
+   <img width="95" src="http://ec2-13-236-177-25.ap-southeast-2.compute.amazonaws.com:8080/geoserver/dem/wms?service=WMS&request=GetMap&layers=dem%3Adem&styles=&format=image%2Fpng&transparent=true&version=1.1.1&visible=false&width=190&height=190&srs=EPSG%3A4326&bbox=112,-45,153,-12"></img>
+   <br/>
+   <img width="95" src="http://ec2-13-236-177-25.ap-southeast-2.compute.amazonaws.com:8080/geoserver/point-cloud/wms?service=WMS&request=GetMap&layers=point-cloud%3Apoint_cloud&styles=&format=image%2Fpng&transparent=true&version=1.1.1&visible=false&width=190&height=190&srs=EPSG%3A4326&bbox=116,-48,156,-8"></img>
+   <br/>
 </body>
 
 </html>

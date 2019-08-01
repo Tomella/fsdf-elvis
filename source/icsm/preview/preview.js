@@ -81,7 +81,6 @@
 
       let service = new Service($location.search());
 
-window.larry = service;
       return service;
    }]);
 }

@@ -119,23 +119,23 @@
                "types": [
                   {
                      "name": "1 Metre",
-                     "color": "#4E3D5B"
+                     "color": "#004385"
                   },
                   {
                      "name": "2 Metre",
-                     "color": "#497986"
+                     "color": "#0071E2"
                   },
                   {
                      "name": "5 Metre",
-                     "color": "#D18989"
+                     "color": "Don't know"
                   },
                   {
                      "name": "1 Second",
-                     "color": "#EFCFCF"
+                     "color": "#CCE6FF"
                   },
                   {
                      "name": "Restricted",
-                     "color": "#FC7369"
+                     "color": "#FFFFCE"
                   }
                ]
             },
@@ -160,11 +160,11 @@
                "types": [
                   {
                      "name": "Point Cloud Area",
-                     "color": "#00F2FF"
+                     "color": "#7372FF"
                   },
                   {
                      "name": "Restricted",
-                     "color": "#FC7369"
+                     "color": "#FFFFCE"
                   }
                ]
             },
@@ -190,12 +190,8 @@
                "thumb": "icsm/resources/img/imagery_thumb.png",
                "types": [
                   {
-                     "name": "2Km",
-                     "color": "#F88E8E"
-                  },
-                  {
-                     "name": "1Km",
-                     "color": "#EA6ED0"
+                     "name": "Imagery",
+                     "color": "#00CC66"
                   }
                ]
             },
@@ -224,11 +220,11 @@
                "types": [
                   {
                      "name": "50 Metre",
-                     "color": "#E0876A"
+                     "color": "#F07C02"
                   },
                   {
                      "name": "100 Metre",
-                     "color": "#F9CCAC"
+                     "color": "#FFC181"
                   }
                ]
             },
