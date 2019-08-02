@@ -927,32 +927,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
 	HelpService.$inject = ['$http'];
 }
-"use strict";
-
-{
-   var showButton = function showButton(data) {
-      return data.file_url && data.file_url.lastIndexOf(".zip") > 0; // Well it needs something in front of ".zip";
-   };
-
-   angular.module("icsm.imagery", []).directive("launchImage", ["$rootScope", "configService", function ($rootScope, configService) {
-      return {
-         templateUrl: "icsm/imagery/launch.html",
-         restrict: "AE",
-         link: function link(scope) {
-            var item = scope.item;
-            scope.show = showButton(item);
-
-            scope.preview = function () {
-               configService.getConfig("imagery").then(function (config) {
-                  var url = item.thumb_url;
-                  console.log(url, item);
-                  $rootScope.$broadcast("icsm-preview", { url: url, item: item });
-               });
-            };
-         }
-      };
-   }]);
-}
 'use strict';
 
 {
@@ -1036,6 +1010,32 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
                   });
                });
             });
+         }
+      };
+   }]);
+}
+"use strict";
+
+{
+   var showButton = function showButton(data) {
+      return data.file_url && data.file_url.lastIndexOf(".zip") > 0; // Well it needs something in front of ".zip";
+   };
+
+   angular.module("icsm.imagery", []).directive("launchImage", ["$rootScope", "configService", function ($rootScope, configService) {
+      return {
+         templateUrl: "icsm/imagery/launch.html",
+         restrict: "AE",
+         link: function link(scope) {
+            var item = scope.item;
+            scope.show = showButton(item);
+
+            scope.preview = function () {
+               configService.getConfig("imagery").then(function (config) {
+                  var url = item.thumb_url;
+                  console.log(url, item);
+                  $rootScope.$broadcast("icsm-preview", { url: url, item: item });
+               });
+            };
          }
       };
    }]);
