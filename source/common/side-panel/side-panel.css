@@ -90,3 +90,9 @@
 .cbp-spmenu-open .left-side-menu-container, .cbp-spmenu-open .right-side-menu-container  {
   overflow-y: auto;
 }
+
+@media (max-width: 991px) {
+   .panel-sm {
+      display: none !important;
+   }
+}
