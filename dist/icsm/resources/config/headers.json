@@ -21,7 +21,8 @@
 		"helpalttext": "Get help about Positioning"
 	},
 	"placeNames": {
-		"heading": "ELVIS -  Place Names",
+		"enabled": true,
+		"heading": "Place Names",
 		"headingtitle": "Place Names",
 		"breadcrumbs": [{"name": "ELVIS", "title": "ELVIS - Elevation and Depth - Foundation Spatial Data", "url": "/"}],
 		"helptitle": "Get help about ELVIS - Place Names",
