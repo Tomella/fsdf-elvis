@@ -81,7 +81,7 @@
       {
          "code": "position",
          "label": "Positioning",
-         "enabled": true,
+         "enabled": false,
          "title": "Positioning.",
          "description": "Positioning.",
          "className": "altthemes-crosshair",
