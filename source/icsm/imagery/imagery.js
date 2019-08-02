@@ -11,7 +11,7 @@
 
             scope.preview = () => {
                configService.getConfig("imagery").then(config => {
-                  let url = generateUrl(config, item);
+                  let url = generateUrl(item);
                   console.log(url, item);
                   $rootScope.$broadcast("icsm-preview", {url, item});
                });
@@ -24,8 +24,10 @@
       return data.file_url && data.file_url.lastIndexOf(".zip") > 0; // Well it needs something in front of ".zip";
    }
 
-   function generateUrl(config, data) {
-      let index = data.file_name.lastIndexOf(".zip");
-      return config.baseUrl.replace("${file_name}", data.file_name.substr(0, index) + ".jpg");
+   function generateUrl(data) {
+      let fileName = data.file_name;
+      let imagePart = "thumbnails/" + fileName.replace(".zip", ".png");
+
+      return data.file_url.replace(fileName, imagePart);
    }
 }
