@@ -10,7 +10,7 @@
          <input type="checkbox" ng-model="item.selected" />
          <icsm-abstract item="item"></icsm-abstract>
          <common-cc version="mappings[item.source].ccLicence"></common-cc>
-         <launch-image item="item" ng-if="item.type === 'Imagery'"></launch-image>
+         <launch-image item="item" ng-if="item.thumb_url"></launch-image>
          <span class="listItem" item="item" icsm-abstract-link></span>
          <span ng-show="item.file_size" style="float:right;padding-top:3px">({{item.file_size | fileSize}})</span>
          <span ng-show="item.product" style="float:right;padding-top:3px" title="Product size will depend on size of chosen area, data coverage and resolution. An email will be sent after the extraction giving the exact size of the extracted data and a link to the product.">(Product &lt; 500MB)</span>

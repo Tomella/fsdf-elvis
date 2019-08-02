@@ -11,7 +11,7 @@
 
             scope.preview = () => {
                configService.getConfig("imagery").then(config => {
-                  let url = generateUrl(item);
+                  let url = item.thumb_url;
                   console.log(url, item);
                   $rootScope.$broadcast("icsm-preview", {url, item});
                });
