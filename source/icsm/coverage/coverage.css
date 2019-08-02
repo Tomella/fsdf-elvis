@@ -14,6 +14,11 @@
    box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
 }
 
+@media (max-width: 991px) {
+   .coverage {
+      right:136px;
+   }
+}
 .coverage-unstick {
    vertical-align: top;
    font-weight: bold;
