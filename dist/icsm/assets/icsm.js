@@ -883,32 +883,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 "use strict";
 
 {
-   var showButton = function showButton(data) {
-      return data.file_url && data.file_url.lastIndexOf(".zip") > 0; // Well it needs something in front of ".zip";
-   };
-
-   angular.module("icsm.imagery", []).directive("launchImage", ["$rootScope", "configService", function ($rootScope, configService) {
-      return {
-         templateUrl: "icsm/imagery/launch.html",
-         restrict: "AE",
-         link: function link(scope) {
-            var item = scope.item;
-            scope.show = showButton(item);
-
-            scope.preview = function () {
-               configService.getConfig("imagery").then(function (config) {
-                  var url = item.thumb_url;
-                  console.log(url, item);
-                  $rootScope.$broadcast("icsm-preview", { url: url, item: item });
-               });
-            };
-         }
-      };
-   }]);
-}
-"use strict";
-
-{
 	var HelpCtrl = function HelpCtrl($log, helpService) {
 		var self = this;
 		$log.info("HelpCtrl");
@@ -952,6 +926,32 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
 
 	HelpService.$inject = ['$http'];
+}
+"use strict";
+
+{
+   var showButton = function showButton(data) {
+      return data.file_url && data.file_url.lastIndexOf(".zip") > 0; // Well it needs something in front of ".zip";
+   };
+
+   angular.module("icsm.imagery", []).directive("launchImage", ["$rootScope", "configService", function ($rootScope, configService) {
+      return {
+         templateUrl: "icsm/imagery/launch.html",
+         restrict: "AE",
+         link: function link(scope) {
+            var item = scope.item;
+            scope.show = showButton(item);
+
+            scope.preview = function () {
+               configService.getConfig("imagery").then(function (config) {
+                  var url = item.thumb_url;
+                  console.log(url, item);
+                  $rootScope.$broadcast("icsm-preview", { url: url, item: item });
+               });
+            };
+         }
+      };
+   }]);
 }
 'use strict';
 
@@ -1323,89 +1323,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 }
 "use strict";
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-{
-   angular.module("icsm.parameters", []).factory("parametersService", ["$location", function ($location) {
-      // We read the parameters once only. Then the app can decide what to do with them.
-      var Service = function () {
-         function Service(search) {
-            _classCallCheck(this, Service);
-
-            this.search = search;
-         }
-
-         _createClass(Service, [{
-            key: "ignoreSizeLimit",
-            value: function ignoreSizeLimit() {
-               return !!this.search.metadata;
-            }
-         }, {
-            key: "hasValidBbox",
-            value: function hasValidBbox() {
-               var parameters = this.search;
-               return !(isNaN(parameters.minx) || isNaN(parameters.maxx) || isNaN(parameters.miny) || isNaN(parameters.maxy));
-            }
-         }, {
-            key: "clear",
-            value: function clear() {
-               this.search = {};
-            }
-         }, {
-            key: "bbox",
-            get: function get() {
-               return this.hasValidBbox() ? {
-                  minx: +this.search.minx,
-                  maxx: +this.search.maxx,
-                  miny: +this.search.miny,
-                  maxy: +this.search.maxy
-               } : null;
-            }
-         }, {
-            key: "clip",
-            get: function get() {
-               return this.hasValidBbox() ? {
-                  xMin: +this.search.minx,
-                  xMax: +this.search.maxx,
-                  yMin: +this.search.miny,
-                  yMax: +this.search.maxy,
-                  metadata: this.search.metadata
-               } : null;
-            }
-         }, {
-            key: "bounds",
-            get: function get() {
-               var s = this.search;
-               return this.hasValidBbox() ? L.latLngBounds([s.miny, s.minx], [s.maxy, s.maxx]) : null;
-            }
-         }, {
-            key: "data",
-            get: function get() {
-               // Just a wrapper around bounds same as draw does.
-               return this.hasValidBbox() ? { bounds: this.bounds, metadata: this.metadata } : null;
-            }
-         }, {
-            key: "metadata",
-            get: function get() {
-               return this.search.metadata;
-            }
-         }]);
-
-         return Service;
-      }();
-
-      ;
-
-      var service = new Service($location.search());
-
-      window.larry = service;
-      return service;
-   }]);
-}
-"use strict";
-
 {
    var PaneCtrl = function PaneCtrl(paneService) {
       var _this = this;
@@ -1492,6 +1409,89 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 
    PaneService.$inject = [];
+}
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+{
+   angular.module("icsm.parameters", []).factory("parametersService", ["$location", function ($location) {
+      // We read the parameters once only. Then the app can decide what to do with them.
+      var Service = function () {
+         function Service(search) {
+            _classCallCheck(this, Service);
+
+            this.search = search;
+         }
+
+         _createClass(Service, [{
+            key: "ignoreSizeLimit",
+            value: function ignoreSizeLimit() {
+               return !!this.search.metadata;
+            }
+         }, {
+            key: "hasValidBbox",
+            value: function hasValidBbox() {
+               var parameters = this.search;
+               return !(isNaN(parameters.minx) || isNaN(parameters.maxx) || isNaN(parameters.miny) || isNaN(parameters.maxy));
+            }
+         }, {
+            key: "clear",
+            value: function clear() {
+               this.search = {};
+            }
+         }, {
+            key: "bbox",
+            get: function get() {
+               return this.hasValidBbox() ? {
+                  minx: +this.search.minx,
+                  maxx: +this.search.maxx,
+                  miny: +this.search.miny,
+                  maxy: +this.search.maxy
+               } : null;
+            }
+         }, {
+            key: "clip",
+            get: function get() {
+               return this.hasValidBbox() ? {
+                  xMin: +this.search.minx,
+                  xMax: +this.search.maxx,
+                  yMin: +this.search.miny,
+                  yMax: +this.search.maxy,
+                  metadata: this.search.metadata
+               } : null;
+            }
+         }, {
+            key: "bounds",
+            get: function get() {
+               var s = this.search;
+               return this.hasValidBbox() ? L.latLngBounds([s.miny, s.minx], [s.maxy, s.maxx]) : null;
+            }
+         }, {
+            key: "data",
+            get: function get() {
+               // Just a wrapper around bounds same as draw does.
+               return this.hasValidBbox() ? { bounds: this.bounds, metadata: this.metadata } : null;
+            }
+         }, {
+            key: "metadata",
+            get: function get() {
+               return this.search.metadata;
+            }
+         }]);
+
+         return Service;
+      }();
+
+      ;
+
+      var service = new Service($location.search());
+
+      window.larry = service;
+      return service;
+   }]);
 }
 'use strict';
 
@@ -4815,13 +4815,13 @@ $templateCache.put("icsm/coverage/popup.html","<span class=\"coverage\" ng-class
 $templateCache.put("icsm/coverage/trigger.html","<button ng-click=\"toggle()\" type=\"button\" class=\"map-tool-toggle-btn\" title=\"Select views of coverage, view legends and summaries of the coverage layers\">\r\n      <span class=\"panel-sm\">Layers</span>\r\n      <img src=\"icsm/resources/img/layers-16.png\">\r\n</button>");
 $templateCache.put("icsm/glossary/glossary.html","<div ng-controller=\"GlossaryCtrl as glossary\">\r\n   <div style=\"position:relative;padding:5px;padding-left:10px;\">\r\n      <div class=\"panel\" style=\"padding:5px;\">\r\n         <p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n	         <strong>Glossary</strong>\r\n         </p>\r\n\r\n         <div class=\"panel-body\">\r\n            <table class=\"table table-striped\">\r\n               <thead>\r\n                  <tr>\r\n                     <th>Term</th>\r\n                     <th>Definition</th>\r\n                  </tr>\r\n               </thead>\r\n               <tbody>\r\n                  <tr ng-repeat=\"term in glossary.terms\">\r\n                     <td>{{term.term}}</td>\r\n                     <td>{{term.definition}}</td>\r\n                  </tr>\r\n               </tbody>\r\n            </table>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n   <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n      <ul class=\"nav navbar-nav\">\r\n         <li class=\"hidden-xs\">\r\n            <a href=\"https://www.icsm.gov.au/\" target=\"_blank\" class=\"icsm-logo\"\r\n               style=\"margin-top: -4px;display:inline-block;\">\r\n               <img alt=\"ICSM - ANZLIC Committee on Surveying &amp; Mapping\" class=\"header-logo\"\r\n                  src=\"icsm/resources/img/icsm-logo-sml.gif\">\r\n            </a>\r\n            <a href=\"/\">\r\n               <h1 class=\"applicationTitle\">{{heading}}</h1>\r\n            </a>\r\n         </li>\r\n      </ul>\r\n      <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n         <li role=\"menuitem\" style=\"padding-right:10px;position: relative;top: -3px;\">\r\n            <span class=\"altthemes-container\">\r\n               <span>\r\n                  <a title=\"Location INformation Knowledge platform (LINK)\" href=\"http://fsdf.org.au/\" target=\"_blank\">\r\n                     <img alt=\"FSDF\" src=\"icsm/resources/img/FSDFimagev4.0.png\" style=\"height: 66px\">\r\n                  </a>\r\n               </span>\r\n            </span>\r\n         </li>\r\n         <li common-navigation role=\"menuitem\" current=\"current\" style=\"padding-right:10px\"></li>\r\n         <li mars-version-display role=\"menuitem\"></li>\r\n         <li style=\"width:10px\"></li>\r\n      </ul>\r\n   </div>\r\n   <!--/.nav-collapse -->\r\n</div>\r\n<div class=\"contributorsLink\" style=\"position: absolute; right:7px; bottom:15px\">\r\n   <icsm-contributors-link></icsm-contributors-link>\r\n</div>\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n   <div class=\"col-md-12\">\r\n      <div class=\"strap-blue\">\r\n      </div>\r\n      <div class=\"strap-white\">\r\n      </div>\r\n      <div class=\"strap-red\">\r\n      </div>\r\n   </div>\r\n</div>");
-$templateCache.put("icsm/imagery/launch.html","<button type=\"button\" class=\"undecorated\" title=\"View preview of imagery\" ng-click=\"preview()\" ng-if=\"show\">\r\n	<i class=\"fa fa-lg fa-eye\"></i>\r\n</button>");
 $templateCache.put("icsm/help/faqs.html","<p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n   <strong>FAQS</strong>\r\n</p>\r\n\r\n<h5 ng-repeat=\"faq in faqs\"><button type=\"button\" class=\"undecorated\" ng-click=\"focus(faq.key)\">{{faq.question}}</button></h5>\r\n<hr/>\r\n<div class=\"row\" ng-repeat=\"faq in faqs\">\r\n   <div class=\"col-md-12\">\r\n      <h5 tabindex=\"0\" id=\"faqs_{{faq.key}}\">{{faq.question}}</h5>\r\n      <span ng-bind-html=\"faq.answer\"></span>\r\n      <hr/>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/help/help.html","<p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n	<strong>Help</strong>\r\n</p>\r\n\r\n<div class=\"panel-body\" ng-controller=\"HelpCtrl as help\">\r\n	The steps to get data!\r\n	<ol>\r\n		<li>Define area of interest</li>\r\n		<li>Select datasets</li>\r\n		<li>Confirm selections</li>\r\n		<li>Enter email address and industry</li>\r\n		<li>Start extract</li>\r\n	</ol>\r\n	One or more emails will be sent to you on completion of the data extract(s) with a link to your data.\r\n   <hr>\r\n	<icsm-faqs faqs=\"help.faqs\" ></icsm-faqs>\r\n</div>");
+$templateCache.put("icsm/imagery/launch.html","<button type=\"button\" class=\"undecorated\" title=\"View preview of imagery\" ng-click=\"preview()\" ng-if=\"show\">\r\n	<i class=\"fa fa-lg fa-eye\"></i>\r\n</button>");
 $templateCache.put("icsm/message/message.html","<div class=\"well well-sm mess-container\" ng-show=\"message.type && message.text\"\r\n   ng-class=\"{\'mess-error\': message.type == \'error\', \'mess-warn\': message.type == \'warn\', \'mess-info\': (message.type == \'info\' || message.type == \'wait\')}\">\r\n   <i class=\"fa fa-spinner fa-spin fa-fw\" aria-hidden=\"true\" ng-if=\"message.type == \'wait\'\"></i>\r\n   <span>{{message.text}}</span>\r\n</div>");
 $templateCache.put("icsm/panes/panes.html","<div class=\"mapContainer\" class=\"col-md-12\" style=\"padding-right:0\"  ng-attr-style=\"right:{{right.width}}\">\r\n   <span common-baselayer-control class=\"baselayer-slider\" max-zoom=\"16\" title=\"Satellite to Topography bias on base map.\"></span>\r\n   <div class=\"panesMapContainer\" geo-map configuration=\"data.map\">\r\n      <geo-extent></geo-extent>\r\n      <icsm-layerswitch></icsm-layerswitch>\r\n   </div>\r\n   <div class=\"base-layer-controller\">\r\n      <div geo-draw data=\"data.map.drawOptions\" line-event=\"elevation.plot.data\" rectangle-event=\"bounds.drawn\" polygon-event=\"polygon.drawn\"></div>\r\n   </div>\r\n   <restrict-pan bounds=\"data.map.position.bounds\"></restrict-pan>\r\n</div>");
 $templateCache.put("icsm/panes/tabs.html","<!-- tabs go here -->\r\n<div id=\"panesTabsContainer\" class=\"paneRotateTabs\" style=\"opacity:0.9\" ng-style=\"{\'right\' : contentLeft +\'px\'}\">\r\n\r\n   <div class=\"paneTabItem\" style=\"width:60px; opacity:0\">\r\n\r\n   </div>\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'download\'}\" ng-click=\"setView(\'download\')\">\r\n      <button class=\"undecorated\">Datasets Download</button>\r\n   </div>\r\n   <!--\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'search\'}\" ng-click=\"setView(\'search\')\">\r\n		<button class=\"undecorated\">Search</button>\r\n	</div>\r\n	<div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'maps\'}\" ng-click=\"setView(\'maps\')\">\r\n		<button class=\"undecorated\">Layers</button>\r\n	</div>\r\n   -->\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'downloader\'}\" ng-click=\"setView(\'downloader\')\">\r\n      <button class=\"undecorated\">Products Download</button>\r\n   </div>\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'glossary\'}\" ng-click=\"setView(\'glossary\')\">\r\n      <button class=\"undecorated\">Glossary</button>\r\n   </div>\r\n   <div class=\"paneTabItem\" ng-class=\"{\'bold\': view == \'help\'}\" ng-click=\"setView(\'help\')\">\r\n      <button class=\"undecorated\">Help</button>\r\n   </div>\r\n</div>");
-$templateCache.put("icsm/preview/preview.html","<div class=\"preview-container\" ng-if=\"previewData\">\r\n   <div class=\"preview-blocker\" ng-click=\"clear()\"></div>\r\n\r\n   <div style=\"position:absolute; right: 10px; z-index: 1; top:20px\">\r\n      <div class=\"pull-right\">\r\n         <button type=\"button\" class=\"btn btn-primary\" ng-click=\"clear()\" autofocus>Hide</button>\r\n      </div>\r\n   </div>\r\n   <img width=\"800\" class=\"preview-image\" ng-src=\"{{previewData.url}}\"></img>\r\n</div>");
+$templateCache.put("icsm/preview/preview.html","<div class=\"preview-container\" ng-if=\"previewData\">\r\n   <div class=\"preview-blocker\" ng-click=\"clear()\"></div>\r\n\r\n   <div style=\"position:absolute; right: 10px; z-index: 1; top:20px\">\r\n      <div class=\"pull-right\">\r\n         <button type=\"button\" class=\"btn btn-primary\" ng-click=\"clear()\" autofocus>Hide</button>\r\n      </div>\r\n   </div>\r\n   <img width=\"600\" class=\"preview-image\" ng-src=\"{{previewData.url}}\"></img>\r\n</div>");
 $templateCache.put("icsm/products/download.html","<div class=\"well\" ng-show=\"item.showDownload\">\r\n\r\n   <div class=\"well\">\r\n      <div ng-show=\"processing.validClip\" class=\"product-restrict\">\r\n         <span class=\"product-label\">Bounds:</span> {{processing.clip.xMin|number : 4}}&deg; west, {{processing.clip.yMax|number : 4}}&deg; north, {{processing.clip.xMax|number\r\n         : 4}}&deg; east, {{processing.clip.yMin|number : 4}}&deg; south\r\n\r\n         <div ng-show=\"processing.message\" class=\"product-warning\">\r\n            {{processing.message}}\r\n         </div>\r\n      </div>\r\n      <product-projection processing=\"processing\"></product-projection>\r\n      <br/>\r\n      <product-formats processing=\"processing\"></product-formats>\r\n      <br/>\r\n      <product-email processing=\"processing\"></product-email>\r\n   </div>\r\n   <product-download-submit processing=\"processing\" item=\"item\"></product-download-submit>\r\n</div>");
 $templateCache.put("icsm/products/email.html","<div class=\"input-group\">\r\n      <span class=\"input-group-addon\" id=\"nedf-email\">Email</span>\r\n      <input required=\"required\" type=\"email\" ng-model=\"processing.email\" class=\"form-control\" placeholder=\"Email address to send download link\">\r\n   </div>\r\n");
 $templateCache.put("icsm/products/formats.html","<div class=\"row\">\r\n      <div class=\"col-md-4\">\r\n         <label for=\"geoprocessOutputFormat\">\r\n                  Output Format\r\n               </label>\r\n      </div>\r\n      <div class=\"col-md-8\">\r\n         <select id=\"geoprocessOutputFormat\" style=\"width:95%\" ng-model=\"processing.outFormat\" ng-options=\"opt.value for opt in config.outFormat track by opt.code\"></select>\r\n      </div>\r\n   </div>");
