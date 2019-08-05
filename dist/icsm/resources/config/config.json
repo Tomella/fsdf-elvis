@@ -148,6 +148,7 @@
                   "layers" : "dem:dem",
                   "format" : "image/png",
                   "transparent" : true,
+                  "maxZoom": 11,
                   "opacity" : 0.5
                }
             ],
@@ -178,6 +179,7 @@
                   "format" : "image/png",
                   "transparent" : true,
                   "opacity" : 0.5,
+                  "maxZoom": 11,
                   "visible": false
                }
             ],
@@ -205,6 +207,7 @@
                   "format" : "image/png",
                   "transparent" : true,
                   "opacity" : 0.6,
+                  "maxZoom": 11,
                   "visible": false
                }
             ],
@@ -237,6 +240,7 @@
                   "layers" : "bathymetry:bathymetry",
                   "format" : "image/png",
                   "transparent" : true,
+                  "maxZoom": 11,
                   "opacity" : 0.75
                }
             ],

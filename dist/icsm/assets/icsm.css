@@ -285,6 +285,84 @@
 .placenames-title {
   font-weight: bold;
 }
+.clipmodal {
+  z-index: 1010;
+  padding: 1px;
+  text-align: left;
+  white-space: normal;
+  opacity: 1;
+  background-color: #F8f8f8;
+  background-clip: padding-box;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, .2);
+  border-radius: 6px;
+  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+}
+
+.clip-btn {
+  background-color: white;
+  display: inline-block;
+  margin-bottom: 0;
+  width: 44px;
+  padding: 3px;
+  line-height: 1.2857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  border: 1px solid gray;
+  border-radius: 4px;
+}
+
+button.clip-btn:hover div {
+  opacity: 0.4;
+}
+
+.clip-btn div {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: -1px;
+  right: 0;
+  background-color: #006983;
+  opacity: 0.2;
+  border-radius: 4px;
+}
+
+.clipmodal-title {
+  padding: 8px 14px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 18px;
+  background-color: #e0e0e0;
+  border-bottom: 1px solid #ebebeb;
+  border-radius: 5px 5px 0 0;
+}
+
+.clipmodal-content {
+  padding: 9px 14px;
+}
+
+.clipmodal.ng-hide-add,
+.clipmodal.ng-hide-remove {
+  /* this is required as of 1.3x to properly
+      apply all styling in a show/hide animation */
+  transition: 0s linear all;
+}
+
+.clipmodal.ng-hide-add-active,
+.clipmodal.ng-hide-remove-active {
+  /* the transition is defined in the active class */
+  transition: 1s linear all;
+}
 /* TODO: I haven't worked out why it is showing up. Find out why and remove */
 
 .leaflet-draw-draw-circlemarker {
@@ -521,84 +599,6 @@ body {
 
 .leaflet-container {
   background-color: rgba(255,0,0,0.0);
-}
-.clipmodal {
-  z-index: 1010;
-  padding: 1px;
-  text-align: left;
-  white-space: normal;
-  opacity: 1;
-  background-color: #F8f8f8;
-  background-clip: padding-box;
-  border: 1px solid #ccc;
-  border: 1px solid rgba(0, 0, 0, .2);
-  border-radius: 6px;
-  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
-  box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
-}
-
-.clip-btn {
-  background-color: white;
-  display: inline-block;
-  margin-bottom: 0;
-  width: 44px;
-  padding: 3px;
-  line-height: 1.2857143;
-  text-align: center;
-  white-space: nowrap;
-  vertical-align: middle;
-  -ms-touch-action: manipulation;
-  touch-action: manipulation;
-  cursor: pointer;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  border: 1px solid gray;
-  border-radius: 4px;
-}
-
-button.clip-btn:hover div {
-  opacity: 0.4;
-}
-
-.clip-btn div {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: -1px;
-  right: 0;
-  background-color: #006983;
-  opacity: 0.2;
-  border-radius: 4px;
-}
-
-.clipmodal-title {
-  padding: 8px 14px;
-  margin: 0;
-  font-size: 14px;
-  font-weight: bold;
-  line-height: 18px;
-  background-color: #e0e0e0;
-  border-bottom: 1px solid #ebebeb;
-  border-radius: 5px 5px 0 0;
-}
-
-.clipmodal-content {
-  padding: 9px 14px;
-}
-
-.clipmodal.ng-hide-add,
-.clipmodal.ng-hide-remove {
-  /* this is required as of 1.3x to properly
-      apply all styling in a show/hide animation */
-  transition: 0s linear all;
-}
-
-.clipmodal.ng-hide-add-active,
-.clipmodal.ng-hide-remove-active {
-  /* the transition is defined in the active class */
-  transition: 1s linear all;
 }
 .contributors {
   margin: 2px;
@@ -1117,6 +1117,21 @@ img.elvis-logo {
   left: 0;
   right: 0;
 }
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
+}
 .reviewing-odd {
   background-color: #eeeeee;
 }
@@ -1148,21 +1163,6 @@ img.elvis-logo {
 .exclude {
   color: #777777;
   text-decoration: line-through;
-}
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
 }
 .icsm-icon {
   background: url("icsm/img/global-sprites.svg") no-repeat;
