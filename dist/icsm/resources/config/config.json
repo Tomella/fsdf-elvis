@@ -149,6 +149,7 @@
                {
                   "tms": false,
                   "maxZoom": 11,
+                  "opacity": 0.5,
                   "bounds": [
                      [-61, 88],
                      [-7, 174]
@@ -183,6 +184,7 @@
                   "tms": false,
                   "maxZoom": 11,
                   "visible": false,
+                  "opacity": 0.5,
                   "bounds": [
                      [-61, 88],
                      [-7, 174]
@@ -214,6 +216,7 @@
                   "tms": false,
                   "maxZoom": 11,
                   "visible": false,
+                  "opacity": 0.5,
                   "bounds": [
                      [-61, 88],
                      [-7, 174]
@@ -250,6 +253,7 @@
                {
                   "tms": false,
                   "maxZoom": 11,
+                  "opacity": 0.5,
                   "bounds": [
                      [-61, 88],
                      [-7, 174]

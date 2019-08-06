@@ -794,6 +794,41 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       return service;
    }]);
 }
+"use strict";
+
+{
+   var GlossaryCtrl = function GlossaryCtrl($log, glossaryService) {
+      var _this = this;
+
+      $log.info("GlossaryCtrl");
+      glossaryService.getTerms().then(function (terms) {
+         _this.terms = terms;
+      });
+   };
+
+   var GlossaryService = function GlossaryService($http) {
+      var TERMS_SERVICE = "icsm/resources/config/glossary.json";
+
+      return {
+         getTerms: function getTerms() {
+            return $http.get(TERMS_SERVICE, { cache: true }).then(function (response) {
+               return response.data;
+            });
+         }
+      };
+   };
+
+   angular.module("icsm.glossary", []).directive("icsmGlossary", [function () {
+      return {
+         templateUrl: "icsm/glossary/glossary.html"
+      };
+   }]).controller("GlossaryCtrl", GlossaryCtrl).factory("glossaryService", GlossaryService);
+
+   GlossaryCtrl.$inject = ['$log', 'glossaryService'];
+
+
+   GlossaryService.$inject = ['$http'];
+}
 'use strict';
 
 {
@@ -844,41 +879,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 			}
 		};
 	}]).factory('headerService', ['$http', function () {}]);
-}
-"use strict";
-
-{
-   var GlossaryCtrl = function GlossaryCtrl($log, glossaryService) {
-      var _this = this;
-
-      $log.info("GlossaryCtrl");
-      glossaryService.getTerms().then(function (terms) {
-         _this.terms = terms;
-      });
-   };
-
-   var GlossaryService = function GlossaryService($http) {
-      var TERMS_SERVICE = "icsm/resources/config/glossary.json";
-
-      return {
-         getTerms: function getTerms() {
-            return $http.get(TERMS_SERVICE, { cache: true }).then(function (response) {
-               return response.data;
-            });
-         }
-      };
-   };
-
-   angular.module("icsm.glossary", []).directive("icsmGlossary", [function () {
-      return {
-         templateUrl: "icsm/glossary/glossary.html"
-      };
-   }]).controller("GlossaryCtrl", GlossaryCtrl).factory("glossaryService", GlossaryService);
-
-   GlossaryCtrl.$inject = ['$log', 'glossaryService'];
-
-
-   GlossaryService.$inject = ['$http'];
 }
 "use strict";
 
@@ -4813,8 +4813,8 @@ $templateCache.put("icsm/contributors/contributors.html","<span class=\"contribu
 $templateCache.put("icsm/contributors/show.html","<a ng-mouseenter=\"over()\" ng-mouseleave=\"out()\" class=\"contributors-link\" title=\"Click to lock/unlock contributors list.\"\r\n      ng-click=\"toggleStick()\" href=\"#contributors0\">Contributors</a>");
 $templateCache.put("icsm/coverage/popup.html","<span class=\"coverage\" ng-class=\"state.show ? \'transitioned-down\' : \'transitioned-up\'\">\r\n   <div style=\"padding-bottom:15px\" class=\"coverage-off\">\r\n      <button class=\"undecorated coverage-unstick\" ng-click=\"hide()\" style=\"float:right\" title=\"Hide layer selections\">X</button>\r\n   </div>\r\n   <div ng-repeat=\"layer in state.layers\" class=\"coverage-layer\" tooltip-placement=\"left\"\r\n         uib-tooltip=\"Hint: To bring this layer to the top turn it off then on. The last clicked layer is always on top.\">\r\n      <input type=\"checkbox\" ng-checked=\"layer.visible\" ng-click=\"toggleVisibility(layer)\"></input>\r\n      <span ng-click=\"toggleVisibility(layer)\">\r\n         <span class=\"coverage-title\">{{layer.name}}</span><br/>\r\n         <img style=\"width:100px\" ng-src=\"{{layer.coverage.thumb}}\"></img>\r\n      </span>\r\n      <div class=\"pull-right\">\r\n         <div style=\"width: 110px\" ng-repeat=\"type in layer.coverage.types\">\r\n            <span class=\"coverage-legend-color\" ng-style=\"{\'background-color\':type.color}\"></span>\r\n            {{type.name}}\r\n         </div>\r\n      </div>\r\n   </div>\r\n</span>");
 $templateCache.put("icsm/coverage/trigger.html","<button ng-click=\"toggle()\" type=\"button\" class=\"map-tool-toggle-btn\" title=\"Select views of coverage, view legends and summaries of the coverage layers\">\r\n      <span class=\"panel-sm\">Layers</span>\r\n      <img src=\"icsm/resources/img/layers-16.png\">\r\n</button>");
-$templateCache.put("icsm/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n   <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n      <ul class=\"nav navbar-nav\">\r\n         <li class=\"hidden-xs\">\r\n            <a href=\"https://www.icsm.gov.au/\" target=\"_blank\" class=\"icsm-logo\"\r\n               style=\"margin-top: -4px;display:inline-block;\">\r\n               <img alt=\"ICSM - ANZLIC Committee on Surveying &amp; Mapping\" class=\"header-logo\"\r\n                  src=\"icsm/resources/img/icsm-logo-sml.gif\">\r\n            </a>\r\n            <a href=\"/\">\r\n               <h1 class=\"applicationTitle\">{{heading}}</h1>\r\n            </a>\r\n         </li>\r\n      </ul>\r\n      <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n         <li role=\"menuitem\" style=\"padding-right:10px;position: relative;top: -3px;\">\r\n            <span class=\"altthemes-container\">\r\n               <span>\r\n                  <a title=\"Location INformation Knowledge platform (LINK)\" href=\"http://fsdf.org.au/\" target=\"_blank\">\r\n                     <img alt=\"FSDF\" src=\"icsm/resources/img/FSDFimagev4.0.png\" style=\"height: 66px\">\r\n                  </a>\r\n               </span>\r\n            </span>\r\n         </li>\r\n         <li common-navigation role=\"menuitem\" current=\"current\" style=\"padding-right:10px\"></li>\r\n         <li mars-version-display role=\"menuitem\"></li>\r\n         <li style=\"width:10px\"></li>\r\n      </ul>\r\n   </div>\r\n   <!--/.nav-collapse -->\r\n</div>\r\n<div class=\"contributorsLink\" style=\"position: absolute; right:7px; bottom:15px\">\r\n   <icsm-contributors-link></icsm-contributors-link>\r\n</div>\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n   <div class=\"col-md-12\">\r\n      <div class=\"strap-blue\">\r\n      </div>\r\n      <div class=\"strap-white\">\r\n      </div>\r\n      <div class=\"strap-red\">\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/glossary/glossary.html","<div ng-controller=\"GlossaryCtrl as glossary\">\r\n   <div style=\"position:relative;padding:5px;padding-left:10px;\">\r\n      <div class=\"panel\" style=\"padding:5px;\">\r\n         <p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n	         <strong>Glossary</strong>\r\n         </p>\r\n\r\n         <div class=\"panel-body\">\r\n            <table class=\"table table-striped\">\r\n               <thead>\r\n                  <tr>\r\n                     <th>Term</th>\r\n                     <th>Definition</th>\r\n                  </tr>\r\n               </thead>\r\n               <tbody>\r\n                  <tr ng-repeat=\"term in glossary.terms\">\r\n                     <td>{{term.term}}</td>\r\n                     <td>{{term.definition}}</td>\r\n                  </tr>\r\n               </tbody>\r\n            </table>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
+$templateCache.put("icsm/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n   <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n      <ul class=\"nav navbar-nav\">\r\n         <li class=\"hidden-xs\">\r\n            <a href=\"https://www.icsm.gov.au/\" target=\"_blank\" class=\"icsm-logo\"\r\n               style=\"margin-top: -4px;display:inline-block;\">\r\n               <img alt=\"ICSM - ANZLIC Committee on Surveying &amp; Mapping\" class=\"header-logo\"\r\n                  src=\"icsm/resources/img/icsm-logo-sml.gif\">\r\n            </a>\r\n            <a href=\"/\">\r\n               <h1 class=\"applicationTitle\">{{heading}}</h1>\r\n            </a>\r\n         </li>\r\n      </ul>\r\n      <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n         <li role=\"menuitem\" style=\"padding-right:10px;position: relative;top: -3px;\">\r\n            <span class=\"altthemes-container\">\r\n               <span>\r\n                  <a title=\"Location INformation Knowledge platform (LINK)\" href=\"http://fsdf.org.au/\" target=\"_blank\">\r\n                     <img alt=\"FSDF\" src=\"icsm/resources/img/FSDFimagev4.0.png\" style=\"height: 66px\">\r\n                  </a>\r\n               </span>\r\n            </span>\r\n         </li>\r\n         <li common-navigation role=\"menuitem\" current=\"current\" style=\"padding-right:10px\"></li>\r\n         <li mars-version-display role=\"menuitem\"></li>\r\n         <li style=\"width:10px\"></li>\r\n      </ul>\r\n   </div>\r\n   <!--/.nav-collapse -->\r\n</div>\r\n<div class=\"contributorsLink\" style=\"position: absolute; right:7px; bottom:15px\">\r\n   <icsm-contributors-link></icsm-contributors-link>\r\n</div>\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n   <div class=\"col-md-12\">\r\n      <div class=\"strap-blue\">\r\n      </div>\r\n      <div class=\"strap-white\">\r\n      </div>\r\n      <div class=\"strap-red\">\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/help/faqs.html","<p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n   <strong>FAQS</strong>\r\n</p>\r\n\r\n<h5 ng-repeat=\"faq in faqs\"><button type=\"button\" class=\"undecorated\" ng-click=\"focus(faq.key)\">{{faq.question}}</button></h5>\r\n<hr/>\r\n<div class=\"row\" ng-repeat=\"faq in faqs\">\r\n   <div class=\"col-md-12\">\r\n      <h5 tabindex=\"0\" id=\"faqs_{{faq.key}}\">{{faq.question}}</h5>\r\n      <span ng-bind-html=\"faq.answer\"></span>\r\n      <hr/>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/help/help.html","<p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n	<strong>Help</strong>\r\n</p>\r\n\r\n<div class=\"panel-body\" ng-controller=\"HelpCtrl as help\">\r\n	The steps to get data!\r\n	<ol>\r\n		<li>Define area of interest</li>\r\n		<li>Select datasets</li>\r\n		<li>Confirm selections</li>\r\n		<li>Enter email address and industry</li>\r\n		<li>Start extract</li>\r\n	</ol>\r\n	One or more emails will be sent to you on completion of the data extract(s) with a link to your data.\r\n   <hr>\r\n	<icsm-faqs faqs=\"help.faqs\" ></icsm-faqs>\r\n</div>");
 $templateCache.put("icsm/imagery/launch.html","<button type=\"button\" class=\"undecorated\" title=\"View preview of imagery\" ng-click=\"preview()\" ng-if=\"show\">\r\n	<i class=\"fa fa-lg fa-eye\"></i>\r\n</button>");
