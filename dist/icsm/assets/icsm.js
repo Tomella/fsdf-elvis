@@ -4413,7 +4413,8 @@ var Strategies = function () {
          "ACT Government": unknown, // new ActStrategy(http),
          "NT Government": unknown, // new NtStrategy(http),
          "TAS Government": unknown, // new TasStrategy(http),
-         "Geoscience Australia": new GaStrategy(http)
+         "Geoscience Australia": new GaStrategy(http),
+         "Exploring for the Future": new GaStrategy(http)
       };
    }
 

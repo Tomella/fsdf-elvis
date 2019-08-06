@@ -234,6 +234,10 @@
                "thumb": "icsm/resources/img/bathymetry_thumb.png",
                "types": [
                   {
+                     "name": "30 Metre",
+                     "color": "#ff8910"
+                  },
+                  {
                      "name": "50 Metre",
                      "color": "#F07b00"
                   },
