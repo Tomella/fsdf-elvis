@@ -72,236 +72,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								}
 				}]).controller("RootCtrl", RootCtrl);
 }
-"use strict";
-
-{
-   var fileSize = function fileSize(size) {
-      var meg = 1000 * 1000;
-      var gig = meg * 1000;
-      var ter = gig * 1000;
-
-      if (!size) {
-         return "-";
-      }
-
-      if (("" + size).indexOf(" ") > -1) {
-         return size;
-      }
-
-      size = parseFloat(size);
-
-      if (size < 1000) {
-         return size + " bytes";
-      }
-      if (size < meg) {
-         return (size / 1000).toFixed(1) + " kB";
-      }
-      if (size < gig) {
-         return (size / meg).toFixed(1) + " MB";
-      }
-      if (size < ter) {
-         return (size / gig).toFixed(1) + " GB";
-      }
-      return (size / ter).toFixed(1) + " TB";
-   };
-
-   angular.module("icsm.bounds", ["icsm.message"]).directive('icsmBounds', ['$rootScope', 'icsmMessageService', 'boundsService', function ($rootScope, icsmMessageService, boundsService) {
-      return {
-         restrict: 'AE',
-         link: function link() {
-            boundsService.init().then(null, null, function notify(message) {
-               icsmMessageService.removeFlash();
-               switch (message.type) {
-                  case "error":
-                  case "warn":
-                  case "info":
-                     icsmMessageService[message.type](message.text);
-                     break;
-                  case "wait":
-                     icsmMessageService.wait(message.text);
-                     break;
-                  default:
-                     icsmMessageService.flash(message.text, message.duration ? message.duration : 8000, message.type === "wait");
-               }
-            });
-         }
-      };
-   }]).factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService', 'flashService', 'messageService', "parametersService", function ($http, $q, $rootScope, $timeout, configService, flashService, messageService, parametersService) {
-      var clipTimeout = void 0,
-          notify = void 0;
-      return {
-         init: function init() {
-            var notify = $q.defer();
-            if (parametersService.hasValidBbox()) {
-               send('Checking for data (' + parametersService.metadata + ')...');
-               getList(parametersService.clip);
-            }
-
-            $rootScope.$on('icsm.clip.drawn', function (event, clip) {
-               send('Area drawn. Checking for data...');
-               _checkSize(clip).then(function (message) {
-                  if (message.code === "success") {
-                     getList(clip);
-                  }
-               });
-            });
-            return notify.promise;
-         },
-
-         cancelDraw: function cancelDraw() {
-            drawService.cancelDraw();
-         },
-
-         checkSize: function checkSize(clip) {
-            return _checkSize(clip);
-         }
-      };
-
-      function send(message, type, duration) {
-         flashService.remove(notify);
-
-         if (message) {
-            if (type === "error") {
-               messageService.error(message);
-            } else {
-               notify = flashService.add(message, duration, true);
-            }
-         }
-      }
-
-      function _checkSize(clip) {
-         return $q(function (resolve) {
-            var result = drawn(clip);
-            if (result && result.code) {
-               switch (result.code) {
-                  case "oversize":
-                     $timeout(function () {
-                        send("", "clear");
-                        send("The selected area is too large to process. Please restrict to approximately " + "1.5 degrees square.", "error");
-                     });
-                     break;
-                  case "undersize":
-                     $timeout(function () {
-                        send("", "clear");
-                        send("X Min and Y Min should be smaller than X Max and Y Max, respectively. " + "Please update the drawn area.", "error");
-                     });
-               }
-               resolve(result);
-            }
-         });
-      }
-
-      function underSizeLimit(clip) {
-         var size = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
-         return size < 0.00000000001 || clip.xMax < clip.xMin;
-      }
-
-      function overSizeLimit(clip) {
-         // Shouldn't need abs but it doesn't hurt.
-         var size = Math.abs((clip.xMax - clip.xMin) * (clip.yMax - clip.yMin));
-         return size > 2.25;
-      }
-
-      function forceNumbers(clip) {
-         clip.xMax = clip.xMax === null ? null : +clip.xMax;
-         clip.xMin = clip.xMin === null ? null : +clip.xMin;
-         clip.yMax = clip.yMax === null ? null : +clip.yMax;
-         clip.yMin = clip.yMin === null ? null : +clip.yMin;
-      }
-
-      function drawn(clip) {
-         //geoprocessService.removeClip();
-         forceNumbers(clip);
-
-         if (overSizeLimit(clip)) {
-            return { code: "oversize" };
-         }
-
-         if (underSizeLimit(clip)) {
-            return { code: "undersize" };
-         }
-
-         if (clip.xMax === null) {
-            return { code: "incomplete" };
-         }
-
-         if (validClip(clip)) {
-            return { code: "success" };
-         }
-         return { code: "invalid" };
-      }
-
-      // The input validator takes care of order and min/max constraints. We just check valid existance.
-      function validClip(clip) {
-         return clip && angular.isNumber(clip.xMax) && angular.isNumber(clip.xMin) && angular.isNumber(clip.yMax) && angular.isNumber(clip.yMin) && !overSizeLimit(clip) && !underSizeLimit(clip);
-      }
-
-      function getList(clip) {
-         configService.getConfig("processing").then(function (conf) {
-            var url = conf.intersectsUrl;
-            if (url) {
-               var xMax = clip.xMax.toFixed(5),
-                   xMin = clip.xMin.toFixed(5),
-                   yMax = clip.yMax.toFixed(5),
-                   yMin = clip.yMin.toFixed(5),
-                   params = ["polygon=" + encodeURIComponent(clip.polygon)];
-
-               if (clip.metadata) {
-                  params.push("metadata=" + clip.metadata);
-               }
-
-               send("Checking there is data in your selected area...", "wait", 180000);
-               $http.get(url + params.join("&")).then(function (response) {
-                  if (response.data && response.data.available_data) {
-                     var hasData = false;
-                     send("", "clear");
-                     if (response.data.available_data) {
-                        response.data.available_data.forEach(function (group) {
-                           if (group.downloadables) {
-                              decorateDownloadables(group.downloadables);
-                              hasData = true;
-                           }
-                        });
-                     }
-                     if (!hasData) {
-                        send("There is no data held in your selected area. Please try another area.", null, 4000);
-                     }
-
-                     $rootScope.$broadcast('site.selection', response.data);
-                  }
-               }, function (err) {
-                  // If it falls over we don't want to crash.
-                  send("The service that provides the list of datasets is currently unavailable. " + "Please try again later.", "error");
-               });
-            }
-         });
-
-         function decorateDownloadables(downloadables) {
-            Object.keys(downloadables).forEach(function (groupname) {
-               var group = downloadables[groupname];
-               Object.keys(group).forEach(function (listName) {
-                  var items = group[listName];
-
-                  items.forEach(function (item) {
-                     return decorateItem(item);
-                  });
-               });
-            });
-         }
-
-         function decorateItem(item) {
-            item.fileSize = fileSize(item.file_size);
-            if (item.product) {
-               //  "bbox" : "113,-44,154,-10"
-               var arr = item.bbox.split(",").map(function (num) {
-                  return +num;
-               });
-               item.bbox = [Math.max(arr[0], clip.xMin), Math.max(arr[1], clip.yMin), Math.min(arr[2], clip.xMax), Math.min(arr[3], clip.yMax)].join(",");
-            }
-         }
-      }
-   }]);
-}
 'use strict';
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -562,6 +332,236 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             });
          }
       };
+   }]);
+}
+"use strict";
+
+{
+   var fileSize = function fileSize(size) {
+      var meg = 1000 * 1000;
+      var gig = meg * 1000;
+      var ter = gig * 1000;
+
+      if (!size) {
+         return "-";
+      }
+
+      if (("" + size).indexOf(" ") > -1) {
+         return size;
+      }
+
+      size = parseFloat(size);
+
+      if (size < 1000) {
+         return size + " bytes";
+      }
+      if (size < meg) {
+         return (size / 1000).toFixed(1) + " kB";
+      }
+      if (size < gig) {
+         return (size / meg).toFixed(1) + " MB";
+      }
+      if (size < ter) {
+         return (size / gig).toFixed(1) + " GB";
+      }
+      return (size / ter).toFixed(1) + " TB";
+   };
+
+   angular.module("icsm.bounds", ["icsm.message"]).directive('icsmBounds', ['$rootScope', 'icsmMessageService', 'boundsService', function ($rootScope, icsmMessageService, boundsService) {
+      return {
+         restrict: 'AE',
+         link: function link() {
+            boundsService.init().then(null, null, function notify(message) {
+               icsmMessageService.removeFlash();
+               switch (message.type) {
+                  case "error":
+                  case "warn":
+                  case "info":
+                     icsmMessageService[message.type](message.text);
+                     break;
+                  case "wait":
+                     icsmMessageService.wait(message.text);
+                     break;
+                  default:
+                     icsmMessageService.flash(message.text, message.duration ? message.duration : 8000, message.type === "wait");
+               }
+            });
+         }
+      };
+   }]).factory("boundsService", ['$http', '$q', '$rootScope', '$timeout', 'configService', 'flashService', 'messageService', "parametersService", function ($http, $q, $rootScope, $timeout, configService, flashService, messageService, parametersService) {
+      var clipTimeout = void 0,
+          notify = void 0;
+      return {
+         init: function init() {
+            var notify = $q.defer();
+            if (parametersService.hasValidBbox()) {
+               send('Checking for data (' + parametersService.metadata + ')...');
+               getList(parametersService.clip);
+            }
+
+            $rootScope.$on('icsm.clip.drawn', function (event, clip) {
+               send('Area drawn. Checking for data...');
+               _checkSize(clip).then(function (message) {
+                  if (message.code === "success") {
+                     getList(clip);
+                  }
+               });
+            });
+            return notify.promise;
+         },
+
+         cancelDraw: function cancelDraw() {
+            drawService.cancelDraw();
+         },
+
+         checkSize: function checkSize(clip) {
+            return _checkSize(clip);
+         }
+      };
+
+      function send(message, type, duration) {
+         flashService.remove(notify);
+
+         if (message) {
+            if (type === "error") {
+               messageService.error(message);
+            } else {
+               notify = flashService.add(message, duration, true);
+            }
+         }
+      }
+
+      function _checkSize(clip) {
+         return $q(function (resolve) {
+            var result = drawn(clip);
+            if (result && result.code) {
+               switch (result.code) {
+                  case "oversize":
+                     $timeout(function () {
+                        send("", "clear");
+                        send("The selected area is too large to process. Please restrict to approximately " + "1.5 degrees square.", "error");
+                     });
+                     break;
+                  case "undersize":
+                     $timeout(function () {
+                        send("", "clear");
+                        send("X Min and Y Min should be smaller than X Max and Y Max, respectively. " + "Please update the drawn area.", "error");
+                     });
+               }
+               resolve(result);
+            }
+         });
+      }
+
+      function underSizeLimit(clip) {
+         var size = (clip.xMax - clip.xMin) * (clip.yMax - clip.yMin);
+         return size < 0.00000000001 || clip.xMax < clip.xMin;
+      }
+
+      function overSizeLimit(clip) {
+         // Shouldn't need abs but it doesn't hurt.
+         var size = Math.abs((clip.xMax - clip.xMin) * (clip.yMax - clip.yMin));
+         return size > 2.25;
+      }
+
+      function forceNumbers(clip) {
+         clip.xMax = clip.xMax === null ? null : +clip.xMax;
+         clip.xMin = clip.xMin === null ? null : +clip.xMin;
+         clip.yMax = clip.yMax === null ? null : +clip.yMax;
+         clip.yMin = clip.yMin === null ? null : +clip.yMin;
+      }
+
+      function drawn(clip) {
+         //geoprocessService.removeClip();
+         forceNumbers(clip);
+
+         if (overSizeLimit(clip)) {
+            return { code: "oversize" };
+         }
+
+         if (underSizeLimit(clip)) {
+            return { code: "undersize" };
+         }
+
+         if (clip.xMax === null) {
+            return { code: "incomplete" };
+         }
+
+         if (validClip(clip)) {
+            return { code: "success" };
+         }
+         return { code: "invalid" };
+      }
+
+      // The input validator takes care of order and min/max constraints. We just check valid existance.
+      function validClip(clip) {
+         return clip && angular.isNumber(clip.xMax) && angular.isNumber(clip.xMin) && angular.isNumber(clip.yMax) && angular.isNumber(clip.yMin) && !overSizeLimit(clip) && !underSizeLimit(clip);
+      }
+
+      function getList(clip) {
+         configService.getConfig("processing").then(function (conf) {
+            var url = conf.intersectsUrl;
+            if (url) {
+               var xMax = clip.xMax.toFixed(5),
+                   xMin = clip.xMin.toFixed(5),
+                   yMax = clip.yMax.toFixed(5),
+                   yMin = clip.yMin.toFixed(5),
+                   params = ["polygon=" + encodeURIComponent(clip.polygon)];
+
+               if (clip.metadata) {
+                  params.push("metadata=" + clip.metadata);
+               }
+
+               send("Checking there is data in your selected area...", "wait", 180000);
+               $http.get(url + params.join("&")).then(function (response) {
+                  if (response.data && response.data.available_data) {
+                     var hasData = false;
+                     send("", "clear");
+                     if (response.data.available_data) {
+                        response.data.available_data.forEach(function (group) {
+                           if (group.downloadables) {
+                              decorateDownloadables(group.downloadables);
+                              hasData = true;
+                           }
+                        });
+                     }
+                     if (!hasData) {
+                        send("There is no data held in your selected area. Please try another area.", null, 4000);
+                     }
+
+                     $rootScope.$broadcast('site.selection', response.data);
+                  }
+               }, function (err) {
+                  // If it falls over we don't want to crash.
+                  send("The service that provides the list of datasets is currently unavailable. " + "Please try again later.", "error");
+               });
+            }
+         });
+
+         function decorateDownloadables(downloadables) {
+            Object.keys(downloadables).forEach(function (groupname) {
+               var group = downloadables[groupname];
+               Object.keys(group).forEach(function (listName) {
+                  var items = group[listName];
+
+                  items.forEach(function (item) {
+                     return decorateItem(item);
+                  });
+               });
+            });
+         }
+
+         function decorateItem(item) {
+            item.fileSize = fileSize(item.file_size);
+            if (item.product) {
+               //  "bbox" : "113,-44,154,-10"
+               var arr = item.bbox.split(",").map(function (num) {
+                  return +num;
+               });
+               item.bbox = [Math.max(arr[0], clip.xMin), Math.max(arr[1], clip.yMin), Math.min(arr[2], clip.xMax), Math.min(arr[3], clip.yMax)].join(",");
+            }
+         }
+      }
    }]);
 }
 "use strict";
@@ -956,6 +956,93 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 'use strict';
 
 {
+   var insidePolygon = function insidePolygon(latlng, polyPoints) {
+      var x = latlng.lat,
+          y = latlng.lng;
+
+      var inside = false;
+      for (var i = 0, j = polyPoints.length - 1; i < polyPoints.length; j = i++) {
+         var xi = polyPoints[i].lat,
+             yi = polyPoints[i].lng;
+         var xj = polyPoints[j].lat,
+             yj = polyPoints[j].lng;
+
+         var intersect = yi > y !== yj > y && x < (xj - xi) * (y - yi) / (yj - yi) + xi;
+         if (intersect) inside = !inside;
+      }
+
+      return inside;
+   };
+
+   angular.module("icsm.layerswitch", []).directive('icsmLayerswitch', ['$http', 'configService', 'mapService', function ($http, configService, mapService) {
+      return {
+         restrict: "AE",
+         link: function link(scope) {
+            var config;
+            var latlngs;
+
+            configService.getConfig("layerSwitch").then(function (response) {
+               config = response;
+               $http.get(config.extentUrl, { cache: true }).then(function (response) {
+                  var container = L.geoJson(response.data);
+                  var layer = container.getLayers()[0];
+                  if (layer) {
+                     latlngs = layer.getLatLngs();
+                  }
+
+                  mapService.getMap().then(function (map) {
+                     map.on("moveend", checkExtent);
+                     checkExtent();
+
+                     function checkExtent(event) {
+                        var bounds = map.getBounds();
+                        if (insidePolygon({ lng: bounds.getWest(), lat: bounds.getSouth() }, latlngs) && // ll
+                        insidePolygon({ lng: bounds.getWest(), lat: bounds.getNorth() }, latlngs) && // ul
+                        insidePolygon({ lng: bounds.getEast(), lat: bounds.getSouth() }, latlngs) && // lr
+                        insidePolygon({ lng: bounds.getEast(), lat: bounds.getNorth() }, latlngs) // ur
+                        ) {
+                              inSpace();
+                           } else {
+                           outOfSpace();
+                        }
+                     }
+
+                     function outOfSpace() {
+                        setLayers({
+                           outside: true,
+                           inside: false
+                        });
+                     }
+
+                     function inSpace() {
+                        setLayers({
+                           outside: false,
+                           inside: true
+                        });
+                     }
+
+                     function setLayers(settings) {
+                        map.eachLayer(function (layer) {
+                           if (layer.options && layer.options.switch) {
+                              if (layer.options.switch === config.inside) {
+                                 layer._container.style.display = settings.inside ? "block" : "none";
+                              }
+                              if (layer.options.switch === config.outside) {
+                                 layer._container.style.display = settings.outside ? "block" : "none";
+                              }
+                           }
+                        });
+                     }
+                  });
+               });
+            });
+         }
+      };
+   }]);
+}
+'use strict';
+
+{
 
    angular.module("icsm.mapevents", ['geo.map']).directive('icsmMapevents', ['icsmMapeventsService', function (icsmMapeventsService) {
       return {
@@ -1177,93 +1264,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       };
    }]);
 }
-'use strict';
-
-{
-   var insidePolygon = function insidePolygon(latlng, polyPoints) {
-      var x = latlng.lat,
-          y = latlng.lng;
-
-      var inside = false;
-      for (var i = 0, j = polyPoints.length - 1; i < polyPoints.length; j = i++) {
-         var xi = polyPoints[i].lat,
-             yi = polyPoints[i].lng;
-         var xj = polyPoints[j].lat,
-             yj = polyPoints[j].lng;
-
-         var intersect = yi > y !== yj > y && x < (xj - xi) * (y - yi) / (yj - yi) + xi;
-         if (intersect) inside = !inside;
-      }
-
-      return inside;
-   };
-
-   angular.module("icsm.layerswitch", []).directive('icsmLayerswitch', ['$http', 'configService', 'mapService', function ($http, configService, mapService) {
-      return {
-         restrict: "AE",
-         link: function link(scope) {
-            var config;
-            var latlngs;
-
-            configService.getConfig("layerSwitch").then(function (response) {
-               config = response;
-               $http.get(config.extentUrl, { cache: true }).then(function (response) {
-                  var container = L.geoJson(response.data);
-                  var layer = container.getLayers()[0];
-                  if (layer) {
-                     latlngs = layer.getLatLngs();
-                  }
-
-                  mapService.getMap().then(function (map) {
-                     map.on("moveend", checkExtent);
-                     checkExtent();
-
-                     function checkExtent(event) {
-                        var bounds = map.getBounds();
-                        if (insidePolygon({ lng: bounds.getWest(), lat: bounds.getSouth() }, latlngs) && // ll
-                        insidePolygon({ lng: bounds.getWest(), lat: bounds.getNorth() }, latlngs) && // ul
-                        insidePolygon({ lng: bounds.getEast(), lat: bounds.getSouth() }, latlngs) && // lr
-                        insidePolygon({ lng: bounds.getEast(), lat: bounds.getNorth() }, latlngs) // ur
-                        ) {
-                              inSpace();
-                           } else {
-                           outOfSpace();
-                        }
-                     }
-
-                     function outOfSpace() {
-                        setLayers({
-                           outside: true,
-                           inside: false
-                        });
-                     }
-
-                     function inSpace() {
-                        setLayers({
-                           outside: false,
-                           inside: true
-                        });
-                     }
-
-                     function setLayers(settings) {
-                        map.eachLayer(function (layer) {
-                           if (layer.options && layer.options.switch) {
-                              if (layer.options.switch === config.inside) {
-                                 layer._container.style.display = settings.inside ? "block" : "none";
-                              }
-                              if (layer.options.switch === config.outside) {
-                                 layer._container.style.display = settings.outside ? "block" : "none";
-                              }
-                           }
-                        });
-                     }
-                  });
-               });
-            });
-         }
-      };
-   }]);
-}
 "use strict";
 
 {
@@ -1318,6 +1318,89 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
          }
       };
 
+      return service;
+   }]);
+}
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+{
+   angular.module("icsm.parameters", []).factory("parametersService", ["$location", function ($location) {
+      // We read the parameters once only. Then the app can decide what to do with them.
+      var Service = function () {
+         function Service(search) {
+            _classCallCheck(this, Service);
+
+            this.search = search;
+         }
+
+         _createClass(Service, [{
+            key: "ignoreSizeLimit",
+            value: function ignoreSizeLimit() {
+               return !!this.search.metadata;
+            }
+         }, {
+            key: "hasValidBbox",
+            value: function hasValidBbox() {
+               var parameters = this.search;
+               return !(isNaN(parameters.minx) || isNaN(parameters.maxx) || isNaN(parameters.miny) || isNaN(parameters.maxy));
+            }
+         }, {
+            key: "clear",
+            value: function clear() {
+               this.search = {};
+            }
+         }, {
+            key: "bbox",
+            get: function get() {
+               return this.hasValidBbox() ? {
+                  minx: +this.search.minx,
+                  maxx: +this.search.maxx,
+                  miny: +this.search.miny,
+                  maxy: +this.search.maxy
+               } : null;
+            }
+         }, {
+            key: "clip",
+            get: function get() {
+               return this.hasValidBbox() ? {
+                  xMin: +this.search.minx,
+                  xMax: +this.search.maxx,
+                  yMin: +this.search.miny,
+                  yMax: +this.search.maxy,
+                  metadata: this.search.metadata
+               } : null;
+            }
+         }, {
+            key: "bounds",
+            get: function get() {
+               var s = this.search;
+               return this.hasValidBbox() ? L.latLngBounds([s.miny, s.minx], [s.maxy, s.maxx]) : null;
+            }
+         }, {
+            key: "data",
+            get: function get() {
+               // Just a wrapper around bounds same as draw does.
+               return this.hasValidBbox() ? { bounds: this.bounds, metadata: this.metadata } : null;
+            }
+         }, {
+            key: "metadata",
+            get: function get() {
+               return this.search.metadata;
+            }
+         }]);
+
+         return Service;
+      }();
+
+      ;
+
+      var service = new Service($location.search());
+
+      window.larry = service;
       return service;
    }]);
 }
@@ -1409,89 +1492,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
 
    PaneService.$inject = [];
-}
-"use strict";
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-{
-   angular.module("icsm.parameters", []).factory("parametersService", ["$location", function ($location) {
-      // We read the parameters once only. Then the app can decide what to do with them.
-      var Service = function () {
-         function Service(search) {
-            _classCallCheck(this, Service);
-
-            this.search = search;
-         }
-
-         _createClass(Service, [{
-            key: "ignoreSizeLimit",
-            value: function ignoreSizeLimit() {
-               return !!this.search.metadata;
-            }
-         }, {
-            key: "hasValidBbox",
-            value: function hasValidBbox() {
-               var parameters = this.search;
-               return !(isNaN(parameters.minx) || isNaN(parameters.maxx) || isNaN(parameters.miny) || isNaN(parameters.maxy));
-            }
-         }, {
-            key: "clear",
-            value: function clear() {
-               this.search = {};
-            }
-         }, {
-            key: "bbox",
-            get: function get() {
-               return this.hasValidBbox() ? {
-                  minx: +this.search.minx,
-                  maxx: +this.search.maxx,
-                  miny: +this.search.miny,
-                  maxy: +this.search.maxy
-               } : null;
-            }
-         }, {
-            key: "clip",
-            get: function get() {
-               return this.hasValidBbox() ? {
-                  xMin: +this.search.minx,
-                  xMax: +this.search.maxx,
-                  yMin: +this.search.miny,
-                  yMax: +this.search.maxy,
-                  metadata: this.search.metadata
-               } : null;
-            }
-         }, {
-            key: "bounds",
-            get: function get() {
-               var s = this.search;
-               return this.hasValidBbox() ? L.latLngBounds([s.miny, s.minx], [s.maxy, s.maxx]) : null;
-            }
-         }, {
-            key: "data",
-            get: function get() {
-               // Just a wrapper around bounds same as draw does.
-               return this.hasValidBbox() ? { bounds: this.bounds, metadata: this.metadata } : null;
-            }
-         }, {
-            key: "metadata",
-            get: function get() {
-               return this.search.metadata;
-            }
-         }]);
-
-         return Service;
-      }();
-
-      ;
-
-      var service = new Service($location.search());
-
-      window.larry = service;
-      return service;
-   }]);
 }
 'use strict';
 
@@ -4557,6 +4557,28 @@ var Strategies = function () {
 "use strict";
 
 {
+   angular.module("icsm.toolbar", []).directive("elevationToolbar", [function () {
+      return {
+         restrict: "AE",
+         templateUrl: "icsm/toolbar/toolbar.html",
+         controller: 'toolbarLinksCtrl',
+         transclude: true
+      };
+   }]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
+      var self = this;
+      configService.getConfig().then(function (config) {
+         self.links = config.toolbarLinks;
+      });
+
+      $scope.item = "";
+      $scope.toggleItem = function (item) {
+         $scope.item = $scope.item === item ? "" : item;
+      };
+   }]);
+}
+"use strict";
+
+{
    angular.module("icsm.transect", []).provider("transectService", function () {
       var diagonal = 500,
           layers = {},
@@ -4689,28 +4711,6 @@ var Strategies = function () {
          };
       }];
    });
-}
-"use strict";
-
-{
-   angular.module("icsm.toolbar", []).directive("elevationToolbar", [function () {
-      return {
-         restrict: "AE",
-         templateUrl: "icsm/toolbar/toolbar.html",
-         controller: 'toolbarLinksCtrl',
-         transclude: true
-      };
-   }]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
-      var self = this;
-      configService.getConfig().then(function (config) {
-         self.links = config.toolbarLinks;
-      });
-
-      $scope.item = "";
-      $scope.toggleItem = function (item) {
-         $scope.item = $scope.item === item ? "" : item;
-      };
-   }]);
 }
 "use strict";
 
@@ -4862,11 +4862,11 @@ $templateCache.put("icsm/results/results.html","<div ng-show=\"!list || !list.le
 $templateCache.put("icsm/results/subtype.html","<div ng-show=\"(items | matchedItems).length > paging.pageSize\"\r\n   paging page=\"paging.page\" page-size=\"paging.pageSize\"\r\n   total=\"(items | matchedItems).length\"\r\n   paging-action=\"setPage(page, pageSize)\">\r\n</div>\r\n<div>\r\n   <div ng-repeat=\"item in data\" icsm-abstract-hover item=\"item\">\r\n      <div tooltip-append-to-body=\"true\" uib-tooltip-template=\"\'icsm/results/abstracttooltip.html\'\" tooltip-popup-delay=\"400\" data-ng-mouseenter=\"show(item)\"\r\n         data-ng-mouseleave=\"hide(item)\">\r\n         <input type=\"checkbox\" ng-model=\"item.selected\" />\r\n         <icsm-abstract item=\"item\"></icsm-abstract>\r\n         <common-cc version=\"mappings[item.source].ccLicence\"></common-cc>\r\n         <launch-image item=\"item\" ng-if=\"item.thumb_url\"></launch-image>\r\n         <span class=\"listItem\" item=\"item\" icsm-abstract-link></span>\r\n         <span ng-show=\"item.file_size\" style=\"float:right;padding-top:3px\">({{item.file_size | fileSize}})</span>\r\n         <span ng-show=\"item.product\" style=\"float:right;padding-top:3px\" title=\"Product size will depend on size of chosen area, data coverage and resolution. An email will be sent after the extraction giving the exact size of the extracted data and a link to the product.\">(Product &lt; 500MB)</span>\r\n      </div>\r\n      <div ng-show=\"item.showAbstract\" class=\"well\">\r\n         <span ng-show=\"!item.metadata\">\r\n            <i class=\"fa fa-spinner fa-spin fa-lg fa-fw\"></i>\r\n            <span>Loading metadata...</span>\r\n         </span>\r\n         <div ng-show=\"item.metadata.abstract\">\r\n            <strong>{{item.metadata.title}}</strong> -\r\n            <span class=\"icsm-abstract-body\" ng-bind-html=\"item.metadata.abstractText\"></span>\r\n         </div>\r\n         <div ng-show=\"!item.metadata.abstract\">\r\n            <i class=\"fa fa-lg fa-exclamation-triangle\" style=\"color:orange\"></i>\r\n            Can\'t show abstract for this dataset.\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/results/unreleased.html","<div ng-repeat=\"(key, items) in types\" ng-show=\"(items | countMatchedItems) != 0\">\r\n   <div style=\"padding-left:8px\">\r\n      <h5>\r\n         <span uib-tooltip=\"{{filter.types[key].description}}\">{{key}} (Showing {{items | countMatchedItems | number:0}} of {{items.length | number:0}})</span>\r\n\r\n         <button class=\"pull-right undecorated\" ng-click=\"expansions[\'unreleased_\' + items[0].source + \'_\' + key] = !expansions[\'unreleased_\' + items[0].source + \'_\' + key]\">\r\n            [{{expansions[\'unreleased_\' + items[0].source + \'_\' + key]?\"hide \":\"show \"}} list]\r\n         </button>\r\n      </h5>\r\n   </div>\r\n   <div ng-show=\"expansions[\'unreleased_\' + items[0].source + \'_\' + key]\">\r\n      <div ng-repeat=\"item in items | matchedItems\" icsm-abstract-hover item=\"item\">\r\n         <div tooltip-append-to-body=\"true\" uib-tooltip-template=\"\'icsm/results/abstracttooltip.html\'\" tooltip-popup-delay=\"400\" data-ng-mouseenter=\"show(item)\"\r\n            data-ng-mouseleave=\"hide(item)\" style=\"padding-left:8px;\">\r\n            <icsm-abstract item=\"item\"></icsm-abstract>\r\n            <button type=\"button\" class=\"undecorated\" disabled=\"disabled\" title=\"Licence details pending release.\">\r\n               <i class=\"fa fa-lg fa-gavel\"></i>\r\n            </button>\r\n            <span class=\"listItem\" name=\"project_name\" item=\"item\" icsm-abstract-link></span>\r\n            <span ng-show=\"item.file_size\" style=\"float:right;padding-top:3px\">({{item.file_size | fileSize}})</span>\r\n         </div>\r\n         <div ng-show=\"item.showAbstract\" class=\"well\" style=\"margin-bottom:0px\">\r\n            <span ng-show=\"!item.metadata\">\r\n               <i class=\"fa fa-spinner fa-spin fa-lg fa-fw\"></i>\r\n               <span>Loading metadata...</span>\r\n            </span>\r\n            <div ng-show=\"item.metadata.abstract\">\r\n               <strong>{{item.metadata.title}}</strong> -\r\n               <span class=\"icsm-abstract-body\" ng-bind-html=\"item.metadata.abstractText\"></span>\r\n            </div>\r\n            <div ng-show=\"!item.metadata.abstract\">\r\n               <i class=\"fa fa-lg fa-exclamation-triangle\" style=\"color:orange\"></i>\r\n               There is no abstract available for this dataset.\r\n            </div>\r\n         </div>\r\n         <div style=\"padding-left:12px\">\r\n            <div>\r\n               <strong style=\"width:7em\">Captured: </strong>{{item.captured | captured}}\r\n            </div>\r\n            <div ng-if=\"item.available_date\">\r\n               <strong style=\"width:7em\">Available: </strong>{{item.available_date | reverseDate}}\r\n            </div>\r\n            <div>\r\n               <strong style=\"width:7em\">Contact: </strong>\r\n               <a href=\"mailTo:{{item.contact}}\">{{item.contact}}</a>\r\n            </div>\r\n         </div>\r\n      </div>\r\n\r\n      <div style=\"text-align:right\">\r\n         <button class=\"undecorated\" ng-click=\"expansions[\'unreleased_\' + items[0].source + \'_\' + key] = false\">[hide list]</button>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/reviewing/reviewing.html","<div class=\"modal-header\">\r\n   <h3 class=\"modal-title splash\">Download datasets by providing email address and start extract</h3>\r\n</div>\r\n<div class=\"modal-body\" id=\"accept\" ng-form exp-enter=\"accept()\" icsm-splash-modal style=\"width: 100%; margin-left: auto; margin-right: auto;\">\r\n   <div class=\"row bg-warning\" ng-show=\"noneSelected(products)\">\r\n      <div class=\"col-md-2\">\r\n         <button type=\"button\" style=\"float:right\" class=\"btn btn-primary\" ng-click=\"cancel()\">Close</button>\r\n      </div>\r\n   </div>\r\n   <div ng-controller=\"listCtrl as list\">\r\n      <div class=\"row\">\r\n         <div class=\"col-md-12\">\r\n            <strong>\r\n               {{list.selected.length}} Selected Datasets\r\n               <span ng-show=\"list.selectedSize\">(Approx: {{list.selectedSize | fileSize}})</span>\r\n            </strong>\r\n         </div>\r\n      </div>\r\n   </div>\r\n   <div ng-repeat=\"org in products\">\r\n      <h5>\r\n         <img ng-src=\"{{mappings[org.source].image}}\" ng-attr-style=\"height:{{mappings[org.source].height}}px\"></img>\r\n         <strong>{{org.source}}</strong>\r\n      </h5>\r\n      <div style=\"padding-left:10px\" ng-repeat=\"(key, subGroup) in org.downloadables\">\r\n         <h5>{{key}}</h5>\r\n         <div style=\"padding-left:10px;\" ng-repeat=\"(name, items) in subGroup\">\r\n            <h5 title=\"Clipped product using coordinate System: {{data.outCoordSys.value}}, Output Format: {{data.outFormat.value}}\">\r\n               {{name}}\r\n               <span style=\"padding-left:25px;font-size:90%\">\r\n                  {{items.length | number :0}} items\r\n                  <span ng-if=\"items | hasProducts\">{{items | productsSummary}}</span>\r\n                  totalling {{items | reviewSumSize | fileSize}}</span>\r\n            </h5>\r\n         </div>\r\n      </div>\r\n\r\n   </div>\r\n\r\n   <div ng-controller=\"listCtrl as list\">\r\n      <div ng-if=\"list.selected | hasTransformables\" class=\"well\" style=\"padding:7px\">\r\n         <h5 style=\"margin-top:4px\">{{list.selected | transformablesCount}} item(s) are downloads which you can elect to transform into a different coordinate system and file format</h5>\r\n         <span products-dialog>\r\n            <product-projection processing=\"data\"></product-projection>\r\n            <product-formats processing=\"data\"></product-formats>\r\n         </span>\r\n      </div>\r\n   </div>\r\n\r\n   <div class=\"row reviewing-divider\">\r\n      <div class=\"col-md-12\" style=\"padding-bottom: 8px\">\r\n         <div review-industry></div>\r\n      </div>\r\n      <div class=\"col-md-12\">\r\n         <div review-email></div>\r\n      </div>\r\n   </div>\r\n   <div class=\"row\" ng-controller=\"listCtrl as list\">\r\n      <div class=\"col-md-8\">\r\n         <strong>Email notification</strong> The extract of data can take some time. By providing an email address we will be able\r\n         to notify you when the job is complete. The email will provide a link to the extracted data which will be packaged\r\n         up as a single compressed file.\r\n\r\n         <div\r\n            vc-recaptcha\r\n            theme=\"\'light\'\"\r\n            key=\"recaptchaKey\"\r\n            on-create=\"setWidgetId(widgetId)\"\r\n            on-success=\"setResponse(response)\"\r\n            on-expire=\"cbExpiration()\"></div>\r\n      </div>\r\n      <div class=\"col-md-4\">\r\n         <div class=\"pull-right\" style=\"padding:8px;\">\r\n            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"accept()\" ng-disabled=\"!data.industry || !data.email || !list.selected.length || !recaptchaResponse\">Start extract of datasets\r\n            </button>\r\n            <button type=\"button\" class=\"btn btn-primary\" ng-click=\"cancel()\">Cancel</button>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
-$templateCache.put("icsm/side-panel/side-panel-left.html","<div class=\"cbp-spmenu cbp-spmenu-vertical cbp-spmenu-left\" style=\"width: {{left.width}}px;\" ng-class=\"{\'cbp-spmenu-open\': left.active}\">\r\n    <a href=\"\" title=\"Close panel\" ng-click=\"closeLeft()\" style=\"z-index: 1200\">\r\n        <span class=\"glyphicon glyphicon-chevron-left pull-right\"></span>\r\n    </a>\r\n    <div ng-show=\"left.active === \'legend\'\" class=\"left-side-menu-container\">\r\n        <legend url=\"\'img/AustralianTopogaphyLegend.png\'\" title=\"\'Map Legend\'\"></legend>\r\n    </div>\r\n</div>");
-$templateCache.put("icsm/side-panel/side-panel-right.html","<div class=\"cbp-spmenu cbp-spmenu-vertical cbp-spmenu-right noPrint\" ng-attr-style=\"width:{{right.width}}\" ng-class=\"{\'cbp-spmenu-open\': right.active}\">\r\n    <a href=\"\" title=\"Close panel\" ng-click=\"closePanel()\" style=\"z-index: 1\">\r\n        <span class=\"glyphicon glyphicon-chevron-right pull-left\"></span>\r\n    </a>\r\n\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'download\'\" icsm-view></div>\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'maps\'\" icsm-maps></div>\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'glossary\'\" icsm-glossary></div>\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'help\'\" icsm-help></div>\r\n    <panel-close-on-event only-on=\"search\" event-name=\"clear.button.fired\"></panel-close-on-event>\r\n</div>\r\n");
 $templateCache.put("icsm/select/doc.html","<div ng-class-odd=\"\'odd\'\" ng-class-even=\"\'even\'\" ng-mouseleave=\"select.lolight(doc)\" ng-mouseenter=\"select.hilight(doc)\">\r\n	<span ng-class=\"{ellipsis:!expanded}\" tooltip-enable=\"!expanded\" style=\"width:100%;display:inline-block;\"\r\n			tooltip-class=\"selectAbstractTooltip\" tooltip=\"{{doc.abstract | truncate : 250}}\" tooltip-placement=\"bottom\">\r\n		<button type=\"button\" class=\"undecorated\" ng-click=\"expanded = !expanded\" title=\"Click to see more about this dataset\">\r\n			<i class=\"fa pad-right fa-lg\" ng-class=\"{\'fa-caret-down\':expanded,\'fa-caret-right\':(!expanded)}\"></i>\r\n		</button>\r\n		<download-add item=\"doc\" group=\"group\"></download-add>\r\n		<icsm-wms data=\"doc\"></icsm-wms>\r\n		<icsm-bbox data=\"doc\" ng-if=\"doc.showExtent\"></icsm-bbox>\r\n		<a href=\"https://ecat.ga.gov.au/geonetwork/srv/eng/search#!{{doc.primaryId}}\" target=\"_blank\" ><strong>{{doc.title}}</strong></a>\r\n	</span>\r\n	<span ng-class=\"{ellipsis:!expanded}\" style=\"width:100%;display:inline-block;padding-right:15px;\">\r\n		{{doc.abstract}}\r\n	</span>\r\n	<div ng-show=\"expanded\" style=\"padding-bottom: 5px;\">\r\n		<h5>Keywords</h5>\r\n		<div>\r\n			<span class=\"badge\" ng-repeat=\"keyword in doc.keywords track by $index\">{{keyword}}</span>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/select/group.html","<div class=\"panel panel-default\" style=\"margin-bottom:-5px;\" >\r\n	<div class=\"panel-heading\"><icsm-wms data=\"group\"></icsm-wms> <strong>{{group.title}}</strong></div>\r\n	<div class=\"panel-body\">\r\n   		<div ng-repeat=\"doc in group.docs\">\r\n   			<div select-doc doc=\"doc\" group=\"group\"></div>\r\n		</div>\r\n	</div>\r\n</div>\r\n");
 $templateCache.put("icsm/select/select.html","<div>\r\n	<div style=\"position:relative;padding:5px;padding-left:10px;\" ng-controller=\"SelectCtrl as select\" class=\"scrollPanel\">\r\n		<div class=\"panel panel-default\" style=\"margin-bottom:-5px\">\r\n  			<div class=\"panel-heading\">\r\n  				<h3 class=\"panel-title\">Available datasets</h3>\r\n  			</div>\r\n  			<div class=\"panel-body\">\r\n				<div ng-repeat=\"doc in select.data.response.docs\" style=\"padding-bottom:7px\">\r\n					<div select-doc ng-if=\"doc.type == \'dataset\'\" doc=\"doc\"></div>\r\n					<select-group ng-if=\"doc.type == \'group\'\" group=\"doc\"></select-group>\r\n				</div>\r\n  			</div>\r\n		</div>\r\n	</div>\r\n</div>");
+$templateCache.put("icsm/side-panel/side-panel-left.html","<div class=\"cbp-spmenu cbp-spmenu-vertical cbp-spmenu-left\" style=\"width: {{left.width}}px;\" ng-class=\"{\'cbp-spmenu-open\': left.active}\">\r\n    <a href=\"\" title=\"Close panel\" ng-click=\"closeLeft()\" style=\"z-index: 1200\">\r\n        <span class=\"glyphicon glyphicon-chevron-left pull-right\"></span>\r\n    </a>\r\n    <div ng-show=\"left.active === \'legend\'\" class=\"left-side-menu-container\">\r\n        <legend url=\"\'img/AustralianTopogaphyLegend.png\'\" title=\"\'Map Legend\'\"></legend>\r\n    </div>\r\n</div>");
+$templateCache.put("icsm/side-panel/side-panel-right.html","<div class=\"cbp-spmenu cbp-spmenu-vertical cbp-spmenu-right noPrint\" ng-attr-style=\"width:{{right.width}}\" ng-class=\"{\'cbp-spmenu-open\': right.active}\">\r\n    <a href=\"\" title=\"Close panel\" ng-click=\"closePanel()\" style=\"z-index: 1\">\r\n        <span class=\"glyphicon glyphicon-chevron-right pull-left\"></span>\r\n    </a>\r\n\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'download\'\" icsm-view></div>\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'maps\'\" icsm-maps></div>\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'glossary\'\" icsm-glossary></div>\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'help\'\" icsm-help></div>\r\n    <panel-close-on-event only-on=\"search\" event-name=\"clear.button.fired\"></panel-close-on-event>\r\n</div>\r\n");
 $templateCache.put("icsm/splash/splash.html","<div class=\"modal-header\">\r\n   <h3 class=\"modal-title splash\">Elevation - Foundation Spatial Data</h3>\r\n</div>\r\n<div class=\"modal-body\" id=\"accept\" ng-form exp-enter=\"accept()\" icsm-splash-modal style=\"width: 100%; margin-left: auto; margin-right: auto;\">\r\n	<div>\r\n		<p>\r\n			Here you can download point cloud and elevation datasets sourced from jurisdictions.\r\n		</p>\r\n		<p>\r\n			<a href=\"http://www.ga.gov.au/topographic-mapping/digital-elevation-data.html\" target=\"_blank\">Find out more on our Elevation page.</a>\r\n		</p>\r\n		<p>\r\n         Data can be downloaded at <strong>no charge</strong> but note that there is a <strong>15GB limit per request</strong> (please check the file size before you download your files).\r\n		</p>\r\n		<p>\r\n			<a href=\"http://opentopo.sdsc.edu/gridsphere/gridsphere?cid=contributeframeportlet&gs_action=listTools\" target=\"_blank\">Click here for Free GIS Tools.</a>\r\n		</p>\r\n      <h5>How to use</h5>\r\n      <p>\r\n         <ul>\r\n            <li>Pan and zoom the map to your area of interest,</li>\r\n            <li>Click on one of the \"Select area by...\" buttons to define your area of interest,\r\n               <ul>\r\n                  <li>\r\n                        <img style=\"height:26px;padding-right:10px\" src=\"icsm/resources/img/draw_rectangle.png\">Drawing a bounding box. On enabling, click on the map and drag diagonally. There is a limit of roughly 2 square degrees or 200 square km.\r\n                  </li>\r\n                  <li>\r\n                     <img style=\"height:26px;padding-right:10px\" src=\"icsm/resources/img/draw_polygon.png\">\r\n                     Drawing a polygon. On enabling, click on the map for each vertex, click on the first vertex to close the polygon. Don\'t do too many vertices, it will not afford you greater accuracy and will slow down your search.\r\n                  </li>\r\n                  <li>\r\n                     <i class=\"fa fa-keyboard-o fa-2x\" style=\"padding-right:10px\" aria-hidden=\"true\"></i>\r\n                      Manually entering the minimum and maximum latitudes and longitudes. The same area restrictions apply to drawing the bounds.\r\n                  </li>\r\n               </ul>\r\n            </li>\r\n            <li>On drawing complete we will check for data within or very near your area of interest</li>\r\n            <li>If the list is large you can filter:\r\n               <ul>\r\n                  <li>Partial text match by typing in the filter field and/or</li>\r\n                  <li>You can restrict the display to either elevation (DEM) or point cloud file types</li>\r\n               </ul>\r\n            </li>\r\n            <li>Check against any file you would like to download. To reiterate, these files can be huge so take note of the file size before downloading</li>\r\n            <li>Review your selected datasets and submit.</li>\r\n            <li>An email will be sent to you with a link to all your data, zipped into a single file.</li>\r\n            <li>These files can be huge so take note of the file size before submitting or downloading</li>\r\n         </ul>\r\n      </p>\r\n      <h5>Hints</h5>\r\n      <p>\r\n         <ul>\r\n            <li>Hovering over many items will give you further information about the purpose of the item</li>\r\n            <li>Drawing a polyline allows you to measure distance along the polyline.</li>\r\n            <li>On completion on drawing a line the elevation along that line is plotted.</li>\r\n            <li>While the tool to draw your area of interest is enabled it is easiest to pan the map using the arrow keys.</li>\r\n            <li>There are many areas where there is no data though the coverage is improving all the time.</li\r\n         </ul>\r\n      </p>\r\n	</div>\r\n   <div style=\"padding:30px; padding-top:0; padding-bottom:40px; width:100%\">\r\n		<div class=\"pull-right\">\r\n		  	<button type=\"button\" class=\"btn btn-primary\" ng-model=\"seenSplash\" ng-click=\"accept()\" autofocus>Continue</button>\r\n		</div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/themes/themes.html","<div class=\"dropdown themesdropdown\">\r\n  <button class=\"btn btn-default dropdown-toggle themescurrent\" type=\"button\" id=\"dropdownMenu1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"true\">\r\n    Theme\r\n    <span class=\"caret\"></span>\r\n  </button>\r\n  <ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenu1\">\r\n    <li ng-repeat=\"item in themes\">\r\n       <a href=\"#\" title=\"{{item.title}}\" ng-href=\"{{item.url}}\" class=\"themesItemCompact\">\r\n         <span class=\"icsm-icon\" ng-class=\"item.className\"></span>\r\n         <strong style=\"vertical-align:top;font-size:110%\">{{item.label}}</strong>\r\n       </a>\r\n    </li>\r\n  </ul>\r\n</div>");
 $templateCache.put("icsm/toolbar/toolbar.html","<div class=\"elevation-toolbar noPrint\">\r\n   <div class=\"toolBarContainer\">\r\n      <div>\r\n         <ul class=\"left-toolbar-items\">\r\n            <li>\r\n               <div class=\"btn-group searchBar\" ng-show=\"root.whichSearch != \'region\'\">\r\n                  <div class=\"input-group input-group-custom\" geo-search>\r\n                     <input type=\"text\" ng-autocomplete ng-model=\"values.from.description\" options=\'{country:\"au\"}\'\r\n                        size=\"32\" title=\"Select a locality to pan the map to.\" class=\"form-control\" aria-label=\"...\">\r\n                     <div class=\"input-group-btn\">\r\n                        <button ng-click=\"zoom(false)\" exp-ga=\"[\'send\', \'event\', \'icsm\', \'click\', \'zoom to location\']\"\r\n                           class=\"btn btn-default\" title=\"Pan and potentially zoom to location.\">\r\n                           <i class=\"fa fa-search\"></i>\r\n                        </button>\r\n                     </div>\r\n                  </div>\r\n               </div>\r\n            </li>\r\n         </ul>\r\n         <ul class=\"right-toolbar-items\">\r\n            <li coverage-toggle></li>\r\n            <li>\r\n               <panel-trigger panel-id=\"download\" panel-width=\"590px\" name=\"Download\" default=\"default\"\r\n                  icon-class=\"fa-list\" title=\"Select an area of interest and select datasets for download\">\r\n               </panel-trigger>\r\n            </li>\r\n            <li>\r\n               <panel-trigger panel-id=\"help\" panel-width=\"590px\" name=\"Help\" icon-class=\"fa-question-circle-o\"\r\n                  title=\"Show help\"></panel-trigger>\r\n            </li>\r\n            <li>\r\n               <panel-trigger panel-id=\"glossary\" panel-width=\"590px\" name=\"Glossary\" icon-class=\"fa-book\"\r\n                  title=\"Show glossary\"></panel-trigger>\r\n            </li>\r\n            <li reset-page></li>\r\n         </ul>\r\n      </div>\r\n   </div>\r\n</div>");
