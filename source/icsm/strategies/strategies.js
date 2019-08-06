@@ -5,7 +5,7 @@ class BaseStrategy {
    }
 
    constructLink(item) {
-      return null;
+      return item.metadata_url ? item.metadata_url : null;
    }
 
    hasMetadata(item) {
