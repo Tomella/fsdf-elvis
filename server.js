@@ -179,6 +179,14 @@ app.get('/touch', function(req, res) {
    res.status(200).send({status: "success"});
 });
 
+const REFERERS = {localhost: true, "elevation.": true};
+
+app.get('/wms/*', function (req, res, next) {
+   console.log(req.headers.referer);
+
+
+});
+
 app.get('/xml2js/*', function (req, res, next) {
     // look for request like http://localhost:8080/proxy/http://example.com/file?query=1
     var remoteUrl = getRemoteUrlFromParam(req);

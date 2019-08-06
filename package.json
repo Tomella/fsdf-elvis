@@ -23,6 +23,7 @@
     "body-parser": "^1.18.3",
     "express": "^4.17.1",
     "express-http-proxy": "^0.9.1",
+    "node-cache": "^4.2.1",
     "request": "^2.74.0",
     "wiredep": "^3.0.1",
     "x2js": "^2.0.1",
