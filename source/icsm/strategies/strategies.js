@@ -117,6 +117,22 @@ class GaStrategy extends BaseStrategy {
    }
 }
 
+class EftfStrategy extends BaseStrategy {
+   constructor(http) {
+      super(http);
+   }
+
+   constructLink(item) {
+      return item.metadata_url;
+   }
+
+   requestMetadata(item) {
+      return BaseStrategy.resolvedPromise({
+         title: "View metadata in new page"
+      });
+   }
+}
+
 class NswStrategy extends BaseStrategy {
    constructor(http) {
       super(http);
@@ -268,7 +284,7 @@ class Strategies {
          "NT Government": unknown, // new NtStrategy(http),
          "TAS Government": unknown, // new TasStrategy(http),
          "Geoscience Australia": new GaStrategy(http),
-         "Exploring for the Future": new GaStrategy(http)
+         "Exploring for the Future": new EftfStrategy(http)
       };
    }
 
