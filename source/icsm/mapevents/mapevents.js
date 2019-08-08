@@ -36,10 +36,15 @@
                   return;
                }
 
+               var zoom = false;
                var xmax = bbox[2],
                   xmin = bbox[0],
                   ymax = bbox[3],
                   ymin = bbox[1];
+
+               if(bbox.length > 4) {
+                  zoom = bbox[4];
+               }
 
                // It's a bbox.
                makeBounds({
@@ -52,7 +57,7 @@
                      ]
                   },
                   properties: {}
-               }, false);
+               }, zoom);
             });
 
             $rootScope.$on('icsm.bbox.draw', function showBbox(event, bbox) {

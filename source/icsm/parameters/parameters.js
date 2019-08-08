@@ -27,7 +27,8 @@
                xMax: +this.search.maxx,
                yMin: +this.search.miny,
                yMax: +this.search.maxy,
-               metadata: this.search.metadata
+               metadata: this.search.metadata,
+               polygon: this.polygon
             } : null;
          }
 
@@ -37,9 +38,18 @@
                L.latLngBounds([s.miny, s.minx], [s.maxy, s.maxx]) : null;
          }
 
+         get polygon() {
+            return  "POLYGON(("
+               + this.search.minx + " " + this.search.miny + ","
+               + this.search.minx + " " + this.search.maxy + ","
+               + this.search.maxx + " " + this.search.maxy + ","
+               + this.search.maxx + " " + this.search.miny + ","
+               + this.search.minx + " " + this.search.miny + "))";
+         }
+
          get data() {  // Just a wrapper around bounds same as draw does.
             return this.hasValidBbox() ?
-               {bounds: this.bounds, metadata: this.metadata } : null;
+               {bounds: this.bounds, metadata: this.metadata, polygon: this.polygon } : null;
          }
 
          hasValidBbox() {
@@ -58,7 +68,6 @@
 
       let service = new Service($location.search());
 
-window.larry = service;
       return service;
    }]);
 }

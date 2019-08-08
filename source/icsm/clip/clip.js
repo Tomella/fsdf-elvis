@@ -107,7 +107,7 @@
       }])
 
 
-      .factory("clipService", ['$rootScope', 'drawService', 'mapService', 'parametersService',
+      .factory("clipService", ['$rootScope', 'drawService', 'parametersService',
                function ($rootScope, drawService, parametersService) {
          let options = {
             maxAreaDegrees: 4
@@ -178,13 +178,13 @@
 
          let data = parametersService.data;
          if(data) {
-            broadcaster(data);
+            broadcaster(data, true);
             service.data.clip.type = "bbox";
          }
 
          return service;
 
-         function broadcaster(data) {
+         function broadcaster(data, zoom) {
             console.log("data", data);
             service.setClip(data);
             let c = service.data.clip;
@@ -193,7 +193,8 @@
                c.xMin,
                c.yMin,
                c.xMax,
-               c.yMax
+               c.yMax,
+               !!zoom
             ]);// Draw it
 
             $rootScope.$broadcast('icsm.clip.drawn', c);  // Let people know it is drawn
