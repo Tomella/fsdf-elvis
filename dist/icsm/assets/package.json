@@ -1,6 +1,6 @@
 {
   "name": "icsm",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "ICSM",
   "keywords": [
     "Explorer",
@@ -48,7 +48,6 @@
     "gulp-header": "^1.8.7",
     "gulp-insert": "^0.5.0",
     "gulp-rename": "^1.2.2",
-    "gulp-sass": "^2.0.1",
     "gulp-uglify": "^1.2.0",
     "gulp-zip": "^3.2.0"
   },

@@ -522,6 +522,89 @@ body {
 .leaflet-container {
   background-color: rgba(255,0,0,0.0);
 }
+.coverage {
+  margin: 2px;
+  padding: 10px;
+  padding-left: 8px;
+  position: fixed;
+  top: 109px;
+  right: 300px;
+  z-index: 1200;
+  background-color: white;
+  white-space: nowrap;
+  text-align: left;
+  -webkit-transition: all 1s ease;
+  /* Safari */
+  transition: all 1s ease;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+}
+
+@media (max-width: 991px) {
+  .coverage {
+    right: 136px;
+  }
+}
+
+.coverage-unstick {
+  vertical-align: top;
+  font-weight: bold;
+}
+
+.coverage img {
+  -webkit-transition: all 1s ease;
+  /* Safari */
+  transition: all 1s ease;
+}
+
+.coverage.transitioned-up img {
+  height: 0;
+  width: 0;
+}
+
+.coverage.transitioned-up {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.coverage.transitioned-down {
+  border: 1px solid gray;
+  border-radius: 1px;
+  width: 260px;
+}
+
+.transitioned-up {
+  height: 0px;
+  border: 0 none;
+  margin: 0;
+  padding: 0;
+}
+
+.coverage-link {
+  font-weight: bold;
+}
+
+.coverage-layer {
+  border-bottom: solid 1px gray;
+}
+
+.coverage-layer:last-child {
+  border-bottom: none;
+}
+
+.coverage-title {
+  font-weight: bold;
+  font-size: 110%;
+}
+
+.coverage-legend-color {
+  display: inline-block;
+  width: 18px;
+  height: 15px;
+  padding-left: 10px;
+  border: 1px solid gray;
+  border-radius: 2px;
+}
 .clipmodal {
   z-index: 1010;
   padding: 1px;
@@ -667,89 +750,6 @@ img.contributor-logo {
 .elevation-and-depth {
   padding-left: 12px;
   padding-right: 12px;
-}
-.coverage {
-  margin: 2px;
-  padding: 10px;
-  padding-left: 8px;
-  position: fixed;
-  top: 109px;
-  right: 300px;
-  z-index: 1200;
-  background-color: white;
-  white-space: nowrap;
-  text-align: left;
-  -webkit-transition: all 1s ease;
-  /* Safari */
-  transition: all 1s ease;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
-}
-
-@media (max-width: 991px) {
-  .coverage {
-    right: 136px;
-  }
-}
-
-.coverage-unstick {
-  vertical-align: top;
-  font-weight: bold;
-}
-
-.coverage img {
-  -webkit-transition: all 1s ease;
-  /* Safari */
-  transition: all 1s ease;
-}
-
-.coverage.transitioned-up img {
-  height: 0;
-  width: 0;
-}
-
-.coverage.transitioned-up {
-  display: none;
-  width: 0;
-  height: 0;
-}
-
-.coverage.transitioned-down {
-  border: 1px solid gray;
-  border-radius: 1px;
-  width: 260px;
-}
-
-.transitioned-up {
-  height: 0px;
-  border: 0 none;
-  margin: 0;
-  padding: 0;
-}
-
-.coverage-link {
-  font-weight: bold;
-}
-
-.coverage-layer {
-  border-bottom: solid 1px gray;
-}
-
-.coverage-layer:last-child {
-  border-bottom: none;
-}
-
-.coverage-title {
-  font-weight: bold;
-  font-size: 110%;
-}
-
-.coverage-legend-color {
-  display: inline-block;
-  width: 18px;
-  height: 15px;
-  padding-left: 10px;
-  border: 1px solid gray;
-  border-radius: 2px;
 }
 img.elvis-logo {
   height: 75px;
