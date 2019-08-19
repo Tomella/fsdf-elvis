@@ -324,12 +324,20 @@
          "text": "Agriculture"
       },
       {
+         "code": "Asset Management",
+         "text": "Asset Management"
+      },
+      {
          "code": "Banking",
          "text": "Banking"
       },
       {
          "code": "Building Services",
          "text": "Building Services"
+      },
+      {
+         "code": "Chemicals",
+         "text": "Chemicals"
       },
       {
          "code": "Commonwealth Government",
@@ -376,8 +384,8 @@
          "text": "Energy"
       },
       {
-         "code": "Utilities - Electricity",
-         "text": "Utilities - Electricity"
+         "code": "Engineering",
+         "text": "Engineering"
       },
       {
          "code": "Entertainment",
@@ -538,6 +546,10 @@
       {
          "code": "Urban Design",
          "text": "Urban Design"
+      },
+      {
+         "code": "Utilities - Electricity",
+         "text": "Utilities - Electricity"
       },
       {
          "code": "Utilities - Water",
