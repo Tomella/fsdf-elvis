@@ -16,8 +16,18 @@
       "enabled": true,
       "code": "lpi",
       "image": "icsm/resources/img/NSW.jpg",
-      "height": 42,
+      "height": 40,
       "ccLicence": 3,
+      "showText": false
+   },
+   {
+      "name": "NSW Department of Planning Industry and Environment",
+      "title": "NSW Department of Planning Industry and Environment",
+      "href": "https://www.planning.nsw.gov.au/",
+      "enabled": true,
+      "code": "dpie",
+      "image": "icsm/resources/img/DPIE_LOGO.png",
+      "height": 40,
       "showText": false
    },
    {

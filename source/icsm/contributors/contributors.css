@@ -12,6 +12,13 @@
    text-align: center;
    -webkit-transition: height 1s; /* Safari */
    transition: height 1s;
+   -webkit-transition: width 1s; /* Safari */
+   transition: width 1s;
+}
+
+.contributors div {
+   float: left;
+   width: 50%;
 }
 
 img.contributor-logo {
@@ -34,6 +41,7 @@ img.contributor-logo {
 .contributors.transitioned-down {
    border: 1px solid gray;
    border-radius: 3px;
+   width:500px;
 }
 
 .transitioned-up {
@@ -41,6 +49,7 @@ img.contributor-logo {
    border: 0 none;
    margin: 0;
    padding: 0;
+   width:5px;
 }
 
 .contributors.transitioned-up a {
