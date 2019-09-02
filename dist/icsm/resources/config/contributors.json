@@ -73,8 +73,8 @@
    {
       "name": "SA Government",
       "title": "SA Government",
-      "href": "http://www.ga.gov.au",
-      "enabled": false,
+      "href": "https://www.sa.gov.au/",
+      "enabled": true,
       "code": "sa",
       "image": "icsm/resources/img/logo-SA.png",
       "height": 42,
