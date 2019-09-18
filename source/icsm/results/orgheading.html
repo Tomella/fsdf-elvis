@@ -1,4 +1,4 @@
 <h5>
    <img ng-src="{{mappings[org.source].image}}" ng-attr-style="height:{{mappings[org.source].height}}px"></img>
-      <strong>{{org.source}}</strong> (Showing {{org.downloadables | countMatchedDownloadables | number:0}} of {{org.downloadables	| countDownloadables | number:0}})
+      <strong>{{heading()}}</strong> (Showing {{org.downloadables | countMatchedDownloadables | number:0}} of {{org.downloadables	| countDownloadables | number:0}})
 </h5>

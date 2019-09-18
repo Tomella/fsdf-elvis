@@ -33,6 +33,11 @@
                                     $scope.mappings = response;
                                  });
 
+                                 $scope.heading = function(source) {
+                                    let mapping = $scope.mappings[source];
+                                    return mapping.displayName ? mapping.displayName : source;
+                                 }
+
                                  $scope.products = convertFlatToStructured(selected).available_data;
 
                                  $scope.accept = function () {

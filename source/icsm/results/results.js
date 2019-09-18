@@ -21,6 +21,13 @@
             scope: {
                org: "=",
                mappings: "="
+            },
+            link: function(scope) {
+               scope.heading = function() {
+                  let source = scope.org.source;
+                  let mapping = scope.mappings[source];
+                  return mapping.displayName ? mapping.displayName : source;
+               }
             }
          };
       }])

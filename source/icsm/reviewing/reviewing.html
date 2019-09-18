@@ -20,7 +20,7 @@
    <div ng-repeat="org in products">
       <h5>
          <img ng-src="{{mappings[org.source].image}}" ng-attr-style="height:{{mappings[org.source].height}}px"></img>
-         <strong>{{org.source}}</strong>
+         <strong>{{heading(org.source)}}</strong>
       </h5>
       <div style="padding-left:10px" ng-repeat="(key, subGroup) in org.downloadables">
          <h5>{{key}}</h5>
