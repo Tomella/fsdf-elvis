@@ -17,6 +17,38 @@ specific language governing permissions and limitations
 under the License.
 */
 
+"use strict";
+
+{
+
+   var versions = {
+      3: {
+         version: "3.0",
+         link: "https://creativecommons.org/licenses/by/3.0/au/"
+      },
+      4: {
+         version: "4.0",
+         link: "https://creativecommons.org/licenses/by/4.0/"
+      }
+   };
+
+   angular.module("common.cc", []).directive('commonCc', [function () {
+      return {
+         templateUrl: 'common/cc/cc.html',
+         scope: {
+            version: "=?"
+         },
+         link: function link(scope) {
+            if (!scope.version) {
+               scope.details = versions[4];
+            } else {
+               scope.details = versions[scope.version];
+            }
+            scope.template = 'common/cc/cctemplate.html';
+         }
+      };
+   }]);
+}
 'use strict';
 
 {
@@ -61,38 +93,6 @@ under the License.
                   });
                });
             });
-         }
-      };
-   }]);
-}
-"use strict";
-
-{
-
-   var versions = {
-      3: {
-         version: "3.0",
-         link: "https://creativecommons.org/licenses/by/3.0/au/"
-      },
-      4: {
-         version: "4.0",
-         link: "https://creativecommons.org/licenses/by/4.0/"
-      }
-   };
-
-   angular.module("common.cc", []).directive('commonCc', [function () {
-      return {
-         templateUrl: 'common/cc/cc.html',
-         scope: {
-            version: "=?"
-         },
-         link: function link(scope) {
-            if (!scope.version) {
-               scope.details = versions[4];
-            } else {
-               scope.details = versions[scope.version];
-            }
-            scope.template = 'common/cc/cctemplate.html';
          }
       };
    }]);
@@ -540,6 +540,36 @@ under the License.
       };
    });
 }
+"use strict";
+
+(function (angular) {
+   'use strict';
+
+   angular.module("common.scroll", []).directive("commonScroller", ['$timeout', function ($timeout) {
+      return {
+         scope: {
+            more: "&",
+            buffer: "=?"
+         },
+         link: function link(scope, element, attrs) {
+            var fetching;
+            if (!scope.buffer) scope.buffer = 100;
+
+            element.on("scroll", function (event) {
+               var target = event.currentTarget;
+               $timeout.cancel(fetching);
+               fetching = $timeout(bouncer, 120);
+
+               function bouncer() {
+                  if (scope.more && target.scrollHeight - target.scrollTop <= target.clientHeight + scope.buffer) {
+                     scope.more();
+                  }
+               }
+            });
+         }
+      };
+   }]);
+})(angular);
 'use strict';
 
 {
@@ -715,36 +745,6 @@ under the License.
       };
    }]);
 }
-"use strict";
-
-(function (angular) {
-   'use strict';
-
-   angular.module("common.scroll", []).directive("commonScroller", ['$timeout', function ($timeout) {
-      return {
-         scope: {
-            more: "&",
-            buffer: "=?"
-         },
-         link: function link(scope, element, attrs) {
-            var fetching;
-            if (!scope.buffer) scope.buffer = 100;
-
-            element.on("scroll", function (event) {
-               var target = event.currentTarget;
-               $timeout.cancel(fetching);
-               fetching = $timeout(bouncer, 120);
-
-               function bouncer() {
-                  if (scope.more && target.scrollHeight - target.scrollTop <= target.clientHeight + scope.buffer) {
-                     scope.more();
-                  }
-               }
-            });
-         }
-      };
-   }]);
-})(angular);
 'use strict';
 
 {

@@ -13,14 +13,6 @@
       "showText": false
    },
 
-   "NSW Government": {
-      "code": "lpi",
-      "image": "icsm/resources/img/NSW.jpg",
-      "height": 42,
-      "ccLicence": 3,
-      "showText": false
-   },
-
    "NSW Government - Spatial Services": {
       "code": "lpi",
       "displayName": "NSW Government",
