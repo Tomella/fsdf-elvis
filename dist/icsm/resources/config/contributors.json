@@ -160,5 +160,15 @@
       "image": "icsm/resources/img/PP-705 DEA Logo Inline.png",
       "height": 42,
       "showText": false
+   },
+   {
+      "name": "AusSeabed",
+      "title": "AusSeabed",
+      "href": "http://www.ausseabed.gov.au/home/",
+      "enabled": true,
+      "code": "asb",
+      "image": "icsm/resources/img/AusSeabed logo_stacked_RGB.png",
+      "height": 42,
+      "showText": false
    }
 ]
