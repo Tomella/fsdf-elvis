@@ -1174,68 +1174,6 @@ img.elvis-logo {
 i.fa.active {
   color: red;
 }
-.icsm-icon {
-  background: url("icsm/img/global-sprites.svg") no-repeat;
-  display: inline-block;
-  width: 19px;
-  height: 30px;
-  margin: 0 auto 0 auto;
-}
-
-.icsm-pin {
-  background-position: 0px;
-}
-
-.icsm-map {
-  background-position: -63px;
-}
-
-.icsm-crosshair {
-  background-position: -82px;
-}
-
-.icsm-sign {
-  background-position: -102px;
-}
-
-.icsm-parcel {
-  background-position: -121px;
-}
-
-.icsm-satellite {
-  background-position: -140px;
-}
-
-.icsm-ship {
-  background-position: -160px;
-}
-
-.icsm-water {
-  background-position: -179px;
-}
-
-.icsm-shore {
-  background-position: -199px;
-}
-
-.icsm-land {
-  background-position: -218px;
-}
-
-.themesItemCompact {
-  margin-top: 0px !important;
-}
-
-.themesdropdown {
-  margin-top: -8px;
-  padding-right: 20px;
-  z-index: 100000;
-}
-
-.themesdropdown .themescurrent {
-  color: #fff;
-  background-color: #777;
-}
 .common-baselayer-control {
   width: 210px;
   color: #333;
@@ -1335,6 +1273,68 @@ i.fa.active {
   border: none;
   height: 30px;
   font-size: 13px;
+}
+.icsm-icon {
+  background: url("icsm/img/global-sprites.svg") no-repeat;
+  display: inline-block;
+  width: 19px;
+  height: 30px;
+  margin: 0 auto 0 auto;
+}
+
+.icsm-pin {
+  background-position: 0px;
+}
+
+.icsm-map {
+  background-position: -63px;
+}
+
+.icsm-crosshair {
+  background-position: -82px;
+}
+
+.icsm-sign {
+  background-position: -102px;
+}
+
+.icsm-parcel {
+  background-position: -121px;
+}
+
+.icsm-satellite {
+  background-position: -140px;
+}
+
+.icsm-ship {
+  background-position: -160px;
+}
+
+.icsm-water {
+  background-position: -179px;
+}
+
+.icsm-shore {
+  background-position: -199px;
+}
+
+.icsm-land {
+  background-position: -218px;
+}
+
+.themesItemCompact {
+  margin-top: 0px !important;
+}
+
+.themesdropdown {
+  margin-top: -8px;
+  padding-right: 20px;
+  z-index: 100000;
+}
+
+.themesdropdown .themescurrent {
+  color: #fff;
+  background-color: #777;
 }
 .downloadPane {
   padding-left: 0px !important;

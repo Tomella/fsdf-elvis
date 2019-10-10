@@ -653,6 +653,43 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 }
 "use strict";
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+{
+   angular.module("icsm.elevation.point", []).factory("elevationPointsService", ['$http', '$q', 'configService', function ($http, $q, configService) {
+      var service = {
+         getElevation: function getElevation(latlng) {
+            return $q(function (resolve, reject) {
+               configService.getConfig("elevation").then(function (config) {
+                  var delta = 0.000001;
+
+                  var _latlng = _slicedToArray(latlng, 2),
+                      lat = _latlng[0],
+                      lng = _latlng[1];
+
+                  var bbox = [lng - delta, lat - delta, lng + delta, lat + delta];
+                  var url = config.elevationTemplate.replace("{bbox}", bbox.join(","));
+
+                  new TerrainLoader().load(url, function (elev) {
+                     resolve(elev);
+                  }, function (e) {
+                     reject(e);
+                  });
+               });
+            });
+         },
+
+         getHiResElevation: function getHiResElevation(latlng) {
+            return configService.getConfig("elevation").then(function (config) {
+               return $http.get(config.hiResElevationTemplate.replace("{lng}", latlng.lng).replace("{lat}", latlng.lat));
+            });
+         }
+      };
+      return service;
+   }]);
+}
+"use strict";
+
 {
    var CoverageService = function CoverageService(configService, mapService) {
       var state = {
@@ -757,78 +794,6 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
    CoverageService.$inject = ["configService", "mapService"];
 }
-"use strict";
-
-{
-   var GlossaryCtrl = function GlossaryCtrl($log, glossaryService) {
-      var _this = this;
-
-      $log.info("GlossaryCtrl");
-      glossaryService.getTerms().then(function (terms) {
-         _this.terms = terms;
-      });
-   };
-
-   var GlossaryService = function GlossaryService($http) {
-      var TERMS_SERVICE = "icsm/resources/config/glossary.json";
-
-      return {
-         getTerms: function getTerms() {
-            return $http.get(TERMS_SERVICE, { cache: true }).then(function (response) {
-               return response.data;
-            });
-         }
-      };
-   };
-
-   angular.module("icsm.glossary", []).directive("icsmGlossary", [function () {
-      return {
-         templateUrl: "icsm/glossary/glossary.html"
-      };
-   }]).controller("GlossaryCtrl", GlossaryCtrl).factory("glossaryService", GlossaryService);
-
-   GlossaryCtrl.$inject = ['$log', 'glossaryService'];
-
-
-   GlossaryService.$inject = ['$http'];
-}
-"use strict";
-
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-{
-   angular.module("icsm.elevation.point", []).factory("elevationPointsService", ['$http', '$q', 'configService', function ($http, $q, configService) {
-      var service = {
-         getElevation: function getElevation(latlng) {
-            return $q(function (resolve, reject) {
-               configService.getConfig("elevation").then(function (config) {
-                  var delta = 0.000001;
-
-                  var _latlng = _slicedToArray(latlng, 2),
-                      lat = _latlng[0],
-                      lng = _latlng[1];
-
-                  var bbox = [lng - delta, lat - delta, lng + delta, lat + delta];
-                  var url = config.elevationTemplate.replace("{bbox}", bbox.join(","));
-
-                  new TerrainLoader().load(url, function (elev) {
-                     resolve(elev);
-                  }, function (e) {
-                     reject(e);
-                  });
-               });
-            });
-         },
-
-         getHiResElevation: function getHiResElevation(latlng) {
-            return configService.getConfig("elevation").then(function (config) {
-               return $http.get(config.hiResElevationTemplate.replace("{lng}", latlng.lng).replace("{lat}", latlng.lat));
-            });
-         }
-      };
-      return service;
-   }]);
-}
 'use strict';
 
 {
@@ -879,6 +844,41 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 			}
 		};
 	}]).factory('headerService', ['$http', function () {}]);
+}
+"use strict";
+
+{
+   var GlossaryCtrl = function GlossaryCtrl($log, glossaryService) {
+      var _this = this;
+
+      $log.info("GlossaryCtrl");
+      glossaryService.getTerms().then(function (terms) {
+         _this.terms = terms;
+      });
+   };
+
+   var GlossaryService = function GlossaryService($http) {
+      var TERMS_SERVICE = "icsm/resources/config/glossary.json";
+
+      return {
+         getTerms: function getTerms() {
+            return $http.get(TERMS_SERVICE, { cache: true }).then(function (response) {
+               return response.data;
+            });
+         }
+      };
+   };
+
+   angular.module("icsm.glossary", []).directive("icsmGlossary", [function () {
+      return {
+         templateUrl: "icsm/glossary/glossary.html"
+      };
+   }]).controller("GlossaryCtrl", GlossaryCtrl).factory("glossaryService", GlossaryService);
+
+   GlossaryCtrl.$inject = ['$log', 'glossaryService'];
+
+
+   GlossaryService.$inject = ['$http'];
 }
 "use strict";
 
@@ -949,93 +949,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
                   $rootScope.$broadcast("icsm-preview", { url: url, item: item });
                });
             };
-         }
-      };
-   }]);
-}
-'use strict';
-
-{
-   var insidePolygon = function insidePolygon(latlng, polyPoints) {
-      var x = latlng.lat,
-          y = latlng.lng;
-
-      var inside = false;
-      for (var i = 0, j = polyPoints.length - 1; i < polyPoints.length; j = i++) {
-         var xi = polyPoints[i].lat,
-             yi = polyPoints[i].lng;
-         var xj = polyPoints[j].lat,
-             yj = polyPoints[j].lng;
-
-         var intersect = yi > y !== yj > y && x < (xj - xi) * (y - yi) / (yj - yi) + xi;
-         if (intersect) inside = !inside;
-      }
-
-      return inside;
-   };
-
-   angular.module("icsm.layerswitch", []).directive('icsmLayerswitch', ['$http', 'configService', 'mapService', function ($http, configService, mapService) {
-      return {
-         restrict: "AE",
-         link: function link(scope) {
-            var config;
-            var latlngs;
-
-            configService.getConfig("layerSwitch").then(function (response) {
-               config = response;
-               $http.get(config.extentUrl, { cache: true }).then(function (response) {
-                  var container = L.geoJson(response.data);
-                  var layer = container.getLayers()[0];
-                  if (layer) {
-                     latlngs = layer.getLatLngs();
-                  }
-
-                  mapService.getMap().then(function (map) {
-                     map.on("moveend", checkExtent);
-                     checkExtent();
-
-                     function checkExtent(event) {
-                        var bounds = map.getBounds();
-                        if (insidePolygon({ lng: bounds.getWest(), lat: bounds.getSouth() }, latlngs) && // ll
-                        insidePolygon({ lng: bounds.getWest(), lat: bounds.getNorth() }, latlngs) && // ul
-                        insidePolygon({ lng: bounds.getEast(), lat: bounds.getSouth() }, latlngs) && // lr
-                        insidePolygon({ lng: bounds.getEast(), lat: bounds.getNorth() }, latlngs) // ur
-                        ) {
-                              inSpace();
-                           } else {
-                           outOfSpace();
-                        }
-                     }
-
-                     function outOfSpace() {
-                        setLayers({
-                           outside: true,
-                           inside: false
-                        });
-                     }
-
-                     function inSpace() {
-                        setLayers({
-                           outside: false,
-                           inside: true
-                        });
-                     }
-
-                     function setLayers(settings) {
-                        map.eachLayer(function (layer) {
-                           if (layer.options && layer.options.switch) {
-                              if (layer.options.switch === config.inside) {
-                                 layer._container.style.display = settings.inside ? "block" : "none";
-                              }
-                              if (layer.options.switch === config.outside) {
-                                 layer._container.style.display = settings.outside ? "block" : "none";
-                              }
-                           }
-                        });
-                     }
-                  });
-               });
-            });
          }
       };
    }]);
@@ -1262,6 +1175,93 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
                   $rootScope.$broadcast("zoom.to", {
                      zoom: zoom,
                      latlng: latlng
+                  });
+               });
+            });
+         }
+      };
+   }]);
+}
+'use strict';
+
+{
+   var insidePolygon = function insidePolygon(latlng, polyPoints) {
+      var x = latlng.lat,
+          y = latlng.lng;
+
+      var inside = false;
+      for (var i = 0, j = polyPoints.length - 1; i < polyPoints.length; j = i++) {
+         var xi = polyPoints[i].lat,
+             yi = polyPoints[i].lng;
+         var xj = polyPoints[j].lat,
+             yj = polyPoints[j].lng;
+
+         var intersect = yi > y !== yj > y && x < (xj - xi) * (y - yi) / (yj - yi) + xi;
+         if (intersect) inside = !inside;
+      }
+
+      return inside;
+   };
+
+   angular.module("icsm.layerswitch", []).directive('icsmLayerswitch', ['$http', 'configService', 'mapService', function ($http, configService, mapService) {
+      return {
+         restrict: "AE",
+         link: function link(scope) {
+            var config;
+            var latlngs;
+
+            configService.getConfig("layerSwitch").then(function (response) {
+               config = response;
+               $http.get(config.extentUrl, { cache: true }).then(function (response) {
+                  var container = L.geoJson(response.data);
+                  var layer = container.getLayers()[0];
+                  if (layer) {
+                     latlngs = layer.getLatLngs();
+                  }
+
+                  mapService.getMap().then(function (map) {
+                     map.on("moveend", checkExtent);
+                     checkExtent();
+
+                     function checkExtent(event) {
+                        var bounds = map.getBounds();
+                        if (insidePolygon({ lng: bounds.getWest(), lat: bounds.getSouth() }, latlngs) && // ll
+                        insidePolygon({ lng: bounds.getWest(), lat: bounds.getNorth() }, latlngs) && // ul
+                        insidePolygon({ lng: bounds.getEast(), lat: bounds.getSouth() }, latlngs) && // lr
+                        insidePolygon({ lng: bounds.getEast(), lat: bounds.getNorth() }, latlngs) // ur
+                        ) {
+                              inSpace();
+                           } else {
+                           outOfSpace();
+                        }
+                     }
+
+                     function outOfSpace() {
+                        setLayers({
+                           outside: true,
+                           inside: false
+                        });
+                     }
+
+                     function inSpace() {
+                        setLayers({
+                           outside: false,
+                           inside: true
+                        });
+                     }
+
+                     function setLayers(settings) {
+                        map.eachLayer(function (layer) {
+                           if (layer.options && layer.options.switch) {
+                              if (layer.options.switch === config.inside) {
+                                 layer._container.style.display = settings.inside ? "block" : "none";
+                              }
+                              if (layer.options.switch === config.outside) {
+                                 layer._container.style.display = settings.outside ? "block" : "none";
+                              }
+                           }
+                        });
+                     }
                   });
                });
             });
@@ -4476,6 +4476,28 @@ var Strategies = function () {
 
    return Strategies;
 }();
+"use strict";
+
+{
+   angular.module("icsm.toolbar", []).directive("elevationToolbar", [function () {
+      return {
+         restrict: "AE",
+         templateUrl: "icsm/toolbar/toolbar.html",
+         controller: 'toolbarLinksCtrl',
+         transclude: true
+      };
+   }]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
+      var self = this;
+      configService.getConfig().then(function (config) {
+         self.links = config.toolbarLinks;
+      });
+
+      $scope.item = "";
+      $scope.toggleItem = function (item) {
+         $scope.item = $scope.item === item ? "" : item;
+      };
+   }]);
+}
 'use strict';
 
 {
@@ -4574,28 +4596,6 @@ var Strategies = function () {
       };
 
       return this;
-   }]);
-}
-"use strict";
-
-{
-   angular.module("icsm.toolbar", []).directive("elevationToolbar", [function () {
-      return {
-         restrict: "AE",
-         templateUrl: "icsm/toolbar/toolbar.html",
-         controller: 'toolbarLinksCtrl',
-         transclude: true
-      };
-   }]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
-      var self = this;
-      configService.getConfig().then(function (config) {
-         self.links = config.toolbarLinks;
-      });
-
-      $scope.item = "";
-      $scope.toggleItem = function (item) {
-         $scope.item = $scope.item === item ? "" : item;
-      };
    }]);
 }
 "use strict";
@@ -4862,8 +4862,8 @@ $templateCache.put("icsm/clip/manual.html","<div class=\"container-fluid\" style
 $templateCache.put("icsm/clip/modal.html","<div class=\"clipmodal\" ng-show=\"isOpen\">\r\n	<div class=\"clipmodal-inner\">\r\n      <h3 ng-show=\"title\" class=\"clipmodal-title\">\r\n		  	<span  ng-bind=\"title\"></span>\r\n		  	<span ng-show=\"showClose\" class=\"pull-right\">\r\n		 		<button type=\"button\" class=\"undecorated\" ng-click=\"isOpen = false\"><i class=\"fa fa-close\"></i></button>\r\n			</span>\r\n		</h3>\r\n      <div class=\"clipmodal-content\" ng-transclude></div>\r\n	</div>\r\n</div>");
 $templateCache.put("icsm/coverage/popup.html","<span class=\"coverage\" ng-class=\"state.show ? \'transitioned-down\' : \'transitioned-up\'\">\r\n   <div style=\"padding-bottom:15px\" class=\"coverage-off\">\r\n      <button class=\"undecorated coverage-unstick\" ng-click=\"hide()\" style=\"float:right\" title=\"Hide layer selections\">X</button>\r\n   </div>\r\n   <div ng-repeat=\"layer in state.layers\" class=\"coverage-layer\" tooltip-placement=\"left\"\r\n         uib-tooltip=\"Hint: To bring this layer to the top turn it off then on. The last clicked layer is always on top.\">\r\n      <input type=\"checkbox\" ng-checked=\"layer.visible\" ng-click=\"toggleVisibility(layer)\"></input>\r\n      <span ng-click=\"toggleVisibility(layer)\">\r\n         <span class=\"coverage-title\">{{layer.name}}</span><br/>\r\n         <img style=\"width:100px\" ng-src=\"{{layer.coverage.thumb}}\"></img>\r\n      </span>\r\n      <div class=\"pull-right\">\r\n         <div style=\"width: 110px\" ng-repeat=\"type in layer.coverage.types\">\r\n            <span class=\"coverage-legend-color\" ng-style=\"{\'background-color\':type.color}\"></span>\r\n            {{type.name}}\r\n         </div>\r\n      </div>\r\n   </div>\r\n</span>");
 $templateCache.put("icsm/coverage/trigger.html","<button ng-click=\"toggle()\" type=\"button\" class=\"map-tool-toggle-btn\" title=\"Select views of coverage, view legends and summaries of the coverage layers\">\r\n      <span class=\"panel-sm\">Layers</span>\r\n      <img src=\"icsm/resources/img/layers-16.png\">\r\n</button>");
-$templateCache.put("icsm/glossary/glossary.html","<div ng-controller=\"GlossaryCtrl as glossary\">\r\n   <div style=\"position:relative;padding:5px;padding-left:10px;\">\r\n      <div class=\"panel\" style=\"padding:5px;\">\r\n         <p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n	         <strong>Glossary</strong>\r\n         </p>\r\n\r\n         <div class=\"panel-body\">\r\n            <table class=\"table table-striped\">\r\n               <thead>\r\n                  <tr>\r\n                     <th>Term</th>\r\n                     <th>Definition</th>\r\n                  </tr>\r\n               </thead>\r\n               <tbody>\r\n                  <tr ng-repeat=\"term in glossary.terms\">\r\n                     <td>{{term.term}}</td>\r\n                     <td>{{term.definition}}</td>\r\n                  </tr>\r\n               </tbody>\r\n            </table>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/header/header.html","<div class=\"container-full common-header\" style=\"padding-right:10px; padding-left:10px\">\r\n   <div class=\"navbar-collapse collapse ga-header-collapse\">\r\n      <ul class=\"nav navbar-nav\">\r\n         <li class=\"hidden-xs\">\r\n            <a href=\"https://www.icsm.gov.au/\" target=\"_blank\" class=\"icsm-logo\"\r\n               style=\"margin-top: -4px;display:inline-block;\">\r\n               <img alt=\"ICSM - ANZLIC Committee on Surveying &amp; Mapping\" class=\"header-logo\"\r\n                  src=\"icsm/resources/img/icsm-logo-sml.gif\">\r\n            </a>\r\n            <a href=\"/\">\r\n               <h1 class=\"applicationTitle\">{{heading}}</h1>\r\n            </a>\r\n         </li>\r\n      </ul>\r\n      <ul class=\"nav navbar-nav navbar-right nav-icons\">\r\n         <li role=\"menuitem\" style=\"padding-right:10px;position: relative;top: -3px;\">\r\n            <span class=\"altthemes-container\">\r\n               <span>\r\n                  <a title=\"Location INformation Knowledge platform (LINK)\" href=\"http://fsdf.org.au/\" target=\"_blank\">\r\n                     <img alt=\"FSDF\" src=\"icsm/resources/img/FSDFimagev4.0.png\" style=\"height: 66px\">\r\n                  </a>\r\n               </span>\r\n            </span>\r\n         </li>\r\n         <li common-navigation role=\"menuitem\" current=\"current\" style=\"padding-right:10px\"></li>\r\n         <li mars-version-display role=\"menuitem\"></li>\r\n         <li style=\"width:10px\"></li>\r\n      </ul>\r\n   </div>\r\n   <!--/.nav-collapse -->\r\n</div>\r\n<div class=\"contributorsLink\" style=\"position: absolute; right:7px; bottom:15px\">\r\n   <icsm-contributors-link></icsm-contributors-link>\r\n</div>\r\n<!-- Strap -->\r\n<div class=\"row\">\r\n   <div class=\"col-md-12\">\r\n      <div class=\"strap-blue\">\r\n      </div>\r\n      <div class=\"strap-white\">\r\n      </div>\r\n      <div class=\"strap-red\">\r\n      </div>\r\n   </div>\r\n</div>");
+$templateCache.put("icsm/glossary/glossary.html","<div ng-controller=\"GlossaryCtrl as glossary\">\r\n   <div style=\"position:relative;padding:5px;padding-left:10px;\">\r\n      <div class=\"panel\" style=\"padding:5px;\">\r\n         <p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n	         <strong>Glossary</strong>\r\n         </p>\r\n\r\n         <div class=\"panel-body\">\r\n            <table class=\"table table-striped\">\r\n               <thead>\r\n                  <tr>\r\n                     <th>Term</th>\r\n                     <th>Definition</th>\r\n                  </tr>\r\n               </thead>\r\n               <tbody>\r\n                  <tr ng-repeat=\"term in glossary.terms\">\r\n                     <td>{{term.term}}</td>\r\n                     <td>{{term.definition}}</td>\r\n                  </tr>\r\n               </tbody>\r\n            </table>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/help/faqs.html","<p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n   <strong>FAQS</strong>\r\n</p>\r\n\r\n<h5 ng-repeat=\"faq in faqs\"><button type=\"button\" class=\"undecorated\" ng-click=\"focus(faq.key)\">{{faq.question}}</button></h5>\r\n<hr/>\r\n<div class=\"row\" ng-repeat=\"faq in faqs\">\r\n   <div class=\"col-md-12\">\r\n      <h5 tabindex=\"0\" id=\"faqs_{{faq.key}}\">{{faq.question}}</h5>\r\n      <span ng-bind-html=\"faq.answer\"></span>\r\n      <hr/>\r\n   </div>\r\n</div>");
 $templateCache.put("icsm/help/help.html","<p style=\"text-align: left; margin: 10px; font-size: 14px;\">\r\n	<strong>Help</strong>\r\n</p>\r\n\r\n<div class=\"panel-body\" ng-controller=\"HelpCtrl as help\">\r\n	The steps to get data!\r\n	<ol>\r\n		<li>Define area of interest</li>\r\n		<li>Select datasets</li>\r\n		<li>Confirm selections</li>\r\n		<li>Enter email address and industry</li>\r\n		<li>Start extract</li>\r\n	</ol>\r\n	One or more emails will be sent to you on completion of the data extract(s) with a link to your data.\r\n   <hr>\r\n	<icsm-faqs faqs=\"help.faqs\" ></icsm-faqs>\r\n</div>");
 $templateCache.put("icsm/imagery/launch.html","<button type=\"button\" class=\"undecorated\" title=\"View preview of imagery\" ng-click=\"preview()\" ng-if=\"show\">\r\n	<i class=\"fa fa-lg fa-eye\"></i>\r\n</button>");
@@ -4890,6 +4890,6 @@ $templateCache.put("icsm/select/select.html","<div>\r\n	<div style=\"position:re
 $templateCache.put("icsm/side-panel/side-panel-left.html","<div class=\"cbp-spmenu cbp-spmenu-vertical cbp-spmenu-left\" style=\"width: {{left.width}}px;\" ng-class=\"{\'cbp-spmenu-open\': left.active}\">\r\n    <a href=\"\" title=\"Close panel\" ng-click=\"closeLeft()\" style=\"z-index: 1200\">\r\n        <span class=\"glyphicon glyphicon-chevron-left pull-right\"></span>\r\n    </a>\r\n    <div ng-show=\"left.active === \'legend\'\" class=\"left-side-menu-container\">\r\n        <legend url=\"\'img/AustralianTopogaphyLegend.png\'\" title=\"\'Map Legend\'\"></legend>\r\n    </div>\r\n</div>");
 $templateCache.put("icsm/side-panel/side-panel-right.html","<div class=\"cbp-spmenu cbp-spmenu-vertical cbp-spmenu-right noPrint\" ng-attr-style=\"width:{{right.width}}\" ng-class=\"{\'cbp-spmenu-open\': right.active}\">\r\n    <a href=\"\" title=\"Close panel\" ng-click=\"closePanel()\" style=\"z-index: 1\">\r\n        <span class=\"glyphicon glyphicon-chevron-right pull-left\"></span>\r\n    </a>\r\n\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'download\'\" icsm-view></div>\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'maps\'\" icsm-maps></div>\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'glossary\'\" icsm-glossary></div>\r\n    <div class=\"right-side-menu-container\" ng-show=\"right.active === \'help\'\" icsm-help></div>\r\n    <panel-close-on-event only-on=\"search\" event-name=\"clear.button.fired\"></panel-close-on-event>\r\n</div>\r\n");
 $templateCache.put("icsm/splash/splash.html","<div class=\"modal-header\">\r\n   <h3 class=\"modal-title splash\">Elevation - Foundation Spatial Data</h3>\r\n</div>\r\n<div class=\"modal-body\" id=\"accept\" ng-form exp-enter=\"accept()\" icsm-splash-modal style=\"width: 100%; margin-left: auto; margin-right: auto;\">\r\n	<div>\r\n		<p>\r\n			Here you can download point cloud and elevation datasets sourced from jurisdictions.\r\n		</p>\r\n		<p>\r\n			<a href=\"http://www.ga.gov.au/topographic-mapping/digital-elevation-data.html\" target=\"_blank\">Find out more on our Elevation page.</a>\r\n		</p>\r\n		<p>\r\n         Data can be downloaded at <strong>no charge</strong> but note that there is a <strong>15GB limit per request</strong> (please check the file size before you download your files).\r\n		</p>\r\n		<p>\r\n			<a href=\"http://opentopo.sdsc.edu/gridsphere/gridsphere?cid=contributeframeportlet&gs_action=listTools\" target=\"_blank\">Click here for Free GIS Tools.</a>\r\n		</p>\r\n      <h5>How to use</h5>\r\n      <p>\r\n         <ul>\r\n            <li>Pan and zoom the map to your area of interest,</li>\r\n            <li>Click on one of the \"Select area by...\" buttons to define your area of interest,\r\n               <ul>\r\n                  <li>\r\n                        <img style=\"height:26px;padding-right:10px\" src=\"icsm/resources/img/draw_rectangle.png\">Drawing a bounding box. On enabling, click on the map and drag diagonally. There is a limit of roughly 2 square degrees or 200 square km.\r\n                  </li>\r\n                  <li>\r\n                     <img style=\"height:26px;padding-right:10px\" src=\"icsm/resources/img/draw_polygon.png\">\r\n                     Drawing a polygon. On enabling, click on the map for each vertex, click on the first vertex to close the polygon. Don\'t do too many vertices, it will not afford you greater accuracy and will slow down your search.\r\n                  </li>\r\n                  <li>\r\n                     <i class=\"fa fa-keyboard-o fa-2x\" style=\"padding-right:10px\" aria-hidden=\"true\"></i>\r\n                      Manually entering the minimum and maximum latitudes and longitudes. The same area restrictions apply to drawing the bounds.\r\n                  </li>\r\n               </ul>\r\n            </li>\r\n            <li>On drawing complete we will check for data within or very near your area of interest</li>\r\n            <li>If the list is large you can filter:\r\n               <ul>\r\n                  <li>Partial text match by typing in the filter field and/or</li>\r\n                  <li>You can restrict the display to either elevation (DEM) or point cloud file types</li>\r\n               </ul>\r\n            </li>\r\n            <li>Check against any file you would like to download. To reiterate, these files can be huge so take note of the file size before downloading</li>\r\n            <li>Review your selected datasets and submit.</li>\r\n            <li>An email will be sent to you with a link to all your data, zipped into a single file.</li>\r\n            <li>These files can be huge so take note of the file size before submitting or downloading</li>\r\n         </ul>\r\n      </p>\r\n      <h5>Hints</h5>\r\n      <p>\r\n         <ul>\r\n            <li>Hovering over many items will give you further information about the purpose of the item</li>\r\n            <li>Drawing a polyline allows you to measure distance along the polyline.</li>\r\n            <li>On completion on drawing a line the elevation along that line is plotted.</li>\r\n            <li>While the tool to draw your area of interest is enabled it is easiest to pan the map using the arrow keys.</li>\r\n            <li>There are many areas where there is no data though the coverage is improving all the time.</li\r\n         </ul>\r\n      </p>\r\n	</div>\r\n   <div style=\"padding:30px; padding-top:0; padding-bottom:40px; width:100%\">\r\n		<div class=\"pull-right\">\r\n		  	<button type=\"button\" class=\"btn btn-primary\" ng-model=\"seenSplash\" ng-click=\"accept()\" autofocus>Continue</button>\r\n		</div>\r\n	</div>\r\n</div>");
-$templateCache.put("icsm/themes/themes.html","<div class=\"dropdown themesdropdown\">\r\n  <button class=\"btn btn-default dropdown-toggle themescurrent\" type=\"button\" id=\"dropdownMenu1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"true\">\r\n    Theme\r\n    <span class=\"caret\"></span>\r\n  </button>\r\n  <ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenu1\">\r\n    <li ng-repeat=\"item in themes\">\r\n       <a href=\"#\" title=\"{{item.title}}\" ng-href=\"{{item.url}}\" class=\"themesItemCompact\">\r\n         <span class=\"icsm-icon\" ng-class=\"item.className\"></span>\r\n         <strong style=\"vertical-align:top;font-size:110%\">{{item.label}}</strong>\r\n       </a>\r\n    </li>\r\n  </ul>\r\n</div>");
 $templateCache.put("icsm/toolbar/toolbar.html","<div class=\"elevation-toolbar noPrint\">\r\n   <div class=\"toolBarContainer\">\r\n      <div>\r\n         <ul class=\"left-toolbar-items\">\r\n            <li>\r\n               <div class=\"btn-group searchBar\" ng-show=\"root.whichSearch != \'region\'\">\r\n                  <div class=\"input-group input-group-custom\" geo-search>\r\n                     <input type=\"text\" ng-autocomplete ng-model=\"values.from.description\" options=\'{country:\"au\"}\'\r\n                        size=\"32\" title=\"Select a locality to pan the map to.\" class=\"form-control\" aria-label=\"...\">\r\n                     <div class=\"input-group-btn\">\r\n                        <button ng-click=\"zoom(false)\" exp-ga=\"[\'send\', \'event\', \'icsm\', \'click\', \'zoom to location\']\"\r\n                           class=\"btn btn-default\" title=\"Pan and potentially zoom to location.\">\r\n                           <i class=\"fa fa-search\"></i>\r\n                        </button>\r\n                     </div>\r\n                  </div>\r\n               </div>\r\n            </li>\r\n         </ul>\r\n         <ul class=\"right-toolbar-items\">\r\n            <li coverage-toggle></li>\r\n            <li>\r\n               <panel-trigger panel-id=\"download\" panel-width=\"590px\" name=\"Download\" default=\"default\"\r\n                  icon-class=\"fa-list\" title=\"Select an area of interest and select datasets for download\">\r\n               </panel-trigger>\r\n            </li>\r\n            <li>\r\n               <panel-trigger panel-id=\"help\" panel-width=\"590px\" name=\"Help\" icon-class=\"fa-question-circle-o\"\r\n                  title=\"Show help\"></panel-trigger>\r\n            </li>\r\n            <li>\r\n               <panel-trigger panel-id=\"glossary\" panel-width=\"590px\" name=\"Glossary\" icon-class=\"fa-book\"\r\n                  title=\"Show glossary\"></panel-trigger>\r\n            </li>\r\n            <li reset-page></li>\r\n         </ul>\r\n      </div>\r\n   </div>\r\n</div>");
+$templateCache.put("icsm/themes/themes.html","<div class=\"dropdown themesdropdown\">\r\n  <button class=\"btn btn-default dropdown-toggle themescurrent\" type=\"button\" id=\"dropdownMenu1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"true\">\r\n    Theme\r\n    <span class=\"caret\"></span>\r\n  </button>\r\n  <ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenu1\">\r\n    <li ng-repeat=\"item in themes\">\r\n       <a href=\"#\" title=\"{{item.title}}\" ng-href=\"{{item.url}}\" class=\"themesItemCompact\">\r\n         <span class=\"icsm-icon\" ng-class=\"item.className\"></span>\r\n         <strong style=\"vertical-align:top;font-size:110%\">{{item.label}}</strong>\r\n       </a>\r\n    </li>\r\n  </ul>\r\n</div>");
 $templateCache.put("icsm/view/view.html","<div class=\"container-fluid downloadPane\">\r\n   <icsm-clip data=\"data.item\"></icsm-clip>\r\n   <div class=\"list-container\">\r\n      <icsm-list></icsm-list>\r\n   </div>\r\n   <div class=\"downloadCont\" icsm-search-continue></div>\r\n</div>");}]);
