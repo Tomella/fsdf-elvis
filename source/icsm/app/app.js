@@ -40,7 +40,6 @@
 		'explorer.drag',
 		'explorer.enter',
       'explorer.flasher',
-      'explorer.googleanalytics',
 		'explorer.httpdata',
 		'explorer.info',
       'explorer.legend',
