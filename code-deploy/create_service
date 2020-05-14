@@ -1,0 +1,18 @@
+#!/bin/bash
+PROJECT_DIR=/home/ec2-user/fsdf-elvis
+HTTP_CONFIG_DIRECTORY=/etc/httpd/conf.d
+PROXY_FILE_NAME=proxies.conf
+FSDF_SERVER_FILE_NAME=fsdf
+PROXY_SOURCE=$PROJECT_DIR/code-deploy/$PROXY_FILE_NAME
+PROXY_CONFIG_TARGET=$HTTP_CONFIG_DIRECTORY/$PROXY_FILE_NAME
+FSDF_SERVICE_NAME=fsdf
+FSDF_SERVICE_TARGET=/etc/init.d/$FSDF_SERVICE_NAME
+FSDF_SERVICE_SOURCE=$PROJECT_DIR/code-deploy/fsdf
+
+# Creates a SYS5 service and autostarts it
+if [ ! -f "$FSDF_SERVICE_TARGET" ]; then
+   sudo cp $FSDF_SERVICE_SOURCE /etc/init.d
+   sudo chmod +x /etc/init.d/$FSDF_SERVICE_NAME
+   sudo service fsdf start
+   sudo chkconfig fsdf on
+fi

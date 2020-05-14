@@ -1,21 +1,18 @@
 // Include gulp
-var gulp = require('gulp');
+let {series, src, dest, watch} = require('gulp');
 
 // Include Our Plugins
-var fs            = require('fs');
-var header        = require('gulp-header');
-var eslint        = require('gulp-eslint');
-var babel         = require('gulp-babel');
-var concat        = require('gulp-concat');
-var concatCss     = require('gulp-concat-css');
-var insert        = require('gulp-insert');
-var uglify        = require('gulp-uglify');
-var rename        = require('gulp-rename');
-var templateCache = require('gulp-angular-templatecache');
-var zip           = require('gulp-zip');
-var addStream     = require('add-stream');
+let fs            = require('fs');
+let header        = require('gulp-header');
+let eslint        = require('gulp-eslint');
+let babel         = require('gulp-babel');
+let concat        = require('gulp-concat');
+let concatCss     = require('gulp-concat-css');
+let uglify        = require('gulp-uglify');
+let templateCache = require('gulp-angular-templatecache');
+let addStream     = require('add-stream');
 
-var directories = {
+let directories = {
 	assets:      'dist/icsm/assets',
 	source:      'source',
 	resources:  'resources',
@@ -24,131 +21,141 @@ var directories = {
    outbower:   'dist/icsm/bower_components'
 };
 
+const babelConfig = {
+   compact: false,
+   comments: true,
+   presets: ['@babel/preset-env']
+}
+
 // Lint Task
-gulp.task('lint', function() {
-    return gulp.src(directories.source + '/**/*.js')
+function lint() {
+    return src(directories.source + '/**/*.js')
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(eslint.failAfterError());
-});
+}
+exports.lint = lint;
 
-gulp.task('resources', function () {
-    return gulp.src(directories.resources + '/**/*')
-        .pipe(gulp.dest(directories.outresources));
-});
+function resources() {
+    return src(directories.resources + '/**/*')
+        .pipe(dest(directories.outresources));
+}
+exports.resources = resources;
 
-gulp.task('views', function () {
-    return gulp.src(directories.views + '/**/*')
-        .pipe(gulp.dest('dist'));
-});
+function views() {
+    return src(directories.views + '/**/*')
+        .pipe(dest('dist'));
+}
+exports.views = views;
 
 //Concatenate & Minify JS
-gulp.task('scripts', ["commonScripts", "dashboardScripts", "placenamesScripts", "icsmScripts", 'startScripts']);
+let scripts = exports.scripts = series(commonScripts, dashboardScripts, placenamesScripts, icsmScripts, startScripts);
 
 //Concatenate & Minify JS
-gulp.task('commonScripts', function() {
+function commonScripts() {
    return prepareScripts('common');
-});
+}
+exports.commonScripts = commonScripts;
 
-gulp.task('icsmScripts', function() {
+function icsmScripts() {
    return prepareScripts('icsm');
-});
+}
+exports.icsmScripts = icsmScripts;
 
 //Concatenate & Minify JS
-gulp.task('startScripts', function() {
+function startScripts() {
    return prepareScripts('start');
-});
+}
+exports.startScripts = startScripts;
 
 //Concatenate & Minify JS
-gulp.task('dashboardScripts', function() {
+function dashboardScripts() {
    return prepareScripts('dashboard');
-});
+}
+exports.dashboardScripts = dashboardScripts;
 
 //Concatenate & Minify JS
-gulp.task('placenamesScripts', function() {
+function placenamesScripts() {
    return prepareScripts('placenames');
-});
+}
+exports.placenamesScripts = placenamesScripts;
 
 function prepareScripts(name) {
-   return gulp.src(directories.source + '/' + name + '/**/*.js')
-      .pipe(babel({
-            compact: false,
-            comments: true,
-            presets: ['es2015'],
-            plugins: ["syntax-async-generators", "transform-regenerator"]
-      }))
+   return src(directories.source + '/' + name + '/**/*.js')
+      .pipe(babel(babelConfig))
 	   .pipe(addStream.obj(prepareNamedTemplates(name)))
       .pipe(concat(name + '.js'))
       .pipe(header(fs.readFileSync(directories.source + '/licence.txt', 'utf8')))
-      .pipe(gulp.dest(directories.assets));
+      .pipe(dest(directories.assets));
 }
 
-
-//Concatenate & Minify JS
-gulp.task('squash', []); // ['squashCommon','squashIcsm', 'squashStart']);
-
-gulp.task('squashCommon', function() {
-	return gulp.src(directories.assets + '/common.js')
-      .pipe(babel({
-            compact: true,
-            comments:	false,
-            presets: ['es2015'],
-            plugins: ["syntax-async-generators"]
-      }))
+function squashCommon() {
+	return src(directories.assets + '/common.js')
+      .pipe(babel(babelConfig))
 		.pipe(uglify())
       .pipe(header(fs.readFileSync(directories.source + '/licence.txt', 'utf8')))
-		.pipe(gulp.dest(directories.assets + "/min"));
-});
-
-gulp.task('squashIcsm', function() {
-	return squashJs('icsm');
-});
-
-gulp.task('squashStart', function() {
-	return squashJs('start');
-});
-
-function squashJs(name) {
-	return gulp.src(directories.assets + '/' + name + '.js')
-		.pipe(uglify())
-		.pipe(gulp.dest(directories.assets + "/min"));
+		.pipe(dest(directories.assets + "/min"));
 }
+exports.squashCommon = squashCommon;
+
+function squashIcsm() {
+	return squashJs('icsm');
+}
+exports.squashIcsm = squashIcsm;
+
+function squashStart() {
+	return squashJs('start');
+}
+exports.squashStart = squashStart;
 
 
 // Watch Files For Changes
-gulp.task('watch', function() {
+function watchFiles() {
 	// We watch both JS and HTML files.
-    gulp.watch(directories.source + '/**/*(*.js|*.html)', ['lint']);
-    gulp.watch(directories.source + '/common/**/*(*.js|*.html)', ['commonScripts']);
-    gulp.watch(directories.source + '/icsm/**/*(*.js|*.html)', ['icsmScripts']);
-    gulp.watch(directories.source + '/dashboard/**/*(*.js|*.html)', ['dashboardScripts']);
-    gulp.watch(directories.source + '/placenames/**/*(*.js|*.html)', ['placenamesScripts']);
-    gulp.watch(directories.source + '/start/**/*(*.js|*.html)', ['startScripts']);
-    gulp.watch(directories.source + '/**/*.css', ['concatCss']);
-    gulp.watch(directories.assets + '/common.js', ['squashCommon']);
-    gulp.watch(directories.assets + '/icsm.js', ['squashIcsm']);
-    gulp.watch(directories.assets + '/start.js', ['squashStart']);
-    gulp.watch(directories.views +  '/*', ['views']);
-    gulp.watch(directories.resources + '/**/*', ['resources']);
-});
+   let ignore = { ignoreInitial: false };
 
-gulp.task('concatCss', function () {
-  return gulp.src(directories.source + '/**/*.css')
+   watch(directories.source + '/**/*(*.js|*.html)', ignore, lint);
+   watch(directories.source + '/common/**/*(*.js|*.html)', ignore, commonScripts);
+   watch(directories.source + '/icsm/**/*(*.js|*.html)', ignore, icsmScripts);
+   watch(directories.source + '/dashboard/**/*(*.js|*.html)', ignore, dashboardScripts);
+   watch(directories.source + '/placenames/**/*(*.js|*.html)', ignore, placenamesScripts);
+   watch(directories.source + '/start/**/*(*.js|*.html)', ignore, startScripts);
+   watch(directories.source + '/**/*.css', ignore, catCss);
+   watch(directories.assets + '/common.js', squashCommon);
+   watch(directories.assets + '/icsm.js', squashIcsm);
+   watch(directories.assets + '/start.js', squashStart);
+   watch(directories.views +  '/*', ignore, views);
+   watch(directories.resources + '/**/*', ignore, resources);
+   watch('package.json', ignore, package);
+}
+exports.watch = watchFiles;
+
+function catCss() {
+  return src(directories.source + '/**/*.css')
     .pipe(concatCss("icsm.css"))
-    .pipe(gulp.dest(directories.assets));
-});
+    .pipe(dest(directories.assets));
+}
+exports.concatCss = catCss;
 
-gulp.task('package', function() {
-   return gulp.src('package.json')
-      .pipe(gulp.dest(directories.assets));
-});
+function package() {
+   return src('package.json')
+      .pipe(dest(directories.assets));
+}
+exports.package = package;
 
-gulp.task('build', ['views', 'package', 'scripts', 'concatCss', 'resources'])
-
-// Default Task
-gulp.task('default', ['lint', 'scripts', 'concatCss', 'watch', 'package', 'resources', 'views']);
 
 function prepareNamedTemplates(name) {
-   return gulp.src(directories.source + '/' + name + '/**/*.html')
+   return src(directories.source + '/' + name + '/**/*.html')
       .pipe(templateCache({module: name + ".templates", root:name, standalone : true}));
 }
+
+function squashJs(name) {
+	return src(directories.assets + '/' + name + '.js')
+		.pipe(uglify())
+		.pipe(dest(directories.assets + "/min"));
+}
+
+exports.build = series(views, package, scripts, catCss, resources);
+
+// Default Task
+exports.default = series(package, views, watchFiles);
