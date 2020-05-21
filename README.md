@@ -21,10 +21,10 @@ easily be overlayed with other applications with little likelyhood of name clash
 * All other content under the icsm directory.
 
 ### How it runs
-#### Postioning
+#### Positioning
 It requires a couple of environment variables
-ESRI_USERNAME The username to use to generate a token,
-ESRI_PASWORD The password needed to generate a token.
+ESRI_USERNAME The username to used to generate a token,
+ESRI_PASSWORD The password needed to generate a token.
 
 
 ### Google API.

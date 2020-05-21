@@ -1,4 +1,3 @@
-
 process.env.NO_PROXY = "localhost";
 
 var SERVICES_ROOT = "http://www.ga.gov.au/explorer-web";
@@ -129,8 +128,6 @@ app.all('/service/*', function (req, res, next) {
  *
 */
 
-let NameValuePair = require("./lib/nameValuePair");
-let elevationNameValuePair = new NameValuePair(config.elevation.nameValuePair);
 let privateKey = config.elevation.recaptchaPrivateKey;
 let recaptcha = new (require("./lib/recaptcha"))(privateKey);
 let serviceBroker = new (require("./lib/serviceBroker"))(config.elevation);

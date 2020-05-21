@@ -170,5 +170,15 @@
       "image": "icsm/resources/img/AusSeabed logo_stacked_RGB.png",
       "height": 42,
       "showText": false
+   },
+   {
+      "name": "Department of Agriculture, Water and Environment", 
+      "title": "Department of Agriculture, Water and Environment",
+      "href": "https://www.awe.gov.au/",
+      "enabled": true,
+      "code": "dewa",
+      "image": "icsm/resources/img/DAWE-stacked-black.png",
+      "height": 42,
+      "showText": false
    }
 ]
