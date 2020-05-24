@@ -274,22 +274,51 @@ class Strategies {
    constructor(http) {
       var unknown = this.unknown = new UnknownStrategy();
 
-      this.strategies = {
-         "NSW Government": new NswStrategy(http),
-         "VIC Government": unknown, // new VicStrategy(http),
-         "SA Government": unknown, // new SaStrategy(http),
-         "WA Government": unknown, // new WaStrategy(http),
-         "QLD Government": new QldStrategy(http),
-         "ACT Government": unknown, // new ActStrategy(http),
-         "NT Government": unknown, // new NtStrategy(http),
-         "TAS Government": unknown, // new TasStrategy(http),
-         "Geoscience Australia": new GaStrategy(http),
-         "Exploring for the Future": new EftfStrategy(http)
-      };
+      this.strategies = [{
+            name: "NSW Government",
+            strategy: new NswStrategy(http)
+         },
+         {
+            name: "VIC Government",
+            strategy: unknown, // new VicStrategy(http)
+         },
+         {
+            name: "SA Government",
+            strategy: unknown, // new SaStrategy(http),
+         },
+         {
+            name: "WA Government",
+            strategy: unknown, // new WaStrategy(http),
+         },
+         {
+            name: "QLD Government",
+            strategy: new QldStrategy(http)
+         },
+         {
+            name: "ACT Government",
+            strategy: unknown, // new ActStrategy(http)
+         },
+         {
+            name: "NT Government",
+            strategy: unknown, // new NtStrategy(http)
+         },
+         {
+            name: "TAS Government",
+            strategy: unknown, // new TasStrategy(http)
+         },
+         {
+            name: "Geoscience Australia",
+            strategy: new GaStrategy(http)
+         },
+         {
+            name: "Exploring for the Future",
+            strategy: new EftfStrategy(http)
+         }
+      ];
    }
 
    strategy(name) {
-      var strategy = this.strategies[name];
-      return strategy ? strategy : this.unknown;
+      var metadata = this.strategies.find(unit => unit.name && name.indexOf(unit.name) === 0);
+      return metadata ? metadata.strategy : this.unknown;
    }
 }
