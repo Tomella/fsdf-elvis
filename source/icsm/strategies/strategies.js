@@ -1,7 +1,7 @@
 class BaseStrategy {
    constructor($http) {
       this.http = $http;
-      this.NO_METADATA = "Can't show metadata for this dataset.";
+      this.NO_METADATA = "Metadata";
    }
 
    constructLink(item) {
