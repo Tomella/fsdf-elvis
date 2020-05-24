@@ -147,6 +147,22 @@ under the License.
 "use strict";
 
 {
+  angular.module('common.legend', []).directive('commonLegend', [function () {
+    return {
+      template: "<img ng-href='url' ng-if='url'></img>",
+      scope: {
+        map: "="
+      },
+      restrict: "AE",
+      link: function link(scope) {
+        if (scope.map) {}
+      }
+    };
+  }]);
+}
+"use strict";
+
+{
   var captured = function captured(twoDates) {
     var dates = twoDates.split(" - ");
 
@@ -329,22 +345,6 @@ under the License.
           map.removeLayer(lastFeature);
           lastFeature = null;
         }
-      }
-    };
-  }]);
-}
-"use strict";
-
-{
-  angular.module('common.legend', []).directive('commonLegend', [function () {
-    return {
-      template: "<img ng-href='url' ng-if='url'></img>",
-      scope: {
-        map: "="
-      },
-      restrict: "AE",
-      link: function link(scope) {
-        if (scope.map) {}
       }
     };
   }]);

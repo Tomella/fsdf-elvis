@@ -48,7 +48,7 @@
             "defaultLayer": true,
             "isBaselayer": true,
             "parameters": [
-               "//services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+               "https://services.ga.gov.au/gis/rest/services/NationalBaseMap/MapServer/tile/{z}/{y}/{x}",
                {
                   "layers": "Image",
                   "format": "image/png",
