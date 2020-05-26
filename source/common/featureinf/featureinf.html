@@ -49,7 +49,7 @@
                     <div ng-if="feature.properties.metadata_url">
                         <a href='{{feature.properties.metadata_url}}' target='_blank'>Metadata</a>
                     </div>
-                    <hr style="margin:5px"/>
+                    <hr ng-if="!$last" style="margin:5px"/>
                 </div>
             </div>
           </div>
