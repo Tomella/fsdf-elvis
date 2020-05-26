@@ -1,0 +1,65 @@
+.featureInfContainer {
+    overflow-y: auto;
+    max-height: 400px;
+    min-height: 100px;
+    min-width: 250px;
+    position:fixed;
+    top: 120px;
+    left:52px;
+    background-color: white;
+    border-radius: 3px;
+    z-index: 50001;
+    box-shadow: -2px 0 4px #323232;
+}
+
+.fi-close {
+    vertical-align: top;
+    font-weight: bold;
+    font-size:110%;
+    position:absolute; 
+    top:0; 
+    right: 5px
+}
+  
+.fi-d1x1 {
+    height: 100px;
+}
+  
+.fi-d1x2 {
+    height: 150px;
+}
+  
+.fi-d1x3 {
+    height: 200px;
+}
+  
+.fi-d1xb {
+    height: 250px;
+}
+
+
+.fi-d2 {
+    height: 100%; 
+}
+.fi-d3 {
+   height:100%; 
+   position: relative;
+}
+.fi-d3-1 {
+   height:30px;
+}
+.fi-d3-2{
+    height: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding-top: 30px;
+    width: 100%;
+    position: absolute;
+    top: 0;
+}
+.fi-d4
+{
+  position: relative;
+  max-height: 100%;
+  overflow: auto;
+}

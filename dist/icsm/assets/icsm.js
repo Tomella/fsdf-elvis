@@ -43,7 +43,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   };
 
   RootCtrl.$invoke = ['$http', 'configService', 'mapService'];
-  angular.module("IcsmApp", ['common.altthemes', 'common.baselayer.control', 'common.cc', 'common.featureinfo', 'common.header', 'common.legend', 'common.navigation', 'common.reset', "common.side-panel", 'common.slider', 'common.storage', 'common.templates', 'elvis.results', 'elvis.reviewing', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.persist', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'explorer.map.templates', 'geo.draw', 'geo.elevation', 'geo.geosearch', 'geo.map', 'geo.maphelper', 'geo.measure', 'icsm.bounds', 'icsm.clip', 'icsm.contributors', 'icsm.coverage', 'icsm.elevation.point', 'icsm.glossary', 'icsm.header', 'icsm.help', 'icsm.imagery', 'icsm.layerswitch', 'icsm.mapevents', 'icsm.panes', "icsm.parameters", "icsm.polygon", 'icsm.point', 'icsm.products', 'icsm.preview', 'icsm.select', 'icsm.splash', 'icsm.templates', 'icsm.toolbar', 'icsm.view', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer', 'placenames.search', 'placenames.config', 'placenames.summary', 'ui.bootstrap', 'vcRecaptcha']) // Set up all the service providers here.
+  angular.module("IcsmApp", ['common.altthemes', 'common.baselayer.control', 'common.cc', 'common.featureinfo', 'common.featureinf', 'common.header', 'common.legend', 'common.navigation', 'common.reset', "common.side-panel", 'common.slider', 'common.storage', 'common.templates', 'elvis.results', 'elvis.reviewing', 'explorer.config', 'explorer.confirm', 'explorer.drag', 'explorer.enter', 'explorer.flasher', 'explorer.httpdata', 'explorer.info', 'explorer.legend', 'explorer.message', 'explorer.modal', 'explorer.persist', 'explorer.projects', 'explorer.tabs', 'explorer.version', 'exp.ui.templates', 'explorer.map.templates', 'geo.draw', 'geo.elevation', 'geo.geosearch', 'geo.map', 'geo.maphelper', 'geo.measure', 'icsm.bounds', 'icsm.clip', 'icsm.contributors', 'icsm.coverage', 'icsm.elevation.point', 'icsm.glossary', 'icsm.header', 'icsm.help', 'icsm.imagery', 'icsm.layerswitch', 'icsm.mapevents', 'icsm.panes', "icsm.parameters", "icsm.polygon", 'icsm.point', 'icsm.products', 'icsm.preview', 'icsm.select', 'icsm.splash', 'icsm.templates', 'icsm.toolbar', 'icsm.view', 'ngAutocomplete', 'ngRoute', 'ngSanitize', 'page.footer', 'placenames.search', 'placenames.config', 'placenames.summary', 'ui.bootstrap', 'vcRecaptcha']) // Set up all the service providers here.
   .config(['$locationProvider', 'configServiceProvider', 'placenamesConfigServiceProvider', 'projectsServiceProvider', 'persistServiceProvider', 'versionServiceProvider', function ($locationProvider, configServiceProvider, placenamesConfigServiceProvider, projectsServiceProvider, persistServiceProvider, versionServiceProvider) {
     $locationProvider.html5Mode({
       enabled: true,
@@ -675,6 +675,51 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 }
 "use strict";
 
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+{
+  angular.module("icsm.elevation.point", []).factory("elevationPointsService", ['$http', '$q', 'configService', function ($http, $q, configService) {
+    var service = {
+      getElevation: function getElevation(latlng) {
+        return $q(function (resolve, reject) {
+          configService.getConfig("elevation").then(function (config) {
+            var delta = 0.000001;
+
+            var _latlng = _slicedToArray(latlng, 2),
+                lat = _latlng[0],
+                lng = _latlng[1];
+
+            var bbox = [lng - delta, lat - delta, lng + delta, lat + delta];
+            var url = config.elevationTemplate.replace("{bbox}", bbox.join(","));
+            new TerrainLoader().load(url, function (elev) {
+              resolve(elev);
+            }, function (e) {
+              reject(e);
+            });
+          });
+        });
+      },
+      getHiResElevation: function getHiResElevation(latlng) {
+        return configService.getConfig("elevation").then(function (config) {
+          return $http.get(config.hiResElevationTemplate.replace("{lng}", latlng.lng).replace("{lat}", latlng.lat));
+        });
+      }
+    };
+    return service;
+  }]);
+}
+"use strict";
+
 {
   var CoverageService = function CoverageService(configService, mapService) {
     var state = {
@@ -774,51 +819,6 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     };
   }]).factory("coverageService", CoverageService);
   CoverageService.$inject = ["configService", "mapService"];
-}
-"use strict";
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-{
-  angular.module("icsm.elevation.point", []).factory("elevationPointsService", ['$http', '$q', 'configService', function ($http, $q, configService) {
-    var service = {
-      getElevation: function getElevation(latlng) {
-        return $q(function (resolve, reject) {
-          configService.getConfig("elevation").then(function (config) {
-            var delta = 0.000001;
-
-            var _latlng = _slicedToArray(latlng, 2),
-                lat = _latlng[0],
-                lng = _latlng[1];
-
-            var bbox = [lng - delta, lat - delta, lng + delta, lat + delta];
-            var url = config.elevationTemplate.replace("{bbox}", bbox.join(","));
-            new TerrainLoader().load(url, function (elev) {
-              resolve(elev);
-            }, function (e) {
-              reject(e);
-            });
-          });
-        });
-      },
-      getHiResElevation: function getHiResElevation(latlng) {
-        return configService.getConfig("elevation").then(function (config) {
-          return $http.get(config.hiResElevationTemplate.replace("{lng}", latlng.lng).replace("{lat}", latlng.lat));
-        });
-      }
-    };
-    return service;
-  }]);
 }
 "use strict";
 
@@ -951,35 +951,6 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 "use strict";
 
 {
-  var showButton = function showButton(data) {
-    return data.file_url && data.file_url.lastIndexOf(".zip") > 0; // Well it needs something in front of ".zip";
-  };
-
-  angular.module("icsm.imagery", []).directive("launchImage", ["$rootScope", "configService", function ($rootScope, configService) {
-    return {
-      templateUrl: "icsm/imagery/launch.html",
-      restrict: "AE",
-      link: function link(scope) {
-        var item = scope.item;
-        scope.show = showButton(item);
-
-        scope.preview = function () {
-          configService.getConfig("imagery").then(function (config) {
-            var url = item.thumb_url;
-            console.log(url, item);
-            $rootScope.$broadcast("icsm-preview", {
-              url: url,
-              item: item
-            });
-          });
-        };
-      }
-    };
-  }]);
-}
-"use strict";
-
-{
   var insidePolygon = function insidePolygon(latlng, polyPoints) {
     var x = latlng.lat,
         y = latlng.lng;
@@ -1077,6 +1048,84 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
         });
       }
     };
+  }]);
+}
+"use strict";
+
+{
+  var showButton = function showButton(data) {
+    return data.file_url && data.file_url.lastIndexOf(".zip") > 0; // Well it needs something in front of ".zip";
+  };
+
+  angular.module("icsm.imagery", []).directive("launchImage", ["$rootScope", "configService", function ($rootScope, configService) {
+    return {
+      templateUrl: "icsm/imagery/launch.html",
+      restrict: "AE",
+      link: function link(scope) {
+        var item = scope.item;
+        scope.show = showButton(item);
+
+        scope.preview = function () {
+          configService.getConfig("imagery").then(function (config) {
+            var url = item.thumb_url;
+            console.log(url, item);
+            $rootScope.$broadcast("icsm-preview", {
+              url: url,
+              item: item
+            });
+          });
+        };
+      }
+    };
+  }]);
+}
+"use strict";
+
+{
+  angular.module("icsm.message", []).directive("icsmMessage", ['icsmMessageService', function (icsmMessageService) {
+    return {
+      templateUrl: "icsm/message/message.html",
+      link: function link(scope, element) {
+        scope.message = icsmMessageService.data;
+      }
+    };
+  }]).factory("icsmMessageService", ['$timeout', function ($timeout) {
+    var data = {};
+    var service = {
+      get data() {
+        return data;
+      },
+
+      wait: function wait(text) {
+        return service.message("wait", text);
+      },
+      info: function info(text) {
+        return service.message("info", text);
+      },
+      warn: function warn(text) {
+        return service.message("warn", text);
+      },
+      error: function error(text) {
+        return service.message("error", text);
+      },
+      clear: function clear() {
+        return service.message(null, null);
+      },
+      message: function message(type, text) {
+        data.type = type;
+        data.text = text;
+        $timeout(function () {
+          service.removeFlash();
+        }, 100000);
+      },
+      flash: function flash(text) {
+        return service.message("flash", text);
+      },
+      removeFlash: function removeFlash() {
+        data.type = null;
+      }
+    };
+    return service;
   }]);
 }
 "use strict";
@@ -1307,140 +1356,6 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 }
 "use strict";
 
-{
-  angular.module("icsm.message", []).directive("icsmMessage", ['icsmMessageService', function (icsmMessageService) {
-    return {
-      templateUrl: "icsm/message/message.html",
-      link: function link(scope, element) {
-        scope.message = icsmMessageService.data;
-      }
-    };
-  }]).factory("icsmMessageService", ['$timeout', function ($timeout) {
-    var data = {};
-    var service = {
-      get data() {
-        return data;
-      },
-
-      wait: function wait(text) {
-        return service.message("wait", text);
-      },
-      info: function info(text) {
-        return service.message("info", text);
-      },
-      warn: function warn(text) {
-        return service.message("warn", text);
-      },
-      error: function error(text) {
-        return service.message("error", text);
-      },
-      clear: function clear() {
-        return service.message(null, null);
-      },
-      message: function message(type, text) {
-        data.type = type;
-        data.text = text;
-        $timeout(function () {
-          service.removeFlash();
-        }, 100000);
-      },
-      flash: function flash(text) {
-        return service.message("flash", text);
-      },
-      removeFlash: function removeFlash() {
-        data.type = null;
-      }
-    };
-    return service;
-  }]);
-}
-"use strict";
-
-{
-  var PaneCtrl = function PaneCtrl(paneService) {
-    var _this = this;
-
-    paneService.data().then(function (data) {
-      _this.data = data;
-    });
-  };
-
-  var PaneService = function PaneService() {
-    var data = {};
-    return {
-      add: function add(item) {},
-      remove: function remove(item) {}
-    };
-  };
-
-  angular.module("icsm.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
-    return {
-      templateUrl: "icsm/panes/panes.html",
-      transclude: true,
-      scope: {
-        defaultItem: "@",
-        data: "="
-      },
-      controller: ['$scope', function ($scope) {
-        var changeSize = false;
-        $rootScope.$on('side.panel.change', function (event) {
-          emitter();
-          $timeout(emitter, 100);
-          $timeout(emitter, 200);
-          $timeout(emitter, 300);
-          $timeout(emitter, 500);
-
-          function emitter() {
-            var evt = document.createEvent("HTMLEvents");
-            evt.initEvent("resize", false, true);
-            window.dispatchEvent(evt);
-          }
-        });
-        $scope.view = $scope.defaultItem;
-        $rootScope.$broadcast("view.changed", $scope.view, null);
-
-        $scope.setView = function (what) {
-          var oldView = $scope.view;
-
-          if ($scope.view === what) {
-            if (what) {
-              changeSize = true;
-            }
-
-            $scope.view = "";
-          } else {
-            if (!what) {
-              changeSize = true;
-            }
-
-            $scope.view = what;
-          }
-
-          $rootScope.$broadcast("view.changed", $scope.view, oldView);
-
-          if (changeSize) {
-            mapService.getMap().then(function (map) {
-              map._onResize();
-            });
-          }
-        };
-
-        $timeout(function () {
-          $rootScope.$broadcast("view.changed", $scope.view, null);
-        }, 50);
-      }]
-    };
-  }]).directive("icsmTabs", [function () {
-    return {
-      templateUrl: "icsm/panes/tabs.html",
-      require: "^icsmPanes"
-    };
-  }]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
-  PaneCtrl.$inject = ["paneService"];
-  PaneService.$inject = [];
-}
-"use strict";
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -1529,176 +1444,6 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
     ;
     var service = new Service($location.search());
     return service;
-  }]);
-}
-"use strict";
-
-L.Control.ElevationControl = L.Control.extend({
-  statics: {
-    TITLE: 'Find elevation at a point',
-    ALT_TITLE: 'Disable elevation at a point',
-    CLASS_NAME: "leaflet-control-elevation",
-    ALT_CLASS_NAME: "leaflet-control-alt-elevation"
-  },
-  options: {
-    position: 'topleft',
-    handler: {}
-  },
-  toggle: function toggle() {
-    var handler = this.options.handler;
-    var handleClick = this.handleClick;
-
-    if (handler.enabled()) {
-      this._map._container.style.cursor = "";
-
-      this._map.fire(L.Control.ElevationControl.Event.POINTEND, {});
-
-      this._map.off('click', handleClick);
-
-      this.link.title = L.Control.ElevationControl.TITLE;
-      L.DomUtil.removeClass(this.link, L.Control.ElevationControl.ALT_CLASS_NAME);
-      L.DomUtil.addClass(this.link, L.Control.ElevationControl.CLASS_NAME);
-      handler.disable();
-    } else {
-      this._map.fire(L.Control.ElevationControl.Event.POINTSTART, {});
-
-      this._map._container.style.cursor = "crosshair";
-
-      this._map.on('click', handleClick);
-
-      this.link.title = L.Control.ElevationControl.ALT_TITLE;
-      L.DomUtil.removeClass(this.link, L.Control.ElevationControl.CLASS_NAME);
-      L.DomUtil.addClass(this.link, L.Control.ElevationControl.ALT_CLASS_NAME);
-      handler.enable();
-    }
-  },
-  onAdd: function onAdd(map) {
-    var _this = this;
-
-    var className = L.Control.ElevationControl.CLASS_NAME;
-    this._container = L.DomUtil.create('div', 'leaflet-bar');
-    var link = this.link = L.DomUtil.create('a', className, this._container);
-    link.href = '#';
-    link.title = L.Control.ElevationControl.TITLE;
-    L.DomEvent.addListener(link, 'click', L.DomEvent.stopPropagation).addListener(link, 'click', L.DomEvent.preventDefault).addListener(link, 'click', this.toggle, this);
-    map.on("draw:drawstart", function () {
-      _this.clear();
-    });
-
-    this.clear = function () {
-      var handler = this.options.handler;
-
-      if (handler.enabled()) {
-        this.toggle();
-      }
-    };
-
-    this.handleClick = function handleClick(me) {
-      return function (e) {
-        me.searching(e.latlng);
-      };
-    }(this.options.handler);
-
-    return this._container;
-  }
-});
-L.Map.mergeOptions({
-  elevationControl: false
-});
-
-L.Control.elevationControl = function (options) {
-  return new L.Control.ElevationControl(options);
-};
-
-L.Control.ElevationControl.Event = {
-  POINTSTART: "point:start",
-  POINTEND: "point:end"
-};
-{
-  angular.module("icsm.point", []).directive("pointElevation", ["elevationPointsService", "flashService", "mapService", function (elevationPointsService, flashService, mapService) {
-    return {
-      restrict: "AE",
-      link: function link(scope) {
-        var flasher = null;
-        mapService.getMap().then(function (map) {
-          scope.map = map;
-          L.Control.ElevationControl.ALT_TITLE = 'Find features around a point';
-          scope.control = L.Control.elevationControl({
-            handler: handler
-          }).addTo(map);
-          console.log("Point signing in");
-        });
-        var handler = {
-          disable: function disable() {
-            scope.enabled = false;
-            console.log("Disable elevation handler here");
-            flashService.remove(flasher);
-            map.closePopup();
-            flasher = flashService.add("Click map for datasets surrounding a point.", 4000);
-          },
-          enable: function enable(map) {
-            scope.enabled = true;
-            scope.$apply(function () {
-              flashService.remove(flasher);
-              flasher = flashService.add("Click map for detailed elevation information at point", 4000);
-            });
-          },
-          enabled: function enabled() {
-            return scope.enabled;
-          },
-          searching: function searching(latlng) {
-            flashService.remove(flasher);
-            scope.elevation = scope.error = null;
-            flasher = flashService.add("Retrieving elevation data", 20000, true);
-            elevationPointsService.getHiResElevation(latlng).then(function (response) {
-              var data = response.data;
-              var map = scope.map;
-              flashService.remove(flasher);
-              /*
-                 "SOURCE": "Geoscience Australia",
-                 "DATASET": "SRTM-derived 1 Second Digital Elevation Models Version 1.0",
-                 "DEM RESOLUTION": "30m",
-                 "HEIGHT AT LOCATION": "524.67m",
-                 “METADATA_URL”: “https://ecat.ga.gov.au/geonetwork/srv/eng/catalog.search#/metadata/22be4b55-2465-4320-e053-10a3070a5236”
-              */
-
-              var elevation = data["HEIGHT AT LOCATION"];
-              var buffer = [];
-              var lat = latlng.lat.toFixed(5) + "&deg;";
-              var lng = latlng.lng.toFixed(5) + "&deg;";
-
-              if (elevation === "m" || elevation === undefined || elevation === "No data") {
-                buffer.push(title("Lat/Lng") + lat + "/" + lng);
-                buffer.push("<strong>No data available at this point</strong>");
-              } else {
-                buffer.push(title("Elevation") + elevation);
-                buffer.push(title("Lat/Lng") + lat + "/" + lng);
-                buffer.push(title("Source") + data.SOURCE);
-                buffer.push(title("Dataset") + "<span class='elevation-popup ellipsis' title='" + data.DATASET + "'>" + metadataLink(data.DATASET, data["METADATA URL"]) + "</span>");
-                buffer.push(title("DEM Resolution") + data["DEM RESOLUTION"]);
-              }
-
-              L.popup({
-                maxWidth: 400
-              }).setLatLng(latlng).setContent("<div class='fi-popup'>" + buffer.join("<br/>") + "</div>").openOn(map);
-              scope.elevation = data;
-            })["catch"](function (e) {
-              flashService.remove(flasher);
-              scope.error = "No data available at this point";
-            });
-
-            function title(text) {
-              return "<strong>" + text + ":</strong> ";
-            }
-
-            function metadataLink(text, link) {
-              if (!link) return text;
-              return "<a href='" + link + "' target='_blank'>" + text + "</a>";
-            }
-          }
-        };
-      }
-    };
   }]);
 }
 "use strict";
@@ -1939,6 +1684,261 @@ L.Control.ElevationControl.Event = {
         }
       }
     }
+  }]);
+}
+"use strict";
+
+{
+  var PaneCtrl = function PaneCtrl(paneService) {
+    var _this = this;
+
+    paneService.data().then(function (data) {
+      _this.data = data;
+    });
+  };
+
+  var PaneService = function PaneService() {
+    var data = {};
+    return {
+      add: function add(item) {},
+      remove: function remove(item) {}
+    };
+  };
+
+  angular.module("icsm.panes", []).directive("icsmPanes", ['$rootScope', '$timeout', 'mapService', function ($rootScope, $timeout, mapService) {
+    return {
+      templateUrl: "icsm/panes/panes.html",
+      transclude: true,
+      scope: {
+        defaultItem: "@",
+        data: "="
+      },
+      controller: ['$scope', function ($scope) {
+        var changeSize = false;
+        $rootScope.$on('side.panel.change', function (event) {
+          emitter();
+          $timeout(emitter, 100);
+          $timeout(emitter, 200);
+          $timeout(emitter, 300);
+          $timeout(emitter, 500);
+
+          function emitter() {
+            var evt = document.createEvent("HTMLEvents");
+            evt.initEvent("resize", false, true);
+            window.dispatchEvent(evt);
+          }
+        });
+        $scope.view = $scope.defaultItem;
+        $rootScope.$broadcast("view.changed", $scope.view, null);
+
+        $scope.setView = function (what) {
+          var oldView = $scope.view;
+
+          if ($scope.view === what) {
+            if (what) {
+              changeSize = true;
+            }
+
+            $scope.view = "";
+          } else {
+            if (!what) {
+              changeSize = true;
+            }
+
+            $scope.view = what;
+          }
+
+          $rootScope.$broadcast("view.changed", $scope.view, oldView);
+
+          if (changeSize) {
+            mapService.getMap().then(function (map) {
+              map._onResize();
+            });
+          }
+        };
+
+        $timeout(function () {
+          $rootScope.$broadcast("view.changed", $scope.view, null);
+        }, 50);
+      }]
+    };
+  }]).directive("icsmTabs", [function () {
+    return {
+      templateUrl: "icsm/panes/tabs.html",
+      require: "^icsmPanes"
+    };
+  }]).controller("PaneCtrl", PaneCtrl).factory("paneService", PaneService);
+  PaneCtrl.$inject = ["paneService"];
+  PaneService.$inject = [];
+}
+"use strict";
+
+L.Control.ElevationControl = L.Control.extend({
+  statics: {
+    TITLE: 'Find elevation at a point',
+    ALT_TITLE: 'Disable elevation at a point',
+    CLASS_NAME: "leaflet-control-elevation",
+    ALT_CLASS_NAME: "leaflet-control-alt-elevation"
+  },
+  options: {
+    position: 'topleft',
+    handler: {}
+  },
+  toggle: function toggle() {
+    var handler = this.options.handler;
+    var handleClick = this.handleClick;
+
+    if (handler.enabled()) {
+      this._map._container.style.cursor = "";
+
+      this._map.fire(L.Control.ElevationControl.Event.POINTEND, {});
+
+      this._map.off('click', handleClick);
+
+      this.link.title = L.Control.ElevationControl.TITLE;
+      L.DomUtil.removeClass(this.link, L.Control.ElevationControl.ALT_CLASS_NAME);
+      L.DomUtil.addClass(this.link, L.Control.ElevationControl.CLASS_NAME);
+      handler.disable();
+    } else {
+      this._map.fire(L.Control.ElevationControl.Event.POINTSTART, {});
+
+      this._map._container.style.cursor = "crosshair";
+
+      this._map.on('click', handleClick);
+
+      this.link.title = L.Control.ElevationControl.ALT_TITLE;
+      L.DomUtil.removeClass(this.link, L.Control.ElevationControl.CLASS_NAME);
+      L.DomUtil.addClass(this.link, L.Control.ElevationControl.ALT_CLASS_NAME);
+      handler.enable();
+    }
+  },
+  onAdd: function onAdd(map) {
+    var _this = this;
+
+    var className = L.Control.ElevationControl.CLASS_NAME;
+    this._container = L.DomUtil.create('div', 'leaflet-bar');
+    var link = this.link = L.DomUtil.create('a', className, this._container);
+    link.href = '#';
+    link.title = L.Control.ElevationControl.TITLE;
+    L.DomEvent.addListener(link, 'click', L.DomEvent.stopPropagation).addListener(link, 'click', L.DomEvent.preventDefault).addListener(link, 'click', this.toggle, this);
+    map.on("draw:drawstart", function () {
+      _this.clear();
+    });
+
+    this.clear = function () {
+      var handler = this.options.handler;
+
+      if (handler.enabled()) {
+        this.toggle();
+      }
+    };
+
+    this.handleClick = function handleClick(me) {
+      return function (e) {
+        me.searching(e.latlng);
+      };
+    }(this.options.handler);
+
+    return this._container;
+  }
+});
+L.Map.mergeOptions({
+  elevationControl: false
+});
+
+L.Control.elevationControl = function (options) {
+  return new L.Control.ElevationControl(options);
+};
+
+L.Control.ElevationControl.Event = {
+  POINTSTART: "point:start",
+  POINTEND: "point:end"
+};
+{
+  angular.module("icsm.point", []).directive("pointElevation", ["elevationPointsService", "flashService", "mapService", function (elevationPointsService, flashService, mapService) {
+    return {
+      restrict: "AE",
+      link: function link(scope) {
+        var flasher = null;
+        mapService.getMap().then(function (map) {
+          scope.map = map;
+          L.Control.ElevationControl.ALT_TITLE = 'Find features around a point';
+          scope.control = L.Control.elevationControl({
+            handler: handler
+          }).addTo(map);
+          console.log("Point signing in");
+        });
+        var handler = {
+          disable: function disable() {
+            scope.enabled = false;
+            console.log("Disable elevation handler here");
+            flashService.remove(flasher);
+            map.closePopup();
+            flasher = flashService.add("Click map for datasets surrounding a point.", 4000);
+          },
+          enable: function enable(map) {
+            scope.enabled = true;
+            scope.$apply(function () {
+              flashService.remove(flasher);
+              flasher = flashService.add("Click map for detailed elevation information at point", 4000);
+            });
+          },
+          enabled: function enabled() {
+            return scope.enabled;
+          },
+          searching: function searching(latlng) {
+            flashService.remove(flasher);
+            scope.elevation = scope.error = null;
+            flasher = flashService.add("Retrieving elevation data", 20000, true);
+            elevationPointsService.getHiResElevation(latlng).then(function (response) {
+              var data = response.data;
+              var map = scope.map;
+              flashService.remove(flasher);
+              /*
+                 "SOURCE": "Geoscience Australia",
+                 "DATASET": "SRTM-derived 1 Second Digital Elevation Models Version 1.0",
+                 "DEM RESOLUTION": "30m",
+                 "HEIGHT AT LOCATION": "524.67m",
+                 “METADATA_URL”: “https://ecat.ga.gov.au/geonetwork/srv/eng/catalog.search#/metadata/22be4b55-2465-4320-e053-10a3070a5236”
+              */
+
+              var elevation = data["HEIGHT AT LOCATION"];
+              var buffer = [];
+              var lat = latlng.lat.toFixed(5) + "&deg;";
+              var lng = latlng.lng.toFixed(5) + "&deg;";
+
+              if (elevation === "m" || elevation === undefined || elevation === "No data") {
+                buffer.push(title("Lat/Lng") + lat + "/" + lng);
+                buffer.push("<strong>No data available at this point</strong>");
+              } else {
+                buffer.push(title("Elevation") + elevation);
+                buffer.push(title("Lat/Lng") + lat + "/" + lng);
+                buffer.push(title("Source") + data.SOURCE);
+                buffer.push(title("Dataset") + "<span class='elevation-popup ellipsis' title='" + data.DATASET + "'>" + metadataLink(data.DATASET, data["METADATA URL"]) + "</span>");
+                buffer.push(title("DEM Resolution") + data["DEM RESOLUTION"]);
+              }
+
+              L.popup({
+                maxWidth: 400
+              }).setLatLng(latlng).setContent("<div class='fi-popup'>" + buffer.join("<br/>") + "</div>").openOn(map);
+              scope.elevation = data;
+            })["catch"](function (e) {
+              flashService.remove(flasher);
+              scope.error = "No data available at this point";
+            });
+
+            function title(text) {
+              return "<strong>" + text + ":</strong> ";
+            }
+
+            function metadataLink(text, link) {
+              if (!link) return text;
+              return "<a href='" + link + "' target='_blank'>" + text + "</a>";
+            }
+          }
+        };
+      }
+    };
   }]);
 }
 "use strict";
@@ -3963,25 +3963,6 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 "use strict";
 
 {
-  angular.module('icsm.state', []).directive("icsmStateToggle", ['downloadService', function (downloadService) {
-    return {
-      restrict: 'AE',
-      template: '<button ng-click="toggle(false)" ng-disabled="state.show" class="btn btn-default" title="Start downlaod selection."><i class="fa fa-lg fa-object-group"></i></button>',
-      link: function link(scope) {
-        downloadService.data().then(function (data) {
-          scope.state = data;
-        });
-
-        scope.toggle = function () {
-          scope.state.show = !scope.state.show;
-        };
-      }
-    };
-  }]);
-}
-"use strict";
-
-{
   angular.module("icsm.splash", []).directive('icsmSplash', ['$rootScope', '$uibModal', '$log', 'splashService', function ($rootScope, $uibModal, $log, splashService) {
     return {
       controller: ['$scope', 'splashService', function ($scope, splashService) {
@@ -4096,133 +4077,21 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 "use strict";
 
 {
-  angular.module("icsm.transect", []).provider("transectService", function () {
-    var diagonal = 500,
-        layers = {},
-        ptElevationUrl,
-        extent = {
-      lngMin: 112.99986111100009,
-      lngMax: 153.999861113351,
-      latMin: -44.0001389004617,
-      latMax: -10.00013890099995
+  angular.module('icsm.state', []).directive("icsmStateToggle", ['downloadService', function (downloadService) {
+    return {
+      restrict: 'AE',
+      template: '<button ng-click="toggle(false)" ng-disabled="state.show" class="btn btn-default" title="Start downlaod selection."><i class="fa fa-lg fa-object-group"></i></button>',
+      link: function link(scope) {
+        downloadService.data().then(function (data) {
+          scope.state = data;
+        });
+
+        scope.toggle = function () {
+          scope.state.show = !scope.state.show;
+        };
+      }
     };
-
-    this.extent = function (newExtent) {
-      extent.lngMin = angular.isUndefined(newExtent.lngMin) ? extent.lngMin : newExtent.lngMin;
-      extent.lngMax = angular.isUndefined(newExtent.lngMax) ? extent.lngMax : newExtent.lngMax;
-      extent.latMin = angular.isUndefined(newExtent.latMin) ? extent.latMin : newExtent.latMin;
-      extent.latMax = angular.isUndefined(newExtent.latMax) ? extent.latMax : newExtent.latMax;
-    };
-
-    this.setServiceUrl = function (name, url) {
-      name = name.toLowerCase();
-      layers[name] = {
-        urlTemplate: url
-      };
-      if (name === "elevation") ptElevationUrl = url.replace(/{height}|{width}/g, "1");
-    };
-
-    function calcSides(diagonal, ar) {
-      // x * x + ar * ar * x * x = diagonal * diagonal
-      // (1 + ar * ar) * x * x = diagonal * diagonal
-      // x * x = diagonal * diagonal / (1 + ar * ar)
-      var y = Math.sqrt(diagonal * diagonal / (1 + ar * ar));
-      return {
-        y: Math.ceil(y),
-        x: Math.ceil(y * ar)
-      };
-    }
-
-    this.$get = ['$q', function ($q) {
-      return {
-        getElevation: function getElevation(geometry, buffer) {
-          return this.getServiceData("elevation", geometry, buffer);
-        },
-        getServiceData: function getServiceData(name, geometry, buffer) {
-          var feature = Exp.Util.toGeoJSONFeature(geometry),
-              bbox = turf.extent(feature),
-              response = {
-            type: "FeatureCollection",
-            features: []
-          },
-              lngMin = bbox[0],
-              latMin = bbox[1],
-              lngMax = bbox[2],
-              latMax = bbox[3]; // Sanity check for service url
-
-          name = name.toLowerCase();
-          var svcUrl = layers[name] && layers[name].urlTemplate;
-          if (!svcUrl) return $q.when(response); // Sanity check for coordinates
-
-          lngMax = lngMax > lngMin ? lngMax : lngMin + 0.0001;
-          latMax = latMax > latMin ? latMax : latMin + 0.0001;
-          var dx = lngMax - lngMin,
-              dy = latMax - latMin;
-          if (!buffer) buffer = 0;
-          latMin = latMin - buffer * dy;
-          latMax = latMax + buffer * dy;
-          lngMin = lngMin - buffer * dx;
-          lngMax = lngMax + buffer * dx;
-          var xy = calcSides(diagonal, dx / dy),
-              kiloms = turf.lineDistance(feature, "kilometers"),
-              terrainLoader = new TerrainLoader(),
-              deferred = $q.defer();
-          svcUrl = svcUrl.replace("{bbox}", lngMin + "," + latMin + "," + lngMax + "," + latMax).replace(/{width}/g, "" + Math.ceil(xy.x)).replace(/{height}/g, "" + Math.ceil(xy.y));
-          terrainLoader.load(svcUrl, function (loaded) {
-            //                            console.log("width: " + xy.x + ", height: " + xy.y + "calculated cells = " + (xy.x * xy.y) + " loaded length = " + loaded.length);
-            var delta = kiloms / (diagonal - 1);
-
-            for (var i = 0; i < diagonal; i++) {
-              var distance = i * delta;
-              var deltaFeature = turf.along(feature, distance, "kilometers"),
-                  height = toHeight(deltaFeature.geometry.coordinates);
-              deltaFeature.properties.distance = distance;
-              ;
-
-              if (height > -32767) {
-                deltaFeature.geometry.coordinates.push(height);
-                response.features.push(deltaFeature);
-              }
-            }
-
-            deferred.resolve(response);
-
-            function toHeight(coord) {
-              var x = coord[0],
-                  y = coord[1],
-                  zeroX = lngMin,
-                  zeroY = latMax,
-                  cellY = Math.round((zeroY - y) / dy * (xy.y - 1)),
-                  cellX = Math.round((x - zeroX) / dx * (xy.x - 1)),
-                  index = cellY * xy.x + cellX; // console.log("Cell x = " + cellX + ", y = " + cellY + " Index = " + index + ", value = " + loaded[index]);
-
-              return loaded[index];
-            }
-          }, function (error) {
-            console.log("Failed to load transect data for " + name);
-            deferred.reject(error);
-          });
-          return deferred.promise;
-        },
-        isServiceDataAvailable: function isServiceDataAvailable(name) {
-          return layers[name] && layers[name].urlTemplate;
-        },
-        getElevationAtPoint: function getElevationAtPoint(latlng) {
-          var lng = latlng.lng,
-              lat = latlng.lat;
-          if (lat < extent.latMin || lat > extent.latMax || lng < extent.lngMin || lng > extent.lngMax) return $q.when(null);
-          var bbox = [lng - 0.000001, lat - 0.000001, lng + 0.000001, lat + 0.000001];
-          var deferred = $q.defer();
-          new TerrainLoader().load(ptElevationUrl.replace("{bbox}", bbox.join(",")), function (elev) {
-            deferred.resolve(elev);
-          }, function (error) {
-            console.log("Error, probably out of bounds");
-          });
-          return deferred.promise;
-        }
-      };
-    }];
-  });
+  }]);
 }
 "use strict";
 
@@ -4705,28 +4574,6 @@ var Strategies = /*#__PURE__*/function () {
 "use strict";
 
 {
-  angular.module("icsm.toolbar", []).directive("elevationToolbar", [function () {
-    return {
-      restrict: "AE",
-      templateUrl: "icsm/toolbar/toolbar.html",
-      controller: 'toolbarLinksCtrl',
-      transclude: true
-    };
-  }]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
-    var self = this;
-    configService.getConfig().then(function (config) {
-      self.links = config.toolbarLinks;
-    });
-    $scope.item = "";
-
-    $scope.toggleItem = function (item) {
-      $scope.item = $scope.item === item ? "" : item;
-    };
-  }]);
-}
-"use strict";
-
-{
   angular.module('icsm.themes', [])
   /**
      *
@@ -4820,6 +4667,28 @@ var Strategies = /*#__PURE__*/function () {
     };
 
     return this;
+  }]);
+}
+"use strict";
+
+{
+  angular.module("icsm.toolbar", []).directive("elevationToolbar", [function () {
+    return {
+      restrict: "AE",
+      templateUrl: "icsm/toolbar/toolbar.html",
+      controller: 'toolbarLinksCtrl',
+      transclude: true
+    };
+  }]).controller("toolbarLinksCtrl", ["$scope", "configService", function ($scope, configService) {
+    var self = this;
+    configService.getConfig().then(function (config) {
+      self.links = config.toolbarLinks;
+    });
+    $scope.item = "";
+
+    $scope.toggleItem = function (item) {
+      $scope.item = $scope.item === item ? "" : item;
+    };
   }]);
 }
 "use strict";
@@ -4932,6 +4801,137 @@ var Strategies = /*#__PURE__*/function () {
   DownloadCtrl.$inject = ["downloadService"];
   DownloadService.$inject = ['$http', '$q', '$rootScope', 'mapService', 'storageService'];
 }
+"use strict";
+
+{
+  angular.module("icsm.transect", []).provider("transectService", function () {
+    var diagonal = 500,
+        layers = {},
+        ptElevationUrl,
+        extent = {
+      lngMin: 112.99986111100009,
+      lngMax: 153.999861113351,
+      latMin: -44.0001389004617,
+      latMax: -10.00013890099995
+    };
+
+    this.extent = function (newExtent) {
+      extent.lngMin = angular.isUndefined(newExtent.lngMin) ? extent.lngMin : newExtent.lngMin;
+      extent.lngMax = angular.isUndefined(newExtent.lngMax) ? extent.lngMax : newExtent.lngMax;
+      extent.latMin = angular.isUndefined(newExtent.latMin) ? extent.latMin : newExtent.latMin;
+      extent.latMax = angular.isUndefined(newExtent.latMax) ? extent.latMax : newExtent.latMax;
+    };
+
+    this.setServiceUrl = function (name, url) {
+      name = name.toLowerCase();
+      layers[name] = {
+        urlTemplate: url
+      };
+      if (name === "elevation") ptElevationUrl = url.replace(/{height}|{width}/g, "1");
+    };
+
+    function calcSides(diagonal, ar) {
+      // x * x + ar * ar * x * x = diagonal * diagonal
+      // (1 + ar * ar) * x * x = diagonal * diagonal
+      // x * x = diagonal * diagonal / (1 + ar * ar)
+      var y = Math.sqrt(diagonal * diagonal / (1 + ar * ar));
+      return {
+        y: Math.ceil(y),
+        x: Math.ceil(y * ar)
+      };
+    }
+
+    this.$get = ['$q', function ($q) {
+      return {
+        getElevation: function getElevation(geometry, buffer) {
+          return this.getServiceData("elevation", geometry, buffer);
+        },
+        getServiceData: function getServiceData(name, geometry, buffer) {
+          var feature = Exp.Util.toGeoJSONFeature(geometry),
+              bbox = turf.extent(feature),
+              response = {
+            type: "FeatureCollection",
+            features: []
+          },
+              lngMin = bbox[0],
+              latMin = bbox[1],
+              lngMax = bbox[2],
+              latMax = bbox[3]; // Sanity check for service url
+
+          name = name.toLowerCase();
+          var svcUrl = layers[name] && layers[name].urlTemplate;
+          if (!svcUrl) return $q.when(response); // Sanity check for coordinates
+
+          lngMax = lngMax > lngMin ? lngMax : lngMin + 0.0001;
+          latMax = latMax > latMin ? latMax : latMin + 0.0001;
+          var dx = lngMax - lngMin,
+              dy = latMax - latMin;
+          if (!buffer) buffer = 0;
+          latMin = latMin - buffer * dy;
+          latMax = latMax + buffer * dy;
+          lngMin = lngMin - buffer * dx;
+          lngMax = lngMax + buffer * dx;
+          var xy = calcSides(diagonal, dx / dy),
+              kiloms = turf.lineDistance(feature, "kilometers"),
+              terrainLoader = new TerrainLoader(),
+              deferred = $q.defer();
+          svcUrl = svcUrl.replace("{bbox}", lngMin + "," + latMin + "," + lngMax + "," + latMax).replace(/{width}/g, "" + Math.ceil(xy.x)).replace(/{height}/g, "" + Math.ceil(xy.y));
+          terrainLoader.load(svcUrl, function (loaded) {
+            //                            console.log("width: " + xy.x + ", height: " + xy.y + "calculated cells = " + (xy.x * xy.y) + " loaded length = " + loaded.length);
+            var delta = kiloms / (diagonal - 1);
+
+            for (var i = 0; i < diagonal; i++) {
+              var distance = i * delta;
+              var deltaFeature = turf.along(feature, distance, "kilometers"),
+                  height = toHeight(deltaFeature.geometry.coordinates);
+              deltaFeature.properties.distance = distance;
+              ;
+
+              if (height > -32767) {
+                deltaFeature.geometry.coordinates.push(height);
+                response.features.push(deltaFeature);
+              }
+            }
+
+            deferred.resolve(response);
+
+            function toHeight(coord) {
+              var x = coord[0],
+                  y = coord[1],
+                  zeroX = lngMin,
+                  zeroY = latMax,
+                  cellY = Math.round((zeroY - y) / dy * (xy.y - 1)),
+                  cellX = Math.round((x - zeroX) / dx * (xy.x - 1)),
+                  index = cellY * xy.x + cellX; // console.log("Cell x = " + cellX + ", y = " + cellY + " Index = " + index + ", value = " + loaded[index]);
+
+              return loaded[index];
+            }
+          }, function (error) {
+            console.log("Failed to load transect data for " + name);
+            deferred.reject(error);
+          });
+          return deferred.promise;
+        },
+        isServiceDataAvailable: function isServiceDataAvailable(name) {
+          return layers[name] && layers[name].urlTemplate;
+        },
+        getElevationAtPoint: function getElevationAtPoint(latlng) {
+          var lng = latlng.lng,
+              lat = latlng.lat;
+          if (lat < extent.latMin || lat > extent.latMax || lng < extent.lngMin || lng > extent.lngMax) return $q.when(null);
+          var bbox = [lng - 0.000001, lat - 0.000001, lng + 0.000001, lat + 0.000001];
+          var deferred = $q.defer();
+          new TerrainLoader().load(ptElevationUrl.replace("{bbox}", bbox.join(",")), function (elev) {
+            deferred.resolve(elev);
+          }, function (error) {
+            console.log("Error, probably out of bounds");
+          });
+          return deferred.promise;
+        }
+      };
+    }];
+  });
+}
 angular.module('icsm.templates', []).run(['$templateCache', function($templateCache) {$templateCache.put('icsm/app/app.html','<div>\r\n\t<!-- BEGIN: Sticky Header -->\r\n\t<div explorer-header style="z-index:1"\r\n\t\t\tclass="navbar navbar-default navbar-fixed-top"\r\n\t\t\theading="\'Elevation\'"\r\n\t\t\theadingtitle="\'ICSM\'"\r\n\t\t\tbreadcrumbs="[{name:\'ICSM\', title: \'Reload Elevation\', url: \'.\'}]"\r\n\t\t\thelptitle="\'Get help about Elevation\'"\r\n\t\t\thelpalttext="\'Get help about Elevation\'">\r\n\t</div>\r\n\t<!-- END: Sticky Header -->\r\n\r\n\t<!-- Messages go here. They are fixed to the tab bar. -->\r\n\t<div explorer-messages class="marsMessages noPrint"></div>\r\n\t<icsm-panes data="root.data" default-item="download"></icsm-panes>\r\n</div>');
 $templateCache.put('icsm/clip/clip.html','<div class="well well-sm">\r\n   <div class="container-fluid">\r\n      <div class="row">\r\n         <div class="col-md-10">\r\n            <strong style="font-size:120%">Select area by:</strong>\r\n            <button ng-click="initiateDraw()" style="position:relative" ng-disable="client.drawing" tooltip-placement="right"\r\n               uib-tooltip="Drawing a bounding box. On enabling, click on the map and drag diagonally"\r\n               class="clip-btn">\r\n               <img style="height:24px;" src="icsm/resources/img/draw_rectangle.png"></img>\r\n               <div></div>\r\n            </button>\r\n            <button ng-click="initiatePolygon()" style="position:relative" ng-disable="client.drawing" tooltip-placement="right"\r\n               uib-tooltip="Drawing a polygon. On enabling, click vertices on the map, click on the first vertex to complete the loop."\r\n               class="clip-btn">\r\n               <img style="height:26px;" src="icsm/resources/img/draw_polygon.png"></img>\r\n               <div></div>\r\n            </button>\r\n            <button ng-click="typing = !typing" style="position:relative" tooltip-placement="right"\r\n               uib-tooltip="Type coordinates of a bounding box. Restricted to maximum of 2.25 square degrees."\r\n               class="clip-btn">\r\n               <i class="fa fa-keyboard-o fa-2x" aria-hidden="true"></i>\r\n               <div></div>\r\n            </button>\r\n         </div>\r\n         <div class="col-md-2">\r\n            <button style="float:right" ng-click="showInfo = !showInfo" tooltip-placement="left"\r\n               uib-tooltip="Information." class="btn btn-primary btn-default"><i class="fa fa-info"></i></button>\r\n            <exp-info title="Selecting an area" show-close="true"\r\n               style="width:450px;position:fixed;top:230px;right:40px" is-open="showInfo">\r\n               <icsm-info-bbox>\r\n         </div>\r\n         </exp-info>\r\n      </div>\r\n   </div>\r\n   <div class="row" ng-hide="typing || (!clip.xMin && clip.xMin !== 0) || oversize" style="padding-top:7px;">\r\n         <div class="col-md-12 ng-binding" ng-if="clip.type == \'polygon\'">\r\n            Polygon bounded by:\r\n            {{clip.xMin | number : 4}}\xB0 west,\r\n            {{clip.yMax | number : 4}}\xB0 north,\r\n            {{clip.xMax | number : 4}}\xB0 east,\r\n            {{clip.yMin | number : 4}}\xB0 south\r\n         </div>\r\n         <div class="col-md-12 ng-binding" ng-if="clip.type == \'bbox\'">\r\n            Selected bounds:\r\n            {{clip.xMin | number : 4}}\xB0 west,\r\n            {{clip.yMax | number : 4}}\xB0 north,\r\n            {{clip.xMax | number : 4}}\xB0 east,\r\n            {{clip.yMin | number : 4}}\xB0 south\r\n         </div>\r\n   </div>\r\n   <clip-modal title="Define search area" show-close="true" style="width:480px;position:fixed;top:110px;right:80px"\r\n      is-open="typing">\r\n      <icsm-manual-clip></icsm-manual-clip>\r\n   </clip-modal>\r\n</div>');
 $templateCache.put('icsm/clip/infobbox.html','<div class="">\r\n\t<strong style="font-size:120%">Select an area of interest.</strong>\r\n   By hitting one of the "Draw" buttons an area on the map can be selected with the mouse by drawing a bounding box, drawing a polygon or manually typing in the minimum and maximum of latitude and longitude. Hover over the buttons to see\r\n\tmore information.\r\n\t<br/>\r\n   Clicking one of the "Draw" buttons again allows replacing a previous area selection. <br/>\r\n   <strong>Notes:</strong>\r\n   <ul>\r\n      <li>The data does not cover all of Australia.</li>\r\n      <li>Restrict a search area to below 1.5 degrees square. eg 2x0.75 or 1x1.5</li>\r\n   </ul>\r\n\t<p style="padding-top:5px"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n\t\tYou can zoom in and out using the mouse wheel or the "+" and "-" map control on the top left of the map. If you\r\n\t\tdon\'t like the position of your drawn area, hit the one of the "Draw" buttons to draw a new search area.\r\n\t</p>\r\n</div>');
@@ -4969,6 +4969,6 @@ $templateCache.put('icsm/select/doc.html','<div ng-class-odd="\'odd\'" ng-class-
 $templateCache.put('icsm/select/group.html','<div class="panel panel-default" style="margin-bottom:-5px;" >\r\n\t<div class="panel-heading"><icsm-wms data="group"></icsm-wms> <strong>{{group.title}}</strong></div>\r\n\t<div class="panel-body">\r\n   \t\t<div ng-repeat="doc in group.docs">\r\n   \t\t\t<div select-doc doc="doc" group="group"></div>\r\n\t\t</div>\r\n\t</div>\r\n</div>\r\n');
 $templateCache.put('icsm/select/select.html','<div>\r\n\t<div style="position:relative;padding:5px;padding-left:10px;" ng-controller="SelectCtrl as select" class="scrollPanel">\r\n\t\t<div class="panel panel-default" style="margin-bottom:-5px">\r\n  \t\t\t<div class="panel-heading">\r\n  \t\t\t\t<h3 class="panel-title">Available datasets</h3>\r\n  \t\t\t</div>\r\n  \t\t\t<div class="panel-body">\r\n\t\t\t\t<div ng-repeat="doc in select.data.response.docs" style="padding-bottom:7px">\r\n\t\t\t\t\t<div select-doc ng-if="doc.type == \'dataset\'" doc="doc"></div>\r\n\t\t\t\t\t<select-group ng-if="doc.type == \'group\'" group="doc"></select-group>\r\n\t\t\t\t</div>\r\n  \t\t\t</div>\r\n\t\t</div>\r\n\t</div>\r\n</div>');
 $templateCache.put('icsm/splash/splash.html','<div class="modal-header">\r\n   <h3 class="modal-title splash">Elevation - Foundation Spatial Data</h3>\r\n</div>\r\n<div class="modal-body" id="accept" ng-form exp-enter="accept()" icsm-splash-modal style="width: 100%; margin-left: auto; margin-right: auto;">\r\n\t<div>\r\n\t\t<p>\r\n\t\t\tHere you can download point cloud and elevation datasets sourced from jurisdictions.\r\n\t\t</p>\r\n\t\t<p>\r\n\t\t\t<a href="http://www.ga.gov.au/topographic-mapping/digital-elevation-data.html" target="_blank">Find out more on our Elevation page.</a>\r\n\t\t</p>\r\n\t\t<p>\r\n         Data can be downloaded at <strong>no charge</strong> but note that there is a <strong>15GB limit per request</strong> (please check the file size before you download your files).\r\n\t\t</p>\r\n\t\t<p>\r\n\t\t\t<a href="http://opentopo.sdsc.edu/gridsphere/gridsphere?cid=contributeframeportlet&gs_action=listTools" target="_blank">Click here for Free GIS Tools.</a>\r\n\t\t</p>\r\n      <h5>How to use</h5>\r\n      <p>\r\n         <ul>\r\n            <li>Pan and zoom the map to your area of interest,</li>\r\n            <li>Click on one of the "Select area by..." buttons to define your area of interest,\r\n               <ul>\r\n                  <li>\r\n                        <img style="height:26px;padding-right:10px" src="icsm/resources/img/draw_rectangle.png">Drawing a bounding box. On enabling, click on the map and drag diagonally. There is a limit of roughly 2 square degrees or 200 square km.\r\n                  </li>\r\n                  <li>\r\n                     <img style="height:26px;padding-right:10px" src="icsm/resources/img/draw_polygon.png">\r\n                     Drawing a polygon. On enabling, click on the map for each vertex, click on the first vertex to close the polygon. Don\'t do too many vertices, it will not afford you greater accuracy and will slow down your search.\r\n                  </li>\r\n                  <li>\r\n                     <i class="fa fa-keyboard-o fa-2x" style="padding-right:10px" aria-hidden="true"></i>\r\n                      Manually entering the minimum and maximum latitudes and longitudes. The same area restrictions apply to drawing the bounds.\r\n                  </li>\r\n               </ul>\r\n            </li>\r\n            <li>On drawing complete we will check for data within or very near your area of interest</li>\r\n            <li>If the list is large you can filter:\r\n               <ul>\r\n                  <li>Partial text match by typing in the filter field and/or</li>\r\n                  <li>You can restrict the display to either elevation (DEM) or point cloud file types</li>\r\n               </ul>\r\n            </li>\r\n            <li>Check against any file you would like to download. To reiterate, these files can be huge so take note of the file size before downloading</li>\r\n            <li>Review your selected datasets and submit.</li>\r\n            <li>An email will be sent to you with a link to all your data, zipped into a single file.</li>\r\n            <li>These files can be huge so take note of the file size before submitting or downloading</li>\r\n         </ul>\r\n      </p>\r\n      <h5>Hints</h5>\r\n      <p>\r\n         <ul>\r\n            <li>Hovering over many items will give you further information about the purpose of the item</li>\r\n            <li>Drawing a polyline allows you to measure distance along the polyline.</li>\r\n            <li>On completion on drawing a line the elevation along that line is plotted.</li>\r\n            <li>While the tool to draw your area of interest is enabled it is easiest to pan the map using the arrow keys.</li>\r\n            <li>There are many areas where there is no data though the coverage is improving all the time.</li\r\n         </ul>\r\n      </p>\r\n\t</div>\r\n   <div style="padding:30px; padding-top:0; padding-bottom:40px; width:100%">\r\n\t\t<div class="pull-right">\r\n\t\t  \t<button type="button" class="btn btn-primary" ng-model="seenSplash" ng-click="accept()" autofocus>Continue</button>\r\n\t\t</div>\r\n\t</div>\r\n</div>');
-$templateCache.put('icsm/toolbar/toolbar.html','<div class="elevation-toolbar noPrint">\r\n   <div class="toolBarContainer">\r\n      <div>\r\n         <ul class="left-toolbar-items">\r\n            <li>\r\n               <div class="btn-group searchBar" ng-show="root.whichSearch != \'region\'">\r\n                  <div class="input-group input-group-custom" geo-search>\r\n                     <input type="text" ng-autocomplete ng-model="values.from.description" options=\'{country:"au"}\'\r\n                        size="32" title="Select a locality to pan the map to." class="form-control" aria-label="...">\r\n                     <div class="input-group-btn">\r\n                        <button ng-click="zoom(false)"\r\n                           class="btn btn-default" title="Pan and potentially zoom to location.">\r\n                           <i class="fa fa-search"></i>\r\n                        </button>\r\n                     </div>\r\n                  </div>\r\n               </div>\r\n            </li>\r\n         </ul>\r\n         <ul class="right-toolbar-items">\r\n            <li coverage-toggle></li>\r\n            <li>\r\n               <panel-trigger panel-id="download" panel-width="590px" name="Download" default="default"\r\n                  icon-class="fa-list" title="Select an area of interest and select datasets for download">\r\n               </panel-trigger>\r\n            </li>\r\n            <li>\r\n               <panel-trigger panel-id="help" panel-width="590px" name="Help" icon-class="fa-question-circle-o"\r\n                  title="Show help"></panel-trigger>\r\n            </li>\r\n            <li>\r\n               <panel-trigger panel-id="glossary" panel-width="590px" name="Glossary" icon-class="fa-book"\r\n                  title="Show glossary"></panel-trigger>\r\n            </li>\r\n            <li reset-page></li>\r\n         </ul>\r\n      </div>\r\n   </div>\r\n</div>');
 $templateCache.put('icsm/themes/themes.html','<div class="dropdown themesdropdown">\r\n  <button class="btn btn-default dropdown-toggle themescurrent" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">\r\n    Theme\r\n    <span class="caret"></span>\r\n  </button>\r\n  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">\r\n    <li ng-repeat="item in themes">\r\n       <a href="#" title="{{item.title}}" ng-href="{{item.url}}" class="themesItemCompact">\r\n         <span class="icsm-icon" ng-class="item.className"></span>\r\n         <strong style="vertical-align:top;font-size:110%">{{item.label}}</strong>\r\n       </a>\r\n    </li>\r\n  </ul>\r\n</div>');
+$templateCache.put('icsm/toolbar/toolbar.html','<div class="elevation-toolbar noPrint">\r\n   <div class="toolBarContainer">\r\n      <div>\r\n         <ul class="left-toolbar-items">\r\n            <li>\r\n               <div class="btn-group searchBar" ng-show="root.whichSearch != \'region\'">\r\n                  <div class="input-group input-group-custom" geo-search>\r\n                     <input type="text" ng-autocomplete ng-model="values.from.description" options=\'{country:"au"}\'\r\n                        size="32" title="Select a locality to pan the map to." class="form-control" aria-label="...">\r\n                     <div class="input-group-btn">\r\n                        <button ng-click="zoom(false)"\r\n                           class="btn btn-default" title="Pan and potentially zoom to location.">\r\n                           <i class="fa fa-search"></i>\r\n                        </button>\r\n                     </div>\r\n                  </div>\r\n               </div>\r\n            </li>\r\n         </ul>\r\n         <ul class="right-toolbar-items">\r\n            <li coverage-toggle></li>\r\n            <li>\r\n               <panel-trigger panel-id="download" panel-width="590px" name="Download" default="default"\r\n                  icon-class="fa-list" title="Select an area of interest and select datasets for download">\r\n               </panel-trigger>\r\n            </li>\r\n            <li>\r\n               <panel-trigger panel-id="help" panel-width="590px" name="Help" icon-class="fa-question-circle-o"\r\n                  title="Show help"></panel-trigger>\r\n            </li>\r\n            <li>\r\n               <panel-trigger panel-id="glossary" panel-width="590px" name="Glossary" icon-class="fa-book"\r\n                  title="Show glossary"></panel-trigger>\r\n            </li>\r\n            <li reset-page></li>\r\n         </ul>\r\n      </div>\r\n   </div>\r\n</div>');
 $templateCache.put('icsm/view/view.html','<div class="container-fluid downloadPane">\r\n   <icsm-clip data="data.item"></icsm-clip>\r\n   <div class="list-container">\r\n      <icsm-list></icsm-list>\r\n   </div>\r\n   <div class="downloadCont" icsm-search-continue></div>\r\n</div>');}]);

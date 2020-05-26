@@ -1,0 +1,60 @@
+<div class="fi-d1" drag-parent parentclass="featureInfContainer" ng-class="d1Height">
+    <div class="fi-d2">
+      <div class="fi-d3">
+        <div class="fi-d3-1">
+            <strong style="font-size: 120%;padding:2px;">Features</strong>
+          <button class="undecorated fi-close" ng-click="close()">X</button>
+        </div>
+        <div class="fi-d3-2">
+          <div class="fi-d4">
+            <div class="fi-d5">
+                <div style="padding:5px;" ng-repeat="feature in features">
+                    <div ng-if="feature.properties.maptitle" style="white-space: nowrap;">
+                        <strong>Map Title:</strong>
+                        <span title='{{feature.properties.mapnumber ? "Map number: " + feature.properties.mapnumber : ""}}'>
+                            {{feature.properties.maptitle}}
+                        </span>
+                    </div>
+    
+                    <div ng-if="feature.properties.project">
+                        <strong>Project Name:</strong>
+                        {{feature.properties.project}}
+                    </div>
+    
+                    <div ng-if="feature.properties.captured">
+                        <strong>Capture Date:</strong>{{captured(feature.properties.captured)}}
+                    </div>
+    
+                    <div
+                        ng-if="feature.properties.object_name || feature.properties.object_name_ahd || feature.properties.object_name_ort">
+                        <strong>File Name:</strong>
+                        {{feature.properties.object_name}}{{feature.properties.object_name_ahd}}{{feature.properties.object_name_ort}}
+                    </div>
+    
+                    <div>
+                        <strong>Status:</strong>
+                        {{feature.properties.status}}
+                    </div>
+    
+                    <div ng-if="feature.properties.available_date">
+                        <strong>Available Date:</strong>
+                        {{formatDate(feature.properties.available_date)}}
+                    </div>
+    
+                    <div ng-if="feature.properties.contact">
+                        <strong>Contact:</strong> <a
+                            href='{{feature.properties.contact}}'>{{feature.properties.contact}}</a>
+                    </div>
+    
+                    <div ng-if="feature.properties.metadata_url">
+                        <a href='{{feature.properties.metadata_url}}' target='_blank'>Metadata</a>
+                    </div>
+                    <hr style="margin:5px"/>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
