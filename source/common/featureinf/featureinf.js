@@ -1,7 +1,7 @@
 {
    angular.module("common.featureinf", [])
 
-      .directive("commonFeatureInf", ['$http', '$log', '$q', '$timeout', 'featureInfoService', 'flashService', 'mapService', 'messageService',
+      .directive("commonFeatureInf", ['$http', '$log', '$q', '$timeout', 'featureInfService', 'flashService', 'mapService', 'messageService',
          function ($http, $log, $q, $timeout, featureInfoService, flashService, mapService, messageService) {
             var template = "https://elvis2018-ga.fmecloud.com/fmedatastreaming/elvis_indexes/GetFeatureInfo_ElevationAvailableData.fmw?" +
                "SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&SRS=EPSG%3A4326&BBOX=${bounds}&WIDTH=${width}&HEIGHT=${height}" +
@@ -34,9 +34,19 @@
 
                      scope.close = function() {
                         featureInfoService.removeLastLayer(map);
+                        featureInfoService.removePolygon();
                         scope.features = null;
                      }
    
+                     scope.entered = function(feature) {
+                        featureInfoService.showPolygon(map, feature);
+
+                     }
+
+                     scope.left = function(feature) {
+                        featureInfoService.removePolygon();
+                     }
+
                      map.on("draw:drawstart point:start", function () {
                         scope.paused = true;
                      });
@@ -145,6 +155,7 @@
 
       .factory('featureInfService', [function () {
          var lastFeature = null;
+         var polygon = null;
          return {
             setLayer: function (layer) {
                lastFeature = layer;
@@ -153,6 +164,20 @@
                if (lastFeature) {
                   map.removeLayer(lastFeature);
                   lastFeature = null;
+               }
+            },
+
+            showPolygon: function(map, feature) {
+               polygon = L.geoJson( { 
+                  type: "FeatureCollection",
+                  features: [feature]
+               }, {color: 'green'}).addTo(map);
+            },
+
+            removePolygon: function() {
+               if(polygon) {
+                  polygon.remove();
+                  polygon = null;
                }
             }
          };

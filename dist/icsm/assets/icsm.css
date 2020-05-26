@@ -1,12 +1,4 @@
-.leaflet-popup {
-  position: absolute;
-  text-align: center;
-}
 
-.fi-popup hr {
-  margin-top: 3px;
-  margin-bottom: 3px;
-}
 .featureInfContainer {
   overflow-y: auto;
   max-height: 400px;
@@ -18,10 +10,11 @@
   background-color: white;
   border-radius: 3px;
   z-index: 50001;
-  box-shadow: -2px 0 4px #323232;
+  box-shadow: -1px 0 1px #323232;
 }
 
 .fi-close {
+  z-index: 5;
   vertical-align: top;
   font-weight: bold;
   font-size: 110%;
@@ -56,10 +49,12 @@
 }
 
 .fi-d3-1 {
+  z-index: 200;
   height: 30px;
 }
 
 .fi-d3-2 {
+  z-index: 1;
   height: 100%;
   overflow: hidden;
   box-sizing: border-box;
@@ -73,6 +68,15 @@
   position: relative;
   max-height: 100%;
   overflow: auto;
+}
+.leaflet-popup {
+  position: absolute;
+  text-align: center;
+}
+
+.fi-popup hr {
+  margin-top: 3px;
+  margin-bottom: 3px;
 }
 .nav-icons {
   margin-top: 7px !important;
@@ -331,7 +335,6 @@
     display: none !important;
   }
 }
-
 /* TODO: I haven't worked out why it is showing up. Find out why and remove */
 
 .leaflet-draw-draw-circlemarker {
@@ -647,6 +650,84 @@ button.clip-btn:hover div {
   /* the transition is defined in the active class */
   transition: 1s linear all;
 }
+.contributors {
+  margin: 2px;
+  padding: 10px;
+  padding-left: 8px;
+  position: fixed;
+  top: 70px;
+  right: 1px;
+  opacity: 0.95;
+  z-index: 1300;
+  background-color: white;
+  white-space: nowrap;
+  text-align: center;
+  -webkit-transition: height 1s;
+  /* Safari */
+  transition: height 1s;
+  -webkit-transition: width 1s;
+  /* Safari */
+  transition: width 1s;
+}
+
+.contributors div {
+  float: left;
+  width: 50%;
+}
+
+img.contributor-logo {
+  height: 70px;
+}
+
+.contributors img {
+  -webkit-transition: height 1s;
+  /* Safari */
+  transition: height 1s;
+}
+
+.contributors.transitioned-up img {
+  height: 0;
+}
+
+.contributors.transitioned-up .contributors-unstick {
+  display: none;
+}
+
+.contributors.transitioned-down {
+  border: 1px solid gray;
+  border-radius: 3px;
+  width: 500px;
+}
+
+.transitioned-up {
+  height: 0px;
+  border: 0 none;
+  margin: 0;
+  padding: 0;
+  width: 5px;
+}
+
+.contributors.transitioned-up a {
+  height: 0px;
+  border: 0 none;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+}
+
+.contributors-unstick {
+  vertical-align: top;
+  font-weight: bold;
+}
+
+.contributors-link {
+  font-weight: bold;
+}
+
+.elevation-and-depth {
+  padding-left: 12px;
+  padding-right: 12px;
+}
 .coverage {
   margin: 2px;
   padding: 10px;
@@ -729,84 +810,6 @@ button.clip-btn:hover div {
   padding-left: 10px;
   border: 1px solid gray;
   border-radius: 2px;
-}
-.contributors {
-  margin: 2px;
-  padding: 10px;
-  padding-left: 8px;
-  position: fixed;
-  top: 70px;
-  right: 1px;
-  opacity: 0.95;
-  z-index: 1300;
-  background-color: white;
-  white-space: nowrap;
-  text-align: center;
-  -webkit-transition: height 1s;
-  /* Safari */
-  transition: height 1s;
-  -webkit-transition: width 1s;
-  /* Safari */
-  transition: width 1s;
-}
-
-.contributors div {
-  float: left;
-  width: 50%;
-}
-
-img.contributor-logo {
-  height: 70px;
-}
-
-.contributors img {
-  -webkit-transition: height 1s;
-  /* Safari */
-  transition: height 1s;
-}
-
-.contributors.transitioned-up img {
-  height: 0;
-}
-
-.contributors.transitioned-up .contributors-unstick {
-  display: none;
-}
-
-.contributors.transitioned-down {
-  border: 1px solid gray;
-  border-radius: 3px;
-  width: 500px;
-}
-
-.transitioned-up {
-  height: 0px;
-  border: 0 none;
-  margin: 0;
-  padding: 0;
-  width: 5px;
-}
-
-.contributors.transitioned-up a {
-  height: 0px;
-  border: 0 none;
-  margin: 0;
-  padding: 0;
-  border-radius: 0;
-}
-
-.contributors-unstick {
-  vertical-align: top;
-  font-weight: bold;
-}
-
-.contributors-link {
-  font-weight: bold;
-}
-
-.elevation-and-depth {
-  padding-left: 12px;
-  padding-right: 12px;
 }
 img.elvis-logo {
   height: 75px;
@@ -971,28 +974,6 @@ img.elvis-logo {
   font-weight: bold;
   display: inline-block;
 }
-.product-valid {
-  color: green;
-}
-
-.product-invalid {
-  color: red;
-}
-
-.product-warning {
-  color: darkorange;
-}
-
-.product-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.product-restrict {
-  padding-bottom: 8px;
-}
 .preview-container {
   position: fixed;
   display: block;
@@ -1028,6 +1009,28 @@ img.elvis-logo {
   right: 10px;
   z-index: 1;
   top: 20px;
+}
+.product-valid {
+  color: green;
+}
+
+.product-invalid {
+  color: red;
+}
+
+.product-warning {
+  color: darkorange;
+}
+
+.product-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.product-restrict {
+  padding-bottom: 8px;
 }
 .continue-container {
   padding: 4px;

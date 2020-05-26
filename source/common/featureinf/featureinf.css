@@ -9,10 +9,11 @@
     background-color: white;
     border-radius: 3px;
     z-index: 50001;
-    box-shadow: -2px 0 4px #323232;
+    box-shadow: -1px 0 1px #323232;
 }
 
 .fi-close {
+    z-index:5;
     vertical-align: top;
     font-weight: bold;
     font-size:110%;
@@ -46,9 +47,11 @@
    position: relative;
 }
 .fi-d3-1 {
+    z-index: 200;
    height:30px;
 }
 .fi-d3-2{
+    z-index: 1;
     height: 100%;
     overflow: hidden;
     box-sizing: border-box;
