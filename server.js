@@ -150,19 +150,14 @@ app.post('/elevation/initiateJob', function (req, res, next) {
 });
 
 app.get('/refreshToken', function(req, res) {
-   token.refresh().then((data) => {
-      res.header({
-         "Content-Type": "application/json;charset=UTF-8"
-      });
-      res.status(200).send(data);
-   });
+    // It doesn't do anything at the moment. Can be removed soon.
+    token.getToken().then((data) => {
+       res.status(200).send(data);
+    });
 });
 
 app.get('/token', function(req, res) {
-   token.value.then((data) => {
-      res.header({
-         "Content-Type": "application/json;charset=UTF-8"
-      });
+   token.getToken().then((data) => {
       res.status(200).send(data);
    });
 });
