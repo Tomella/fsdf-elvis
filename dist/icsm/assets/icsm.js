@@ -325,6 +325,92 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 }
 "use strict";
 
+{
+  var ContributorsService = function ContributorsService($http) {
+    var state = {
+      show: false,
+      ingroup: false,
+      stick: false
+    };
+    $http.get("icsm/resources/config/contributors.json").then(function (response) {
+      state.orgs = response.data;
+    });
+    return {
+      getState: function getState() {
+        return state;
+      }
+    };
+  };
+
+  angular.module('icsm.contributors', []).directive("icsmContributors", ["$interval", "contributorsService", function ($interval, contributorsService) {
+    return {
+      templateUrl: "icsm/contributors/contributors.html",
+      scope: {},
+      link: function link(scope, element) {
+        var timer;
+        scope.contributors = contributorsService.getState();
+
+        scope.over = function () {
+          $interval.cancel(timer);
+          scope.contributors.ingroup = true;
+        };
+
+        scope.out = function () {
+          timer = $interval(function () {
+            scope.contributors.ingroup = false;
+          }, 1000);
+        };
+
+        scope.unstick = function () {
+          scope.contributors.ingroup = scope.contributors.show = scope.contributors.stick = false;
+          element.find("a").blur();
+        };
+      }
+    };
+  }]).directive("icsmContributorsLink", ["$interval", "contributorsService", function ($interval, contributorsService) {
+    return {
+      restrict: "AE",
+      templateUrl: "icsm/contributors/show.html",
+      scope: {},
+      link: function link(scope) {
+        var timer;
+        scope.contributors = contributorsService.getState();
+
+        scope.over = function () {
+          $interval.cancel(timer);
+          scope.contributors.show = true;
+        };
+
+        scope.toggleStick = function () {
+          scope.contributors.stick = !scope.contributors.stick;
+
+          if (!scope.contributors.stick) {
+            scope.contributors.show = scope.contributors.ingroup = false;
+          }
+        };
+
+        scope.out = function () {
+          timer = $interval(function () {
+            scope.contributors.show = false;
+          }, 700);
+        };
+      }
+    };
+  }]).factory("contributorsService", ContributorsService).filter("activeContributors", function () {
+    return function (contributors) {
+      if (!contributors) {
+        return [];
+      }
+
+      return contributors.filter(function (contributor) {
+        return contributor.enabled;
+      });
+    };
+  });
+  ContributorsService.$inject = ["$http"];
+}
+"use strict";
+
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -590,92 +676,6 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 "use strict";
 
 {
-  var ContributorsService = function ContributorsService($http) {
-    var state = {
-      show: false,
-      ingroup: false,
-      stick: false
-    };
-    $http.get("icsm/resources/config/contributors.json").then(function (response) {
-      state.orgs = response.data;
-    });
-    return {
-      getState: function getState() {
-        return state;
-      }
-    };
-  };
-
-  angular.module('icsm.contributors', []).directive("icsmContributors", ["$interval", "contributorsService", function ($interval, contributorsService) {
-    return {
-      templateUrl: "icsm/contributors/contributors.html",
-      scope: {},
-      link: function link(scope, element) {
-        var timer;
-        scope.contributors = contributorsService.getState();
-
-        scope.over = function () {
-          $interval.cancel(timer);
-          scope.contributors.ingroup = true;
-        };
-
-        scope.out = function () {
-          timer = $interval(function () {
-            scope.contributors.ingroup = false;
-          }, 1000);
-        };
-
-        scope.unstick = function () {
-          scope.contributors.ingroup = scope.contributors.show = scope.contributors.stick = false;
-          element.find("a").blur();
-        };
-      }
-    };
-  }]).directive("icsmContributorsLink", ["$interval", "contributorsService", function ($interval, contributorsService) {
-    return {
-      restrict: "AE",
-      templateUrl: "icsm/contributors/show.html",
-      scope: {},
-      link: function link(scope) {
-        var timer;
-        scope.contributors = contributorsService.getState();
-
-        scope.over = function () {
-          $interval.cancel(timer);
-          scope.contributors.show = true;
-        };
-
-        scope.toggleStick = function () {
-          scope.contributors.stick = !scope.contributors.stick;
-
-          if (!scope.contributors.stick) {
-            scope.contributors.show = scope.contributors.ingroup = false;
-          }
-        };
-
-        scope.out = function () {
-          timer = $interval(function () {
-            scope.contributors.show = false;
-          }, 700);
-        };
-      }
-    };
-  }]).factory("contributorsService", ContributorsService).filter("activeContributors", function () {
-    return function (contributors) {
-      if (!contributors) {
-        return [];
-      }
-
-      return contributors.filter(function (contributor) {
-        return contributor.enabled;
-      });
-    };
-  });
-  ContributorsService.$inject = ["$http"];
-}
-"use strict";
-
-{
   var CoverageService = function CoverageService(configService, mapService) {
     var state = {
       show: false
@@ -813,8 +813,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
       },
       getHiResElevation: function getHiResElevation(latlng) {
         return configService.getConfig("elevation").then(function (config) {
-          return $http.get(config.tokenUrl).then(function (packet) {
-            var token = packet.data.serviceResponse.token;
+          return $http.get(config.tokenUrl).then(function (token) {
             return $http({
               method: 'GET',
               url: config.hiResElevationTemplate.replace("{lng}", latlng.lng).replace("{lat}", latlng.lat) + "&token=" + token,
@@ -2465,6 +2464,278 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 "use strict";
 
 {
+  var transformTemplate = function transformTemplate(template, data) {
+    var response = template;
+    angular.forEach(data, function (value, key) {
+      response = response.replace("{" + key + "}", encodeURIComponent(value));
+    });
+    return response;
+  };
+
+  var convertFlatToStructured = function convertFlatToStructured(flat) {
+    var fields = ["file_url", "file_name", "project_name", "product", "metadata_id", "file_size", "bbox"]; // ["index_poly_name", "file_name", "file_url", "file_size", "file_last_modified", "bbox"]
+
+    var response = {
+      available_data: []
+    };
+    var available = response.available_data;
+    var sourceMap = {};
+    flat.forEach(function (dataset) {
+      var item = {};
+      fields.forEach(function (field) {
+        if (typeof dataset[field] !== "undefined") {
+          item[field] = dataset[field];
+        }
+      });
+      var data = sourceMap[dataset.source];
+
+      if (!data) {
+        data = {
+          source: dataset.source,
+          downloadables: {}
+        };
+        sourceMap[dataset.source] = data;
+        available.push(data);
+      }
+
+      var downloadable = data.downloadables[dataset.type];
+
+      if (!downloadable) {
+        downloadable = {};
+        data.downloadables[dataset.type] = downloadable;
+      }
+
+      var group = downloadable[dataset.group];
+
+      if (!group) {
+        group = [];
+        downloadable[dataset.group] = group;
+      }
+
+      group.push(item);
+    });
+    return response;
+  };
+
+  angular.module("elvis.reviewing", []).directive('icsmReview', ['$rootScope', '$uibModal', '$log', 'messageService', 'reviewService', function ($rootScope, $uibModal, $log, messageService, reviewService) {
+    return {
+      link: function link(scope, element) {
+        var modalInstance;
+        scope.data = reviewService.data; // TODO: Why is this here? What is trying to override data?
+
+        scope.$watch("data", function (value, old) {
+          if (old) {
+            console.log("Why?", value);
+            scope.data = reviewService.data;
+          }
+        });
+        scope.$watch("data.reviewing", function (value) {
+          if (value) {
+            modalInstance = $uibModal.open({
+              templateUrl: 'icsm/reviewing/reviewing.html',
+              size: "lg",
+              backdrop: "static",
+              keyboard: false,
+              controller: ['$scope', '$uibModalInstance', 'listService', 'products', 'vcRecaptchaService', function ($scope, $uibModalInstance, listService, products, vcRecaptchaService) {
+                $scope.recaptchaKey = "6LfUrFsUAAAAAKu4EJY_FSi3zFXvWm60RDVknRHf";
+                var selected = scope.selected = products.filter(function (product) {
+                  return product.selected;
+                });
+                scope.derived = selected.filter(function (selection) {
+                  return selection.product;
+                });
+                listService.getMappings().then(function (response) {
+                  $scope.mappings = response;
+                });
+
+                $scope.heading = function (source) {
+                  var mapping = $scope.mappings[source];
+                  return mapping.displayName ? mapping.displayName : source;
+                };
+
+                $scope.products = convertFlatToStructured(selected).available_data;
+
+                $scope.accept = function () {
+                  $uibModalInstance.close($scope.recaptchaResponse, $scope.products);
+                };
+
+                $scope.cancel = function () {
+                  $uibModalInstance.close(null);
+                };
+
+                $scope.setWidgetId = function (widgetId) {
+                  $scope.recaptchaId = widgetId;
+                };
+
+                $scope.setResponse = function (response) {
+                  $scope.recaptchaResponse = response;
+                };
+
+                $scope.cbExpiration = function () {
+                  vcRecaptchaService.reload($scope.recaptchaId);
+                  $scope.recaptchaResponse = null;
+                };
+              }],
+              resolve: {
+                products: function products() {
+                  return reviewService.products;
+                }
+              }
+            });
+            modalInstance.result.then(function (recaptchaResponse) {
+              delete scope.data.recaptchaResponse;
+
+              if (recaptchaResponse) {
+                scope.data.recaptchaResponse = recaptchaResponse;
+                reviewService.startExtract().then(function (response) {
+                  messageService[response.status](response.message);
+                  reviewService.removeRemoved();
+                  scope.data.reviewing = false;
+                });
+              }
+
+              reviewService.removeRemoved();
+              scope.data.reviewing = false;
+            }, function () {
+              $log.info('Cancelled');
+            });
+          }
+        });
+      }
+    };
+  }]).directive('reviewIndustry', ["configService", "reviewService", function (configService, reviewService) {
+    return {
+      retrict: "AE",
+      template: '<div class="input-group">' + '<span class="input-group-addon" style="width:6em" id="nedf-industry">Industry</span>' + '<select required="required" type="text" ng-options="ind.text for ind in industries" ng-model="data.industry" class="form-control" placeholder="Industry of interest for this data" aria-describedby="nedf-industry">' + '</select></div>',
+      link: function link(scope) {
+        scope.data = reviewService.data;
+        configService.getConfig("industries").then(function (list) {
+          scope.industries = list;
+        });
+      }
+    };
+  }]).directive("reviewEmail", ['reviewService', function (reviewService) {
+    return {
+      template: '<div class="input-group">' + '<span class="input-group-addon" style="width:6em" id="nedf-email">Email</span>' + '<input required="required" type="email" ng-model="data.email" class="form-control" placeholder="Email address to send download link" aria-describedby="nedf-email">' + '</div>',
+      restrict: "AE",
+      link: function link(scope, element) {
+        scope.data = reviewService.data; //console.log("data" + scope.data);
+      }
+    };
+  }]).filter('reviewProductsSelected', function () {
+    return function (products) {
+      return products.filter(function (product) {
+        return product.selected;
+      });
+    };
+  }).filter('reviewSumSize', function () {
+    return function (products) {
+      return products.reduce(function (sum, product) {
+        return sum + (product.file_size ? +product.file_size : product.product ? 500000000 : 0);
+      }, 0);
+    };
+  }).factory('reviewService', ['$http', '$q', 'clipService', 'configService', 'listService', 'persistService', function ($http, $q, clipService, configService, listService, persistService) {
+    var EMAIL_KEY = "elvis_download_email";
+    var INDUSTRY_KEY = "elvis_download_industry";
+    var data = listService.data;
+    var service = {
+      get data() {
+        return data;
+      },
+
+      set data(data) {
+        console.log("What the hell!");
+        data;
+      },
+
+      get products() {
+        return listService.products;
+      },
+
+      startExtract: function startExtract() {
+        this.setEmail(data.email);
+        this.setIndustry(data.industry);
+        return configService.getConfig("processing").then(function (config) {
+          var clip = clipService.data.clip;
+          console.log("We are processing files");
+          return postFiles();
+
+          function postFiles() {
+            var postData = convertFlatToStructured(listService.products.filter(function (product) {
+              return product.selected;
+            }));
+            postData.parameters = {
+              polygon: clip.polygon,
+              email: data.email,
+              industry: data.industry.code,
+              recaptcha: data.recaptchaResponse
+            };
+
+            if (data.outCoordSys) {
+              postData.parameters.outCoordSys = data.outCoordSys.code;
+            }
+
+            if (data.outFormat) {
+              postData.parameters.outFormat = data.outFormat.code;
+            }
+
+            listService.products.forEach(function (product) {
+              product.selected = product.removed = false;
+            });
+            return $http({
+              method: 'POST',
+              url: config.postProcessingUrl,
+              data: postData,
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }).then(function (response) {
+              return response.data;
+            }, function (d) {
+              return {
+                status: "error",
+                message: "Sorry but the service failed to respond. Try again later."
+              };
+            });
+          }
+        });
+      },
+      removeRemoved: function removeRemoved() {
+        listService.products.forEach(function (product) {
+          product.removed = false;
+        });
+      },
+      setEmail: function setEmail(email) {
+        this.data.email = email;
+        persistService.setItem(EMAIL_KEY, email);
+      },
+      setIndustry: function setIndustry(industry) {
+        this.data.industry = industry;
+
+        if (industry && industry.code) {
+          persistService.setItem(INDUSTRY_KEY, industry.code);
+        }
+      },
+      clipProduct: function clipProduct() {}
+    };
+    persistService.getItem(EMAIL_KEY).then(function (value) {
+      service.data.email = value;
+    });
+    persistService.getItem(INDUSTRY_KEY).then(function (code) {
+      if (code) {
+        configService.getConfig("industries").then(function (list) {
+          service.data.industry = list.find(function (item) {
+            return item.code === code;
+          });
+        });
+      }
+    });
+    return service;
+  }]);
+}
+"use strict";
+
+{
   angular.module("elvis.results.continue", []).directive('icsmSearchContinue', ['configService', 'continueService', function (configService, continueService) {
     return {
       templateUrl: 'icsm/results/continue.html',
@@ -3213,278 +3484,6 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 "use strict";
 
 {
-  var transformTemplate = function transformTemplate(template, data) {
-    var response = template;
-    angular.forEach(data, function (value, key) {
-      response = response.replace("{" + key + "}", encodeURIComponent(value));
-    });
-    return response;
-  };
-
-  var convertFlatToStructured = function convertFlatToStructured(flat) {
-    var fields = ["file_url", "file_name", "project_name", "product", "metadata_id", "file_size", "bbox"]; // ["index_poly_name", "file_name", "file_url", "file_size", "file_last_modified", "bbox"]
-
-    var response = {
-      available_data: []
-    };
-    var available = response.available_data;
-    var sourceMap = {};
-    flat.forEach(function (dataset) {
-      var item = {};
-      fields.forEach(function (field) {
-        if (typeof dataset[field] !== "undefined") {
-          item[field] = dataset[field];
-        }
-      });
-      var data = sourceMap[dataset.source];
-
-      if (!data) {
-        data = {
-          source: dataset.source,
-          downloadables: {}
-        };
-        sourceMap[dataset.source] = data;
-        available.push(data);
-      }
-
-      var downloadable = data.downloadables[dataset.type];
-
-      if (!downloadable) {
-        downloadable = {};
-        data.downloadables[dataset.type] = downloadable;
-      }
-
-      var group = downloadable[dataset.group];
-
-      if (!group) {
-        group = [];
-        downloadable[dataset.group] = group;
-      }
-
-      group.push(item);
-    });
-    return response;
-  };
-
-  angular.module("elvis.reviewing", []).directive('icsmReview', ['$rootScope', '$uibModal', '$log', 'messageService', 'reviewService', function ($rootScope, $uibModal, $log, messageService, reviewService) {
-    return {
-      link: function link(scope, element) {
-        var modalInstance;
-        scope.data = reviewService.data; // TODO: Why is this here? What is trying to override data?
-
-        scope.$watch("data", function (value, old) {
-          if (old) {
-            console.log("Why?", value);
-            scope.data = reviewService.data;
-          }
-        });
-        scope.$watch("data.reviewing", function (value) {
-          if (value) {
-            modalInstance = $uibModal.open({
-              templateUrl: 'icsm/reviewing/reviewing.html',
-              size: "lg",
-              backdrop: "static",
-              keyboard: false,
-              controller: ['$scope', '$uibModalInstance', 'listService', 'products', 'vcRecaptchaService', function ($scope, $uibModalInstance, listService, products, vcRecaptchaService) {
-                $scope.recaptchaKey = "6LfUrFsUAAAAAKu4EJY_FSi3zFXvWm60RDVknRHf";
-                var selected = scope.selected = products.filter(function (product) {
-                  return product.selected;
-                });
-                scope.derived = selected.filter(function (selection) {
-                  return selection.product;
-                });
-                listService.getMappings().then(function (response) {
-                  $scope.mappings = response;
-                });
-
-                $scope.heading = function (source) {
-                  var mapping = $scope.mappings[source];
-                  return mapping.displayName ? mapping.displayName : source;
-                };
-
-                $scope.products = convertFlatToStructured(selected).available_data;
-
-                $scope.accept = function () {
-                  $uibModalInstance.close($scope.recaptchaResponse, $scope.products);
-                };
-
-                $scope.cancel = function () {
-                  $uibModalInstance.close(null);
-                };
-
-                $scope.setWidgetId = function (widgetId) {
-                  $scope.recaptchaId = widgetId;
-                };
-
-                $scope.setResponse = function (response) {
-                  $scope.recaptchaResponse = response;
-                };
-
-                $scope.cbExpiration = function () {
-                  vcRecaptchaService.reload($scope.recaptchaId);
-                  $scope.recaptchaResponse = null;
-                };
-              }],
-              resolve: {
-                products: function products() {
-                  return reviewService.products;
-                }
-              }
-            });
-            modalInstance.result.then(function (recaptchaResponse) {
-              delete scope.data.recaptchaResponse;
-
-              if (recaptchaResponse) {
-                scope.data.recaptchaResponse = recaptchaResponse;
-                reviewService.startExtract().then(function (response) {
-                  messageService[response.status](response.message);
-                  reviewService.removeRemoved();
-                  scope.data.reviewing = false;
-                });
-              }
-
-              reviewService.removeRemoved();
-              scope.data.reviewing = false;
-            }, function () {
-              $log.info('Cancelled');
-            });
-          }
-        });
-      }
-    };
-  }]).directive('reviewIndustry', ["configService", "reviewService", function (configService, reviewService) {
-    return {
-      retrict: "AE",
-      template: '<div class="input-group">' + '<span class="input-group-addon" style="width:6em" id="nedf-industry">Industry</span>' + '<select required="required" type="text" ng-options="ind.text for ind in industries" ng-model="data.industry" class="form-control" placeholder="Industry of interest for this data" aria-describedby="nedf-industry">' + '</select></div>',
-      link: function link(scope) {
-        scope.data = reviewService.data;
-        configService.getConfig("industries").then(function (list) {
-          scope.industries = list;
-        });
-      }
-    };
-  }]).directive("reviewEmail", ['reviewService', function (reviewService) {
-    return {
-      template: '<div class="input-group">' + '<span class="input-group-addon" style="width:6em" id="nedf-email">Email</span>' + '<input required="required" type="email" ng-model="data.email" class="form-control" placeholder="Email address to send download link" aria-describedby="nedf-email">' + '</div>',
-      restrict: "AE",
-      link: function link(scope, element) {
-        scope.data = reviewService.data; //console.log("data" + scope.data);
-      }
-    };
-  }]).filter('reviewProductsSelected', function () {
-    return function (products) {
-      return products.filter(function (product) {
-        return product.selected;
-      });
-    };
-  }).filter('reviewSumSize', function () {
-    return function (products) {
-      return products.reduce(function (sum, product) {
-        return sum + (product.file_size ? +product.file_size : product.product ? 500000000 : 0);
-      }, 0);
-    };
-  }).factory('reviewService', ['$http', '$q', 'clipService', 'configService', 'listService', 'persistService', function ($http, $q, clipService, configService, listService, persistService) {
-    var EMAIL_KEY = "elvis_download_email";
-    var INDUSTRY_KEY = "elvis_download_industry";
-    var data = listService.data;
-    var service = {
-      get data() {
-        return data;
-      },
-
-      set data(data) {
-        console.log("What the hell!");
-        data;
-      },
-
-      get products() {
-        return listService.products;
-      },
-
-      startExtract: function startExtract() {
-        this.setEmail(data.email);
-        this.setIndustry(data.industry);
-        return configService.getConfig("processing").then(function (config) {
-          var clip = clipService.data.clip;
-          console.log("We are processing files");
-          return postFiles();
-
-          function postFiles() {
-            var postData = convertFlatToStructured(listService.products.filter(function (product) {
-              return product.selected;
-            }));
-            postData.parameters = {
-              polygon: clip.polygon,
-              email: data.email,
-              industry: data.industry.code,
-              recaptcha: data.recaptchaResponse
-            };
-
-            if (data.outCoordSys) {
-              postData.parameters.outCoordSys = data.outCoordSys.code;
-            }
-
-            if (data.outFormat) {
-              postData.parameters.outFormat = data.outFormat.code;
-            }
-
-            listService.products.forEach(function (product) {
-              product.selected = product.removed = false;
-            });
-            return $http({
-              method: 'POST',
-              url: config.postProcessingUrl,
-              data: postData,
-              headers: {
-                "Content-Type": "application/json"
-              }
-            }).then(function (response) {
-              return response.data;
-            }, function (d) {
-              return {
-                status: "error",
-                message: "Sorry but the service failed to respond. Try again later."
-              };
-            });
-          }
-        });
-      },
-      removeRemoved: function removeRemoved() {
-        listService.products.forEach(function (product) {
-          product.removed = false;
-        });
-      },
-      setEmail: function setEmail(email) {
-        this.data.email = email;
-        persistService.setItem(EMAIL_KEY, email);
-      },
-      setIndustry: function setIndustry(industry) {
-        this.data.industry = industry;
-
-        if (industry && industry.code) {
-          persistService.setItem(INDUSTRY_KEY, industry.code);
-        }
-      },
-      clipProduct: function clipProduct() {}
-    };
-    persistService.getItem(EMAIL_KEY).then(function (value) {
-      service.data.email = value;
-    });
-    persistService.getItem(INDUSTRY_KEY).then(function (code) {
-      if (code) {
-        configService.getConfig("industries").then(function (list) {
-          service.data.industry = list.find(function (item) {
-            return item.code === code;
-          });
-        });
-      }
-    });
-    return service;
-  }]);
-}
-"use strict";
-
-{
   var SelectService = function SelectService($http, $q, $rootScope, $timeout, mapService, configService) {
     var LAYER_GROUP_KEY = "Search Layers",
         baseUrl = "icsm/resources/config/select.json",
@@ -4085,25 +4084,6 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 }
 "use strict";
 
-{
-  angular.module('icsm.state', []).directive("icsmStateToggle", ['downloadService', function (downloadService) {
-    return {
-      restrict: 'AE',
-      template: '<button ng-click="toggle(false)" ng-disabled="state.show" class="btn btn-default" title="Start downlaod selection."><i class="fa fa-lg fa-object-group"></i></button>',
-      link: function link(scope) {
-        downloadService.data().then(function (data) {
-          scope.state = data;
-        });
-
-        scope.toggle = function () {
-          scope.state.show = !scope.state.show;
-        };
-      }
-    };
-  }]);
-}
-"use strict";
-
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
@@ -4583,6 +4563,25 @@ var Strategies = /*#__PURE__*/function () {
 "use strict";
 
 {
+  angular.module('icsm.state', []).directive("icsmStateToggle", ['downloadService', function (downloadService) {
+    return {
+      restrict: 'AE',
+      template: '<button ng-click="toggle(false)" ng-disabled="state.show" class="btn btn-default" title="Start downlaod selection."><i class="fa fa-lg fa-object-group"></i></button>',
+      link: function link(scope) {
+        downloadService.data().then(function (data) {
+          scope.state = data;
+        });
+
+        scope.toggle = function () {
+          scope.state.show = !scope.state.show;
+        };
+      }
+    };
+  }]);
+}
+"use strict";
+
+{
   angular.module('icsm.themes', [])
   /**
      *
@@ -4942,12 +4941,12 @@ var Strategies = /*#__PURE__*/function () {
   DownloadService.$inject = ['$http', '$q', '$rootScope', 'mapService', 'storageService'];
 }
 angular.module('icsm.templates', []).run(['$templateCache', function($templateCache) {$templateCache.put('icsm/app/app.html','<div>\r\n\t<!-- BEGIN: Sticky Header -->\r\n\t<div explorer-header style="z-index:1"\r\n\t\t\tclass="navbar navbar-default navbar-fixed-top"\r\n\t\t\theading="\'Elevation\'"\r\n\t\t\theadingtitle="\'ICSM\'"\r\n\t\t\tbreadcrumbs="[{name:\'ICSM\', title: \'Reload Elevation\', url: \'.\'}]"\r\n\t\t\thelptitle="\'Get help about Elevation\'"\r\n\t\t\thelpalttext="\'Get help about Elevation\'">\r\n\t</div>\r\n\t<!-- END: Sticky Header -->\r\n\r\n\t<!-- Messages go here. They are fixed to the tab bar. -->\r\n\t<div explorer-messages class="marsMessages noPrint"></div>\r\n\t<icsm-panes data="root.data" default-item="download"></icsm-panes>\r\n</div>');
+$templateCache.put('icsm/contributors/contributors.html','<span class="contributors" \r\n      ng-class="(contributors.show || contributors.ingroup || contributors.stick) ? \'transitioned-down\' : \'transitioned-up\'">\r\n   <button class="undecorated contributors-unstick" ng-click="unstick()" style="float:right">X</button>\r\n   <div ng-repeat="contributor in contributors.orgs | activeContributors" style="text-align:center">\r\n      <a ng-href="{{contributor.href}}" name="contributors{{$index}}" title="{{contributor.title}}" target="_blank">\r\n         <img ng-src="{{contributor.image}}" alt="{{contributor.title}}" class="contributor-logo" ng-class="contributor.class"></img>\r\n      </a>\r\n   </div>\r\n</span>');
+$templateCache.put('icsm/contributors/show.html','<a class="contributors-link" title="View contributors list."\r\n      ng-click="toggleStick()" href="#contributors0">Contributors</a>');
 $templateCache.put('icsm/clip/clip.html','<div class="well well-sm">\r\n   <div class="container-fluid">\r\n      <div class="row">\r\n         <div class="col-md-10">\r\n            <strong style="font-size:120%">Select area by:</strong>\r\n            <button ng-click="initiateDraw()" style="position:relative" ng-disable="client.drawing" tooltip-placement="right"\r\n               uib-tooltip="Drawing a bounding box. On enabling, click on the map and drag diagonally"\r\n               class="clip-btn">\r\n               <img style="height:24px;" src="icsm/resources/img/draw_rectangle.png"></img>\r\n               <div></div>\r\n            </button>\r\n            <button ng-click="initiatePolygon()" style="position:relative" ng-disable="client.drawing" tooltip-placement="right"\r\n               uib-tooltip="Drawing a polygon. On enabling, click vertices on the map, click on the first vertex to complete the loop."\r\n               class="clip-btn">\r\n               <img style="height:26px;" src="icsm/resources/img/draw_polygon.png"></img>\r\n               <div></div>\r\n            </button>\r\n            <button ng-click="typing = !typing" style="position:relative" tooltip-placement="right"\r\n               uib-tooltip="Type coordinates of a bounding box. Restricted to maximum of 2.25 square degrees."\r\n               class="clip-btn">\r\n               <i class="fa fa-keyboard-o fa-2x" aria-hidden="true"></i>\r\n               <div></div>\r\n            </button>\r\n         </div>\r\n         <div class="col-md-2">\r\n            <button style="float:right" ng-click="showInfo = !showInfo" tooltip-placement="left"\r\n               uib-tooltip="Information." class="btn btn-primary btn-default"><i class="fa fa-info"></i></button>\r\n            <exp-info title="Selecting an area" show-close="true"\r\n               style="width:450px;position:fixed;top:230px;right:40px" is-open="showInfo">\r\n               <icsm-info-bbox>\r\n         </div>\r\n         </exp-info>\r\n      </div>\r\n   </div>\r\n   <div class="row" ng-hide="typing || (!clip.xMin && clip.xMin !== 0) || oversize" style="padding-top:7px;">\r\n         <div class="col-md-12 ng-binding" ng-if="clip.type == \'polygon\'">\r\n            Polygon bounded by:\r\n            {{clip.xMin | number : 4}}\xB0 west,\r\n            {{clip.yMax | number : 4}}\xB0 north,\r\n            {{clip.xMax | number : 4}}\xB0 east,\r\n            {{clip.yMin | number : 4}}\xB0 south\r\n         </div>\r\n         <div class="col-md-12 ng-binding" ng-if="clip.type == \'bbox\'">\r\n            Selected bounds:\r\n            {{clip.xMin | number : 4}}\xB0 west,\r\n            {{clip.yMax | number : 4}}\xB0 north,\r\n            {{clip.xMax | number : 4}}\xB0 east,\r\n            {{clip.yMin | number : 4}}\xB0 south\r\n         </div>\r\n   </div>\r\n   <clip-modal title="Define search area" show-close="true" style="width:480px;position:fixed;top:110px;right:80px"\r\n      is-open="typing">\r\n      <icsm-manual-clip></icsm-manual-clip>\r\n   </clip-modal>\r\n</div>');
 $templateCache.put('icsm/clip/infobbox.html','<div class="">\r\n\t<strong style="font-size:120%">Select an area of interest.</strong>\r\n   By hitting one of the "Draw" buttons an area on the map can be selected with the mouse by drawing a bounding box, drawing a polygon or manually typing in the minimum and maximum of latitude and longitude. Hover over the buttons to see\r\n\tmore information.\r\n\t<br/>\r\n   Clicking one of the "Draw" buttons again allows replacing a previous area selection. <br/>\r\n   <strong>Notes:</strong>\r\n   <ul>\r\n      <li>The data does not cover all of Australia.</li>\r\n      <li>Restrict a search area to below 1.5 degrees square. eg 2x0.75 or 1x1.5</li>\r\n   </ul>\r\n\t<p style="padding-top:5px"><strong>Hint:</strong> If the map has focus, you can use the arrow keys to pan the map.\r\n\t\tYou can zoom in and out using the mouse wheel or the "+" and "-" map control on the top left of the map. If you\r\n\t\tdon\'t like the position of your drawn area, hit the one of the "Draw" buttons to draw a new search area.\r\n\t</p>\r\n</div>');
 $templateCache.put('icsm/clip/manual.html','<div class="container-fluid" style="padding-top:7px">\r\n   <div class="row">\r\n      <div class="col-md-3"> </div>\r\n      <div class="col-md-8">\r\n         <div style="font-weight:bold;width:3.5em;display:inline-block">Y Max:</div>\r\n         <span>\r\n            <input type="text" style="width:6em" ng-model="yMax" ng-change="check()"></input>\r\n         </span>\r\n      </div>\r\n   </div>\r\n   <div class="row">\r\n      <div class="col-md-6">\r\n         <div style="font-weight:bold;width:3.5em;display:inline-block">X Min:</div>\r\n         <span>\r\n            <input type="text" style="width:6em" ng-model="xMin" ng-change="check()"></input>\r\n         </span>\r\n      </div>\r\n      <div class="col-md-6">\r\n         <div style="font-weight:bold;width:3.5em;display:inline-block">X Max:</div>\r\n         <span>\r\n            <input type="text" style="width:6em" ng-model="xMax" ng-change="check()"></input>\r\n         </span>\r\n      </div>\r\n   </div>\r\n   <div class="row">\r\n      <div class="col-md-offset-3 col-md-5">\r\n         <div style="font-weight:bold;width:3.5em;display:inline-block">Y Min:</div>\r\n         <span>\r\n            <input type="text" style="width:6em" ng-model="yMin" ng-change="check()"></input>\r\n         </span>\r\n      </div>\r\n      <div class="col-md-4">\r\n         <button style="float:right" ng-disabled="!xMin || !xMax || !yMin || !yMax || isNan(xMin) || isNan(xMax) || isNan(yMin) || isNan(yMax) || (+xMin) === (+xMax) || (+yMin) === (+yMax)" class="btn btn-primary btn-default" ng-click="search()">Search</button>\r\n      </div>\r\n   </div>\r\n</div>');
 $templateCache.put('icsm/clip/modal.html','<div class="clipmodal" ng-show="isOpen">\r\n\t<div class="clipmodal-inner">\r\n      <h3 ng-show="title" class="clipmodal-title">\r\n\t\t  \t<span  ng-bind="title"></span>\r\n\t\t  \t<span ng-show="showClose" class="pull-right">\r\n\t\t \t\t<button type="button" class="undecorated" ng-click="isOpen = false"><i class="fa fa-close"></i></button>\r\n\t\t\t</span>\r\n\t\t</h3>\r\n      <div class="clipmodal-content" ng-transclude></div>\r\n\t</div>\r\n</div>');
-$templateCache.put('icsm/contributors/contributors.html','<span class="contributors" \r\n      ng-class="(contributors.show || contributors.ingroup || contributors.stick) ? \'transitioned-down\' : \'transitioned-up\'">\r\n   <button class="undecorated contributors-unstick" ng-click="unstick()" style="float:right">X</button>\r\n   <div ng-repeat="contributor in contributors.orgs | activeContributors" style="text-align:center">\r\n      <a ng-href="{{contributor.href}}" name="contributors{{$index}}" title="{{contributor.title}}" target="_blank">\r\n         <img ng-src="{{contributor.image}}" alt="{{contributor.title}}" class="contributor-logo" ng-class="contributor.class"></img>\r\n      </a>\r\n   </div>\r\n</span>');
-$templateCache.put('icsm/contributors/show.html','<a class="contributors-link" title="View contributors list."\r\n      ng-click="toggleStick()" href="#contributors0">Contributors</a>');
 $templateCache.put('icsm/coverage/popup.html','<span class="coverage" ng-class="state.show ? \'transitioned-down\' : \'transitioned-up\'">\r\n   <div style="padding-bottom:15px" class="coverage-off">\r\n      <button class="undecorated coverage-unstick" ng-click="hide()" style="float:right" title="Hide layer selections">X</button>\r\n   </div>\r\n   <div ng-repeat="layer in state.layers" class="coverage-layer" tooltip-placement="left"\r\n         uib-tooltip="Hint: To bring this layer to the top turn it off then on. The last clicked layer is always on top.">\r\n      <input type="checkbox" ng-checked="layer.visible" ng-click="toggleVisibility(layer)"></input>\r\n      <span ng-click="toggleVisibility(layer)">\r\n         <span class="coverage-title">{{layer.name}}</span><br/>\r\n         <img style="width:100px" ng-src="{{layer.coverage.thumb}}"></img>\r\n      </span>\r\n      <div class="pull-right">\r\n         <div style="width: 110px" ng-repeat="type in layer.coverage.types">\r\n            <span class="coverage-legend-color" ng-style="{\'background-color\':type.color}"></span>\r\n            {{type.name}}\r\n         </div>\r\n      </div>\r\n   </div>\r\n</span>');
 $templateCache.put('icsm/coverage/trigger.html','<button ng-click="toggle()" type="button" class="map-tool-toggle-btn" title="Select views of coverage, view legends and summaries of the coverage layers">\r\n      <span class="panel-sm">Layers</span>\r\n      <img src="icsm/resources/img/layers-16.png">\r\n</button>');
 $templateCache.put('icsm/glossary/glossary.html','<div ng-controller="GlossaryCtrl as glossary">\r\n   <div style="position:relative;padding:5px;padding-left:10px;">\r\n      <div class="panel" style="padding:5px;">\r\n         <p style="text-align: left; margin: 10px; font-size: 14px;">\r\n\t         <strong>Glossary</strong>\r\n         </p>\r\n\r\n         <div class="panel-body">\r\n            <table class="table table-striped">\r\n               <thead>\r\n                  <tr>\r\n                     <th>Term</th>\r\n                     <th>Definition</th>\r\n                  </tr>\r\n               </thead>\r\n               <tbody>\r\n                  <tr ng-repeat="term in glossary.terms">\r\n                     <td>{{term.term}}</td>\r\n                     <td>{{term.definition}}</td>\r\n                  </tr>\r\n               </tbody>\r\n            </table>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>');
@@ -4964,6 +4963,7 @@ $templateCache.put('icsm/products/email.html','<div class="input-group">\r\n    
 $templateCache.put('icsm/products/formats.html','<div class="row">\r\n      <div class="col-md-4">\r\n         <label for="geoprocessOutputFormat">\r\n                  Output Format\r\n               </label>\r\n      </div>\r\n      <div class="col-md-8">\r\n         <select id="geoprocessOutputFormat" style="width:95%" ng-model="processing.outFormat" ng-options="opt.value for opt in config.outFormat track by opt.code"></select>\r\n      </div>\r\n   </div>');
 $templateCache.put('icsm/products/projection.html','<div class="row">\r\n   <div class="col-md-4">\r\n      <label for="geoprocessOutCoordSys">\r\n                  Coordinate System\r\n               </label>\r\n   </div>\r\n   <div class="col-md-8">\r\n      <select id="geoprocessOutCoordSys" style="width:95%" ng-model="processing.outCoordSys" ng-options="opt.value for opt in config.outCoordSys | productIntersect : processing.clip track by opt.code"></select>\r\n   </div>\r\n</div>');
 $templateCache.put('icsm/products/submit.html','<div class="well" style="padding-bottom:2px">\r\n   <div class="row">\r\n      <div class="col-md-6" style="padding-top:7px">\r\n         <div class="progress">\r\n            <div class="progress-bar" role="progressbar" aria-valuenow="{{processing.percentComplete}}" aria-valuemin="0" aria-valuemax="100"\r\n               style="width: {{processing.percentComplete}}%;">\r\n               <span class="sr-only">60% Complete</span>\r\n            </div>\r\n         </div>\r\n      </div>\r\n      <div class="col-md-4" style="padding-top:7px">\r\n         <span style="padding-right:10px" uib-tooltip="Draw a valid area to extract data." tooltip-placement="left">\r\n            <i class="fa fa-scissors fa-2x" ng-class="{\'product-valid\': processing.validClipSize, \'product-invalid\': !processing.validClipSize }"></i>\r\n         </span>\r\n         <span style="padding-right:10px" uib-tooltip="Select a valid coordinate system for area." tooltip-placement="left">\r\n            <i class="fa fa-file-video-o fa-2x" ng-class="{\'product-valid\': processing.validProjection, \'product-invalid\': !processing.validProjection}"></i>\r\n         </span>\r\n         <span style="padding-right:10px" uib-tooltip="Select a valid download format." tooltip-placement="left">\r\n            <i class="fa fa-files-o fa-2x" ng-class="{\'product-valid\': processing.validFormat, \'product-invalid\': !processing.validFormat}"></i>\r\n         </span>\r\n         <span style="padding-right:10px" uib-tooltip="Provide an email address." tooltip-placement="left">\r\n            <i class="fa fa-envelope fa-2x" ng-class="{\'product-valid\': processing.validEmail, \'product-invalid\': !processing.validEmail}"></i>\r\n         </span>\r\n      </div>\r\n      <div class="col-md-2">\r\n         <button class="btn btn-primary pull-right" ng-disabled="!processing.valid" ng-click="submit()">Submit</button>\r\n      </div>\r\n   </div>\r\n</div>');
+$templateCache.put('icsm/reviewing/reviewing.html','<div class="modal-header">\r\n   <h3 class="modal-title splash">Download datasets by providing email address and start extract</h3>\r\n</div>\r\n<div class="modal-body" id="accept" ng-form exp-enter="accept()" icsm-splash-modal style="width: 100%; margin-left: auto; margin-right: auto;">\r\n   <div class="row bg-warning" ng-show="noneSelected(products)">\r\n      <div class="col-md-2">\r\n         <button type="button" style="float:right" class="btn btn-primary" ng-click="cancel()">Close</button>\r\n      </div>\r\n   </div>\r\n   <div ng-controller="listCtrl as list">\r\n      <div class="row">\r\n         <div class="col-md-12">\r\n            <strong>\r\n               {{list.selected.length}} Selected Datasets\r\n               <span ng-show="list.selectedSize">(Approx: {{list.selectedSize | fileSize}})</span>\r\n            </strong>\r\n         </div>\r\n      </div>\r\n   </div>\r\n   <div ng-repeat="org in products">\r\n      <h5>\r\n         <img ng-src="{{mappings[org.source].image}}" ng-attr-style="height:{{mappings[org.source].height}}px"></img>\r\n         <strong>{{heading(org.source)}}</strong>\r\n      </h5>\r\n      <div style="padding-left:10px" ng-repeat="(key, subGroup) in org.downloadables">\r\n         <h5>{{key}}</h5>\r\n         <div style="padding-left:10px;" ng-repeat="(name, items) in subGroup">\r\n            <h5 title="Clipped product using coordinate System: {{data.outCoordSys.value}}, Output Format: {{data.outFormat.value}}">\r\n               {{name}}\r\n               <span style="padding-left:25px;font-size:90%">\r\n                  {{items.length | number :0}} items\r\n                  <span ng-if="items | hasProducts">{{items | productsSummary}}</span>\r\n                  totalling {{items | reviewSumSize | fileSize}}</span>\r\n            </h5>\r\n         </div>\r\n      </div>\r\n\r\n   </div>\r\n\r\n   <div ng-controller="listCtrl as list">\r\n      <div ng-if="list.selected | hasTransformables" class="well" style="padding:7px">\r\n         <h5 style="margin-top:4px">{{list.selected | transformablesCount}} item(s) are downloads which you can elect to transform into a different coordinate system and file format</h5>\r\n         <span products-dialog>\r\n            <product-projection processing="data"></product-projection>\r\n            <product-formats processing="data"></product-formats>\r\n         </span>\r\n      </div>\r\n   </div>\r\n\r\n   <div class="row reviewing-divider">\r\n      <div class="col-md-12" style="padding-bottom: 8px">\r\n         <div review-industry></div>\r\n      </div>\r\n      <div class="col-md-12">\r\n         <div review-email></div>\r\n      </div>\r\n   </div>\r\n   <div class="row" ng-controller="listCtrl as list">\r\n      <div class="col-md-8">\r\n         <strong>Email notification</strong> The extract of data can take some time. By providing an email address we will be able\r\n         to notify you when the job is complete. The email will provide a link to the extracted data which will be packaged\r\n         up as a single compressed file.\r\n\r\n         <div\r\n            vc-recaptcha\r\n            theme="\'light\'"\r\n            key="recaptchaKey"\r\n            on-create="setWidgetId(widgetId)"\r\n            on-success="setResponse(response)"\r\n            on-expire="cbExpiration()"></div>\r\n      </div>\r\n      <div class="col-md-4">\r\n         <div class="pull-right" style="padding:8px;">\r\n            <button type="button" class="btn btn-primary" ng-click="accept()" ng-disabled="!data.industry || !data.email || !list.selected.length || !recaptchaResponse">Start extract of datasets\r\n            </button>\r\n            <button type="button" class="btn btn-primary" ng-click="cancel()">Cancel</button>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>');
 $templateCache.put('icsm/results/abstractbutton.html','<button ng-show="show" type="button" class="undecorated" title="View full title and abstract of this dataset" ng-click="toggle()">\r\n\t<i class="fa fa-lg" ng-class="{\'fa-caret-down active\':item.showAbstract, \'fa-caret-right\':!item.showAbstract}"></i>\r\n</button>');
 $templateCache.put('icsm/results/abstracttooltip.html','<div>\r\n{{item.metadata.title? item.metadata.title: \'Loading...\'}}\r\n</div>');
 $templateCache.put('icsm/results/continue.html','<div class="continue-container" ng-show="ctrl.selected.length">\r\n   <div class="warn-limit alert-danger" ng-show="ctrl.selectedSize > limit">\r\n      There is a {{limit | fileSize}} limit per request.<br/>\r\n      Remove some selections or decrease the size of the selected area.\r\n   </div>\r\n   <button ng-disabled="ctrl.selectedSize > limit" class="btn btn-primary" ng-click="ctrl.review()">Download {{ctrl.selected.length | number}} selected datasets... (Approx: {{ctrl.selectedSize | fileSize}})</button>\r\n</div>\r\n\r\n');
@@ -4971,7 +4971,6 @@ $templateCache.put('icsm/results/orgheading.html','<h5>\r\n   <img ng-src="{{map
 $templateCache.put('icsm/results/results.html','<div ng-show="!list || !list.length">\r\n   <div class="alert alert-warning" role="alert">\r\n      <strong>Select an area</strong> to find datasets within.</div>\r\n</div>\r\n\r\n<div ng-show="list.length" class="results-list">\r\n   <div class="row">\r\n      <div class="col-md-12" uib-tooltip="Number of intersecting or very near datasets to your area of interest.">\r\n         <h4 style="display:inline-block; padding-left:7px">Found {{products.length | number:0}} datasets</h4>\r\n      </div>\r\n   </div>\r\n   <div class="panel panel-default" style="margin-bottom: 5px; margin-top: 0;">\r\n      <div class="panel-body" style="float:clear">\r\n         <span class="filter-text" style="float:left;width:50%">\r\n            <div class="input-group input-group-sm">\r\n               <span class="input-group-addon" id="names1">Filter:</span>\r\n               <input type="text" ng-model="filters.filter" class="form-control" ng-change="update()" placeholder="Filter names" aria-describedby="names1">\r\n            </div>\r\n         </span>\r\n         <span class="filter-type" style="padding:10px; float:right">\r\n            <span class="listTypeLabel">Filter by type:</span>\r\n            <span ng-repeat="type in filters.types" class="listType">\r\n               <input type="checkbox" ng-model="type.selected" ng-change="update()" />\r\n               <span uib-tooltip="{{type.description}}">{{type.label}}</span>\r\n            </span>\r\n         </span>\r\n      </div>\r\n   </div>\r\n\r\n   <div ng-repeat="available in list" class="well" style="padding-left:4px;padding-right:4px" ng-show="list.someMatches(available)"\r\n      ng-controller="listCtrl as list">\r\n      <icsm-org-heading org="available" mappings="mappings"></icsm-org-heading>\r\n      <div>\r\n         <div class="listRow" ng-class-odd="\'listEven\'" ng-repeat="(typeKey, types) in available.downloadables | allowedTypes" ng-show="types | hasTypeMatches">\r\n            <span>\r\n               <h5>{{typeKey}}</h5>\r\n            </span>\r\n\r\n            <div ng-if="typeKey === \'Unreleased Data\'">\r\n               <icsm-unreleased types="types">\r\n            </div>\r\n            <div ng-if="typeKey !== \'Unreleased Data\'">\r\n               <div ng-repeat="(key, items) in types" ng-show="(items | countMatchedItems) != 0">\r\n                  <div>\r\n                     <h5>\r\n                        <button ng-click="list.checkChildren(items)" style="width:7em" class="btn btn-xs btn-default">\r\n                           <span ng-show="!list.childrenChecked(items)">Select all</span>\r\n                           <span ng-show="list.childrenChecked(items)">Deselect all</span>\r\n                        </button>\r\n                        <span uib-tooltip="{{filter.types[key].description}}">{{key}} (Showing {{items | countMatchedItems | number:0}} of {{items.length | number:0}})</span>\r\n\r\n\r\n                        <button class="pull-right undecorated" ng-click="expansions[available.source + \'_\' + key] = !expansions[available.source + \'_\' + key]">\r\n                           [{{expansions[available.source + \'_\' + key]?"hide ":"show "}} list]\r\n                        </button>\r\n                     </h5>\r\n                  </div>\r\n                  <div ng-show="expansions[available.source + \'_\' + key]">\r\n                     <subtype items="items" mappings="mappings" show="show" hide="hide"></subtype>\r\n                     <div style="text-align:right">\r\n                        <button class="undecorated" ng-click="expansions[available.source + \'_\' + key] = false">[hide list]</button>\r\n                     </div>\r\n                  </div>\r\n               </div>\r\n            </div>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>');
 $templateCache.put('icsm/results/subtype.html','<div ng-show="(items | matchedItems).length > paging.pageSize"\r\n   paging page="paging.page" page-size="paging.pageSize"\r\n   total="(items | matchedItems).length"\r\n   paging-action="setPage(page, pageSize)">\r\n</div>\r\n<div>\r\n   <div ng-repeat="item in data" icsm-abstract-hover item="item">\r\n      <div tooltip-append-to-body="true" uib-tooltip-template="\'icsm/results/abstracttooltip.html\'" tooltip-popup-delay="400" data-ng-mouseenter="show(item)"\r\n         data-ng-mouseleave="hide(item)">\r\n         <input type="checkbox" ng-model="item.selected" />\r\n         <icsm-abstract item="item"></icsm-abstract>\r\n         <common-cc version="mappings[item.source].ccLicence"></common-cc>\r\n         <launch-image item="item" ng-if="item.thumb_url"></launch-image>\r\n         <span class="listItem" item="item" icsm-abstract-link></span>\r\n         <span ng-show="item.file_size" style="float:right;padding-top:3px">({{item.file_size | fileSize}})</span>\r\n         <span ng-show="item.product" style="float:right;padding-top:3px" title="Product size will depend on size of chosen area, data coverage and resolution. An email will be sent after the extraction giving the exact size of the extracted data and a link to the product.">(Product &lt; 500MB)</span>\r\n      </div>\r\n      <div ng-show="item.showAbstract" class="well">\r\n         <span ng-show="!item.metadata">\r\n            <i class="fa fa-spinner fa-spin fa-lg fa-fw"></i>\r\n            <span>Loading metadata...</span>\r\n         </span>\r\n         <div ng-show="item.metadata.abstract">\r\n            <strong>{{item.metadata.title}}</strong> -\r\n            <span class="icsm-abstract-body" ng-bind-html="item.metadata.abstractText"></span>\r\n         </div>\r\n         <div ng-show="!item.metadata.abstract">\r\n            <i class="fa fa-lg fa-exclamation-triangle" style="color:orange"></i>\r\n            Can\'t show abstract for this dataset.\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>');
 $templateCache.put('icsm/results/unreleased.html','<div ng-repeat="(key, items) in types" ng-show="(items | countMatchedItems) != 0">\r\n   <div style="padding-left:8px">\r\n      <h5>\r\n         <span uib-tooltip="{{filter.types[key].description}}">{{key}} (Showing {{items | countMatchedItems | number:0}} of {{items.length | number:0}})</span>\r\n\r\n         <button class="pull-right undecorated" ng-click="expansions[\'unreleased_\' + items[0].source + \'_\' + key] = !expansions[\'unreleased_\' + items[0].source + \'_\' + key]">\r\n            [{{expansions[\'unreleased_\' + items[0].source + \'_\' + key]?"hide ":"show "}} list]\r\n         </button>\r\n      </h5>\r\n   </div>\r\n   <div ng-show="expansions[\'unreleased_\' + items[0].source + \'_\' + key]">\r\n      <div ng-repeat="item in items | matchedItems" icsm-abstract-hover item="item">\r\n         <div tooltip-append-to-body="true" uib-tooltip-template="\'icsm/results/abstracttooltip.html\'" tooltip-popup-delay="400" data-ng-mouseenter="show(item)"\r\n            data-ng-mouseleave="hide(item)" style="padding-left:8px;">\r\n            <icsm-abstract item="item"></icsm-abstract>\r\n            <button type="button" class="undecorated" disabled="disabled" title="Licence details pending release.">\r\n               <i class="fa fa-lg fa-gavel"></i>\r\n            </button>\r\n            <span class="listItem" name="project_name" item="item" icsm-abstract-link></span>\r\n            <span ng-show="item.file_size" style="float:right;padding-top:3px">({{item.file_size | fileSize}})</span>\r\n         </div>\r\n         <div ng-show="item.showAbstract" class="well" style="margin-bottom:0px">\r\n            <span ng-show="!item.metadata">\r\n               <i class="fa fa-spinner fa-spin fa-lg fa-fw"></i>\r\n               <span>Loading metadata...</span>\r\n            </span>\r\n            <div ng-show="item.metadata.abstract">\r\n               <strong>{{item.metadata.title}}</strong> -\r\n               <span class="icsm-abstract-body" ng-bind-html="item.metadata.abstractText"></span>\r\n            </div>\r\n            <div ng-show="!item.metadata.abstract">\r\n               <i class="fa fa-lg fa-exclamation-triangle" style="color:orange"></i>\r\n               There is no abstract available for this dataset.\r\n            </div>\r\n         </div>\r\n         <div style="padding-left:12px">\r\n            <div>\r\n               <strong style="width:7em">Captured: </strong>{{item.captured | captured}}\r\n            </div>\r\n            <div ng-if="item.available_date">\r\n               <strong style="width:7em">Available: </strong>{{item.available_date | reverseDate}}\r\n            </div>\r\n            <div>\r\n               <strong style="width:7em">Contact: </strong>\r\n               <a href="mailTo:{{item.contact}}">{{item.contact}}</a>\r\n            </div>\r\n         </div>\r\n      </div>\r\n\r\n      <div style="text-align:right">\r\n         <button class="undecorated" ng-click="expansions[\'unreleased_\' + items[0].source + \'_\' + key] = false">[hide list]</button>\r\n      </div>\r\n   </div>\r\n</div>');
-$templateCache.put('icsm/reviewing/reviewing.html','<div class="modal-header">\r\n   <h3 class="modal-title splash">Download datasets by providing email address and start extract</h3>\r\n</div>\r\n<div class="modal-body" id="accept" ng-form exp-enter="accept()" icsm-splash-modal style="width: 100%; margin-left: auto; margin-right: auto;">\r\n   <div class="row bg-warning" ng-show="noneSelected(products)">\r\n      <div class="col-md-2">\r\n         <button type="button" style="float:right" class="btn btn-primary" ng-click="cancel()">Close</button>\r\n      </div>\r\n   </div>\r\n   <div ng-controller="listCtrl as list">\r\n      <div class="row">\r\n         <div class="col-md-12">\r\n            <strong>\r\n               {{list.selected.length}} Selected Datasets\r\n               <span ng-show="list.selectedSize">(Approx: {{list.selectedSize | fileSize}})</span>\r\n            </strong>\r\n         </div>\r\n      </div>\r\n   </div>\r\n   <div ng-repeat="org in products">\r\n      <h5>\r\n         <img ng-src="{{mappings[org.source].image}}" ng-attr-style="height:{{mappings[org.source].height}}px"></img>\r\n         <strong>{{heading(org.source)}}</strong>\r\n      </h5>\r\n      <div style="padding-left:10px" ng-repeat="(key, subGroup) in org.downloadables">\r\n         <h5>{{key}}</h5>\r\n         <div style="padding-left:10px;" ng-repeat="(name, items) in subGroup">\r\n            <h5 title="Clipped product using coordinate System: {{data.outCoordSys.value}}, Output Format: {{data.outFormat.value}}">\r\n               {{name}}\r\n               <span style="padding-left:25px;font-size:90%">\r\n                  {{items.length | number :0}} items\r\n                  <span ng-if="items | hasProducts">{{items | productsSummary}}</span>\r\n                  totalling {{items | reviewSumSize | fileSize}}</span>\r\n            </h5>\r\n         </div>\r\n      </div>\r\n\r\n   </div>\r\n\r\n   <div ng-controller="listCtrl as list">\r\n      <div ng-if="list.selected | hasTransformables" class="well" style="padding:7px">\r\n         <h5 style="margin-top:4px">{{list.selected | transformablesCount}} item(s) are downloads which you can elect to transform into a different coordinate system and file format</h5>\r\n         <span products-dialog>\r\n            <product-projection processing="data"></product-projection>\r\n            <product-formats processing="data"></product-formats>\r\n         </span>\r\n      </div>\r\n   </div>\r\n\r\n   <div class="row reviewing-divider">\r\n      <div class="col-md-12" style="padding-bottom: 8px">\r\n         <div review-industry></div>\r\n      </div>\r\n      <div class="col-md-12">\r\n         <div review-email></div>\r\n      </div>\r\n   </div>\r\n   <div class="row" ng-controller="listCtrl as list">\r\n      <div class="col-md-8">\r\n         <strong>Email notification</strong> The extract of data can take some time. By providing an email address we will be able\r\n         to notify you when the job is complete. The email will provide a link to the extracted data which will be packaged\r\n         up as a single compressed file.\r\n\r\n         <div\r\n            vc-recaptcha\r\n            theme="\'light\'"\r\n            key="recaptchaKey"\r\n            on-create="setWidgetId(widgetId)"\r\n            on-success="setResponse(response)"\r\n            on-expire="cbExpiration()"></div>\r\n      </div>\r\n      <div class="col-md-4">\r\n         <div class="pull-right" style="padding:8px;">\r\n            <button type="button" class="btn btn-primary" ng-click="accept()" ng-disabled="!data.industry || !data.email || !list.selected.length || !recaptchaResponse">Start extract of datasets\r\n            </button>\r\n            <button type="button" class="btn btn-primary" ng-click="cancel()">Cancel</button>\r\n         </div>\r\n      </div>\r\n   </div>\r\n</div>');
 $templateCache.put('icsm/select/doc.html','<div ng-class-odd="\'odd\'" ng-class-even="\'even\'" ng-mouseleave="select.lolight(doc)" ng-mouseenter="select.hilight(doc)">\r\n\t<span ng-class="{ellipsis:!expanded}" tooltip-enable="!expanded" style="width:100%;display:inline-block;"\r\n\t\t\ttooltip-class="selectAbstractTooltip" tooltip="{{doc.abstract | truncate : 250}}" tooltip-placement="bottom">\r\n\t\t<button type="button" class="undecorated" ng-click="expanded = !expanded" title="Click to see more about this dataset">\r\n\t\t\t<i class="fa pad-right fa-lg" ng-class="{\'fa-caret-down\':expanded,\'fa-caret-right\':(!expanded)}"></i>\r\n\t\t</button>\r\n\t\t<download-add item="doc" group="group"></download-add>\r\n\t\t<icsm-wms data="doc"></icsm-wms>\r\n\t\t<icsm-bbox data="doc" ng-if="doc.showExtent"></icsm-bbox>\r\n\t\t<a href="https://ecat.ga.gov.au/geonetwork/srv/eng/search#!{{doc.primaryId}}" target="_blank" ><strong>{{doc.title}}</strong></a>\r\n\t</span>\r\n\t<span ng-class="{ellipsis:!expanded}" style="width:100%;display:inline-block;padding-right:15px;">\r\n\t\t{{doc.abstract}}\r\n\t</span>\r\n\t<div ng-show="expanded" style="padding-bottom: 5px;">\r\n\t\t<h5>Keywords</h5>\r\n\t\t<div>\r\n\t\t\t<span class="badge" ng-repeat="keyword in doc.keywords track by $index">{{keyword}}</span>\r\n\t\t</div>\r\n\t</div>\r\n</div>');
 $templateCache.put('icsm/select/group.html','<div class="panel panel-default" style="margin-bottom:-5px;" >\r\n\t<div class="panel-heading"><icsm-wms data="group"></icsm-wms> <strong>{{group.title}}</strong></div>\r\n\t<div class="panel-body">\r\n   \t\t<div ng-repeat="doc in group.docs">\r\n   \t\t\t<div select-doc doc="doc" group="group"></div>\r\n\t\t</div>\r\n\t</div>\r\n</div>\r\n');
 $templateCache.put('icsm/select/select.html','<div>\r\n\t<div style="position:relative;padding:5px;padding-left:10px;" ng-controller="SelectCtrl as select" class="scrollPanel">\r\n\t\t<div class="panel panel-default" style="margin-bottom:-5px">\r\n  \t\t\t<div class="panel-heading">\r\n  \t\t\t\t<h3 class="panel-title">Available datasets</h3>\r\n  \t\t\t</div>\r\n  \t\t\t<div class="panel-body">\r\n\t\t\t\t<div ng-repeat="doc in select.data.response.docs" style="padding-bottom:7px">\r\n\t\t\t\t\t<div select-doc ng-if="doc.type == \'dataset\'" doc="doc"></div>\r\n\t\t\t\t\t<select-group ng-if="doc.type == \'group\'" group="doc"></select-group>\r\n\t\t\t\t</div>\r\n  \t\t\t</div>\r\n\t\t</div>\r\n\t</div>\r\n</div>');
