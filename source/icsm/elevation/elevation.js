@@ -27,7 +27,7 @@
                         let token = response.data;
                         return $http({
                               method: 'GET',
-                              url: config.hiResElevationTemplate.replace("{lng}", latlng.lng).replace("{lat}", latlng.lat) + "&token=" + token,
+                              url: config.hiResElevationTemplate.replace("{lng}", latlng.lng).replace("{lat}", latlng.lat),
                               headers: {
                                  'Authorization': "fmetoken token=" + token
                               }
