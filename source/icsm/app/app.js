@@ -22,7 +22,6 @@
 		'common.altthemes',
 		'common.baselayer.control',
 		'common.cc',
-		'common.featureinfo',
 		'common.featureinf',
 		'common.header',
 		'common.legend',

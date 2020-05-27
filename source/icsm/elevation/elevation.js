@@ -22,10 +22,18 @@
                },
 
                getHiResElevation: function (latlng) {
-                  return configService.getConfig("elevation").then(config =>
-                        $http.get(config.hiResElevationTemplate
-                                    .replace("{lng}", latlng.lng)
-                                    .replace("{lat}", latlng.lat)))
+                  return configService.getConfig("elevation").then(config => {
+                     return $http.get(config.tokenUrl).then(packet => {
+                        var token =packet.data.serviceResponse.token;
+                        return $http({
+                              method: 'GET',
+                              url: config.hiResElevationTemplate.replace("{lng}", latlng.lng).replace("{lat}", latlng.lat) + "&token=" + token,
+                              headers: {
+                                 'Authorization': "fmetoken token=" + token
+                              }
+                        });
+                     });
+                  });
                }
             };
             return service;
