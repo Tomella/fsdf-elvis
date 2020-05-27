@@ -4,8 +4,7 @@ let Token = require("../lib/token");
 (async function() {
 
     let token = new Token(config.fmeToken);
-    token.value.then(val => {
-        console.log(value);
-    });
+    let value = await token.getToken();
+    console.log(value);
 
 })();
