@@ -1,39 +1,4 @@
 
-.nav-icons {
-  margin-top: 7px !important;
-}
-
-@media only screen and (max-width:1200px) {
-  .nav-icons {
-    margin-top: 30px;
-  }
-}
-
-.breadcrumbsContainer {
-  margin-left: 245px;
-}
-
-.applicationTitle {
-  display: inline-block;
-  font-size: large;
-  color: #2f2f2f;
-  font-weight: bold;
-  margin: 0;
-  padding: 0;
-}
-
-.header-logo {
-  width: 80px;
-}
-
-.applicationTitle {
-  padding-left: 20px;
-  font-size: 200%;
-}
-
-.common-header {
-  background-color: white;
-}
 .featureInfContainer {
   overflow-y: auto;
   max-height: 400px;
@@ -103,6 +68,41 @@
   position: relative;
   max-height: 100%;
   overflow: auto;
+}
+.nav-icons {
+  margin-top: 7px !important;
+}
+
+@media only screen and (max-width:1200px) {
+  .nav-icons {
+    margin-top: 30px;
+  }
+}
+
+.breadcrumbsContainer {
+  margin-left: 245px;
+}
+
+.applicationTitle {
+  display: inline-block;
+  font-size: large;
+  color: #2f2f2f;
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+}
+
+.header-logo {
+  width: 80px;
+}
+
+.applicationTitle {
+  padding-left: 20px;
+  font-size: 200%;
+}
+
+.common-header {
+  background-color: white;
 }
 .common-legend {
   position: abssolute;

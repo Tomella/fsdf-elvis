@@ -23,7 +23,8 @@
 
                getHiResElevation: function (latlng) {
                   return configService.getConfig("elevation").then(config => {
-                     return $http.get(config.tokenUrl).then(token => {
+                     return $http.get(config.tokenUrl).then(response => {
+                        let token = response.data;
                         return $http({
                               method: 'GET',
                               url: config.hiResElevationTemplate.replace("{lng}", latlng.lng).replace("{lat}", latlng.lat) + "&token=" + token,
