@@ -1,45 +1,46 @@
 process.env.NO_PROXY = "localhost";
 
-var SERVICES_ROOT = "http://www.ga.gov.au/explorer-web";
+const SERVICES_ROOT = "http://www.ga.gov.au/explorer-web";
 
-var config = require("./lib/config");
-var express = require("express");
-var bodyParser = require('body-parser');
+let config = require("./lib/config");
+let isDev = config.isDev;
 
-var fs = require("fs");
-var os = require('os');
-var request = require('request');
-var mappers = require("./lib/mapper-picker");
+const express = require("express");
+const bodyParser = require('body-parser');
+
+const fs = require("fs");
+const request = require('request');
+let mappers = require("./lib/mapper-picker");
 
 // For positioning. We need a token
-var Token = require("./lib/token");
-var token = new Token(config.fmeToken);
+const Token = require("./lib/token");
+let token = new Token(Object.assign({isDev}, config.fmeToken));
 
 
 request.gzip = false;
 
 //var httpProxy = require('http-proxy');
-var app = express();
+let app = express();
 //app.use(bodyParser.json({limit: '50mb'}));
 
-app.use(function(req, res, next) {
-   // service uses pipes and body parser reads the stream and closes it.
-   if(req.url.indexOf("/service/") === 0) {
-       return next();
-   } else {
-       bodyParser.json({limit: '30mb'})(req,res,next);
-   }
+app.use(function (req, res, next) {
+    // service uses pipes and body parser reads the stream and closes it.
+    if (req.url.indexOf("/service/") === 0) {
+        return next();
+    } else {
+        bodyParser.json({ limit: '30mb' })(req, res, next);
+    }
 });
 
 
-var url = require('url');
-var X2JS = require('x2js');
+let url = require('url');
+let X2JS = require('x2js');
 
 // A bit ugly but we will get rid of it soon.
-var TOUCHPATH = "/home/ec2-user/touched/touched";
+let TOUCHPATH = "/home/ec2-user/touched/touched";
 
-var StringDecoder = require('string_decoder').StringDecoder;
-var yargs = require('yargs').options({
+let StringDecoder = require('string_decoder').StringDecoder;
+let yargs = require('yargs').options({
     'port': {
         'default': 3000,
         'description': 'Port to listen on.'
@@ -60,16 +61,16 @@ var yargs = require('yargs').options({
         'description': 'Show this help.'
     }
 });
-var argv = yargs.argv;
-var port = process.env.PORT || argv.port;
-var dontProxyHeaderRegex = /^(?:Host|Proxy-Connection|Accept-Encoding|Connection|Keep-Alive|Transfer-Encoding|TE|Trailer|Proxy-Authorization|Proxy-Authenticate|Upgrade)$/i;
+let argv = yargs.argv;
+let port = process.env.PORT || argv.port;
+let dontProxyHeaderRegex = /^(?:Host|Proxy-Connection|Accept-Encoding|Connection|Keep-Alive|Transfer-Encoding|TE|Trailer|Proxy-Authorization|Proxy-Authenticate|Upgrade)$/i;
 // There should only ever be a couple. We do a contains on the requested host.
-var validHosts = config.validHosts;
-var upstreamProxy = argv['upstream-proxy'];
+let validHosts = config.validHosts;
+let upstreamProxy = argv['upstream-proxy'];
 
 // eventually this mime type configuration will need to change
 // https://github.com/visionmedia/send/commit/d2cb54658ce65948b0ed6e5fb5de69d022bef941
-var mime = express.static.mime;
+let mime = express.static.mime;
 mime.define({
     'application/json': ['czml', 'json', 'geojson', 'topojson'],
     'model/vnd.gltf+json': ['gltf'],
@@ -79,10 +80,10 @@ mime.define({
 
 // serve static files
 app.use(express.static("dist"));
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
 });
 
 app.all('/service/*', function (req, res, next) {
@@ -127,56 +128,54 @@ app.all('/service/*', function (req, res, next) {
  * Initiate jobs on FME server.
  *
 */
-
 let privateKey = config.elevation.recaptchaPrivateKey;
 let recaptcha = new (require("./lib/recaptcha"))(privateKey);
-let serviceBroker = new (require("./lib/serviceBroker"))(config.elevation);
+let serviceBroker = new (require("./lib/serviceBroker"))(config.elevation, token);
 
 app.post('/elevation/initiateJob', function (req, res, next) {
-   let data = req.body;
+    let data = req.body;
 
-   //console.log("initiate job: " + JSON.stringify(data, null, 3));
+    //console.log("initiate job: " + JSON.stringify(data, null, 3));
 
-   recaptcha.verify(req.connection.remoteAddress, data.parameters.recaptcha, function(error, response, body) {
-      if(!error) {
-         delete data.parameters.recaptcha;
-         serviceBroker.execute(data).then(message => {
-            res.status(200).send(message);
-         });
-      } else {
-         res.status(403).send(body);
-      }
-   });
-});
-
-app.get('/refreshToken', function(req, res) {
-    // It doesn't do anything at the moment. Can be removed soon.
-    token.getToken().then((data) => {
-       res.status(200).send(data);
+    recaptcha.verify(req.connection.remoteAddress, data.parameters.recaptcha, function (error, response, body) {
+        if (!error) {
+            delete data.parameters.recaptcha;
+            serviceBroker.execute(data).then(message => {
+                res.status(200).send(message);
+            });
+        } else {
+            res.status(403).send(body);
+        }
     });
 });
 
-app.get('/token', function(req, res) {
-   token.getToken().then((data) => {
-      res.status(200).send(data);
-   });
+app.get('/refreshToken', function (req, res) {
+    // It doesn't do anything at the moment. Can be removed soon.
+    token.getToken().then((data) => {
+        res.status(200).send(data);
+    });
+});
+
+app.get('/token', async (req, res) => {
+    console.log("Getting token");
+    let data = await token.getToken();
+    console.log("Got token", data);
+    res.status(200).send(data);
 });
 
 // This doesn't refresh Solr straight away. It simply touches a file and it is up to something else to react to the touch
-app.get('/touch', function(req, res) {
-   fs.closeSync(fs.openSync(TOUCHPATH, 'w'));
-   res.header({
-      "Content-Type": "application/json;charset=UTF-8"
-   });
-   res.status(200).send({status: "success"});
+app.get('/touch', function (req, res) {
+    fs.closeSync(fs.openSync(TOUCHPATH, 'w'));
+    res.header({
+        "Content-Type": "application/json;charset=UTF-8"
+    });
+    res.status(200).send({ status: "success" });
 });
 
-const REFERERS = {localhost: true, "elevation.": true};
+const REFERERS = { localhost: true, "elevation.": true };
 
 app.get('/wms/*', function (req, res, next) {
-   console.log(req.headers.referer);
-
-
+    console.log(req.headers.referer);
 });
 
 app.get('/xml2js/*', function (req, res, next) {
@@ -221,7 +220,7 @@ app.get('/xml2js/*', function (req, res, next) {
     }, function (error, response, body) {
         var code = 500;
         var x2js, text, headers, decoder = new StringDecoder('utf8');
-        if(error) {
+        if (error) {
             console.log("Err", error);
         }
         if (body) {
@@ -241,12 +240,12 @@ app.get('/xml2js/*', function (req, res, next) {
 
 
 app.get('/gazetteer/json', function (req, res, next) {
-   console.log(JSON.stringify(req.params));
-   let id = req.param("id");
+    console.log(JSON.stringify(req.params));
+    let id = req.param("id");
 
-   let mapper = mappers.findById(id);
+    let mapper = mappers.findById(id);
 
-   let url = mapper.createPath(id);
+    let url = mapper.createPath(id);
 
 
     request.get({
@@ -256,7 +255,7 @@ app.get('/gazetteer/json', function (req, res, next) {
     }, function (error, response, body) {
         var code = response.statusCode;
         var x2js, text, headers, decoder = new StringDecoder('utf8');
-        if(error) {
+        if (error) {
             console.log("Err", error);
         }
         if (code === 200) {
@@ -275,10 +274,10 @@ app.get('/gazetteer/json', function (req, res, next) {
 
 
 app.get('/gazetteer/wfs', function (req, res, next) {
-   let id = req.param("id");
-   let mapper = mappers.findById(id);
+    let id = req.param("id");
+    let mapper = mappers.findById(id);
 
-   let url = mapper.createPath(id);
+    let url = mapper.createPath(id);
 
 
     request.get({
@@ -288,7 +287,7 @@ app.get('/gazetteer/wfs', function (req, res, next) {
     }, function (error, response, body) {
         var code = 500;
         var text, headers, decoder = new StringDecoder('utf8');
-        if(error) {
+        if (error) {
             console.log("Err", error);
         }
         if (body) {
@@ -308,28 +307,28 @@ app.get('/gazetteer/wfs', function (req, res, next) {
 // This works on my local machine for development as I have a Solr instance on a Linux box
 // but it is to be expected that it will not be hit in production so doesn't need changing
 // as proxying via the apache proxy will intercept and route the request to the local Solr instance.
-app.get('/select', function(req, res, next) {
-   var remoteUrl = req.url;
-   // let wholeUrl = "http://web.geospeedster.com" +  remoteUrl;
-   // let wholeUrl = "http://192.168.0.24:8983/solr/placenames" + remoteUrl;
-   let wholeUrl = "http://placenames.fsdf.org.au" + remoteUrl;
-   console.log(wholeUrl);
+app.get('/select', function (req, res, next) {
+    var remoteUrl = req.url;
+    // let wholeUrl = "http://web.geospeedster.com" +  remoteUrl;
+    // let wholeUrl = "http://192.168.0.24:8983/solr/placenames" + remoteUrl;
+    let wholeUrl = "http://placenames.fsdf.org.au" + remoteUrl;
+    console.log(wholeUrl);
 
 
-   request.get({
-       url: wholeUrl,
-       headers: filterHeaders(req, req.headers),
-       encoding: null
-   }, function (error, response, body) {
-       var code = 500;
+    request.get({
+        url: wholeUrl,
+        headers: filterHeaders(req, req.headers),
+        encoding: null
+    }, function (error, response, body) {
+        var code = 500;
 
-       if (response) {
-           code = response.statusCode;
-           res.header(filterHeaders(req, response.headers));
-       }
+        if (response) {
+            code = response.statusCode;
+            res.header(filterHeaders(req, response.headers));
+        }
 
-       res.status(code).send(body);
-   });
+        res.status(code).send(body);
+    });
 });
 
 app.get('/proxy/*', function (req, res, next) {
@@ -396,9 +395,9 @@ function getRemoteUrlFromParam(req) {
         if (!/^https?:\/\//.test(remoteUrl)) {
             // Now double slashes are removed on some URL's by some servers (which is the right behaviour)
             if (!/^https?:\//.test(remoteUrl)) {
-               remoteUrl = 'http://' + remoteUrl;
+                remoteUrl = 'http://' + remoteUrl;
             } else {
-               remoteUrl = remoteUrl.replace(":/", "://");
+                remoteUrl = remoteUrl.replace(":/", "://");
             }
         }
         remoteUrl = url.parse(remoteUrl);
