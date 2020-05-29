@@ -22,10 +22,9 @@ easily be overlayed with other applications with little likelyhood of name clash
 
 ### How it runs
 #### Positioning
-It requires a couple of environment variables
-ESRI_USERNAME The username to used to generate a token,
-ESRI_PASSWORD The password needed to generate a token.
-
+If you are running locally on your PC, as you don't have access to the secrets manager set the following system variable 
+so that it knows to run locally
+FSDF_DEV_ENV=true
 
 ### Google API.
 At the moment the registered Google API key for the cloud VM is in the HTML files. If you want it to work on
