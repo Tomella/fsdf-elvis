@@ -34,6 +34,7 @@
                                  });
 
                                  $scope.heading = function(source) {
+                                    if(!$scope.mappings) return source;
                                     let mapping = $scope.mappings[source];
                                     return mapping.displayName ? mapping.displayName : source;
                                  }

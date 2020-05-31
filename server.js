@@ -16,6 +16,8 @@ let mappers = require("./lib/mapper-picker");
 const Token = require("./lib/token");
 let token = new Token(Object.assign({isDev}, config.fmeToken));
 
+const Secrets = require("./lib/secrets");
+let secrets = new Secrets(Object.assign({isDev}, config.secrets));
 
 request.gzip = false;
 
@@ -128,265 +130,268 @@ app.all('/service/*', function (req, res, next) {
  * Initiate jobs on FME server.
  *
 */
-let privateKey = config.elevation.recaptchaPrivateKey;
-let recaptcha = new (require("./lib/recaptcha"))(privateKey);
-let serviceBroker = new (require("./lib/serviceBroker"))(config.elevation, token);
 
-app.post('/elevation/initiateJob', function (req, res, next) {
-    let data = req.body;
-
-    //console.log("initiate job: " + JSON.stringify(data, null, 3));
-
-    recaptcha.verify(req.connection.remoteAddress, data.parameters.recaptcha, function (error, response, body) {
-        if (!error) {
-            delete data.parameters.recaptcha;
-            serviceBroker.execute(data).then(message => {
-                res.status(200).send(message);
-            });
-        } else {
-            res.status(403).send(body);
-        }
+(async () => {
+    let privateKey = await secrets.recaptchaPrivateKey();
+    let recaptcha = new (require("./lib/recaptcha"))(privateKey);
+    let serviceBroker = new (require("./lib/serviceBroker"))(config.elevation, token);
+    
+    app.post('/elevation/initiateJob', function (req, res, next) {
+        let data = req.body;
+    
+        //console.log("initiate job: " + JSON.stringify(data, null, 3));
+    
+        recaptcha.verify(req.connection.remoteAddress, data.parameters.recaptcha, function (error, response, body) {
+            if (!error) {
+                delete data.parameters.recaptcha;
+                serviceBroker.execute(data).then(message => {
+                    res.status(200).send(message);
+                });
+            } else {
+                res.status(403).send(body);
+            }
+        });
     });
-});
-
-app.get('/refreshToken', function (req, res) {
-    // It doesn't do anything at the moment. Can be removed soon.
-    token.getToken().then((data) => {
+    
+    app.get('/refreshToken', function (req, res) {
+        // It doesn't do anything at the moment. Can be removed soon.
+        token.getToken().then((data) => {
+            res.status(200).send(data);
+        });
+    });
+    
+    app.get('/token', async (req, res) => {
+        console.log("Getting token");
+        let data = await token.getToken();
+        console.log("Got token", data);
         res.status(200).send(data);
     });
-});
-
-app.get('/token', async (req, res) => {
-    console.log("Getting token");
-    let data = await token.getToken();
-    console.log("Got token", data);
-    res.status(200).send(data);
-});
-
-// This doesn't refresh Solr straight away. It simply touches a file and it is up to something else to react to the touch
-app.get('/touch', function (req, res) {
-    fs.closeSync(fs.openSync(TOUCHPATH, 'w'));
-    res.header({
-        "Content-Type": "application/json;charset=UTF-8"
+    
+    // This doesn't refresh Solr straight away. It simply touches a file and it is up to something else to react to the touch
+    app.get('/touch', function (req, res) {
+        fs.closeSync(fs.openSync(TOUCHPATH, 'w'));
+        res.header({
+            "Content-Type": "application/json;charset=UTF-8"
+        });
+        res.status(200).send({ status: "success" });
     });
-    res.status(200).send({ status: "success" });
-});
-
-const REFERERS = { localhost: true, "elevation.": true };
-
-app.get('/wms/*', function (req, res, next) {
-    console.log(req.headers.referer);
-});
-
-app.get('/xml2js/*', function (req, res, next) {
-    // look for request like http://localhost:8080/proxy/http://example.com/file?query=1
-    var remoteUrl = getRemoteUrlFromParam(req);
-    if (!remoteUrl) {
-        // look for request like http://localhost:8080/proxy/?http%3A%2F%2Fexample.com%2Ffile%3Fquery%3D1
-        remoteUrl = Object.keys(req.query)[0];
-        if (remoteUrl) {
-            remoteUrl = url.parse(remoteUrl);
-        }
-    }
-
-    if (!remoteUrl) {
-        return res.status(400).send('No url specified.');
-    }
-
-    // We only want a very few requests to get through. Via the whitelist.
-    var host = remoteUrl.host;
-    if (!validHosts.some((valid) => {
-        return host.indexOf(valid) > -1;
-    })) {
-        return res.status(403).send('Not a white listed host. Go away!');
-    }
-
-    if (!remoteUrl.protocol) {
-        remoteUrl.protocol = 'http:';
-    }
-
-    var proxy;
-    if (upstreamProxy && !(remoteUrl.host in bypassUpstreamProxyHosts)) {
-        proxy = upstreamProxy;
-    }
-
-    // encoding : null means "body" passed to the callback will be raw bytes
-
-    request.get({
-        url: url.format(remoteUrl),
-        headers: filterHeaders(req, req.headers),
-        encoding: null,
-        proxy: proxy
-    }, function (error, response, body) {
-        var code = 500;
-        var x2js, text, headers, decoder = new StringDecoder('utf8');
-        if (error) {
-            console.log("Err", error);
-        }
-        if (body) {
-            code = response.statusCode;
-            headers = filterHeaders(req, response.headers);
-            headers['Content-Type'] = 'application/json';
-            res.header(headers);
-            text = body.toString();
-            x2js = new X2JS();
-            res.status(code).send(x2js.xml2js(body.toString()));
-        } else {
-            console.log("No body!")
-            res.status(code).send('{"error":{"code": ' + code + '}}');
-        }
+    
+    const REFERERS = { localhost: true, "elevation.": true };
+    
+    app.get('/wms/*', function (req, res, next) {
+        console.log(req.headers.referer);
     });
-});
-
-
-app.get('/gazetteer/json', function (req, res, next) {
-    console.log(JSON.stringify(req.params));
-    let id = req.param("id");
-
-    let mapper = mappers.findById(id);
-
-    let url = mapper.createPath(id);
-
-
-    request.get({
-        url: url,
-        headers: filterHeaders(req, req.headers),
-        encoding: null
-    }, function (error, response, body) {
-        var code = response.statusCode;
-        var x2js, text, headers, decoder = new StringDecoder('utf8');
-        if (error) {
-            console.log("Err", error);
+    
+    app.get('/xml2js/*', function (req, res, next) {
+        // look for request like http://localhost:8080/proxy/http://example.com/file?query=1
+        var remoteUrl = getRemoteUrlFromParam(req);
+        if (!remoteUrl) {
+            // look for request like http://localhost:8080/proxy/?http%3A%2F%2Fexample.com%2Ffile%3Fquery%3D1
+            remoteUrl = Object.keys(req.query)[0];
+            if (remoteUrl) {
+                remoteUrl = url.parse(remoteUrl);
+            }
         }
-        if (code === 200) {
-            headers = filterHeaders(req, response.headers);
-            headers['Content-Type'] = 'application/json';
-            res.header(headers);
-            text = body.toString();
-            x2js = new X2JS();
-            res.status(code).send(mapper.transform(x2js.xml2js(text)));
-        } else {
-            console.log("No body!")
-            res.status(code).send('{"error":{"code": ' + code + '}}');
+    
+        if (!remoteUrl) {
+            return res.status(400).send('No url specified.');
         }
+    
+        // We only want a very few requests to get through. Via the whitelist.
+        var host = remoteUrl.host;
+        if (!validHosts.some((valid) => {
+            return host.indexOf(valid) > -1;
+        })) {
+            return res.status(403).send('Not a white listed host. Go away!');
+        }
+    
+        if (!remoteUrl.protocol) {
+            remoteUrl.protocol = 'http:';
+        }
+    
+        var proxy;
+        if (upstreamProxy && !(remoteUrl.host in bypassUpstreamProxyHosts)) {
+            proxy = upstreamProxy;
+        }
+    
+        // encoding : null means "body" passed to the callback will be raw bytes
+    
+        request.get({
+            url: url.format(remoteUrl),
+            headers: filterHeaders(req, req.headers),
+            encoding: null,
+            proxy: proxy
+        }, function (error, response, body) {
+            var code = 500;
+            var x2js, text, headers, decoder = new StringDecoder('utf8');
+            if (error) {
+                console.log("Err", error);
+            }
+            if (body) {
+                code = response.statusCode;
+                headers = filterHeaders(req, response.headers);
+                headers['Content-Type'] = 'application/json';
+                res.header(headers);
+                text = body.toString();
+                x2js = new X2JS();
+                res.status(code).send(x2js.xml2js(body.toString()));
+            } else {
+                console.log("No body!")
+                res.status(code).send('{"error":{"code": ' + code + '}}');
+            }
+        });
     });
-});
-
-
-app.get('/gazetteer/wfs', function (req, res, next) {
-    let id = req.param("id");
-    let mapper = mappers.findById(id);
-
-    let url = mapper.createPath(id);
-
-
-    request.get({
-        url: url,
-        headers: filterHeaders(req, req.headers),
-        encoding: null
-    }, function (error, response, body) {
-        var code = 500;
-        var text, headers, decoder = new StringDecoder('utf8');
-        if (error) {
-            console.log("Err", error);
-        }
-        if (body) {
-            code = response.statusCode;
-            headers = filterHeaders(req, response.headers);
-            headers['Content-Type'] = 'application/xml';
-            res.header(headers);
-            text = body.toString();
-            res.status(code).send(text);
-        } else {
-            console.log("No body!")
-            res.status(code).send('{"error":{"code": ' + code + '}}');
-        }
+    
+    
+    app.get('/gazetteer/json', function (req, res, next) {
+        console.log(JSON.stringify(req.params));
+        let id = req.param("id");
+    
+        let mapper = mappers.findById(id);
+    
+        let url = mapper.createPath(id);
+    
+    
+        request.get({
+            url: url,
+            headers: filterHeaders(req, req.headers),
+            encoding: null
+        }, function (error, response, body) {
+            var code = response.statusCode;
+            var x2js, text, headers, decoder = new StringDecoder('utf8');
+            if (error) {
+                console.log("Err", error);
+            }
+            if (code === 200) {
+                headers = filterHeaders(req, response.headers);
+                headers['Content-Type'] = 'application/json';
+                res.header(headers);
+                text = body.toString();
+                x2js = new X2JS();
+                res.status(code).send(mapper.transform(x2js.xml2js(text)));
+            } else {
+                console.log("No body!")
+                res.status(code).send('{"error":{"code": ' + code + '}}');
+            }
+        });
     });
-});
-
-// This works on my local machine for development as I have a Solr instance on a Linux box
-// but it is to be expected that it will not be hit in production so doesn't need changing
-// as proxying via the apache proxy will intercept and route the request to the local Solr instance.
-app.get('/select', function (req, res, next) {
-    var remoteUrl = req.url;
-    // let wholeUrl = "http://web.geospeedster.com" +  remoteUrl;
-    // let wholeUrl = "http://192.168.0.24:8983/solr/placenames" + remoteUrl;
-    let wholeUrl = "http://placenames.fsdf.org.au" + remoteUrl;
-    console.log(wholeUrl);
-
-
-    request.get({
-        url: wholeUrl,
-        headers: filterHeaders(req, req.headers),
-        encoding: null
-    }, function (error, response, body) {
-        var code = 500;
-
-        if (response) {
-            code = response.statusCode;
-            res.header(filterHeaders(req, response.headers));
-        }
-
-        res.status(code).send(body);
+    
+    
+    app.get('/gazetteer/wfs', function (req, res, next) {
+        let id = req.param("id");
+        let mapper = mappers.findById(id);
+    
+        let url = mapper.createPath(id);
+    
+    
+        request.get({
+            url: url,
+            headers: filterHeaders(req, req.headers),
+            encoding: null
+        }, function (error, response, body) {
+            var code = 500;
+            var text, headers, decoder = new StringDecoder('utf8');
+            if (error) {
+                console.log("Err", error);
+            }
+            if (body) {
+                code = response.statusCode;
+                headers = filterHeaders(req, response.headers);
+                headers['Content-Type'] = 'application/xml';
+                res.header(headers);
+                text = body.toString();
+                res.status(code).send(text);
+            } else {
+                console.log("No body!")
+                res.status(code).send('{"error":{"code": ' + code + '}}');
+            }
+        });
     });
-});
-
-app.get('/proxy/*', function (req, res, next) {
-    // look for request like http://localhost:8080/proxy/http://example.com/file?query=1
-
-    var remoteUrl = getRemoteUrlFromParam(req);
-    if (!remoteUrl) {
-        // look for request like http://localhost:8080/proxy/?http%3A%2F%2Fexample.com%2Ffile%3Fquery%3D1
-        remoteUrl = Object.keys(req.query)[0];
-        if (remoteUrl) {
-            remoteUrl = url.parse(remoteUrl);
-        }
-    }
-
-    if (!remoteUrl) {
-        return res.status(400).send('No url specified.');
-    }
-
-    // We only want a very few requests to get through. Via the whitelist.
-    var host = remoteUrl.host;
-    if (!validHosts.some((valid) => {
-        return host && host.indexOf(valid) > -1;
-    })) {
-        return res.status(403).send('Not a white listed host. Go away!');
-    }
-
-    if (!remoteUrl.protocol) {
-        remoteUrl.protocol = 'http:';
-    }
-
-    var proxy;
-    if (upstreamProxy && !(remoteUrl.host in bypassUpstreamProxyHosts)) {
-        proxy = upstreamProxy;
-    }
-
-    // encoding : null means "body" passed to the callback will be raw bytes
-
-    request.get({
-        url: url.format(remoteUrl),
-        headers: filterHeaders(req, req.headers),
-        encoding: null,
-        proxy: proxy
-    }, function (error, response, body) {
-        var code = 500;
-
-        if (response) {
-            code = response.statusCode;
-            res.header(filterHeaders(req, response.headers));
-        }
-
-        res.status(code).send(body);
+    
+    // This works on my local machine for development as I have a Solr instance on a Linux box
+    // but it is to be expected that it will not be hit in production so doesn't need changing
+    // as proxying via the apache proxy will intercept and route the request to the local Solr instance.
+    app.get('/select', function (req, res, next) {
+        var remoteUrl = req.url;
+        // let wholeUrl = "http://web.geospeedster.com" +  remoteUrl;
+        // let wholeUrl = "http://192.168.0.24:8983/solr/placenames" + remoteUrl;
+        let wholeUrl = "http://placenames.fsdf.org.au" + remoteUrl;
+        console.log(wholeUrl);
+    
+    
+        request.get({
+            url: wholeUrl,
+            headers: filterHeaders(req, req.headers),
+            encoding: null
+        }, function (error, response, body) {
+            var code = 500;
+    
+            if (response) {
+                code = response.statusCode;
+                res.header(filterHeaders(req, response.headers));
+            }
+    
+            res.status(code).send(body);
+        });
     });
-});
-
-app.listen(port, function (err) {
-    console.log("running server on port " + port);
-});
-
+    
+    app.get('/proxy/*', function (req, res, next) {
+        // look for request like http://localhost:8080/proxy/http://example.com/file?query=1
+    
+        var remoteUrl = getRemoteUrlFromParam(req);
+        if (!remoteUrl) {
+            // look for request like http://localhost:8080/proxy/?http%3A%2F%2Fexample.com%2Ffile%3Fquery%3D1
+            remoteUrl = Object.keys(req.query)[0];
+            if (remoteUrl) {
+                remoteUrl = url.parse(remoteUrl);
+            }
+        }
+    
+        if (!remoteUrl) {
+            return res.status(400).send('No url specified.');
+        }
+    
+        // We only want a very few requests to get through. Via the whitelist.
+        var host = remoteUrl.host;
+        if (!validHosts.some((valid) => {
+            return host && host.indexOf(valid) > -1;
+        })) {
+            return res.status(403).send('Not a white listed host. Go away!');
+        }
+    
+        if (!remoteUrl.protocol) {
+            remoteUrl.protocol = 'http:';
+        }
+    
+        var proxy;
+        if (upstreamProxy && !(remoteUrl.host in bypassUpstreamProxyHosts)) {
+            proxy = upstreamProxy;
+        }
+    
+        // encoding : null means "body" passed to the callback will be raw bytes
+    
+        request.get({
+            url: url.format(remoteUrl),
+            headers: filterHeaders(req, req.headers),
+            encoding: null,
+            proxy: proxy
+        }, function (error, response, body) {
+            var code = 500;
+    
+            if (response) {
+                code = response.statusCode;
+                res.header(filterHeaders(req, response.headers));
+            }
+    
+            res.status(code).send(body);
+        });
+    });
+    
+    app.listen(port, function (err) {
+        console.log("running server on port " + port);
+    });
+    
+})();
 
 function getRemoteUrlFromParam(req) {
     var remoteUrl = req.params[0];
