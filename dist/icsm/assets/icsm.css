@@ -1,4 +1,39 @@
 
+.nav-icons {
+  margin-top: 7px !important;
+}
+
+@media only screen and (max-width:1200px) {
+  .nav-icons {
+    margin-top: 30px;
+  }
+}
+
+.breadcrumbsContainer {
+  margin-left: 245px;
+}
+
+.applicationTitle {
+  display: inline-block;
+  font-size: large;
+  color: #2f2f2f;
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+}
+
+.header-logo {
+  width: 80px;
+}
+
+.applicationTitle {
+  padding-left: 20px;
+  font-size: 200%;
+}
+
+.common-header {
+  background-color: white;
+}
 .featureInfContainer {
   overflow-y: auto;
   max-height: 400px;
@@ -68,46 +103,6 @@
   position: relative;
   max-height: 100%;
   overflow: auto;
-}
-.nav-icons {
-  margin-top: 7px !important;
-}
-
-@media only screen and (max-width:1200px) {
-  .nav-icons {
-    margin-top: 30px;
-  }
-}
-
-.breadcrumbsContainer {
-  margin-left: 245px;
-}
-
-.applicationTitle {
-  display: inline-block;
-  font-size: large;
-  color: #2f2f2f;
-  font-weight: bold;
-  margin: 0;
-  padding: 0;
-}
-
-.header-logo {
-  width: 80px;
-}
-
-.applicationTitle {
-  padding-left: 20px;
-  font-size: 200%;
-}
-
-.common-header {
-  background-color: white;
-}
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
 }
 .altthemes-icon {
   background: url("../resources/img/dbl_sprites.svg") no-repeat;
@@ -220,6 +215,11 @@
 .altthemesdropdown .altthemescurrent {
   color: #fff;
   background-color: #777;
+}
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
 }
 /* Side Panel */
 
@@ -346,69 +346,6 @@
 
 .placenames-title {
   font-weight: bold;
-}
-.start-content-container {
-  position: fixed;
-  top: 95px;
-  bottom: 6px;
-  overflow-y: auto;
-  left: 0;
-  right: 0;
-}
-
-@media (min-width: 1200px) {
-  .start-content-container .panel {
-    margin-left: 150px;
-    margin-right: 150px;
-  }
-}
-
-.select-icon {
-  background: url("../resources/img/sprites.svg") no-repeat;
-  display: inline-block;
-  width: 75px;
-  height: 120px;
-  margin: 0 auto 0 auto;
-}
-
-.select-pin {
-  background-position: 0px;
-}
-
-.select-map {
-  background-position: -75px;
-}
-
-.select-crosshair {
-  background-position: -150px;
-}
-
-.select-sign {
-  background-position: -225px;
-}
-
-.select-parcel {
-  background-position: -300px;
-}
-
-.select-satellite {
-  background-position: -375px;
-}
-
-.select-ship {
-  background-position: -450px;
-}
-
-.select-water {
-  background-position: -525px;
-}
-
-.select-shore {
-  background-position: -600px;
-}
-
-.select-land {
-  background-position: -675px;
 }
 /* TODO: I haven't worked out why it is showing up. Find out why and remove */
 
@@ -647,6 +584,84 @@ body {
 .leaflet-container {
   background-color: rgba(255,0,0,0.0);
 }
+.contributors {
+  margin: 2px;
+  padding: 10px;
+  padding-left: 8px;
+  position: fixed;
+  top: 70px;
+  right: 1px;
+  opacity: 0.95;
+  z-index: 1300;
+  background-color: white;
+  white-space: nowrap;
+  text-align: center;
+  -webkit-transition: height 1s;
+  /* Safari */
+  transition: height 1s;
+  -webkit-transition: width 1s;
+  /* Safari */
+  transition: width 1s;
+}
+
+.contributors div {
+  float: left;
+  width: 50%;
+}
+
+img.contributor-logo {
+  height: 70px;
+}
+
+.contributors img {
+  -webkit-transition: height 1s;
+  /* Safari */
+  transition: height 1s;
+}
+
+.contributors.transitioned-up img {
+  height: 0;
+}
+
+.contributors.transitioned-up .contributors-unstick {
+  display: none;
+}
+
+.contributors.transitioned-down {
+  border: 1px solid gray;
+  border-radius: 3px;
+  width: 500px;
+}
+
+.transitioned-up {
+  height: 0px;
+  border: 0 none;
+  margin: 0;
+  padding: 0;
+  width: 5px;
+}
+
+.contributors.transitioned-up a {
+  height: 0px;
+  border: 0 none;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+}
+
+.contributors-unstick {
+  vertical-align: top;
+  font-weight: bold;
+}
+
+.contributors-link {
+  font-weight: bold;
+}
+
+.elevation-and-depth {
+  padding-left: 12px;
+  padding-right: 12px;
+}
 .coverage {
   margin: 2px;
   padding: 10px;
@@ -808,84 +823,6 @@ button.clip-btn:hover div {
   /* the transition is defined in the active class */
   transition: 1s linear all;
 }
-.contributors {
-  margin: 2px;
-  padding: 10px;
-  padding-left: 8px;
-  position: fixed;
-  top: 70px;
-  right: 1px;
-  opacity: 0.95;
-  z-index: 1300;
-  background-color: white;
-  white-space: nowrap;
-  text-align: center;
-  -webkit-transition: height 1s;
-  /* Safari */
-  transition: height 1s;
-  -webkit-transition: width 1s;
-  /* Safari */
-  transition: width 1s;
-}
-
-.contributors div {
-  float: left;
-  width: 50%;
-}
-
-img.contributor-logo {
-  height: 70px;
-}
-
-.contributors img {
-  -webkit-transition: height 1s;
-  /* Safari */
-  transition: height 1s;
-}
-
-.contributors.transitioned-up img {
-  height: 0;
-}
-
-.contributors.transitioned-up .contributors-unstick {
-  display: none;
-}
-
-.contributors.transitioned-down {
-  border: 1px solid gray;
-  border-radius: 3px;
-  width: 500px;
-}
-
-.transitioned-up {
-  height: 0px;
-  border: 0 none;
-  margin: 0;
-  padding: 0;
-  width: 5px;
-}
-
-.contributors.transitioned-up a {
-  height: 0px;
-  border: 0 none;
-  margin: 0;
-  padding: 0;
-  border-radius: 0;
-}
-
-.contributors-unstick {
-  vertical-align: top;
-  font-weight: bold;
-}
-
-.contributors-link {
-  font-weight: bold;
-}
-
-.elevation-and-depth {
-  padding-left: 12px;
-  padding-right: 12px;
-}
 img.elvis-logo {
   height: 75px;
 }
@@ -898,6 +835,21 @@ img.elvis-logo {
   position: absolute;
   right: 7px;
   bottom: 15px;
+}
+.mess-error {
+  background-color: lightcoral;
+}
+
+.mess-info {
+  background-color: lightblue;
+}
+
+.mess-warn {
+  background-color: #ffbc1e;
+}
+
+.mess-container {
+  font-weight: bold;
 }
 .icsmTabs {
   position: absolute;
@@ -992,21 +944,6 @@ img.elvis-logo {
   right: 20px;
   top: 10px;
   z-index: 3;
-}
-.mess-error {
-  background-color: lightcoral;
-}
-
-.mess-info {
-  background-color: lightblue;
-}
-
-.mess-warn {
-  background-color: #ffbc1e;
-}
-
-.mess-container {
-  font-weight: bold;
 }
 .leaflet-control-elevation {
   background-image: url("../../../../icsm/resources/img/mountain24.png");
@@ -1252,21 +1189,6 @@ img.elvis-logo {
   left: 0;
   right: 0;
 }
-.selectContainer {
-  width: 100%;
-}
-
-.selectAbstractTooltip {
-  /* width:450px; */
-}
-
-.orange {
-  color: orange;
-}
-
-i.fa.active {
-  color: red;
-}
 .reviewing-odd {
   background-color: #eeeeee;
 }
@@ -1298,6 +1220,21 @@ i.fa.active {
 .exclude {
   color: #777777;
   text-decoration: line-through;
+}
+.selectContainer {
+  width: 100%;
+}
+
+.selectAbstractTooltip {
+  /* width:450px; */
+}
+
+.orange {
+  color: orange;
+}
+
+i.fa.active {
+  color: red;
 }
 .icsm-icon {
   background: url("icsm/img/global-sprites.svg") no-repeat;
@@ -1476,4 +1413,67 @@ i.fa.active {
   position: fixed;
   right: 0;
   bottom: 8px;
+}
+.start-content-container {
+  position: fixed;
+  top: 95px;
+  bottom: 6px;
+  overflow-y: auto;
+  left: 0;
+  right: 0;
+}
+
+@media (min-width: 1200px) {
+  .start-content-container .panel {
+    margin-left: 150px;
+    margin-right: 150px;
+  }
+}
+
+.select-icon {
+  background: url("../resources/img/sprites.svg") no-repeat;
+  display: inline-block;
+  width: 75px;
+  height: 120px;
+  margin: 0 auto 0 auto;
+}
+
+.select-pin {
+  background-position: 0px;
+}
+
+.select-map {
+  background-position: -75px;
+}
+
+.select-crosshair {
+  background-position: -150px;
+}
+
+.select-sign {
+  background-position: -225px;
+}
+
+.select-parcel {
+  background-position: -300px;
+}
+
+.select-satellite {
+  background-position: -375px;
+}
+
+.select-ship {
+  background-position: -450px;
+}
+
+.select-water {
+  background-position: -525px;
+}
+
+.select-shore {
+  background-position: -600px;
+}
+
+.select-land {
+  background-position: -675px;
 }

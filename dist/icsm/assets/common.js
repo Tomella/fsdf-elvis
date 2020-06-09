@@ -329,6 +329,38 @@ under the License.
 "use strict";
 
 {
+  angular.module('common.legend', []).directive('commonLegend', [function () {
+    return {
+      template: "<img ng-href='url' ng-if='url'></img>",
+      scope: {
+        map: "="
+      },
+      restrict: "AE",
+      link: function link(scope) {
+        if (scope.map) {}
+      }
+    };
+  }]);
+}
+"use strict";
+
+{
+  angular.module('common.reset', []).directive('resetPage', function ($window) {
+    return {
+      restrict: 'AE',
+      scope: {},
+      templateUrl: 'common/reset/reset.html',
+      controller: ['$scope', function ($scope) {
+        $scope.reset = function () {
+          $window.location.reload();
+        };
+      }]
+    };
+  });
+}
+"use strict";
+
+{
   angular.module('common.altthemes', [])
   /**
   	*
@@ -485,67 +517,6 @@ under the License.
     return {};
   }]);
 }
-"use strict";
-
-{
-  angular.module('common.legend', []).directive('commonLegend', [function () {
-    return {
-      template: "<img ng-href='url' ng-if='url'></img>",
-      scope: {
-        map: "="
-      },
-      restrict: "AE",
-      link: function link(scope) {
-        if (scope.map) {}
-      }
-    };
-  }]);
-}
-"use strict";
-
-{
-  angular.module('common.reset', []).directive('resetPage', function ($window) {
-    return {
-      restrict: 'AE',
-      scope: {},
-      templateUrl: 'common/reset/reset.html',
-      controller: ['$scope', function ($scope) {
-        $scope.reset = function () {
-          $window.location.reload();
-        };
-      }]
-    };
-  });
-}
-"use strict";
-
-(function (angular) {
-  'use strict';
-
-  angular.module("common.scroll", []).directive("commonScroller", ['$timeout', function ($timeout) {
-    return {
-      scope: {
-        more: "&",
-        buffer: "=?"
-      },
-      link: function link(scope, element, attrs) {
-        var fetching;
-        if (!scope.buffer) scope.buffer = 100;
-        element.on("scroll", function (event) {
-          var target = event.currentTarget;
-          $timeout.cancel(fetching);
-          fetching = $timeout(bouncer, 120);
-
-          function bouncer() {
-            if (scope.more && target.scrollHeight - target.scrollTop <= target.clientHeight + scope.buffer) {
-              scope.more();
-            }
-          }
-        });
-      }
-    };
-  }]);
-})(angular);
 "use strict";
 
 {
@@ -726,51 +697,6 @@ under the License.
         scope.closeLeft = function () {
           panelSideFactory.setLeft(null);
         };
-      }
-    };
-  }]);
-}
-"use strict";
-
-{
-  angular.module("common.storage", ['explorer.projects']).factory("storageService", ['$log', '$q', 'projectsService', function ($log, $q, projectsService) {
-    return {
-      setGlobalItem: function setGlobalItem(key, value) {
-        this._setItem("_system", key, value);
-      },
-      setItem: function setItem(key, value) {
-        projectsService.getCurrentProject().then(function (project) {
-          this._setItem(project, key, value);
-        }.bind(this));
-      },
-      _setItem: function _setItem(project, key, value) {
-        $log.debug("Fetching state for key locally" + key);
-        localStorage.setItem("mars.anon." + project + "." + key, JSON.stringify(value));
-      },
-      getGlobalItem: function getGlobalItem(key) {
-        return this._getItem("_system", key);
-      },
-      getItem: function getItem(key) {
-        var deferred = $q.defer();
-        projectsService.getCurrentProject().then(function (project) {
-          this._getItem(project, key).then(function (response) {
-            deferred.resolve(response);
-          });
-        }.bind(this));
-        return deferred.promise;
-      },
-      _getItem: function _getItem(project, key) {
-        $log.debug("Fetching state locally for key " + key);
-        var item = localStorage.getItem("mars.anon." + project + "." + key);
-
-        if (item) {
-          try {
-            item = JSON.parse(item);
-          } catch (e) {// Do nothing as it will be a string
-          }
-        }
-
-        return $q.when(item);
       }
     };
   }]);
@@ -1016,10 +942,84 @@ var TerrainLoader = /*#__PURE__*/function () {
 
   return TerrainLoader;
 }();
+"use strict";
+
+(function (angular) {
+  'use strict';
+
+  angular.module("common.scroll", []).directive("commonScroller", ['$timeout', function ($timeout) {
+    return {
+      scope: {
+        more: "&",
+        buffer: "=?"
+      },
+      link: function link(scope, element, attrs) {
+        var fetching;
+        if (!scope.buffer) scope.buffer = 100;
+        element.on("scroll", function (event) {
+          var target = event.currentTarget;
+          $timeout.cancel(fetching);
+          fetching = $timeout(bouncer, 120);
+
+          function bouncer() {
+            if (scope.more && target.scrollHeight - target.scrollTop <= target.clientHeight + scope.buffer) {
+              scope.more();
+            }
+          }
+        });
+      }
+    };
+  }]);
+})(angular);
+"use strict";
+
+{
+  angular.module("common.storage", ['explorer.projects']).factory("storageService", ['$log', '$q', 'projectsService', function ($log, $q, projectsService) {
+    return {
+      setGlobalItem: function setGlobalItem(key, value) {
+        this._setItem("_system", key, value);
+      },
+      setItem: function setItem(key, value) {
+        projectsService.getCurrentProject().then(function (project) {
+          this._setItem(project, key, value);
+        }.bind(this));
+      },
+      _setItem: function _setItem(project, key, value) {
+        $log.debug("Fetching state for key locally" + key);
+        localStorage.setItem("mars.anon." + project + "." + key, JSON.stringify(value));
+      },
+      getGlobalItem: function getGlobalItem(key) {
+        return this._getItem("_system", key);
+      },
+      getItem: function getItem(key) {
+        var deferred = $q.defer();
+        projectsService.getCurrentProject().then(function (project) {
+          this._getItem(project, key).then(function (response) {
+            deferred.resolve(response);
+          });
+        }.bind(this));
+        return deferred.promise;
+      },
+      _getItem: function _getItem(project, key) {
+        $log.debug("Fetching state locally for key " + key);
+        var item = localStorage.getItem("mars.anon." + project + "." + key);
+
+        if (item) {
+          try {
+            item = JSON.parse(item);
+          } catch (e) {// Do nothing as it will be a string
+          }
+        }
+
+        return $q.when(item);
+      }
+    };
+  }]);
+}
 angular.module('common.templates', []).run(['$templateCache', function($templateCache) {$templateCache.put('common/cc/cc.html','<button type="button" class="undecorated" title="View CCBy {{details.version}} licence details"\r\n      popover-trigger="outsideClick"\r\n      uib-popover-template="template" popover-placement="bottom" popover-append-to-body="true">\r\n\t<i ng-class="{active:data.isWmsShowing}" class="fa fa-lg fa-gavel"></i>\r\n</button>');
 $templateCache.put('common/cc/cctemplate.html','<div>\r\n   <div class="row">\r\n      <div class="col-md-12">\r\n         <a target="_blank" ng-href="{{details.link}}">Creative Commons Attribution {{details.version}} </a>\r\n      </div>\r\n   </div>\r\n   <div class="row">\r\n      <div class="col-md-2">\r\n         <span class="fa-stack" aria-hidden="true">\r\n         <i class="fa fa-check-circle-o fa-stack-2x" aria-hidden="true"></i>\r\n      </span>\r\n      </div>\r\n      <div class="col-md-10">\r\n         You may use this work for commercial purposes.\r\n      </div>\r\n   </div>\r\n   <div class="row">\r\n      <div class="col-md-2">\r\n         <span class="fa-stack" aria-hidden="true">\r\n         <i class="fa fa-circle-o fa-stack-2x"></i>\r\n         <i class="fa fa-female fa-stack-1x"></i>\r\n      </span>\r\n      </div>\r\n      <div class="col-md-10">\r\n         You must attribute the creator in your own works.\r\n      </div>\r\n   </div>\r\n</div>');
 $templateCache.put('common/featureinf/featureinf.html','<div class="fi-d1" drag-parent parentclass="featureInfContainer" ng-class="d1Height">\n    <button class="undecorated fi-close" ng-click="close()">X</button>\n    <div class="fi-d2">\n      <div class="fi-d3">\n        <div class="fi-d3-1">\n            <strong style="font-size: 120%;padding:2px;">Features</strong>\n        </div>\n        <div class="fi-d3-2">\n          <div class="fi-d4">\n            <div class="fi-d5">\n                <div style="padding:5px;" ng-repeat="feature in features" ng-mouseenter="entered(feature)" ng-mouseleave="left()">\n                    <div ng-if="feature.properties.maptitle" style="white-space: nowrap;">\n                        <strong>Map Title:</strong>\n                        <span title=\'{{feature.properties.mapnumber ? "Map number: " + feature.properties.mapnumber : ""}}\'>\n                            {{feature.properties.maptitle}}\n                        </span>\n                    </div>\n    \n                    <div ng-if="feature.properties.project">\n                        <strong>Project Name:</strong>\n                        {{feature.properties.project}}\n                    </div>\n    \n                    <div ng-if="feature.properties.captured">\n                        <strong>Capture Date:</strong>{{captured(feature.properties.captured)}}\n                    </div>\n    \n                    <div\n                        ng-if="feature.properties.object_name || feature.properties.object_name_ahd || feature.properties.object_name_ort">\n                        <strong>File Name:</strong>\n                        {{feature.properties.object_name}}{{feature.properties.object_name_ahd}}{{feature.properties.object_name_ort}}\n                    </div>\n    \n                    <div>\n                        <strong>Status:</strong>\n                        {{feature.properties.status}}\n                    </div>\n    \n                    <div ng-if="feature.properties.available_date">\n                        <strong>Available Date:</strong>\n                        {{formatDate(feature.properties.available_date)}}\n                    </div>\n    \n                    <div ng-if="feature.properties.contact">\n                        <strong>Contact:</strong> <a\n                            href=\'{{feature.properties.contact}}\'>{{feature.properties.contact}}</a>\n                    </div>\n    \n                    <div ng-if="feature.properties.metadata_url">\n                        <a href=\'{{feature.properties.metadata_url}}\' target=\'_blank\'>Metadata</a>\n                    </div>\n                    <hr ng-if="!$last" style="margin:5px"/>\n                </div>\n            </div>\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>');
 $templateCache.put('common/header/header.html','<div class="container-full common-header" style="padding-right:10px; padding-left:10px">\r\n   <div class="navbar-header">\r\n\r\n      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".ga-header-collapse">\r\n         <span class="sr-only">Toggle navigation</span>\r\n         <span class="icon-bar"></span>\r\n         <span class="icon-bar"></span>\r\n         <span class="icon-bar"></span>\r\n      </button>\r\n\r\n      <a href="/" class="appTitle visible-xs">\r\n         <h1 style="font-size:120%">{{heading}}</h1>\r\n      </a>\r\n   </div>\r\n   <div class="navbar-collapse collapse ga-header-collapse">\r\n      <ul class="nav navbar-nav">\r\n         <li class="hidden-xs">\r\n            <a href="https://www.icsm.gov.au/" target="_blank" class="icsm-logo"\r\n               style="margin-top: -4px;display:inline-block;">\r\n               <img alt="ICSM - ANZLIC Committee on Surveying &amp; Mapping" class="header-logo"\r\n                  src="icsm/resources/img/icsm-logo-sml.gif">\r\n            </a>\r\n            <a href="/" style="margin-top:8px; padding:5px;display:inline-block">\r\n               <h1 class="applicationTitle">{{heading}}</h1>\r\n            </a>\r\n         </li>\r\n      </ul>\r\n      <ul class="nav navbar-nav navbar-right nav-icons">\r\n         <li common-navigation role="menuitem" current="current" style="padding-right:10px"></li>\r\n         <li mars-version-display role="menuitem"></li>\r\n         <li style="width:10px"></li>\r\n      </ul>\r\n   </div>\r\n   <!--/.nav-collapse -->\r\n</div>\r\n<div class="contributorsLink" style="position: absolute; right:7px; bottom:15px">\r\n   <icsm-contributors-link></icsm-contributors-link>\r\n</div>\r\n<!-- Strap -->\r\n<div class="row">\r\n   <div class="col-md-12">\r\n      <div class="strap-blue">\r\n      </div>\r\n      <div class="strap-white">\r\n      </div>\r\n      <div class="strap-red">\r\n      </div>\r\n   </div>\r\n</div>');
-$templateCache.put('common/navigation/altthemes.html','<span class="altthemes-container">\r\n\t<span ng-repeat="item in themes | altthemesEnabled">\r\n       <a title="{{item.label}}" ng-href="{{item.url}}" class="altthemesItemCompact" target="_blank">\r\n         <span class="altthemes-icon" ng-class="item.className"></span>\r\n       </a>\r\n    </li>\r\n</span>');
 $templateCache.put('common/reset/reset.html','<button type="button" class="map-tool-toggle-btn" ng-click="reset()" title="Reset page">\r\n   <span class="panel-sm">Reset</span>\r\n   <i class="fa fa-lg fa-refresh"></i>\r\n</button>');
+$templateCache.put('common/navigation/altthemes.html','<span class="altthemes-container">\r\n\t<span ng-repeat="item in themes | altthemesEnabled">\r\n       <a title="{{item.label}}" ng-href="{{item.url}}" class="altthemesItemCompact" target="_blank">\r\n         <span class="altthemes-icon" ng-class="item.className"></span>\r\n       </a>\r\n    </li>\r\n</span>');
 $templateCache.put('common/side-panel/trigger.html','<button ng-click="toggle()" type="button" class="map-tool-toggle-btn">\r\n   <span class="panel-sm">{{name}}</span>\r\n   <ng-transclude></ng-transclude>\r\n   <i class="fa fa-lg" ng-class="iconClass"></i>\r\n</button>');}]);

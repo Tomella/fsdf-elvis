@@ -118,14 +118,7 @@ app.use(function (req, res, next) {
             }
         });
     });
-
-    app.get('/token', async (req, res) => {
-        console.log("Getting token");
-        let data = await token.getToken();
-        console.log("Got token", data);
-        res.status(200).send(data);
-    });
-
+    
     app.get('/elevation', async (req, res) => {
         let { error, response, body } = await elevationService.get(req.query);
         let code = 500;
