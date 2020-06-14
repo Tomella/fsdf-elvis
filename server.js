@@ -388,6 +388,34 @@ app.use(function (req, res, next) {
         });
     });
 
+    app.post('/positioning/upload', async (req, res, next) => {
+        let tokenStr = await token.getToken();
+        let fme = request.post({
+            uri: config.positioning.uploadUrl,
+            headers:{
+                "Content-Type": req.headers["Content-Type"],
+                "Content-Length": req.headers["Content-Length"]
+            }
+        });
+
+        req.pipe(fme).on('end', (uploadInfo) => {
+            request.post({
+                url: config.positioning.transformUrl,
+                headers: {
+                    'Authorization': "fmetoken token=" + tokenStr
+                },
+                json:req.query
+            }, function (error, response, body) {
+                var code = 500;
+                if (response) {
+                    code = response.statusCode;
+                    res.header(filterHeaders(req, response.headers));
+                }    
+                res.status(code).send(body);
+            });
+        });
+    });
+
     app.listen(port, function (err) {
         console.log("running server on port " + port);
     });
