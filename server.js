@@ -399,6 +399,8 @@ app.use(function (req, res, next) {
         });
 
         req.pipe(fme).on('end', (uploadInfo) => {
+            console.log("Upload done:", uploadInfo);
+            console.log(req.query)
             request.post({
                 url: config.positioning.transformUrl,
                 headers: {
