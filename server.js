@@ -400,8 +400,7 @@ app.use(function (req, res, next) {
         });
 
         req.pipe(fme).on('end', (uploadInfo) => {
-            console.log("Upload done:", uploadInfo);
-            console.log(req.query)
+            console.log("Upload done");
             request.post({
                 url: config.positioning.transformUrl,
                 headers: {
@@ -419,23 +418,17 @@ app.use(function (req, res, next) {
         });
     });
 
-    app.post('/positioning/uploadOld', async (req, res, next) => {
+    app.post('/placenames/download', async (req, res) => {
         let tokenStr = await token.getToken();
-
-        request.post({
-            url: config.positioning.transformUrl,
+        let fme = request.post({
+            uri: config.placenames.downloadUrl,
             headers: {
-                'Authorization': "fmetoken token=" + tokenStr
-            },
-            json: req.query
-        }, function (error, response, body) {
-            var code = 500;
-            if (response) {
-                code = response.statusCode;
-                res.header(filterHeaders(req, response.headers));
+                "Content-Type": req.headers["Content-Type"],
+                "Content-Length": req.headers["Content-Length"],
+                "Authorization": "fmetoken token=" + tokenStr
             }
-            res.status(code).send(body);
         });
+        req.pipe(fme).pipe(res);
     });
 
     app.listen(port, function (err) {
