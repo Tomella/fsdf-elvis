@@ -393,8 +393,8 @@ app.use(function (req, res, next) {
         let fme = request.post({
             uri: config.positioning.uploadUrl,
             headers: {
-                "Content-Type": req.headers["Content-Type"],
-                "Content-Length": req.headers["Content-Length"],
+                "Content-Type": req.header("Content-Type"),
+                "Content-Length": req.header("Content-Length"),
                 "Authorization": "fmetoken token=" + tokenStr
             }
         });
@@ -419,12 +419,14 @@ app.use(function (req, res, next) {
     });
 
     app.post('/placenames/download', async (req, res) => {
+        console.log("Getting token");
         let tokenStr = await token.getToken();
+        console.log("Token received");
         let fme = request.post({
             uri: config.placenames.downloadUrl,
             headers: {
-                "Content-Type": req.headers["Content-Type"],
-                "Content-Length": req.headers["Content-Length"],
+                "Content-Type": req.header("Content-Type"),
+                "Content-Length": req.header("Content-Length"),
                 "Authorization": "fmetoken token=" + tokenStr
             }
         });
