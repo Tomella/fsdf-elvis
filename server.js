@@ -422,15 +422,24 @@ app.use(function (req, res, next) {
         console.log("Getting token");
         let tokenStr = await token.getToken();
         console.log("Token received");
-        let fme = request.post({
+        request.post({
             uri: config.placenames.downloadUrl,
             headers: {
                 "Content-Type": req.header("Content-Type"),
-                "Content-Length": req.header("Content-Length"),
                 "Authorization": "fmetoken token=" + tokenStr
+            },
+            json:req.body
+        }, function (error, response, body) {
+            var code = 500;
+            if (response) {
+                code = response.statusCode;
+                res.header(filterHeaders(req, response.headers));
             }
+            res.status(code).send(body);
         });
-        req.pipe(fme).pipe(res);
+
+        // We can't just pipe it because the body parser has already read the stream. We would have used...
+        // req.pipe(fme).pipe(res);
     });
 
     app.listen(port, function (err) {
