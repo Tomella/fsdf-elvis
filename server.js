@@ -81,7 +81,7 @@ mime.define({
 });
 
 // add timestamps in front of log messages
-require('console-stamp')(console, {datePrefix: "", dateSuffix: "", label:false, pattern:'[yyyymmdd HHMMss.l]'});
+require('console-stamp')(console, { datePrefix: "", dateSuffix: "", label: false, pattern: '[yyyymmdd HHMMss.l]' });
 
 // serve static files
 app.use(express.static("dist"));
@@ -118,7 +118,7 @@ app.use(function (req, res, next) {
             }
         });
     });
-    
+
     app.get('/elevation', async (req, res) => {
         let { error, response, body } = await elevationService.get(req.query);
         let code = 500;
@@ -392,9 +392,10 @@ app.use(function (req, res, next) {
         let tokenStr = await token.getToken();
         let fme = request.post({
             uri: config.positioning.uploadUrl,
-            headers:{
+            headers: {
                 "Content-Type": req.headers["Content-Type"],
-                "Content-Length": req.headers["Content-Length"]
+                "Content-Length": req.headers["Content-Length"],
+                "Authorization": "fmetoken token=" + tokenStr
             }
         });
 
@@ -406,15 +407,34 @@ app.use(function (req, res, next) {
                 headers: {
                     'Authorization': "fmetoken token=" + tokenStr
                 },
-                json:req.query
+                json: req.query
             }, function (error, response, body) {
                 var code = 500;
                 if (response) {
                     code = response.statusCode;
                     res.header(filterHeaders(req, response.headers));
-                }    
+                }
                 res.status(code).send(body);
             });
+        });
+    });
+
+    app.post('/positioning/uploadOld', async (req, res, next) => {
+        let tokenStr = await token.getToken();
+
+        request.post({
+            url: config.positioning.transformUrl,
+            headers: {
+                'Authorization': "fmetoken token=" + tokenStr
+            },
+            json: req.query
+        }, function (error, response, body) {
+            var code = 500;
+            if (response) {
+                code = response.statusCode;
+                res.header(filterHeaders(req, response.headers));
+            }
+            res.status(code).send(body);
         });
     });
 
