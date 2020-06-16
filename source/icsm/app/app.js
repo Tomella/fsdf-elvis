@@ -104,7 +104,7 @@
 					enabled: true,
 					requireBase: false
 				});
-				configServiceProvider.location("icsm/resources/config/config.json?v=a");
+				configServiceProvider.location("icsm/resources/config/config.json?v=b");
 				placenamesConfigServiceProvider.location("icsm/resources/config/placenames.json");
 				//configServiceProvider.dynamicLocation("icsm/resources/config/appConfig.json?t=");
 				versionServiceProvider.url("icsm/assets/package.json");

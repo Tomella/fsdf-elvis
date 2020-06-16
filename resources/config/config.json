@@ -48,25 +48,6 @@
             "visible":true
          },
          {
-            "name": "Australian Topography",
-            "pseudoBaseLayer": true,
-            "type": [
-               "TileLayer"
-            ],
-            "key": "topography",
-            "parameters": [
-               "//services.ga.gov.au/gis/rest/services/NationalMap_Colour_Topographic_Base_World_WM/MapServer/tile/{z}/{y}/{x}",
-               {
-                  "layers": "Image",
-                  "format": "image/png",
-                  "transparent": true,
-                  "switch": "topography",
-                  "opacity": 0.5
-               }
-            ],
-            "addLayerControl": false
-         },
-         {
             "name": "NSW Topography",
             "pseudoBaseLayer": true,
             "type": [
