@@ -21,7 +21,7 @@
     <meta name="version" content="BUILD-VERSION">
 
 	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css" crossorigin="anonymous">
-   <link href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" rel="stylesheet" />
+   <link href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.6.0/leaflet.css" rel="stylesheet" />
 
     <link href="icsm/resources/css/ga.css" rel="stylesheet" />
     <link href="icsm/resources/css/app.header.footer.css?v=VERSION_NO" rel="stylesheet" />
@@ -91,7 +91,7 @@
     <script src='https://www.google.com/recaptcha/api.js'></script>
 
 	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-   <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js"></script>
+   <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.6.0/leaflet.js"></script>
    <script src='icsm/bower_components/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js'></script>
    <script src="icsm/resources/js/chrome_hack.js"></script>
 
@@ -120,6 +120,28 @@
 	<!-- These are the "ICSM" specific includes of modules -->
 	<script src="icsm/assets/common.js?v=1.1"></script>
    <script src="icsm/assets/placenames.js"></script>
-	<script src="icsm/assets/icsm.js?v=1.1-a"></script>
+   <script src="icsm/assets/icsm.js?v=1.1-a"></script>
+<script>
+      /* 
+ * Workaround for 1px lines appearing in some browsers due to fractional transforms
+ * and resulting anti-aliasing.
+ * https://github.com/Leaflet/Leaflet/issues/3575
+ */
+(function(){
+    var originalInitTile = L.GridLayer.prototype._initTile
+    L.GridLayer.include({
+        _initTile: function (tile) {
+            originalInitTile.call(this, tile);
+           
+           if(this.options && this.options.squeeze) tile.classList.add("squeeze");
+        }
+    });
+})();
+</script>
+<style>
+   .squeeze img {
+      transform: scale(1.0041);
+   }
+</style>
 </body>
 </html>

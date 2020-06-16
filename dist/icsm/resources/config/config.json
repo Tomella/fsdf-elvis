@@ -42,7 +42,7 @@
          {
             "name":"Google Hybrid",
             "type":["GridLayer", "GoogleMutant"],
-            "parameters":[{"type": "hybrid"}],
+            "parameters":[{"type": "hybrid", "squeeze": true}],
             "defaultLayer":true,
             "isBaselayer":true,
             "visible":true
