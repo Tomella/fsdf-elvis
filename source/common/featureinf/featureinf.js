@@ -67,12 +67,17 @@
 
                         var layer = null;
                         var size = map.getSize();
-                        var point = map.latLngToContainerPoint(event.latlng, map.getZoom());
-                        var latlng = event.latlng;
+                        var bds = map.getBounds();
+
+                        var w = bds.getNorthEast().lng - bds.getSouthWest().lng;
+                        var h = bds.getNorthEast().lat - bds.getSouthWest().lat;
+                        var X2= (((event.latlng.lng - bds.getSouthWest().lng) / w) * size.x).toFixed(0);
+                        var Y2 = (((bds.getNorthEast().lat - event.latlng.lat) / h) * size.y).toFixed(0);
+                        
                         var data = {
-                           x: point.x,
-                           y: point.y,
-                           bounds: map.getBounds().toBBoxString(),
+                           x: X2, //point.x,
+                           y: Y2, //point.y,
+                           bounds: bds.toBBoxString(),
                            height: size.y,
                            width: size.x
                         };

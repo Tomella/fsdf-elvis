@@ -36,24 +36,8 @@
 	<link href='icsm/bower_components/seiyria-bootstrap-slider/dist/css/bootstrap-slider.css' rel="stylesheet" />
 
 
-	<link href="icsm/assets/icsm.css?v=VERSION_NO" rel="stylesheet"/>
+   <link href="icsm/assets/icsm.css?v=VERSION_NO" rel="stylesheet"/>
 <body ng-controller="RootCtrl as root">
-
-<!--[if lt IE 9]>
-<div style="margin-right:100px; position:absolute; top:0">
-<style>
-.navbar {
-	display:none!important;
-}
-</style>
-<p>
-<img src="icsm/resources/css/images/geoscience_inline_padded_small.png" style="float:left;padding-right:10px;" />
-<br/>
-<strong>Elevation - browser requirements.</strong><br/>
-Unfortunately this application requires a browser made more recently than what you are using. We will not be providing a lower spec
-version of this application. The latest Firefox, Chrome plus Microsoft Internet Explorer 9 and higher including Edge browsers have been tested to work as of mid-2015.
-</div>
-<![endif]-->
 
 <!-- BEGIN: Sticky Header -->
 <div icsm-header class="navbar navbar-default navbar-fixed-top"
@@ -104,11 +88,11 @@ version of this application. The latest Firefox, Chrome plus Microsoft Internet 
    <script src="https://maps.googleapis.com/maps/api/js?client=gme-geoscienceaustralia&v=3&language=en&libraries=places"></script>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-    <!--[if IE 9 ]>    <script src="assets/placeholder/placeholders.jquery.min.js"></script> <![endif]-->
     <script src='https://www.google.com/recaptcha/api.js'></script>
 
 	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
    <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js"></script>
+   <script src='icsm/bower_components/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js'></script>
    <script src="icsm/resources/js/chrome_hack.js"></script>
 
 	<script src="//cdn.jsdelivr.net/leaflet.esri/1.0.0/esri-leaflet.js"></script>
