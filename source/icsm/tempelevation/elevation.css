@@ -1,0 +1,7 @@
+.tempElevationFixedBottom {
+  white-space: nowrap;
+  position: fixed;
+  bottom: 10px;
+  left: 6px;
+  opacity: 0.95;
+}

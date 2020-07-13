@@ -69,6 +69,11 @@
   max-height: 100%;
   overflow: auto;
 }
+.common-legend {
+  position: abssolute;
+  bottom: 45px;
+  left: 12px;
+}
 .nav-icons {
   margin-top: 7px !important;
 }
@@ -215,11 +220,6 @@
 .altthemesdropdown .altthemescurrent {
   color: #fff;
   background-color: #777;
-}
-.common-legend {
-  position: abssolute;
-  bottom: 45px;
-  left: 12px;
 }
 /* Side Panel */
 
@@ -563,6 +563,162 @@ body {
 .leaflet-container {
   background-color: rgba(255,0,0,0.0);
 }
+.clipmodal {
+  z-index: 1010;
+  padding: 1px;
+  text-align: left;
+  white-space: normal;
+  opacity: 1;
+  background-color: #F8f8f8;
+  background-clip: padding-box;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, .2);
+  border-radius: 6px;
+  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+}
+
+.clip-btn {
+  background-color: white;
+  display: inline-block;
+  margin-bottom: 0;
+  width: 44px;
+  padding: 3px;
+  line-height: 1.2857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  border: 1px solid gray;
+  border-radius: 4px;
+}
+
+button.clip-btn:hover div {
+  opacity: 0.4;
+}
+
+.clip-btn div {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: -1px;
+  right: 0;
+  background-color: #006983;
+  opacity: 0.2;
+  border-radius: 4px;
+}
+
+.clipmodal-title {
+  padding: 8px 14px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 18px;
+  background-color: #e0e0e0;
+  border-bottom: 1px solid #ebebeb;
+  border-radius: 5px 5px 0 0;
+}
+
+.clipmodal-content {
+  padding: 9px 14px;
+}
+
+.clipmodal.ng-hide-add,
+.clipmodal.ng-hide-remove {
+  /* this is required as of 1.3x to properly
+      apply all styling in a show/hide animation */
+  transition: 0s linear all;
+}
+
+.clipmodal.ng-hide-add-active,
+.clipmodal.ng-hide-remove-active {
+  /* the transition is defined in the active class */
+  transition: 1s linear all;
+}
+.contributors {
+  margin: 2px;
+  padding: 10px;
+  padding-left: 8px;
+  position: fixed;
+  top: 70px;
+  right: 1px;
+  opacity: 0.95;
+  z-index: 1300;
+  background-color: white;
+  white-space: nowrap;
+  text-align: center;
+  -webkit-transition: height 1s;
+  /* Safari */
+  transition: height 1s;
+  -webkit-transition: width 1s;
+  /* Safari */
+  transition: width 1s;
+}
+
+.contributors div {
+  float: left;
+  width: 50%;
+}
+
+img.contributor-logo {
+  height: 70px;
+}
+
+.contributors img {
+  -webkit-transition: height 1s;
+  /* Safari */
+  transition: height 1s;
+}
+
+.contributors.transitioned-up img {
+  height: 0;
+}
+
+.contributors.transitioned-up .contributors-unstick {
+  display: none;
+}
+
+.contributors.transitioned-down {
+  border: 1px solid gray;
+  border-radius: 3px;
+  width: 500px;
+}
+
+.transitioned-up {
+  height: 0px;
+  border: 0 none;
+  margin: 0;
+  padding: 0;
+  width: 5px;
+}
+
+.contributors.transitioned-up a {
+  height: 0px;
+  border: 0 none;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+}
+
+.contributors-unstick {
+  vertical-align: top;
+  font-weight: bold;
+}
+
+.contributors-link {
+  font-weight: bold;
+}
+
+.elevation-and-depth {
+  padding-left: 12px;
+  padding-right: 12px;
+}
 .coverage {
   margin: 2px;
   padding: 10px;
@@ -646,162 +802,6 @@ body {
   border: 1px solid gray;
   border-radius: 2px;
 }
-.contributors {
-  margin: 2px;
-  padding: 10px;
-  padding-left: 8px;
-  position: fixed;
-  top: 70px;
-  right: 1px;
-  opacity: 0.95;
-  z-index: 1300;
-  background-color: white;
-  white-space: nowrap;
-  text-align: center;
-  -webkit-transition: height 1s;
-  /* Safari */
-  transition: height 1s;
-  -webkit-transition: width 1s;
-  /* Safari */
-  transition: width 1s;
-}
-
-.contributors div {
-  float: left;
-  width: 50%;
-}
-
-img.contributor-logo {
-  height: 70px;
-}
-
-.contributors img {
-  -webkit-transition: height 1s;
-  /* Safari */
-  transition: height 1s;
-}
-
-.contributors.transitioned-up img {
-  height: 0;
-}
-
-.contributors.transitioned-up .contributors-unstick {
-  display: none;
-}
-
-.contributors.transitioned-down {
-  border: 1px solid gray;
-  border-radius: 3px;
-  width: 500px;
-}
-
-.transitioned-up {
-  height: 0px;
-  border: 0 none;
-  margin: 0;
-  padding: 0;
-  width: 5px;
-}
-
-.contributors.transitioned-up a {
-  height: 0px;
-  border: 0 none;
-  margin: 0;
-  padding: 0;
-  border-radius: 0;
-}
-
-.contributors-unstick {
-  vertical-align: top;
-  font-weight: bold;
-}
-
-.contributors-link {
-  font-weight: bold;
-}
-
-.elevation-and-depth {
-  padding-left: 12px;
-  padding-right: 12px;
-}
-.clipmodal {
-  z-index: 1010;
-  padding: 1px;
-  text-align: left;
-  white-space: normal;
-  opacity: 1;
-  background-color: #F8f8f8;
-  background-clip: padding-box;
-  border: 1px solid #ccc;
-  border: 1px solid rgba(0, 0, 0, .2);
-  border-radius: 6px;
-  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
-  box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
-}
-
-.clip-btn {
-  background-color: white;
-  display: inline-block;
-  margin-bottom: 0;
-  width: 44px;
-  padding: 3px;
-  line-height: 1.2857143;
-  text-align: center;
-  white-space: nowrap;
-  vertical-align: middle;
-  -ms-touch-action: manipulation;
-  touch-action: manipulation;
-  cursor: pointer;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  border: 1px solid gray;
-  border-radius: 4px;
-}
-
-button.clip-btn:hover div {
-  opacity: 0.4;
-}
-
-.clip-btn div {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: -1px;
-  right: 0;
-  background-color: #006983;
-  opacity: 0.2;
-  border-radius: 4px;
-}
-
-.clipmodal-title {
-  padding: 8px 14px;
-  margin: 0;
-  font-size: 14px;
-  font-weight: bold;
-  line-height: 18px;
-  background-color: #e0e0e0;
-  border-bottom: 1px solid #ebebeb;
-  border-radius: 5px 5px 0 0;
-}
-
-.clipmodal-content {
-  padding: 9px 14px;
-}
-
-.clipmodal.ng-hide-add,
-.clipmodal.ng-hide-remove {
-  /* this is required as of 1.3x to properly
-      apply all styling in a show/hide animation */
-  transition: 0s linear all;
-}
-
-.clipmodal.ng-hide-add-active,
-.clipmodal.ng-hide-remove-active {
-  /* the transition is defined in the active class */
-  transition: 1s linear all;
-}
 img.elvis-logo {
   height: 75px;
 }
@@ -829,47 +829,6 @@ img.elvis-logo {
 
 .mess-container {
   font-weight: bold;
-}
-.leaflet-control-elevation {
-  background-image: url("../../../../icsm/resources/img/mountain24.png");
-}
-
-.leaflet-control-alt-elevation {
-  background-image: url("../../../../icsm/resources/img/alt_mountain24.png");
-}
-
-.elevation-popup {
-  max-width: 380px;
-  display: inline-flex;
-}
-
-.point-container {
-  position: fixed;
-  bottom: 40px;
-  left: 10px;
-  height: 100px;
-  width: 280px;
-  background-color: white;
-  border: 1px solid gray;
-  border-radius: 8px;
-}
-
-.point-container {
-  margin: 2px;
-  padding: 10px;
-  padding-left: 8px;
-  background-color: white;
-  white-space: nowrap;
-  text-align: left;
-  -webkit-transition: all 1s ease;
-  transition: all 1s ease;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
-}
-
-.point-container .title {
-  width: 7em;
-  font-weight: bold;
-  display: inline-block;
 }
 .icsmTabs {
   position: absolute;
@@ -965,6 +924,47 @@ img.elvis-logo {
   top: 10px;
   z-index: 3;
 }
+.leaflet-control-elevation {
+  background-image: url("../../../../icsm/resources/img/mountain24.png");
+}
+
+.leaflet-control-alt-elevation {
+  background-image: url("../../../../icsm/resources/img/alt_mountain24.png");
+}
+
+.elevation-popup {
+  max-width: 380px;
+  display: inline-flex;
+}
+
+.point-container {
+  position: fixed;
+  bottom: 40px;
+  left: 10px;
+  height: 100px;
+  width: 280px;
+  background-color: white;
+  border: 1px solid gray;
+  border-radius: 8px;
+}
+
+.point-container {
+  margin: 2px;
+  padding: 10px;
+  padding-left: 8px;
+  background-color: white;
+  white-space: nowrap;
+  text-align: left;
+  -webkit-transition: all 1s ease;
+  transition: all 1s ease;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+}
+
+.point-container .title {
+  width: 7em;
+  font-weight: bold;
+  display: inline-block;
+}
 .preview-container {
   position: fixed;
   display: block;
@@ -1000,6 +1000,28 @@ img.elvis-logo {
   right: 10px;
   z-index: 1;
   top: 20px;
+}
+.product-valid {
+  color: green;
+}
+
+.product-invalid {
+  color: red;
+}
+
+.product-warning {
+  color: darkorange;
+}
+
+.product-label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.product-restrict {
+  padding-bottom: 8px;
 }
 .continue-container {
   padding: 4px;
@@ -1146,28 +1168,6 @@ img.elvis-logo {
   left: 0;
   right: 0;
 }
-.product-valid {
-  color: green;
-}
-
-.product-invalid {
-  color: red;
-}
-
-.product-warning {
-  color: darkorange;
-}
-
-.product-label {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.product-restrict {
-  padding-bottom: 8px;
-}
 .selectContainer {
   width: 100%;
 }
@@ -1214,6 +1214,13 @@ i.fa.active {
 .exclude {
   color: #777777;
   text-decoration: line-through;
+}
+.tempElevationFixedBottom {
+  white-space: nowrap;
+  position: fixed;
+  bottom: 10px;
+  left: 6px;
+  opacity: 0.95;
 }
 .icsm-icon {
   background: url("icsm/img/global-sprites.svg") no-repeat;

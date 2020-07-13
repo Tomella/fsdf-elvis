@@ -52,8 +52,10 @@
 		'exp.ui.templates',
 		'explorer.map.templates',
 
-		'geo.draw',
-		'geo.elevation',
+		//'geo.draw',
+		// 'geo.elevation',
+		'temp.elevation', // Filling in until new service is developed
+
 		'geo.geosearch',
 		'geo.map',
 		'geo.maphelper',

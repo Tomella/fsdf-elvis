@@ -350,6 +350,22 @@ under the License.
 "use strict";
 
 {
+  angular.module('common.reset', []).directive('resetPage', function ($window) {
+    return {
+      restrict: 'AE',
+      scope: {},
+      templateUrl: 'common/reset/reset.html',
+      controller: ['$scope', function ($scope) {
+        $scope.reset = function () {
+          $window.location.reload();
+        };
+      }]
+    };
+  });
+}
+"use strict";
+
+{
   angular.module('common.altthemes', [])
   /**
   	*
@@ -508,22 +524,6 @@ under the License.
 }
 "use strict";
 
-{
-  angular.module('common.reset', []).directive('resetPage', function ($window) {
-    return {
-      restrict: 'AE',
-      scope: {},
-      templateUrl: 'common/reset/reset.html',
-      controller: ['$scope', function ($scope) {
-        $scope.reset = function () {
-          $window.location.reload();
-        };
-      }]
-    };
-  });
-}
-"use strict";
-
 (function (angular) {
   'use strict';
 
@@ -551,6 +551,190 @@ under the License.
     };
   }]);
 })(angular);
+"use strict";
+
+{
+  angular.module("common.side-panel", []).factory('panelSideFactory', ['$rootScope', '$timeout', function ($rootScope, $timeout) {
+    var state = {
+      left: {
+        active: null,
+        width: 0
+      },
+      right: {
+        active: null,
+        width: 0
+      }
+    };
+
+    function setSide(state, value) {
+      var response = state.active;
+
+      if (response === value) {
+        state.active = null;
+        state.width = 0;
+      } else {
+        state.active = value;
+      }
+
+      return !response;
+    }
+
+    return {
+      state: state,
+      setLeft: function setLeft(value) {
+        var result = setSide(state.left, value);
+
+        if (result) {
+          state.left.width = 320; // We have a hard coded width at the moment we will probably refactor to parameterize it.
+        }
+
+        return result;
+      },
+      setRight: function setRight(data) {
+        state.right.width = data.width;
+        var response = setSide(state.right, data.name);
+        $rootScope.$broadcast('side.panel.change', {
+          side: "right",
+          data: state.right,
+          width: data.width
+        });
+        return response;
+      }
+    };
+  }]).directive('sidePanelRightOppose', ["panelSideFactory", function (panelSideFactory) {
+    return {
+      restrict: 'E',
+      transclude: true,
+      template: '<div class="contentContainer" ng-attr-style="right:{{right.width}}">' + '<ng-transclude></ng-transclude>' + '</div>',
+      link: function link(scope) {
+        scope.right = panelSideFactory.state.right;
+      }
+    };
+  }]).directive('sidePanelRight', ["panelSideFactory", function (panelSideFactory) {
+    return {
+      restrict: 'E',
+      transclude: true,
+      templateUrl: 'icsm/side-panel/side-panel-right.html',
+      link: function link(scope) {
+        scope.right = panelSideFactory.state.right;
+
+        scope.closePanel = function () {
+          panelSideFactory.setRight({
+            name: null,
+            width: 0
+          });
+        };
+      }
+    };
+  }]).directive('panelTrigger', ["panelSideFactory", function (panelSideFactory) {
+    return {
+      restrict: 'E',
+      transclude: true,
+      templateUrl: 'common/side-panel/trigger.html',
+      scope: {
+        "default": "@?",
+        panelWidth: "@",
+        name: "@",
+        iconClass: "@",
+        panelId: "@"
+      },
+      link: function link(scope) {
+        scope.toggle = function () {
+          panelSideFactory.setRight({
+            width: scope.panelWidth,
+            name: scope.panelId
+          });
+        };
+
+        if (scope["default"]) {
+          panelSideFactory.setRight({
+            width: scope.panelWidth,
+            name: scope.panelId
+          });
+        }
+      }
+    };
+  }]).directive('panelOpenOnEvent', ["$rootScope", "panelSideFactory", function ($rootScope, panelSideFactory) {
+    return {
+      restrict: 'E',
+      scope: {
+        panelWidth: "@",
+        eventName: "@",
+        panelId: "@",
+        side: "@?"
+      },
+      link: function link(scope) {
+        if (!scope.side) {
+          scope.side = "right";
+        }
+
+        $rootScope.$on(scope.eventName, function (event, data) {
+          var state = panelSideFactory.state[scope.side];
+
+          if (state && (!state.active || scope.panelId !== state.active)) {
+            var params = {
+              width: scope.panelWidth,
+              name: scope.panelId
+            };
+
+            if (scope.side === "right") {
+              panelSideFactory.setRight(params);
+            } else {
+              panelSideFactory.setLeft(params);
+            }
+          }
+        });
+      }
+    };
+  }]).directive('panelCloseOnEvent', ["$rootScope", "panelSideFactory", function ($rootScope, panelSideFactory) {
+    return {
+      restrict: 'E',
+      scope: {
+        eventName: "@",
+        side: "@?",
+        onlyOn: "@?"
+      },
+      link: function link(scope) {
+        if (!scope.side) {
+          scope.side = "right";
+        }
+
+        $rootScope.$on(scope.eventName, function (event, data) {
+          var state = panelSideFactory.state[scope.side];
+
+          if (scope.onlyOn && state.active !== scope.onlyOn) {
+            return;
+          }
+
+          if (state && state.active) {
+            var params = {
+              name: null
+            };
+
+            if (scope.side === "right") {
+              panelSideFactory.setRight(params);
+            } else {
+              panelSideFactory.setLeft(params);
+            }
+          }
+        });
+      }
+    };
+  }]).directive('sidePanelLeft', ['panelSideFactory', function (panelSideFactory) {
+    return {
+      restrict: 'E',
+      transclude: true,
+      templateUrl: 'icsm/side-panel/side-panel-left.html',
+      link: function link(scope) {
+        scope.left = panelSideFactory.state.left;
+
+        scope.closeLeft = function () {
+          panelSideFactory.setLeft(null);
+        };
+      }
+    };
+  }]);
+}
 "use strict";
 
 {
@@ -751,188 +935,47 @@ under the License.
 }
 "use strict";
 
-{
-  angular.module("common.side-panel", []).factory('panelSideFactory', ['$rootScope', '$timeout', function ($rootScope, $timeout) {
-    var state = {
-      left: {
-        active: null,
-        width: 0
-      },
-      right: {
-        active: null,
-        width: 0
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+// In the style of threejs loaders. Adapted from here
+// https://github.com/Tomella/elevation/blob/master/source/geotiff/terrainloader.ts
+var TerrainLoader = /*#__PURE__*/function () {
+  function TerrainLoader() {
+    _classCallCheck(this, TerrainLoader);
+  }
+
+  _createClass(TerrainLoader, [{
+    key: "load",
+    value: function load(url, onload, onerror) {
+      var request = new XMLHttpRequest();
+      request.addEventListener('load', function (event) {
+        try {
+          var parser = new GeotiffParser();
+          parser.parseHeader(event.target.response);
+          onload(parser.loadPixels());
+        } catch (error) {
+          onerror(error);
+        }
+      }, false);
+
+      if (onerror !== undefined) {
+        request.addEventListener('error', function (event) {
+          onerror(event);
+        }, false);
       }
-    };
 
-    function setSide(state, value) {
-      var response = state.active;
-
-      if (response === value) {
-        state.active = null;
-        state.width = 0;
-      } else {
-        state.active = value;
-      }
-
-      return !response;
+      request.open('GET', url, true);
+      request.responseType = 'arraybuffer';
+      request.send(null);
     }
-
-    return {
-      state: state,
-      setLeft: function setLeft(value) {
-        var result = setSide(state.left, value);
-
-        if (result) {
-          state.left.width = 320; // We have a hard coded width at the moment we will probably refactor to parameterize it.
-        }
-
-        return result;
-      },
-      setRight: function setRight(data) {
-        state.right.width = data.width;
-        var response = setSide(state.right, data.name);
-        $rootScope.$broadcast('side.panel.change', {
-          side: "right",
-          data: state.right,
-          width: data.width
-        });
-        return response;
-      }
-    };
-  }]).directive('sidePanelRightOppose', ["panelSideFactory", function (panelSideFactory) {
-    return {
-      restrict: 'E',
-      transclude: true,
-      template: '<div class="contentContainer" ng-attr-style="right:{{right.width}}">' + '<ng-transclude></ng-transclude>' + '</div>',
-      link: function link(scope) {
-        scope.right = panelSideFactory.state.right;
-      }
-    };
-  }]).directive('sidePanelRight', ["panelSideFactory", function (panelSideFactory) {
-    return {
-      restrict: 'E',
-      transclude: true,
-      templateUrl: 'icsm/side-panel/side-panel-right.html',
-      link: function link(scope) {
-        scope.right = panelSideFactory.state.right;
-
-        scope.closePanel = function () {
-          panelSideFactory.setRight({
-            name: null,
-            width: 0
-          });
-        };
-      }
-    };
-  }]).directive('panelTrigger', ["panelSideFactory", function (panelSideFactory) {
-    return {
-      restrict: 'E',
-      transclude: true,
-      templateUrl: 'common/side-panel/trigger.html',
-      scope: {
-        "default": "@?",
-        panelWidth: "@",
-        name: "@",
-        iconClass: "@",
-        panelId: "@"
-      },
-      link: function link(scope) {
-        scope.toggle = function () {
-          panelSideFactory.setRight({
-            width: scope.panelWidth,
-            name: scope.panelId
-          });
-        };
-
-        if (scope["default"]) {
-          panelSideFactory.setRight({
-            width: scope.panelWidth,
-            name: scope.panelId
-          });
-        }
-      }
-    };
-  }]).directive('panelOpenOnEvent', ["$rootScope", "panelSideFactory", function ($rootScope, panelSideFactory) {
-    return {
-      restrict: 'E',
-      scope: {
-        panelWidth: "@",
-        eventName: "@",
-        panelId: "@",
-        side: "@?"
-      },
-      link: function link(scope) {
-        if (!scope.side) {
-          scope.side = "right";
-        }
-
-        $rootScope.$on(scope.eventName, function (event, data) {
-          var state = panelSideFactory.state[scope.side];
-
-          if (state && (!state.active || scope.panelId !== state.active)) {
-            var params = {
-              width: scope.panelWidth,
-              name: scope.panelId
-            };
-
-            if (scope.side === "right") {
-              panelSideFactory.setRight(params);
-            } else {
-              panelSideFactory.setLeft(params);
-            }
-          }
-        });
-      }
-    };
-  }]).directive('panelCloseOnEvent', ["$rootScope", "panelSideFactory", function ($rootScope, panelSideFactory) {
-    return {
-      restrict: 'E',
-      scope: {
-        eventName: "@",
-        side: "@?",
-        onlyOn: "@?"
-      },
-      link: function link(scope) {
-        if (!scope.side) {
-          scope.side = "right";
-        }
-
-        $rootScope.$on(scope.eventName, function (event, data) {
-          var state = panelSideFactory.state[scope.side];
-
-          if (scope.onlyOn && state.active !== scope.onlyOn) {
-            return;
-          }
-
-          if (state && state.active) {
-            var params = {
-              name: null
-            };
-
-            if (scope.side === "right") {
-              panelSideFactory.setRight(params);
-            } else {
-              panelSideFactory.setLeft(params);
-            }
-          }
-        });
-      }
-    };
-  }]).directive('sidePanelLeft', ['panelSideFactory', function (panelSideFactory) {
-    return {
-      restrict: 'E',
-      transclude: true,
-      templateUrl: 'icsm/side-panel/side-panel-left.html',
-      link: function link(scope) {
-        scope.left = panelSideFactory.state.left;
-
-        scope.closeLeft = function () {
-          panelSideFactory.setLeft(null);
-        };
-      }
-    };
   }]);
-}
+
+  return TerrainLoader;
+}();
 "use strict";
 
 {
@@ -978,53 +1021,10 @@ under the License.
     };
   }]);
 }
-"use strict";
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-// In the style of threejs loaders. Adapted from here
-// https://github.com/Tomella/elevation/blob/master/source/geotiff/terrainloader.ts
-var TerrainLoader = /*#__PURE__*/function () {
-  function TerrainLoader() {
-    _classCallCheck(this, TerrainLoader);
-  }
-
-  _createClass(TerrainLoader, [{
-    key: "load",
-    value: function load(url, onload, onerror) {
-      var request = new XMLHttpRequest();
-      request.addEventListener('load', function (event) {
-        try {
-          var parser = new GeotiffParser();
-          parser.parseHeader(event.target.response);
-          onload(parser.loadPixels());
-        } catch (error) {
-          onerror(error);
-        }
-      }, false);
-
-      if (onerror !== undefined) {
-        request.addEventListener('error', function (event) {
-          onerror(event);
-        }, false);
-      }
-
-      request.open('GET', url, true);
-      request.responseType = 'arraybuffer';
-      request.send(null);
-    }
-  }]);
-
-  return TerrainLoader;
-}();
 angular.module('common.templates', []).run(['$templateCache', function($templateCache) {$templateCache.put('common/cc/cc.html','<button type="button" class="undecorated" title="View CCBy {{details.version}} licence details"\r\n      popover-trigger="outsideClick"\r\n      uib-popover-template="template" popover-placement="bottom" popover-append-to-body="true">\r\n\t<i ng-class="{active:data.isWmsShowing}" class="fa fa-lg fa-gavel"></i>\r\n</button>');
 $templateCache.put('common/cc/cctemplate.html','<div>\r\n   <div class="row">\r\n      <div class="col-md-12">\r\n         <a target="_blank" ng-href="{{details.link}}">Creative Commons Attribution {{details.version}} </a>\r\n      </div>\r\n   </div>\r\n   <div class="row">\r\n      <div class="col-md-2">\r\n         <span class="fa-stack" aria-hidden="true">\r\n         <i class="fa fa-check-circle-o fa-stack-2x" aria-hidden="true"></i>\r\n      </span>\r\n      </div>\r\n      <div class="col-md-10">\r\n         You may use this work for commercial purposes.\r\n      </div>\r\n   </div>\r\n   <div class="row">\r\n      <div class="col-md-2">\r\n         <span class="fa-stack" aria-hidden="true">\r\n         <i class="fa fa-circle-o fa-stack-2x"></i>\r\n         <i class="fa fa-female fa-stack-1x"></i>\r\n      </span>\r\n      </div>\r\n      <div class="col-md-10">\r\n         You must attribute the creator in your own works.\r\n      </div>\r\n   </div>\r\n</div>');
 $templateCache.put('common/featureinf/featureinf.html','<div class="fi-d1" drag-parent parentclass="featureInfContainer" ng-class="d1Height">\n    <button class="undecorated fi-close" ng-click="close()">X</button>\n    <div class="fi-d2">\n      <div class="fi-d3">\n        <div class="fi-d3-1">\n            <strong style="font-size: 120%;padding:2px;">Features</strong>\n        </div>\n        <div class="fi-d3-2">\n          <div class="fi-d4">\n            <div class="fi-d5">\n                <div style="padding:5px;" ng-repeat="feature in features" ng-mouseenter="entered(feature)" ng-mouseleave="left()">\n                    <div ng-if="feature.properties.maptitle" style="white-space: nowrap;">\n                        <strong>Map Title:</strong>\n                        <span title=\'{{feature.properties.mapnumber ? "Map number: " + feature.properties.mapnumber : ""}}\'>\n                            {{feature.properties.maptitle}}\n                        </span>\n                    </div>\n    \n                    <div ng-if="feature.properties.project">\n                        <strong>Project Name:</strong>\n                        {{feature.properties.project}}\n                    </div>\n    \n                    <div ng-if="feature.properties.captured">\n                        <strong>Capture Date:</strong>{{captured(feature.properties.captured)}}\n                    </div>\n    \n                    <div\n                        ng-if="feature.properties.object_name || feature.properties.object_name_ahd || feature.properties.object_name_ort">\n                        <strong>File Name:</strong>\n                        {{feature.properties.object_name}}{{feature.properties.object_name_ahd}}{{feature.properties.object_name_ort}}\n                    </div>\n    \n                    <div>\n                        <strong>Status:</strong>\n                        {{feature.properties.status}}\n                    </div>\n    \n                    <div ng-if="feature.properties.available_date">\n                        <strong>Available Date:</strong>\n                        {{formatDate(feature.properties.available_date)}}\n                    </div>\n    \n                    <div ng-if="feature.properties.contact">\n                        <strong>Contact:</strong> <a\n                            href=\'{{feature.properties.contact}}\'>{{feature.properties.contact}}</a>\n                    </div>\n    \n                    <div ng-if="feature.properties.metadata_url">\n                        <a href=\'{{feature.properties.metadata_url}}\' target=\'_blank\'>Metadata</a>\n                    </div>\n                    <hr ng-if="!$last" style="margin:5px"/>\n                </div>\n            </div>\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>');
 $templateCache.put('common/header/header.html','<div class="container-full common-header" style="padding-right:10px; padding-left:10px">\r\n   <div class="navbar-header">\r\n\r\n      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".ga-header-collapse">\r\n         <span class="sr-only">Toggle navigation</span>\r\n         <span class="icon-bar"></span>\r\n         <span class="icon-bar"></span>\r\n         <span class="icon-bar"></span>\r\n      </button>\r\n\r\n      <a href="/" class="appTitle visible-xs">\r\n         <h1 style="font-size:120%">{{heading}}</h1>\r\n      </a>\r\n   </div>\r\n   <div class="navbar-collapse collapse ga-header-collapse">\r\n      <ul class="nav navbar-nav">\r\n         <li class="hidden-xs">\r\n            <a href="https://www.icsm.gov.au/" target="_blank" class="icsm-logo"\r\n               style="margin-top: -4px;display:inline-block;">\r\n               <img alt="ICSM - ANZLIC Committee on Surveying &amp; Mapping" class="header-logo"\r\n                  src="icsm/resources/img/icsm-logo-sml.gif">\r\n            </a>\r\n            <a href="/" style="margin-top:8px; padding:5px;display:inline-block">\r\n               <h1 class="applicationTitle">{{heading}}</h1>\r\n            </a>\r\n         </li>\r\n      </ul>\r\n      <ul class="nav navbar-nav navbar-right nav-icons">\r\n         <li common-navigation role="menuitem" current="current" style="padding-right:10px"></li>\r\n         <li mars-version-display role="menuitem"></li>\r\n         <li style="width:10px"></li>\r\n      </ul>\r\n   </div>\r\n   <!--/.nav-collapse -->\r\n</div>\r\n<div class="contributorsLink" style="position: absolute; right:7px; bottom:15px">\r\n   <icsm-contributors-link></icsm-contributors-link>\r\n</div>\r\n<!-- Strap -->\r\n<div class="row">\r\n   <div class="col-md-12">\r\n      <div class="strap-blue">\r\n      </div>\r\n      <div class="strap-white">\r\n      </div>\r\n      <div class="strap-red">\r\n      </div>\r\n   </div>\r\n</div>');
-$templateCache.put('common/navigation/altthemes.html','<span class="altthemes-container">\r\n\t<span ng-repeat="item in themes | altthemesEnabled">\r\n       <a title="{{item.label}}" ng-href="{{item.url}}" class="altthemesItemCompact" target="_blank">\r\n         <span class="altthemes-icon" ng-class="item.className"></span>\r\n       </a>\r\n    </li>\r\n</span>');
 $templateCache.put('common/reset/reset.html','<button type="button" class="map-tool-toggle-btn" ng-click="reset()" title="Reset page">\r\n   <span class="panel-sm">Reset</span>\r\n   <i class="fa fa-lg fa-refresh"></i>\r\n</button>');
+$templateCache.put('common/navigation/altthemes.html','<span class="altthemes-container">\r\n\t<span ng-repeat="item in themes | altthemesEnabled">\r\n       <a title="{{item.label}}" ng-href="{{item.url}}" class="altthemesItemCompact" target="_blank">\r\n         <span class="altthemes-icon" ng-class="item.className"></span>\r\n       </a>\r\n    </li>\r\n</span>');
 $templateCache.put('common/side-panel/trigger.html','<button ng-click="toggle()" type="button" class="map-tool-toggle-btn">\r\n   <span class="panel-sm">{{name}}</span>\r\n   <ng-transclude></ng-transclude>\r\n   <i class="fa fa-lg" ng-class="iconClass"></i>\r\n</button>');}]);
